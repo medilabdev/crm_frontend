@@ -1,0 +1,36 @@
+div .search{
+    width: 14rem;
+    right: 0;
+    margin-right: 1.3rem;
+}
+div .search:hover{
+    border: 1px solid #6b6bff;
+}
+
+
+.action-icon{
+    margin-right: 2rem;
+}
+div .icon-button{
+    border: none;
+    height: 12px;
+    width: 25px;
+    background: none;
+}
+div button .danger:hover{
+    font-size: 15px;
+    color: rgb(238, 80, 80);
+}
+div button .edit:hover{
+    font-weight: 700;
+    font-size: 15px;
+    color: rgb(64, 99, 255);
+}
+button .btn:hover{
+    background-color: #4f4ffb;
+}
+
+.image-name img{
+    width: 40px;
+    margin-right: 12px;
+}

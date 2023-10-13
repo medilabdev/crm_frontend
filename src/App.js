@@ -1,24 +1,16 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { Fragment } from "react";
+import "../src/assets/css/style.css";
+import "../src/assets/vendor/bootstrap/css/bootstrap.min.css";
+import "../src/assets/vendor/bootstrap/css/bootstrap.css";
+import "../src/assets/vendor/bootstrap-icons/bootstrap-icons.css";
+
+import Router from "./router";
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Fragment>
+      <Router />
+    </Fragment>
   );
 }
 
