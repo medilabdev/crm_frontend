@@ -26,6 +26,15 @@ function Sidebar() {
           /> */}
           <MenuSidebar
             typeMenu="nonCollapse"
+            name="Contact"
+            key="contact"
+            url="/contact"
+            icon="bi bi-person-rolodex"
+            noCollapse={true}
+            isActive={1}
+          />
+          <MenuSidebar
+            typeMenu="nonCollapse"
             name="Users"
             key="users"
             url="/users"

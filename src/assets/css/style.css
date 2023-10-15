@@ -1038,6 +1038,10 @@ h6 {
 .profile .profile-edit img {
   max-width: 120px;
 }
+.profile .change-password label{
+  font-weight: 600;
+  color: rgba(1, 41, 112, 0.6);
+}
 
 /*--------------------------------------------------------------
 # F.A.Q Page

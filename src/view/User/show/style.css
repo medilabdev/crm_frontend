@@ -16,5 +16,7 @@
     .profile-card .img-icon{
         margin-right: 3px;
     }
- 
+    ul li{
+        font-size: 12px;
+    }
 }

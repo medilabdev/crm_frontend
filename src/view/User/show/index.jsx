@@ -2,9 +2,13 @@ import React from "react";
 import Topbar from "../../../components/Template/Topbar";
 import Sidebar from "../../../components/Template/Sidebar";
 import Main from "../../../components/Template/Main";
-import { Col, Row, Container, Card } from "react-bootstrap";
+import { Col, Row, Container, Card, Form } from "react-bootstrap";
 import IconImage from "../../../assets/img/team-1.jpg";
 import "../show/style.css";
+import Footer from "../../../components/Template/Footer";
+import Profil from "./profil";
+import EditProfil from "./editProfil";
+import ChangePassword from "./changePassword";
 
 const ShowUser = () => {
   return (
@@ -36,38 +40,43 @@ const ShowUser = () => {
             <Col xl={4}>
               <Card>
                 <Card.Body className="profile-card pt-4 d-flex flex-column align-items-center">
-                  <img src={IconImage} alt="" className="rounded-circle img-icon" />
+                  <img
+                    src={IconImage}
+                    alt=""
+                    className="rounded-circle img-icon"
+                  />
                   <h2>Joko</h2>
                   <h6 className="mt-2 mb-2">Sales</h6>
                 </Card.Body>
               </Card>
             </Col>
             <Col xl={8}>
-              <Card className="profile-detail">
-                <Card.Body>
+              <Card>
+                <Card.Body className="pt-3">
                   <ul className="nav nav-tabs nav-tabs-bordered">
                     <li className="nav-item">
                       <button
-                        className="nav-link"
-                        data-bs-toggle="tabs"
+                        className="nav-link active"
+                        data-bs-toggle="tab"
                         data-bs-target="#profile-overview"
                       >
-                        Profile
+                        Overview
                       </button>
                     </li>
                     <li className="nav-item">
                       <button
                         className="nav-link"
-                        data-bs-toggle="tabs"
+                        data-bs-toggle="tab"
                         data-bs-target="#profile-edit"
                       >
                         Edit Profile
                       </button>
                     </li>
+
                     <li className="nav-item">
                       <button
                         className="nav-link"
-                        data-bs-toggle="tabs"
+                        data-bs-toggle="tab"
                         data-bs-target="#change-password"
                       >
                         Change Password
@@ -75,83 +84,16 @@ const ShowUser = () => {
                     </li>
                   </ul>
                   <div className="tab-content pt-2">
-                    <div
-                      className="tab-pane fade-show active profile-overview ms-3"
-                      id="profile-overview"
-                    >
-                      <h5 className="card-title">Profile Detail</h5>
-                      <Row>
-                        <Col lg={3} md={4} className="label">
-                          Full Name
-                        </Col>
-                        <Col lg={9} md={8}>
-                          Jowel Aditya mine
-                        </Col>
-                      </Row>
-                      <Row>
-                        <Col lg={3} md={4} className="label">
-                          Email
-                        </Col>
-                        <Col lg={9} md={8}>
-                          JowelAdityamine@gmail.com
-                        </Col>
-                      </Row>
-                      <Row>
-                        <Col lg={3} md={4} className="label">
-                          No.Telp
-                        </Col>
-                        <Col lg={9} md={8}>
-                          0896736127238
-                        </Col>
-                      </Row>
-                      <Row>
-                        <Col lg={3} md={4} className="label">
-                          PID
-                        </Col>
-                        <Col lg={9} md={8}>
-                          8291237896736127238
-                        </Col>
-                      </Row>
-                      <Row>
-                        <Col lg={3} md={4} className="label">
-                          Company Name
-                        </Col>
-                        <Col lg={9} md={8}>
-                          PT.Prima Indo Medilab
-                        </Col>
-                      </Row>
-                      <Row>
-                        <Col lg={3} md={4} className="label">
-                          Role
-                        </Col>
-                        <Col lg={9} md={8}>
-                          Staff
-                        </Col>
-                      </Row>
-                      <Row>
-                        <Col lg={3} md={4} className="label">
-                          Primary Team
-                        </Col>
-                        <Col lg={9} md={8}>
-                          Team 1
-                        </Col>
-                      </Row>
-                      <Row>
-                        <Col lg={3} md={4} className="label">
-                          Secondary Team
-                        </Col>
-                        <Col lg={9} md={8}>
-                          Team 4
-                        </Col>
-                      </Row>
-                    </div>
+                    <Profil />
+                    <EditProfil />
+                    <ChangePassword />
                   </div>
                 </Card.Body>
               </Card>
             </Col>
           </Row>
-      
         </section>
+        <Footer />
       </Main>
     </body>
   );

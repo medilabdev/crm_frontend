@@ -10,6 +10,7 @@ import Dashboard from "../view/Dashboard";
 import User from "../view/User";
 import ShowUser from "../view/User/show";
 import Auth from "../view/Auth";
+import Contact from "../view/Contact";
 
 function Router() {
   return (
@@ -19,6 +20,7 @@ function Router() {
         <Route path="/users" element={<User />} />
         <Route path="/users/:uid" element={<ShowUser />} />
         <Route path="/login" element={<Auth />} />
+        <Route path="/contact" element={<Contact />} />
       </Routes>
     </BrowserRouter>
   );
