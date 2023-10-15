@@ -1,0 +1,11 @@
+.auth-body{
+    background-image: url("/src//assets/img/bg-login.jpg");
+    background-position: center;
+    background-size: cover;
+}
+.auth-main{
+    background-color: rgba(60, 77, 121, 0.308);
+}
+.card-login{
+    box-shadow: 12px 8px 8px 0 rgba(0, 0, 0, 0.2), 3px 6px 20px 0 rgba(239, 59, 59, 0.19);
+}

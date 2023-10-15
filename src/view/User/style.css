@@ -7,7 +7,6 @@ div .search:hover{
     border: 1px solid #6b6bff;
 }
 
-
 .action-icon{
     margin-right: 2rem;
 }
@@ -22,15 +21,16 @@ div button .danger:hover{
     color: rgb(238, 80, 80);
 }
 div button .edit:hover{
-    font-weight: 700;
     font-size: 15px;
     color: rgb(64, 99, 255);
 }
-button .btn:hover{
-    background-color: #4f4ffb;
+div button .show:hover{
+    font-size: 15px;
+    color:#6b6bff;
 }
 
 .image-name img{
     width: 40px;
     margin-right: 12px;
 }
+

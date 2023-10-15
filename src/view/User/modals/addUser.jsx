@@ -11,7 +11,7 @@ const AddUser = ({ visible, onClose }) => {
         <Modal.Body>
           <Form>
             <Form.Group className="mb-3 ">
-              <Form.Label><span className="text-danger fs-5">*</span>Name</Form.Label>
+              <Form.Label><span className="text-danger fs-5" floating>*</span>Name</Form.Label>
               
               <Form.Control type="text" placeholder="input name" required />
             </Form.Group>

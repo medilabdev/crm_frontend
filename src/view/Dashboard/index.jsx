@@ -2,6 +2,7 @@ import React from "react";
 import Sidebar from "../../components/Template/Sidebar";
 import Topbar from "../../components/Template/Topbar";
 import Main from "../../components/Template/Main";
+import Footer from "../../components/Template/Footer";
 
 function Dashboard() {
   return (
@@ -18,6 +19,7 @@ function Dashboard() {
             </ol>
           </nav>
         </div>
+        <Footer />
       </Main>
     </body>
   );
