@@ -34,3 +34,5 @@ div button .show:hover{
     margin-right: 12px;
 }
 
+@media(max-width:767px){
+}

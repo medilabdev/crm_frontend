@@ -1,0 +1,35 @@
+.image-name img{
+    width: 25px;
+    margin-right: 12px;
+}
+.button-flex{
+    margin-left: 23.5rem;
+    white-space: nowrap; 
+}
+.bulk-change{
+    white-space: nowrap;
+}
+
+@media(max-width:767px){
+   .button-flex button{
+    margin-left: -26rem;
+    font-size: 12px;
+   }
+   .donwload {
+    margin-left: -20rem;
+   }
+   .donwload button{
+    font-size: 12px;
+   }
+   div .bulk-change{
+    font-size: 12px;
+    width: 120px;
+    height: 30px;
+    white-space: nowrap; 
+    }
+    div .delete{
+        font-size: 12px;
+        width: 60px;
+        height: 30px;
+    }
+}

@@ -5,7 +5,7 @@ const DeleteUser = ({ visible, onClose }) => {
   return (
     <>
       <Modal show={visible} onHide={onClose} centered>
-        <Modal.Header>
+        <Modal.Header closeButton>
           <Modal.Title>Delete User</Modal.Title>
         </Modal.Header>
         <Modal.Body>

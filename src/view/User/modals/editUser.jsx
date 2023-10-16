@@ -5,7 +5,7 @@ const EditUser = ({ visible, onClose }) => {
   return (
     <>
       <Modal show={visible} onHide={onClose} size="lg" centered>
-        <Modal.Header>
+        <Modal.Header closeButton>
           <Modal.Title>Edit User</Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -14,7 +14,6 @@ const EditUser = ({ visible, onClose }) => {
               <Form.Label>
                 <span className="text-danger fs-5">*</span>Name
               </Form.Label>
-
               <Form.Control type="text" placeholder="input name" required />
             </Form.Group>
             <Row>

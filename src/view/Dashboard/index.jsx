@@ -14,8 +14,7 @@ function Dashboard() {
           <h1>Dashboard</h1>
           <nav>
             <ol className="breadcrumb mt-2">
-              <li className="breadcrumb-item">Home</li>
-              <li className="breadcrumb-item active">Dashboard</li>
+              <li className="breadcrumb-item">Dashboard</li>
             </ol>
           </nav>
         </div>

@@ -334,6 +334,7 @@ h6 {
 .nav-tabs-bordered .nav-link:hover,
 .nav-tabs-bordered .nav-link:focus {
   color: #4154f1;
+  font-weight: bold;
 }
 
 .nav-tabs-bordered .nav-link.active {

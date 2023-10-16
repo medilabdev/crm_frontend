@@ -38,7 +38,7 @@ const ShowUser = () => {
         <section className="section profile">
           <Row>
             <Col xl={4}>
-              <Card>
+              <Card className="shadow">
                 <Card.Body className="profile-card pt-4 d-flex flex-column align-items-center">
                   <img
                     src={IconImage}
@@ -51,7 +51,7 @@ const ShowUser = () => {
               </Card>
             </Col>
             <Col xl={8}>
-              <Card>
+              <Card className="shadow">
                 <Card.Body className="pt-3">
                   <ul className="nav nav-tabs nav-tabs-bordered">
                     <li className="nav-item">

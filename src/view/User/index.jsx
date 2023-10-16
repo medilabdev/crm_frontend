@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 import Footer from "../../components/Template/Footer";
 import dumyData from "./dummy/index";
 
+
 const User = () => {
   // modal add
   const [usersCreate, setUsersCreate] = useState(false);
@@ -94,6 +95,7 @@ const User = () => {
   };
   const columns = [
     {
+      id: 1,
       name: "Name",
       selector: (row) => (
         <div className="image-name">
@@ -122,20 +124,23 @@ const User = () => {
         </div>
       ),
       left: true,
-      width:"270px"
+      width: "270px",
     },
     {
+      id: 2,
       name: "Role",
       selector: (row) => row.role,
       sortable: true,
       center: true,
     },
     {
+      id: 3,
       name: "Last Login",
       selector: (row) => row.last_login,
       sortable: true,
     },
     {
+      id: 4,
       name: "Action",
       selector: (row) => (
         <div className="action-icon">
@@ -162,7 +167,7 @@ const User = () => {
           </button>
         </div>
       ),
-      width:"230px"
+      width: "230px",
     },
   ];
 
@@ -193,15 +198,15 @@ const User = () => {
               </ol>
             </nav>
           </div>
-          <Card >
+          <Card>
             <button
-              className="btn btn-primary mt-3"
+              className="btn btn-primary mt-3 add-users"
               onClick={() => setUsersCreate(true)}
             >
               Add Users
             </button>
             <div className="mt-3 col-md-3 float-end">
-              <div className="input-group">
+              <div className="input-group search-users">
                 <div className="input-group-prepend">
                   <span
                     className="input-group-text"
