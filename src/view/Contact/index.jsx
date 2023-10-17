@@ -11,41 +11,25 @@ import "../Contact/style.css";
 import { Row, Col, OverlayTrigger, Tooltip } from "react-bootstrap";
 
 const Contact = () => {
-  // const [isSidebarToggleCard, setSidebarToggled] = useState(false);
-
-  // useEffect(() => {
-  //   const toggleSideCard = document.querySelector(".toggle-sidebar-card");
-  //   const body = document.getElementById("filter");
-  //   const bodyDatatable = document.getElementById("datatable-content");
-
-  //   const toggleSidebarCard = () => {
-  //     setSidebarToggled(!isSidebarToggleCard);
-  //     if (!isSidebarToggleCard) {
-  //       body.classList = "col-md-5";
-  //       bodyDatatable.classList = "col-md-7";
-  //     } else {
-  //       body.classList = "col-sm-0";
-  //       bodyDatatable.classList = "col-sm-12";
-  //     }
-  //   };
-  //   console.log(isSidebarToggleCard);
-  //   if (toggleSideCard) {
-  //     toggleSideCard.addEventListener("click", toggleSidebarCard);
-  //   }
-
-  //   return () => {
-  //     if (toggleSideCard) {
-  //       toggleSideCard.removeEventListener("click", toggleSidebarCard);
-  //     }
-  //   };
-  // }, [isSidebarToggleCard]);
   const [isSidebarToggleCard, setSidebarToggled] = useState(false);
 
   const toggleSidebarCard = () => {
     setSidebarToggled(!isSidebarToggleCard);
   };
-  const filterClass = isSidebarToggleCard ? "col-md-3" : "col-sm-0";
+
+  const filterClass = isSidebarToggleCard
+    ? "col-md-3 d-block"
+    : "col-sm-0 d-none";
+
   const datatableClass = isSidebarToggleCard ? "col-md-9" : "col-sm-12";
+
+  const IconFilter = isSidebarToggleCard ? "bi bi-x-lg" : "bi bi-funnel";
+
+  const showTooltip = isSidebarToggleCard ? (
+    <Tooltip id="tooltip">Close Filter</Tooltip>
+  ) : (
+    <Tooltip id="tooltip">Show Filter</Tooltip>
+  );
 
   const columns = [
     {
@@ -74,11 +58,6 @@ const Contact = () => {
     {
       name: "Contact Info",
       selector: (row) => row.contact,
-      sortable: true,
-    },
-    {
-      name: "Status",
-      selector: (row) => row.status,
       sortable: true,
     },
     {
@@ -154,7 +133,7 @@ const Contact = () => {
                   <ol className="breadcrumb mt-2">
                     <li className="breadcrumb-item">
                       <a href="/" className="text-decoration-none">
-                        Home
+                        Dashboard
                       </a>
                     </li>
                     <li className="breadcrumb-item active fw-bold">Contact</li>
@@ -163,8 +142,8 @@ const Contact = () => {
               </div>
             </div>
           </div>
-          <div className="col">
-            <div class="d-flex m-2">
+          <div className="row button-contact mb-2">
+            <div className="col d-flex mb-2">
               <div class="dropdown button-flex">
                 <button
                   class="btn btn-primary dropdown-toggle"
@@ -176,7 +155,10 @@ const Contact = () => {
                 </button>
                 <ul class="dropdown-menu">
                   <li>
-                    <a class="dropdown-item" href="#">
+                    <a
+                      class="dropdown-item"
+                      href="/single-contact"
+                    >
                       Single Contact
                     </a>
                   </li>
@@ -219,25 +201,234 @@ const Contact = () => {
                   </li>
                 </ul>
               </div>
-              <button class="btn btn-outline-primary ms-2 bulk-change">
+              <a href="#" class="btn btn-outline-primary ms-2 bulk-change">
                 Bulk Change
-              </button>
+              </a>
               <button class="btn btn-danger ms-2 delete">Delete</button>
             </div>
           </div>
 
-          <Card>
-            <Row>
-              <div className="row">
-                <div className={` ${filterClass}`} id="filter"></div>
-                <div className={` ${datatableClass}`} id="datatable-content">
+          <Card className="shadow">
+            <div className="row">
+              <div className={` ${filterClass}`} id="filter">
+                <div className="container">
+                  <div className="row mt-3">
+                    <div className="col">
+                      <h6>
+                        <i class="bi bi-funnel ml"></i>
+                        <span className="fw-semibold ms-2">Filter</span>
+                      </h6>
+                    </div>
+                  </div>
+                  <div className="row">
+                    <div className="col">
+                      <select
+                        name=""
+                        id=""
+                        className="form-select"
+                        style={{ fontSize: "0.85rem" }}
+                      >
+                        <option value="">All Contact</option>
+                        <option value="">My Contact</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="row mt-2">
+                    <div className="col">
+                      <select
+                        name=""
+                        id=""
+                        className="form-select"
+                        style={{ fontSize: "0.85rem" }}
+                      >
+                        <option disabled selected>
+                          Owner
+                        </option>
+                        <option value="">Person 1</option>
+                        <option value="">Person 2</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="row mt-2">
+                    <div className="col">
+                      <select
+                        name=""
+                        id=""
+                        className="form-select"
+                        style={{ fontSize: "0.85rem" }}
+                      >
+                        <option disabled selected>
+                          Team
+                        </option>
+                        <option value="">Team 1</option>
+                        <option value="">Team 2</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="row mt-5">
+                    <div className="col">
+                      <h6>
+                        <i class="bi bi-link-45deg"></i>
+                        <span className="fw-semibold ms-2">Associated</span>
+                      </h6>
+                    </div>
+                  </div>
+                  <div className="row">
+                    <div className="col">
+                      <select
+                        name=""
+                        id=""
+                        className="form-select"
+                        style={{ fontSize: "0.85rem" }}
+                      >
+                        <option value="">Select Company</option>
+                        <option value="">Company 1</option>
+                        <option value="">Company 2</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="row mt-3">
+                    <div className="col">
+                      <select
+                        name=""
+                        id=""
+                        className="form-select"
+                        style={{ fontSize: "0.85rem" }}
+                      >
+                        <option disabled selected>
+                          Select Deals
+                        </option>
+                        <option value="">Deals 1</option>
+                        <option value="">Deals 2</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="row mt-5">
+                    <div className="col">
+                      <h6>
+                        <i class="bi bi-person-circle"></i>
+                        <span className="fw-semibold ms-2">Contacts</span>
+                      </h6>
+                    </div>
+                  </div>
+                  <form action="">
+                    <div className="mb-1">
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="name"
+                        placeholder="name"
+                        style={{ fontSize: "0.85rem" }}
+                      />
+                    </div>
+                    <div className="mb-1">
+                      <input
+                        type="email"
+                        className="form-control"
+                        name="email"
+                        placeholder="email"
+                        style={{ fontSize: "0.85rem" }}
+                      />
+                    </div>
+                    <div className="mb-1">
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="job_title"
+                        placeholder="Job Title"
+                        style={{ fontSize: "0.85rem" }}
+                      />
+                    </div>
+                    <div className="mb-1">
+                      <select
+                        name="source"
+                        id=""
+                        className="form-select"
+                        style={{ fontSize: "0.85rem" }}
+                      >
+                        <option disabled selected>
+                          Source
+                        </option>
+                        <option value="event">Event</option>
+                        <option value="referal">Referal</option>
+                        <option value="database">Database</option>
+                        <option value="others">Others</option>
+                      </select>
+                    </div>
+                    <div className="mb-1">
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="address"
+                        placeholder="Address"
+                        style={{ fontSize: "0.85rem" }}
+                      />
+                    </div>
+                    <div className="mb-1">
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="city"
+                        placeholder="City"
+                        style={{ fontSize: "0.85rem" }}
+                      />
+                    </div>
+                    <div className="mb-1">
+                      <label htmlFor="date">Created</label>
+                      <input
+                        type="date"
+                        name="date"
+                        className="form-control"
+                        style={{ fontSize: "0.85rem" }}
+                      />
+                    </div>
+                    <div className="mb-1">
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="notes"
+                        placeholder="Notes"
+                        style={{ fontSize: "0.85rem" }}
+                      />
+                    </div>
+                    <div className="mb-1">
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="remarks"
+                        placeholder="Remarks (Other Source)"
+                        style={{ fontSize: "0.85rem" }}
+                      />
+                    </div>
+                    <button
+                      className="btn btn-primary mt-2"
+                      style={{ fontSize: "0.85rem" }}
+                    >
+                      Apply
+                    </button>
+                    <button
+                      className="btn btn-secondary mt-2 ms-2"
+                      style={{ fontSize: "0.85rem" }}
+                    >
+                      Cancel
+                    </button>
+                  </form>
+                </div>
+              </div>
+              <div className={` ${datatableClass}`} id="datatable-content">
+                <OverlayTrigger placement="top" overlay={showTooltip}>
                   <button
-                    className="btn btn-primary mt-3 toggle-sidebar-card"
+                    className="btn btn-primary mt-3"
                     onClick={toggleSidebarCard}
+                    style={{
+                      fontSize: "0.85rem",
+                    }}
                   >
-                    <i className="bi bi-funnel"></i>
+                    <i className={`${IconFilter}`}></i>
                   </button>
-                  <div className="input-group search-users col-4">
+                </OverlayTrigger>
+                <div className="col-md-4 ms-5 mt-5 float-end">
+                  <div className="input-group search-users">
                     <div className="input-group-prepend">
                       <span
                         className="input-group-text"
@@ -254,42 +445,12 @@ const Contact = () => {
                       placeholder="search name..."
                       onChange={handleFilter}
                       className="form-control search"
+                      style={{
+                        fontSize: "0.85rem",
+                      }}
                     />
                   </div>
-                  <DataTable
-                    columns={columns}
-                    data={records}
-                    defaultSortFieldId={1}
-                    pagination
-                    paginationComponentOptions={paginationComponentOptions}
-                    selectableRows
-                  />
                 </div>
-              </div>
-              {/* <div className="col-sm-0" id="filter">
-                jasd
-              </div>
-              <div className="col-md-12" id="datatable-content">
-                <button className="btn btn-primary mt-3 ">
-                  <i class="bi bi-funnel toggle-sidebar-card"></i>
-                </button>
-                <div className="input-group search-users col-4">
-                  <div className="input-group-prepend">
-                    <span
-                      className="input-group-text"
-                      style={{ borderEndEndRadius: 0, borderStartEndRadius: 0 }}
-                    >
-                      <i className="bi bi-search"></i>
-                    </span>
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="search name..."
-                    onChange={handleFilter}
-                    className="form-control search"
-                  />
-                </div>
-
                 <DataTable
                   columns={columns}
                   data={records}
@@ -298,8 +459,8 @@ const Contact = () => {
                   paginationComponentOptions={paginationComponentOptions}
                   selectableRows
                 />
-              </div> */}
-            </Row>
+              </div>
+            </div>
           </Card>
           <Footer />
         </div>

@@ -1,5 +1,5 @@
 div .search{
-    width: 14rem;
+    width: 12rem;
     right: 0;
     margin-right: 1.3rem;
 }
@@ -35,4 +35,7 @@ div button .show:hover{
 }
 
 @media(max-width:767px){
+    div .search-users{
+        margin-top: -26px;
+    }
 }

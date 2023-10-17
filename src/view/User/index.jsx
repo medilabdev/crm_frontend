@@ -12,7 +12,6 @@ import { useNavigate } from "react-router-dom";
 import Footer from "../../components/Template/Footer";
 import dumyData from "./dummy/index";
 
-
 const User = () => {
   // modal add
   const [usersCreate, setUsersCreate] = useState(false);
@@ -26,68 +25,6 @@ const User = () => {
 
   // show redirect
   const navigate = useNavigate();
-
-  // const columns = [
-  //   {
-  //     id: 1,
-  //     name: "Name",
-  //     selector: (row) => (
-  //       <div className="image-name mt-3">
-  //         <img src={IconImage} className="rounded-circle" />
-  //         <div className="float-end">
-  //           <span className="fw-semibold">{row.name}</span>
-  //           <p className="mt-1">{row.email}</p>
-  //         </div>
-  //       </div>
-  //     ),
-  //     sortable: true,
-  //     reorder: true,
-  //   },
-  //   {
-  //     id: 2,
-  //     name: "Role",
-  //     selector: (row) => row.role,
-  //     sortable: true,
-  //     reorder: true,
-  //   },
-  //   {
-  //     id: 3,
-  //     name: "Last Login",
-  //     selector: (row) => row.last_login,
-  //     sortable: true,
-  //     reorder: true,
-  //   },
-  //   {
-  //     id: 4,
-  //     name: "Action",
-  //     selector: (row) => (
-  //       <div className="action-icon">
-  //         <button
-  //           onClick={() => navigate(`/users/${row.id}}`)}
-  //           className="icon-button ms-4"
-  //           title="show"
-  //         >
-  //           <i className="bi bi-person-circle show"></i>
-  //         </button>
-  //         <button
-  //           className="ms-2 icon-button"
-  //           title="edit"
-  //           onClick={() => setUserEdit(row.id)}
-  //         >
-  //           <div className="bi bi-pen edit"></div>
-  //         </button>
-  //         <button
-  //           className="ms-2 icon-button"
-  //           title="delete"
-  //           onClick={() => setUserDelete(row.id)}
-  //         >
-  //           <i className="bi bi-trash-fill danger"></i>
-  //         </button>
-  //       </div>
-  //     ),
-  //     center:true
-  //   },
-  // ];
 
   const paginationComponentOptions = {
     selectAllRowsItem: true,
@@ -205,7 +142,7 @@ const User = () => {
             >
               Add Users
             </button>
-            <div className="mt-3 col-md-3 float-end">
+            <div className="mt-5 col-md-3 float-end">
               <div className="input-group search-users">
                 <div className="input-group-prepend">
                   <span
@@ -220,6 +157,7 @@ const User = () => {
                   placeholder="Search User...."
                   className="form-control search"
                   onChange={handleFilter}
+                  style={{ fontSize: "0.85rem" }}
                 />
               </div>
             </div>

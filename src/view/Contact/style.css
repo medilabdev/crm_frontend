@@ -1,35 +1,44 @@
+
+  
 .image-name img{
     width: 25px;
     margin-right: 12px;
 }
-.button-flex{
-    margin-left: 23.5rem;
-    white-space: nowrap; 
+.search-users{
+    margin-top: -28.7px;
+    padding-bottom: 1rem;    
 }
-.bulk-change{
+.dropdown .dropdown-toggle{
+    font-size: 0.85rem;
+}
+.dropdown .dropdown-menu{
+    font-size: 0.85rem;
+}
+.col .delete {
+    font-size: 0.85rem;
+}
+.col .bulk-change{
+    font-size: 0.85rem;
     white-space: nowrap;
 }
-
+/* .container .button-contact{
+    margin-left: 36.2rem;
+} */
 @media(max-width:767px){
-   .button-flex button{
-    margin-left: -26rem;
-    font-size: 12px;
-   }
-   .donwload {
-    margin-left: -20rem;
-   }
-   .donwload button{
-    font-size: 12px;
-   }
-   div .bulk-change{
-    font-size: 12px;
-    width: 120px;
-    height: 30px;
-    white-space: nowrap; 
+    .container .button-contact{
+        margin-left: -1rem;
     }
-    div .delete{
-        font-size: 12px;
-        width: 60px;
-        height: 30px;
+    .dropdown .dropdown-toggle{
+        font-size: 0.78rem;
+    }
+    .dropdown .dropdown-menu{
+        font-size: 0.75rem;
+    }
+    .col .bulk-change{
+        font-size: 0.78rem;
+        white-space: nowrap;
+    }
+    .col .delete {
+        font-size: 0.78rem;
     }
 }

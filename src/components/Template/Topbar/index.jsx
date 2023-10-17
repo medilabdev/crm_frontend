@@ -38,7 +38,7 @@ function Topbar() {
     <header id="header" className="header fixed-top d-flex align-items-center">
       <div className="d-flex align-items-center justify-content-between ms-3">
         <a
-          href=""
+          href="\"
           className="logo d-flex align-items-center text-decoration-none"
         >
           <img src={Image} style={{ width: "22px", marginLeft: "1rem" }} />
@@ -51,7 +51,7 @@ function Topbar() {
         </a>
         <i
           className="bi bi-list toggle-sidebar-btn"
-          style={{ fontSize: "1.2rem" }}
+          style={{ fontSize: "1.8rem" }}
         />
       </div>
       <nav className="header-nav ms-auto">
@@ -59,8 +59,13 @@ function Topbar() {
           {/* End Search Icon*/}
           <li className="nav-item dropdown">
             <a className="nav-link nav-icon" href="#" data-bs-toggle="dropdown">
-              <i className="bi bi-bell" />
-              <span className="badge bg-primary badge-number">4</span>
+              <i className="bi bi-bell" style={{ fontSize: "1.4rem" }} />
+              <span
+                className="badge bg-primary badge-number"
+                style={{ fontSize: "0.8rem" }}
+              >
+                4
+              </span>
             </a>
             {/* End Notification Icon */}
             <ul className="dropdown-menu dropdown-menu-end dropdown-menu-arrow notifications">
@@ -128,8 +133,16 @@ function Topbar() {
           {/* End Notification Nav */}
           <li className="nav-item dropdown">
             <a className="nav-link nav-icon" href="#" data-bs-toggle="dropdown">
-              <i className="bi bi-chat-left-text" />
-              <span className="badge bg-success badge-number">3</span>
+              <i
+                className="bi bi-chat-left-text"
+                style={{ fontSize: "1.4rem" }}
+              />
+              <span
+                className="badge bg-success badge-number"
+                style={{ fontSize: "0.8rem" }}
+              >
+                3
+              </span>
             </a>
             {/* End Messages Icon */}
             <ul className="dropdown-menu dropdown-menu-end dropdown-menu-arrow messages">

@@ -11,6 +11,7 @@ import User from "../view/User";
 import ShowUser from "../view/User/show";
 import Auth from "../view/Auth";
 import Contact from "../view/Contact";
+import SingleContact from "../view/Contact/SingleContact";
 
 function Router() {
   return (
@@ -21,6 +22,7 @@ function Router() {
         <Route path="/users/:uid" element={<ShowUser />} />
         <Route path="/login" element={<Auth />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/single-contact" element={<SingleContact />} />
       </Routes>
     </BrowserRouter>
   );
