@@ -11,8 +11,12 @@ import DeleteUser from "./modals/deleteUser";
 import { useNavigate } from "react-router-dom";
 import Footer from "../../components/Template/Footer";
 import dumyData from "./dummy/index";
+import axios from "axios";
+import IconImage from "../../assets/img/person.png";
 
 const User = () => {
+  const [getDataUser, setGetDataUser] = useState([]);
+  const [filterData, setFilterData] = useState([]);
   // modal add
   const [usersCreate, setUsersCreate] = useState(false);
   const handleCloseModal = () => setUsersCreate(false);
@@ -22,6 +26,25 @@ const User = () => {
   // modal delete
   const [userDelete, setUserDelete] = useState(false);
   const handleCloseDeleteModal = () => setUserDelete(false);
+  const token = localStorage.getItem("token");
+
+  const getData = (url, token, state) => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/${url}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response) => {
+        state(response.data.data);
+        setFilterData(response.data.data);
+      })
+      .catch((error) => console.log(error));
+  };
+  useEffect(() => {
+    getData("users", token, setGetDataUser);
+  }, [token]);
+  // console.log(getData);
 
   // show redirect
   const navigate = useNavigate();
@@ -38,11 +61,15 @@ const User = () => {
         <div className="image-name">
           <div className="d-flex align-items-center">
             <img
-              src={require(`../../assets/img/${row.image}`)}
+              // src={
+              //   row.image ? require(`../../assets/img/${row.image}`) : IconImage
+              // }
+              src={row.image ? row.image : IconImage}
               alt={row.image}
               className="rounded-circle"
               style={{
-                width: "35px",
+                width: "40px",
+                height: "40px",
                 marginRight: "10px",
               }}
             />
@@ -65,15 +92,21 @@ const User = () => {
     },
     {
       id: 2,
-      name: "Role",
-      selector: (row) => row.role,
+      name: "Position",
+      selector: (row) => row.position.name,
       sortable: true,
       center: true,
     },
     {
       id: 3,
       name: "Last Login",
-      selector: (row) => row.last_login,
+      selector: (row) => {
+        const date = new Date(row.created_at);
+        const FormattedDate = date.toISOString().split("T")[0];
+        const FormattedTime = date.toTimeString().split(" ")[0];
+        const FormattedDateTime = `${FormattedDate} ${FormattedTime}`;
+        return FormattedDateTime;
+      },
       sortable: true,
     },
     {
@@ -108,12 +141,11 @@ const User = () => {
     },
   ];
 
-  const [records, setRecords] = useState(dumyData);
   function handleFilter(event) {
-    const newData = dumyData.filter((row) => {
+    const newData = getDataUser.filter((row) => {
       return row.name.toLowerCase().includes(event.target.value.toLowerCase());
     });
-    setRecords(newData);
+    setFilterData(newData);
   }
 
   return (
@@ -163,7 +195,7 @@ const User = () => {
             </div>
             <DataTable
               columns={columns}
-              data={records}
+              data={filterData}
               defaultSortFieldId={1}
               pagination
               paginationComponentOptions={paginationComponentOptions}

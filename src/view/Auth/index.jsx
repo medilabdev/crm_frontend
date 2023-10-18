@@ -1,8 +1,63 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card, Col, Container, Row } from "react-bootstrap";
 import "./style.css";
+import axios from "axios";
+import Swal from "sweetalert2";
+import { useNavigate } from "react-router-dom";
 
 const Auth = () => {
+  const navigate = useNavigate();
+  // console.log(process.env.REACT_APP_BACKEND_URL);
+  const [login, setLogin] = useState({
+    email: "",
+    password: "",
+  });
+  // console.log(login);
+  const handleChange = (e) => {
+    setLogin({
+      ...login,
+      [e.target.name]: e.target.value,
+    });
+  };
+  const handleLogin = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await axios.post(
+        `${process.env.REACT_APP_BACKEND_URL}/users/login`,
+        login
+      );
+      if (response.data.message !== "Login successful!") {
+        Swal.fire({
+          title: response.data.message,
+          text: "You clicked the button",
+          icon: "success",
+        });
+        localStorage.setItem("token", response.data.data.token);
+        navigate("/");
+      } else {
+        Swal.fire({
+          title: "Error",
+          text: response.data.message,
+          icon: "error",
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      if (error.response) {
+        Swal.fire({
+          text: error.response.data.message,
+          icon: "warning",
+        });
+      } else {
+        Swal.fire({
+          text: "Something went wrong!",
+          icon: "error",
+        });
+      }
+    }
+  };
+
   return (
     <body className="auth-body">
       <main className="auth-main">
@@ -19,7 +74,12 @@ const Auth = () => {
                     <Card.Body>
                       <div className="pb-2">
                         <Card.Title>
-                          <h3 className="text-center pb-0 fw-bold mb-4 " style={{fontFamily:'revert-layer'}}>CRM</h3>
+                          <h3
+                            className="text-center pb-0 fw-bold mb-4 "
+                            style={{ fontFamily: "revert-layer" }}
+                          >
+                            CRM
+                          </h3>
                           <p className="text-center fw-light small fs-6">
                             Enter your email & password to login
                           </p>
@@ -27,8 +87,9 @@ const Auth = () => {
                         <form
                           className="row g-3 needs-validation"
                           method="post"
+                          onSubmit={handleLogin}
                         >
-                          <div className="col-12">
+                          <div className=" col-12">
                             <label className="form-label">Email</label>
                             <div className="input-group has-validation shadow-sm">
                               <span
@@ -38,10 +99,12 @@ const Auth = () => {
                                 @
                               </span>
                               <input
-                                type="text"
+                                type="email"
                                 name="email"
                                 className="form-control"
                                 id="yourUsername"
+                                value={login.email}
+                                onChange={handleChange}
                                 required
                               />
                               <div className="invalid-feedback">
@@ -61,6 +124,8 @@ const Auth = () => {
                               name="password"
                               className="form-control mb-2 shadow-sm"
                               id="yourPassword"
+                              value={login.password}
+                              onChange={handleChange}
                               required
                             />
                             <div className="invalid-feedback">

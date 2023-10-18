@@ -3,7 +3,7 @@ import Topbar from "../../../components/Template/Topbar";
 import Sidebar from "../../../components/Template/Sidebar";
 import Main from "../../../components/Template/Main";
 import { Col, Row, Container, Card, Form } from "react-bootstrap";
-import IconImage from "../../../assets/img/team-1.jpg";
+import IconImage from "../../../assets/img/man.png";
 import "../show/style.css";
 import Footer from "../../../components/Template/Footer";
 import Profil from "./profil";
@@ -41,6 +41,7 @@ const ShowUser = () => {
               <Card className="shadow">
                 <Card.Body className="profile-card pt-4 d-flex flex-column align-items-center">
                   <img
+                    // src=
                     src={IconImage}
                     alt=""
                     className="rounded-circle img-icon"

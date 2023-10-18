@@ -59,6 +59,7 @@ const SingleContact = () => {
                   <ReactQuill
                     className="p-2"
                     theme="snow"
+                    
                     // style={{
                     //   minHeight: "100px",
                     // }}

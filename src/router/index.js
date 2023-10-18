@@ -5,6 +5,7 @@ import {
   Navigate,
   useLocation,
   Route,
+  useNavigate,
 } from "react-router-dom";
 import Dashboard from "../view/Dashboard";
 import User from "../view/User";
@@ -12,17 +13,63 @@ import ShowUser from "../view/User/show";
 import Auth from "../view/Auth";
 import Contact from "../view/Contact";
 import SingleContact from "../view/Contact/SingleContact";
+import Swal from "sweetalert2";
+
+const Login = ({ children }) => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+  return children;
+};
 
 function Router() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/users" element={<User />} />
-        <Route path="/users/:uid" element={<ShowUser />} />
         <Route path="/login" element={<Auth />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/single-contact" element={<SingleContact />} />
+
+        <Route
+          path="/"
+          element={
+            <Login>
+              <Dashboard />
+            </Login>
+          }
+        />
+
+        <Route
+          path="/users"
+          element={
+            <Login>
+              <User />{" "}
+            </Login>
+          }
+        />
+        <Route
+          path="/users/:uid"
+          element={
+            <Login>
+              <ShowUser />
+            </Login>
+          }
+        />
+        <Route
+          path="/contact"
+          element={
+            <Login>
+              <Contact />
+            </Login>
+          }
+        />
+        <Route
+          path="/single-contact"
+          element={
+            <Login>
+              <SingleContact />
+            </Login>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );

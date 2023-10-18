@@ -4,19 +4,19 @@ import { Button, Card, FloatingLabel, Form } from "react-bootstrap";
 const AddContact = () => {
   const [telephone, setTelephone] = useState([""]);
 
-  //menambah telephone
+  //  menambah telephone
   const addTelephone = () => {
     setTelephone([...telephone, ""]);
   };
 
-//   mengubah nomor telepon pada indeks tertentu
+  //   mengubah nomor telepon pada indeks tertentu
   const handleChangeTelephone = (index, value) => {
     const newTelephone = [...telephone];
     newTelephone[index] = value;
     setTelephone(newTelephone);
   };
 
-//   menghapus telephone
+  //   menghapus telephone
   const removeTelephone = (index) => {
     const newTelephone = [...telephone];
     newTelephone.splice(index, 1);
