@@ -34,6 +34,15 @@ function Sidebar() {
             isActive={1}
           />
           <MenuSidebar
+            type="nonCollapse"
+            name="Company"
+            key="company"
+            url="/company"
+            icon="bi bi-building"
+            noCollapse={true}
+            isActive={1}
+          />
+          <MenuSidebar
             typeMenu="nonCollapse"
             name="Users"
             key="users"

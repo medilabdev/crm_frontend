@@ -14,6 +14,8 @@ import Auth from "../view/Auth";
 import Contact from "../view/Contact";
 import SingleContact from "../view/Contact/SingleContact";
 import Swal from "sweetalert2";
+import BulkChange from "../view/Contact/BulkChange";
+import Company from "../view/Company";
 
 const Login = ({ children }) => {
   const token = localStorage.getItem("token");
@@ -42,10 +44,11 @@ function Router() {
           path="/users"
           element={
             <Login>
-              <User />{" "}
+              <User />
             </Login>
           }
         />
+
         <Route
           path="/users/:uid"
           element={
@@ -54,6 +57,7 @@ function Router() {
             </Login>
           }
         />
+
         <Route
           path="/contact"
           element={
@@ -62,11 +66,30 @@ function Router() {
             </Login>
           }
         />
+
         <Route
           path="/single-contact"
           element={
             <Login>
               <SingleContact />
+            </Login>
+          }
+        />
+
+        <Route
+          path="/contact/bulk-change"
+          element={
+            <Login>
+              <BulkChange />
+            </Login>
+          }
+        />
+
+        <Route
+          path="/company"
+          element={
+            <Login>
+              <Company />
             </Login>
           }
         />

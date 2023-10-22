@@ -155,10 +155,7 @@ const Contact = () => {
                 </button>
                 <ul class="dropdown-menu">
                   <li>
-                    <a
-                      class="dropdown-item"
-                      href="/single-contact"
-                    >
+                    <a class="dropdown-item" href="/single-contact">
                       Single Contact
                     </a>
                   </li>
@@ -201,7 +198,10 @@ const Contact = () => {
                   </li>
                 </ul>
               </div>
-              <a href="#" class="btn btn-outline-primary ms-2 bulk-change">
+              <a
+                href="/contact/bulk-change"
+                class="btn btn-outline-primary ms-2 bulk-change"
+              >
                 Bulk Change
               </a>
               <button class="btn btn-danger ms-2 delete">Delete</button>

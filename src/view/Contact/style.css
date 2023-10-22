@@ -24,6 +24,9 @@
 /* .container .button-contact{
     margin-left: 36.2rem;
 } */
+.offcanvas-content{
+    overflow: auto;
+}
 @media(max-width:767px){
     .container .button-contact{
         margin-left: -1rem;

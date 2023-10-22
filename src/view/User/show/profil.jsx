@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { Col, Row, Card } from "react-bootstrap";
-const Profil = () => {
+const Profil = ({userDetail}) => {
   return (
     <div
       className="tab-pane fade show active profile-overview"
@@ -14,7 +14,7 @@ const Profil = () => {
           Name
         </Col>
         <Col lg={9} md={8}>
-          Joko Prasetio
+          {userDetail.name}
         </Col>
       </Row>
       <Row className="ms-2">
@@ -22,7 +22,7 @@ const Profil = () => {
           Email
         </Col>
         <Col lg={9} md={8}>
-          jokoprasetio12@gmail.com
+          {userDetail.email}
         </Col>
       </Row>
       <Row className="ms-2">
@@ -30,7 +30,7 @@ const Profil = () => {
           No.Telp
         </Col>
         <Col lg={9} md={8}>
-          028394721839
+          {userDetail.telp_number}
         </Col>
       </Row>
       <Row className="ms-2">
@@ -38,7 +38,7 @@ const Profil = () => {
           Company Name
         </Col>
         <Col lg={9} md={8}>
-          PT.Prima Indo Medilab
+          {userDetail.company_name ? userDetail.company_name : "-"}
         </Col>
       </Row>
       <Row className="ms-2">
@@ -46,7 +46,7 @@ const Profil = () => {
           Role
         </Col>
         <Col lg={9} md={8}>
-          Supervisor Sales
+         {userDetail?.role?.name}
         </Col>
       </Row>
       <Row className="ms-2">
@@ -54,7 +54,7 @@ const Profil = () => {
           Primary Team
         </Col>
         <Col lg={9} md={8}>
-          Team 1
+         {userDetail?.primary_team?.name}
         </Col>
       </Row>
       <Row className="ms-2">
@@ -62,7 +62,7 @@ const Profil = () => {
           Secondary Team
         </Col>
         <Col lg={9} md={8}>
-          Team 2
+          {userDetail.secondary_team ? userDetail.secondary_team : "-"}
         </Col>
       </Row>
       <Row className="ms-2">
@@ -70,7 +70,7 @@ const Profil = () => {
           Position
         </Col>
         <Col lg={9} md={8}>
-          Admin
+        {userDetail?.position?.name}
         </Col>
       </Row>
     </div>

@@ -12,7 +12,8 @@ import { useNavigate } from "react-router-dom";
 import Footer from "../../components/Template/Footer";
 import dumyData from "./dummy/index";
 import axios from "axios";
-import IconImage from "../../assets/img/person.png";
+import IconImage from "../../assets/img/man.png";
+import Swal from "sweetalert2";
 
 const User = () => {
   const [getDataUser, setGetDataUser] = useState([]);
@@ -22,12 +23,26 @@ const User = () => {
   const handleCloseModal = () => setUsersCreate(false);
   // modal edit
   const [userEdit, setUserEdit] = useState(false);
-  const handleCloseEditModal = () => setUserEdit(false);
+
+  const token = localStorage.getItem("token");
+
+  const handleCloseEditModal = () => {
+    setUserEdit(false);
+  };
+
   // modal delete
   const [userDelete, setUserDelete] = useState(false);
   const handleCloseDeleteModal = () => setUserDelete(false);
-  const token = localStorage.getItem("token");
 
+  // get role
+  const [roles, setRoles] = useState([]);
+  // get teams
+  const [primary, setPrimary] = useState([]);
+  // get all user
+  const [users, setUser] = useState([]);
+
+  // get all position
+  const [position, setPosition] = useState([]);
   const getData = (url, token, state) => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/${url}`, {
@@ -39,12 +54,78 @@ const User = () => {
         state(response.data.data);
         setFilterData(response.data.data);
       })
-      .catch((error) => console.log(error));
+      .catch((error) => {
+        if (error.response.data.message === "Unauthenticated.") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
+
+  const getAllRoles = (token) => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/roles`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response) => setRoles(response.data.data))
+      .catch((error) => {
+        if (error.response.data.message === "Unauthenticated.") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
+
+  const getPrimaryTeam = (token) => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/teams`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response) => setPrimary(response.data.data));
+  };
+
+  const getAllUser = (token) => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response) => setUser(response.data.data))
+      .catch((error) => {
+        if (error.response.data.message === "Unauthenticated.") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
+
+  const getAllPosition = (token) => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/positions`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response) => setPosition(response.data.data))
+      .catch((error) => {
+        if (error.response.data.message === "Unauthenticated.") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
   };
   useEffect(() => {
     getData("users", token, setGetDataUser);
+    getAllRoles(token);
+    getPrimaryTeam(token);
+    getAllUser(token);
+    getAllPosition(token);
   }, [token]);
-  // console.log(getData);
 
   // show redirect
   const navigate = useNavigate();
@@ -61,9 +142,6 @@ const User = () => {
         <div className="image-name">
           <div className="d-flex align-items-center">
             <img
-              // src={
-              //   row.image ? require(`../../assets/img/${row.image}`) : IconImage
-              // }
               src={row.image ? row.image : IconImage}
               alt={row.image}
               className="rounded-circle"
@@ -93,7 +171,7 @@ const User = () => {
     {
       id: 2,
       name: "Position",
-      selector: (row) => row.position.name,
+      selector: (row) => row?.position?.name,
       sortable: true,
       center: true,
     },
@@ -122,14 +200,14 @@ const User = () => {
             <i class="bi bi-person-circle show"></i>
           </button>
           <button
-            onClick={() => setUserEdit(row.id)}
+            onClick={() => setUserEdit(row.uid)}
             className="ms-2 icon-button"
             title="Edit"
           >
             <i className="bi bi-pen edit"></i>
           </button>
           <button
-            onClick={() => setUserDelete(row.id)}
+            onClick={() => setUserDelete(row.uid)}
             className="ms-2 icon-button"
             title="Delete"
           >
@@ -201,9 +279,29 @@ const User = () => {
               paginationComponentOptions={paginationComponentOptions}
               className="mt-2"
             />
-            <AddUser onClose={handleCloseModal} visible={usersCreate} />
-            <EditUser onClose={handleCloseEditModal} visible={userEdit} />
-            <DeleteUser onClose={handleCloseDeleteModal} visible={userDelete} />
+            <AddUser
+              onClose={handleCloseModal}
+              visible={usersCreate}
+              roles={roles}
+              primary={primary}
+              refUsers={users}
+              position={position}
+            />
+
+            <EditUser
+              onClose={handleCloseEditModal}
+              visible={userEdit !== false}
+              uid={userEdit}
+              roles={roles}
+              primary={primary}
+              refUsers={users}
+              position={position}
+            />
+            <DeleteUser
+              onClose={handleCloseDeleteModal}
+              visible={userDelete !== false}
+              uid={userDelete}
+            />
           </Card>
           <Footer />
         </Main>
