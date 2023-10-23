@@ -1,0 +1,10 @@
+.action-icon{
+    margin-right: 2rem;
+}
+
+div .icon-button{
+    border: none;
+    height: 12px;
+    width: 25px;
+    background: none;
+}

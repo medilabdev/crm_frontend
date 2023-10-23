@@ -7,23 +7,9 @@ import Swal from "sweetalert2";
 const EditProfil = ({ roles, position, primaryTeam, users }) => {
   const { uid } = useParams();
   const token = localStorage.getItem("token");
-  const [userDetail, setUserDetail] = useState({});
 
-  const [editUser, setEditUser] = useState("");
-
-  const [imageProfil, setImageProfil] = useState("");
-  const [selectRole, setSelectRole] = useState(userDetail?.role?.uid);
-  const [selectPosition, setSelectPosition] = useState(userDetail?.role?.uid);
-  const [selectPrimaryTeam, setSelectPrimaryTeam] = useState(
-    userDetail?.primary_team?.uid
-  );
-  const [selectSecondaryTeam, setSelectSecondaryTeam] = useState(
-    userDetail?.secondary_team?.uid
-  );
-  const [selectRefUser, setSelectRefUser] = useState(
-    userDetail?.refrence_user?.uid
-  );
-  // console.log(userDetail);
+  const [editUser, setEditUser] = useState({});
+  const [oldImage, setOldImage] = useState({});
   const getDataUser = (uid, token) => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/users/${uid}`, {
@@ -33,18 +19,19 @@ const EditProfil = ({ roles, position, primaryTeam, users }) => {
       })
       .then((res) => {
         const UserData = res.data.data;
-        setUserDetail(res.data.data);
         setEditUser({
           name: UserData.name,
           email: UserData.email,
           telp_number: UserData.telp_number,
           pid: UserData.pid,
           company_name: UserData.company_name,
-          reff_uid: UserData.reff_uid,
-          position: UserData.position_uid,
-
-          // ... tambahkan properti lainnya sesuai kebutuhan
+          role_uid: UserData?.role?.uid,
+          position_uid: UserData?.position?.uid,
+          reff_uid: UserData?.refrence_user?.uid,
+          secondary_team_uid: UserData?.secondary_team?.uid,
+          primary_team_uid: UserData?.primary_team?.uid,
         });
+        setOldImage(UserData.image);
       })
       .catch((err) => {
         if (err.response.data.message === "Unauthenticated.") {
@@ -53,24 +40,21 @@ const EditProfil = ({ roles, position, primaryTeam, users }) => {
         }
       });
   };
-
+  // console.log(oldImage);
   // image
-
+  const [image, setImage] = useState(null);
   const handleImageChange = (e) => {
     const selectImage = e.target.files[0];
-    setEditUser({
-      ...editUser,
-      image: selectImage,
-    });
+    setImage(selectImage);
     if (selectImage) {
       const reader = new FileReader();
       reader.onload = (e) => {
-        setImageProfil(e.target.result);
+        setImage(e.target.result);
       };
       reader.readAsDataURL(selectImage);
     }
   };
-
+  // console.log(editUser);
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setEditUser({
@@ -82,52 +66,55 @@ const EditProfil = ({ roles, position, primaryTeam, users }) => {
   useEffect(() => {
     getDataUser(uid, token);
   }, [uid, token]);
-
+  // console.log(editUser);
   const handleUpdateUser = async (e) => {
     e.preventDefault();
     const formData = new FormData();
-    if (editUser.image) {
-      formData.append("image", editUser.image);
+    if (image) {
+      formData.append("image", image);
     }
     formData.append("name", editUser.name);
     formData.append("email", editUser.email);
     formData.append("telp_number", editUser.telp_number);
     formData.append("pid", editUser.pid);
-    formData.append("company_name", editUser.company_name);
-    formData.append("role_uid", selectRole);
-    formData.append("primary_team_uid", selectPrimaryTeam);
-    formData.append("secondary_team_uid", selectSecondaryTeam);
-    formData.append("position_uid", selectPosition);
-    formData.append("reff_uid", selectRefUser);
+    formData.append("company_name", editUser.company_name || "");
+    formData.append("role_uid", editUser.role_uid || "");
+    formData.append("primary_team_uid", editUser.primary_team_uid || "");
+    formData.append("secondary_team_uid", editUser.secondary_team_uid || "");
+    formData.append("position_uid", editUser.position_uid || "");
+    formData.append("reff_uid", editUser.reff_uid || "");
+    formData.append("_method", "put");
     console.log(formData);
     try {
-      const updateUser = await axios
-        .put(`${process.env.REACT_APP_BACKEND_URL}/users/${uid}`, formData, {
+      const updateUser = await axios.post(
+        `${process.env.REACT_APP_BACKEND_URL}/users/${uid}`,
+        formData,
+        {
           headers: {
+            "Content-Type": "multipart/form-data",
             Authorization: `Bearer ${token}`,
           },
-        })
-        .then((res) => console.log(res));
-      // Swal.fire({
-      //   title: "Updated Successfully",
-      //   text: "Updated Successfully",
-      //   icon: "success",
-      // });
-      // window.location.reload();
+        }
+      );
+      Swal.fire({
+        title: updateUser.data.message,
+        text: "Updated Successfully",
+        icon: "success",
+      });
+      window.location.reload();
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       if (error.response) {
         Swal.fire({
           text: error.response.data.message,
           icon: "warning",
         });
       } else {
-        Swal.fire({ text: "Something wrong", icon: "error" });
+        Swal.fire({ text: error.response.data.message, icon: "error" });
       }
     }
   };
 
-  console.log(selectRefUser);
   return (
     <div className="tab-pane fade profile-edit pt-3" id="profile-edit">
       {/* Profile Edit Form */}
@@ -138,7 +125,7 @@ const EditProfil = ({ roles, position, primaryTeam, users }) => {
           </label>
           <div className="col-md-8 col-lg-9">
             <img
-              src={imageProfil}
+              src={image ? image : oldImage}
               alt="Profile"
               style={{ width: "150px", height: "120px" }}
             />
@@ -147,8 +134,8 @@ const EditProfil = ({ roles, position, primaryTeam, users }) => {
                 type="file"
                 className="form-control"
                 accept="image/*"
-                onChange={handleImageChange}
                 name="image"
+                onChange={handleImageChange}
               />
             </div>
           </div>
@@ -224,10 +211,13 @@ const EditProfil = ({ roles, position, primaryTeam, users }) => {
             <select
               name="role_uid"
               className="form-select"
-              value={selectRole || editUser?.role?.uid}
+              value={editUser.role_uid}
               onChange={(e) => {
-                const SelectRoleUid = e.target.value;
-                setSelectRole(SelectRoleUid);
+                const RoleUid = e.target.value;
+                setEditUser({
+                  ...editUser,
+                  role_uid: RoleUid,
+                });
               }}
               required
             >
@@ -246,10 +236,13 @@ const EditProfil = ({ roles, position, primaryTeam, users }) => {
             <select
               name="position_uid"
               className="form-select"
-              value={selectPosition || editUser?.position?.uid}
+              value={editUser.position_uid}
               onChange={(e) => {
-                const selectPositionUid = e.target.value;
-                setSelectPosition(selectPositionUid);
+                const posUid = e.target.value;
+                setEditUser({
+                  ...editUser,
+                  position_uid: posUid,
+                });
               }}
             >
               <option value="">Select Position</option>
@@ -269,13 +262,16 @@ const EditProfil = ({ roles, position, primaryTeam, users }) => {
             <select
               name="primary_team_uid"
               className="form-select"
-              value={selectPrimaryTeam || editUser?.primary_team?.uid}
+              value={editUser.primary_team_uid}
               onChange={(e) => {
-                const uidPrimaryTeam = e.target.value;
-                setSelectPrimaryTeam(uidPrimaryTeam);
+                const PtUid = e.target.value;
+                setEditUser({
+                  ...editUser,
+                  primary_team_uid: PtUid,
+                });
               }}
             >
-              <option value=" ">Select Primary Team</option>
+              <option value="">Select Primary Team</option>
               {primaryTeam.map((pt) => (
                 <option key={pt.uid} value={pt.uid}>
                   {pt.name}
@@ -292,13 +288,16 @@ const EditProfil = ({ roles, position, primaryTeam, users }) => {
             <select
               name="secondary_team_uid"
               className="form-select"
-              value={selectSecondaryTeam || editUser?.secondary_team?.uid}
+              value={editUser.secondary_team_uid}
               onChange={(e) => {
-                const uidSecondTeam = e.target.value;
-                setSelectSecondaryTeam(uidSecondTeam);
+                const StUid = e.target.value;
+                setEditUser({
+                  ...editUser,
+                  secondary_team_uid: StUid,
+                });
               }}
             >
-              <option value=" ">Select Secondary Team</option>
+              <option value="">Select Secondary Team</option>
               {primaryTeam.map((pt) => (
                 <option key={pt.uid} value={pt.uid}>
                   {pt.name}
@@ -314,10 +313,13 @@ const EditProfil = ({ roles, position, primaryTeam, users }) => {
             <select
               name="reff_uid"
               className="form-select"
-              value={selectRefUser || editUser?.refrence_user?.uid}
+              value={editUser.reff_uid}
               onChange={(e) => {
-                const reffUser = e.target.value;
-                setSelectRefUser(reffUser);
+                const RefUid = e.target.value;
+                setEditUser({
+                  ...editUser,
+                  reff_uid: RefUid,
+                });
               }}
             >
               <option value="">Select User</option>

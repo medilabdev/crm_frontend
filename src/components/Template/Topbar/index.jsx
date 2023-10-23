@@ -206,7 +206,7 @@ function Topbar() {
               data-bs-toggle="dropdown"
             >
               <img
-                src={image ? image : IconImage}
+                src={IconImage}
                 alt="Profile"
                 className="rounded-circle"
                 style={{ width: "38px", height: "50px" }}

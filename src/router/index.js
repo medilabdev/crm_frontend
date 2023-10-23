@@ -16,7 +16,8 @@ import SingleContact from "../view/Contact/SingleContact";
 import Swal from "sweetalert2";
 import BulkChange from "../view/Contact/BulkChange";
 import Company from "../view/Company";
-
+import SingleCompany from "../view/Company/SingleCompany";
+import FileUploadCompany from "../view/Company/FileUpload";
 const Login = ({ children }) => {
   const token = localStorage.getItem("token");
   if (!token) {
@@ -90,6 +91,24 @@ function Router() {
           element={
             <Login>
               <Company />
+            </Login>
+          }
+        />
+
+        <Route
+          path="/company/single-company"
+          element={
+            <Login>
+              <SingleCompany />
+            </Login>
+          }
+        />
+
+        <Route
+          path="/company/upload-file"
+          element={
+            <Login>
+              <FileUploadCompany />
             </Login>
           }
         />

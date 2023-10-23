@@ -1,6 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Modal, Button, Form, Row } from "react-bootstrap";
+import Swal from "sweetalert2";
 
 const EditUser = ({
   visible,
@@ -12,13 +13,12 @@ const EditUser = ({
   position,
 }) => {
   // console.log(uid);
-  const [formData, setFormData] = useState({
+  const [editUser, setEditUser] = useState({
     name: "",
     email: "",
     telp_number: "",
     pid: "",
     company_name: "",
-    image: null,
     role_uid: "",
     primary_team_uid: "",
     secondary_team_uid: "",
@@ -35,7 +35,18 @@ const EditUser = ({
       })
       .then((res) => {
         const oldUserData = res.data.data;
-        setFormData(oldUserData);
+        setEditUser({
+          name: oldUserData.name,
+          email: oldUserData.email,
+          telp_number: oldUserData.telp_number,
+          pid: oldUserData.pid,
+          company_name: oldUserData.company_name,
+          role_uid: oldUserData?.role?.uid,
+          position_uid: oldUserData?.position?.uid,
+          reff_uid: oldUserData?.refrence_user?.uid,
+          secondary_team_uid: oldUserData?.secondary_team?.uid,
+          primary_team_uid: oldUserData?.primary_team?.uid
+        });
       })
       .catch((err) => {
         console.error("gagal memuat data", err);
@@ -46,14 +57,58 @@ const EditUser = ({
       handleOpenEditModal(uid);
     }
   }, [visible, uid]);
+  // console.log(editUser);
 
-  const [role, setRoles] = useState(formData?.role?.name);
-  console.log(formData);
   const handleChange = (e) => {
-    const newValue = e.target.value;
-    setFormData(newValue);
+    const { name, value } = e.target;
+    setEditUser({
+      ...editUser,
+      [name]: value,
+    });
   };
-  // console.log(formData);
+
+  const handleUpdateUser = async (e) => {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append("name", editUser.name);
+    formData.append("email", editUser.email);
+    formData.append("telp_number", editUser.telp_number);
+    formData.append("pid", editUser.pid);
+    formData.append("company_name", editUser.company_name || "");
+    formData.append("role_uid", editUser.role_uid || "");
+    formData.append("primary_team_uid", editUser.primary_team_uid || "");
+    formData.append("secondary_team_uid", editUser.secondary_team_uid || "");
+    formData.append("position_uid", editUser.position_uid || "");
+    formData.append("reff_uid", editUser.reff_uid || "");
+    formData.append("_method", "put");
+    try {
+      const updateUser = await axios.post(
+        `${process.env.REACT_APP_BACKEND_URL}/users/${uid}`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      Swal.fire({
+        title: updateUser.data.message,
+        text: "updated successfully",
+        icon: "success",
+      });
+      window.location.reload();
+      onClose();
+    } catch (err) {
+      if (err.response) {
+        Swal.fire({
+          text: err.response.data.message,
+          icon: "warning",
+        });
+      } else {
+        Swal.fire({ text: err.response.data.message, icon: "error" });
+      }
+    }
+  };
   return (
     <>
       <Modal show={visible} onHide={onClose} size="lg" centered>
@@ -61,7 +116,7 @@ const EditUser = ({
           <Modal.Title>Edit User</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
+          <form onSubmit={handleUpdateUser}>
             <Row>
               <Form.Group className="mb-3 col-6">
                 <Form.Label>
@@ -70,7 +125,8 @@ const EditUser = ({
                 <Form.Control
                   type="text"
                   placeholder="input name"
-                  value={formData.name}
+                  name="name"
+                  value={editUser.name}
                   onChange={handleChange}
                   required
                 />
@@ -82,7 +138,8 @@ const EditUser = ({
                 <Form.Control
                   type="email"
                   placeholder="input email"
-                  value={formData.email}
+                  name="email"
+                  value={editUser.email}
                   onChange={handleChange}
                   required
                 />
@@ -96,7 +153,8 @@ const EditUser = ({
                 <Form.Control
                   type="number"
                   placeholder="input no.telp"
-                  value={formData.telp_number}
+                  name="telp_number"
+                  value={editUser.telp_number}
                   onChange={handleChange}
                   required
                 />
@@ -106,7 +164,8 @@ const EditUser = ({
                 <Form.Control
                   type="number"
                   placeholder="input pid"
-                  value={formData.pid}
+                  name="pid"
+                  value={editUser.pid}
                   onChange={handleChange}
                 />
               </Form.Group>
@@ -116,18 +175,10 @@ const EditUser = ({
               <Form.Control
                 type="text"
                 placeholder="input company name"
-                value={formData.company_name}
+                value={editUser.company_name}
+                name="company_name"
                 onChange={handleChange}
               />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Image</Form.Label>
-              <Form.Control
-                type="file"
-                placeholder="input company name"
-                accept="image/*"
-              />
-              <Form.Text className="text-muted">Input Photo person</Form.Text>
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>
@@ -136,10 +187,13 @@ const EditUser = ({
               <select
                 name="role_uid"
                 className="form-select"
-                value={role || formData?.role?.name}
+                value={editUser.role_uid}
                 onChange={(e) => {
                   const selectRoleName = e.target.value;
-                  setRoles(selectRoleName);
+                  setEditUser({
+                    ...editUser,
+                    role_uid: selectRoleName,
+                  });
                 }}
               >
                 {roles.map((role) => (
@@ -156,10 +210,13 @@ const EditUser = ({
               <select
                 name="position_uid"
                 className="form-select"
-                value={position || formData?.role?.name}
+                value={editUser.position_uid}
                 onChange={(e) => {
-                  const selectRoleName = e.target.value;
-                  setRoles(selectRoleName);
+                  const positionUid = e.target.value;
+                  setEditUser({
+                    ...editUser,
+                    position_uid: positionUid,
+                  });
                 }}
               >
                 {position.map((role) => (
@@ -176,10 +233,16 @@ const EditUser = ({
                   <select
                     name="primary_team_uid"
                     className="form-select"
-                    value={formData?.primary_team?.name}
+                    value={editUser.primary_team_uid}
+                    onChange={(e) => {
+                      const priUid = e.target.value;
+                      setEditUser({
+                        ...editUser,
+                        primary_team_uid: priUid,
+                      });
+                    }}
                   >
                     <option value="">Select choose</option>
-                    <option value="">None</option>
                     {primary.map((pri) => (
                       <option key={pri.uid} value={pri.uid}>
                         {pri.name}
@@ -192,10 +255,16 @@ const EditUser = ({
                   <select
                     name="secondary_team_uid"
                     className="form-select"
-                    value={formData?.primary_team?.name}
+                    value={editUser.secondary_team_uid}
+                    onChange={(e) => {
+                      const SeUid = e.target.value;
+                      setEditUser({
+                        ...editUser,
+                        secondary_team_uid: SeUid,
+                      });
+                    }}
                   >
                     <option value="">Select choose</option>
-                    <option value="">None</option>
                     {primary.map((pri) => (
                       <option key={pri.uid} value={pri.uid}>
                         {pri.name}
@@ -207,9 +276,16 @@ const EditUser = ({
               <Form.Group className="mb-3">
                 <Form.Label>Reff User</Form.Label>
                 <select
-                  name="refrence_user_uid"
+                  name="reff_uid"
                   className="form-select"
-                  value={formData?.refrence_user?.name}
+                  value={editUser.reff_uid}
+                  onChange={(e) => {
+                    const ReUid = e.target.value;
+                    setEditUser({
+                      ...editUser,
+                      reff_uid: ReUid,
+                    });
+                  }}
                 >
                   <option value="">Select Chose</option>
                   {refUsers.map((rf) => (
@@ -220,16 +296,15 @@ const EditUser = ({
                 </select>
               </Form.Group>
             </Form.Group>
-          </Form>
+            <Button variant="secondary" onClick={onClose} className="ms-2">
+              Close
+            </Button>
+            <Button variant="primary" type="submit" className="ms-3">
+              Save Changes
+            </Button>
+          </form>
         </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={onClose}>
-            Close
-          </Button>
-          <Button variant="primary" onClick={onClose}>
-            Save Changes
-          </Button>
-        </Modal.Footer>
+        <Modal.Footer></Modal.Footer>
       </Modal>
     </>
   );

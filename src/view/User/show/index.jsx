@@ -29,7 +29,8 @@ const ShowUser = () => {
         },
       })
       .then((response) => {
-        setUserDetail(response.data.data);
+        // console.log(response?.data?.data);
+        state(response?.data?.data);
       })
       .catch((error) => {
         if (error.response.data.message === "Unauthenticated.") {
@@ -88,7 +89,7 @@ const ShowUser = () => {
     getAllDataRole(tokenAuth);
     getAllPrimaryTeam(tokenAuth);
     getAllUsers(tokenAuth);
-    getDataUserDetail(uid, userDetail, tokenAuth);
+    getDataUserDetail(uid, setUserDetail, tokenAuth);
   }, [uid, tokenAuth]);
 
   // console.log(userDetail);
@@ -170,7 +171,7 @@ const ShowUser = () => {
                     </li>
                   </ul>
                   <div className="tab-content pt-2">
-                    <Profil userDetail={userDetail} />
+                    <Profil detail={userDetail} />
                     <EditProfil
                       roles={roles}
                       position={position}

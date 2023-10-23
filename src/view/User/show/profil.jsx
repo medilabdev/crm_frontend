@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Col, Row, Card } from "react-bootstrap";
-const Profil = ({userDetail}) => {
+const Profil = ({ detail }) => {
+  console.log(detail);
   return (
     <div
       className="tab-pane fade show active profile-overview"
@@ -14,7 +15,7 @@ const Profil = ({userDetail}) => {
           Name
         </Col>
         <Col lg={9} md={8}>
-          {userDetail.name}
+          {detail?.name}
         </Col>
       </Row>
       <Row className="ms-2">
@@ -22,7 +23,7 @@ const Profil = ({userDetail}) => {
           Email
         </Col>
         <Col lg={9} md={8}>
-          {userDetail.email}
+          {detail.email}
         </Col>
       </Row>
       <Row className="ms-2">
@@ -30,7 +31,7 @@ const Profil = ({userDetail}) => {
           No.Telp
         </Col>
         <Col lg={9} md={8}>
-          {userDetail.telp_number}
+          {detail.telp_number}
         </Col>
       </Row>
       <Row className="ms-2">
@@ -38,7 +39,7 @@ const Profil = ({userDetail}) => {
           Company Name
         </Col>
         <Col lg={9} md={8}>
-          {userDetail.company_name ? userDetail.company_name : "-"}
+          {detail.company_name ? detail.company_name : "-"}
         </Col>
       </Row>
       <Row className="ms-2">
@@ -46,7 +47,7 @@ const Profil = ({userDetail}) => {
           Role
         </Col>
         <Col lg={9} md={8}>
-         {userDetail?.role?.name}
+          {detail?.role?.name}
         </Col>
       </Row>
       <Row className="ms-2">
@@ -54,7 +55,7 @@ const Profil = ({userDetail}) => {
           Primary Team
         </Col>
         <Col lg={9} md={8}>
-         {userDetail?.primary_team?.name}
+          {detail?.primary_team?.name ? detail?.primary_team?.name : "-"}
         </Col>
       </Row>
       <Row className="ms-2">
@@ -62,7 +63,7 @@ const Profil = ({userDetail}) => {
           Secondary Team
         </Col>
         <Col lg={9} md={8}>
-          {userDetail.secondary_team ? userDetail.secondary_team : "-"}
+          {detail?.secondary_team?.name ? detail?.secondary_team?.name : "-"}
         </Col>
       </Row>
       <Row className="ms-2">
@@ -70,7 +71,7 @@ const Profil = ({userDetail}) => {
           Position
         </Col>
         <Col lg={9} md={8}>
-        {userDetail?.position?.name}
+          {detail?.position?.name}
         </Col>
       </Row>
     </div>

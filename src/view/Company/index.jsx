@@ -6,7 +6,10 @@ import { OverlayTrigger, Tooltip } from "react-bootstrap";
 import Card from "../../components/Card";
 import Footer from "../../components/Template/Footer";
 import DataTable from "react-data-table-component";
-
+import Dummy from "./Dummy/index";
+import IconCompany from "../../assets/img/office-building.png";
+import { useNavigate } from "react-router-dom";
+import "../Company/style.css";
 const Company = () => {
   const [isSideBar, setIsSideBar] = useState(false);
   const toggleSideBarCard = () => {
@@ -21,10 +24,88 @@ const Company = () => {
   );
   const iconFilter = isSideBar ? "bi bi-x-lg" : "bi bi-funnel";
   //   console.log(isSideBar);
+  const navigate = useNavigate();
+
+  const [search, setSearch] = useState(Dummy);
+  function handleSearch(e) {
+    const newData = Dummy.filter((row) => {
+      return row.name.toLowerCase().includes(e.target.value.toLowerCase());
+    });
+    setSearch(newData);
+  }
+
+  const paginationComponentOptions = {
+    selectAllRowsItem: true,
+    selectAllRowsItemText: "ALL",
+  };
 
   const columns = [
     {
+      id: 1,
       name: "Company Name",
+      selector: (row) => (
+        <div className="image-name">
+          <div className="d-flex align-items-center">
+            <img src={IconCompany} className="rounded-circle" />
+            <div className="mt-1">
+              <span className="fw-semibold">{row.name}</span>
+            </div>
+          </div>
+        </div>
+      ),
+      left: true,
+      width: "200px",
+      sortable: true,
+    },
+    {
+      id: 2,
+      name: "Associated with",
+      sortable: true,
+    },
+    {
+      id: 3,
+      name: "Type",
+      selector: (row) => row.company_type_uid,
+      sortable: true,
+    },
+    {
+      id: 4,
+      name: "Owner/Created",
+      selector: (row) => (
+        <div className="mt-2">
+          <span className="fw-semibold">{row.owner_user_uid}</span> -{" "}
+          <p className="mt-1">{row.created_at}</p>
+        </div>
+      ),
+      sortable: true,
+    },
+    {
+      id: 5,
+      name: "Updated",
+      selector: (row) => row.updated_at,
+      sortable: true,
+    },
+    {
+      id: 6,
+      name: "Action",
+      selector: (row) => (
+        <div className="action-icon">
+          <button
+            title="show"
+            className="icon-button"
+            onClick={() => navigate(`/company/${row.uid}`)}
+          >
+            <i className="bi bi-building-fill"></i>
+          </button>
+          <button className="ms-2 icon-button" title="edit" onClick="">
+            <i className="bi bi-pen"></i>
+          </button>
+          <button className="ms-2 icon-button" title="delete" onClick="">
+            <i className="bi bi-trash-fill"></i>
+          </button>
+        </div>
+      ),
+      width: "150px",
     },
   ];
   return (
@@ -66,12 +147,12 @@ const Company = () => {
                   </button>
                   <ul class="dropdown-menu">
                     <li>
-                      <a class="dropdown-item" href="#">
+                      <a class="dropdown-item" href="/company/single-company">
                         Single Company
                       </a>
                     </li>
                     <li>
-                      <a class="dropdown-item" href="#">
+                      <a class="dropdown-item" href="/company/upload-file">
                         Upload File
                       </a>
                     </li>
@@ -371,12 +452,20 @@ const Company = () => {
                       <input
                         type="text"
                         className="form-control"
+                        onChange={handleSearch}
                         placeholder="search company"
                         style={{ fontSize: "0.85rem" }}
                       />
                     </div>
                   </div>
-                  <DataTable pagination selectableRows />
+                  <DataTable
+                    columns={columns}
+                    data={search}
+                    defaultSortFieldId={1}
+                    pagination
+                    paginationComponentOptions={paginationComponentOptions}
+                    selectableRows
+                  />
                 </div>
               </div>
             </Card>
