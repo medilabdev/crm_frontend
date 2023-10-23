@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { Col, Row, Card } from "react-bootstrap";
-const Profil = () => {
+const Profil = ({ detail }) => {
+  console.log(detail);
   return (
     <div
       className="tab-pane fade show active profile-overview"
@@ -14,7 +15,7 @@ const Profil = () => {
           Name
         </Col>
         <Col lg={9} md={8}>
-          Joko Prasetio
+          {detail?.name}
         </Col>
       </Row>
       <Row className="ms-2">
@@ -22,7 +23,7 @@ const Profil = () => {
           Email
         </Col>
         <Col lg={9} md={8}>
-          jokoprasetio12@gmail.com
+          {detail.email}
         </Col>
       </Row>
       <Row className="ms-2">
@@ -30,7 +31,7 @@ const Profil = () => {
           No.Telp
         </Col>
         <Col lg={9} md={8}>
-          028394721839
+          {detail.telp_number}
         </Col>
       </Row>
       <Row className="ms-2">
@@ -38,7 +39,7 @@ const Profil = () => {
           Company Name
         </Col>
         <Col lg={9} md={8}>
-          PT.Prima Indo Medilab
+          {detail.company_name ? detail.company_name : "-"}
         </Col>
       </Row>
       <Row className="ms-2">
@@ -46,7 +47,7 @@ const Profil = () => {
           Role
         </Col>
         <Col lg={9} md={8}>
-          Supervisor Sales
+          {detail?.role?.name}
         </Col>
       </Row>
       <Row className="ms-2">
@@ -54,7 +55,7 @@ const Profil = () => {
           Primary Team
         </Col>
         <Col lg={9} md={8}>
-          Team 1
+          {detail?.primary_team?.name ? detail?.primary_team?.name : "-"}
         </Col>
       </Row>
       <Row className="ms-2">
@@ -62,7 +63,7 @@ const Profil = () => {
           Secondary Team
         </Col>
         <Col lg={9} md={8}>
-          Team 2
+          {detail?.secondary_team?.name ? detail?.secondary_team?.name : "-"}
         </Col>
       </Row>
       <Row className="ms-2">
@@ -70,7 +71,7 @@ const Profil = () => {
           Position
         </Col>
         <Col lg={9} md={8}>
-          Admin
+          {detail?.position?.name}
         </Col>
       </Row>
     </div>

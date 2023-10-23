@@ -33,7 +33,11 @@ const Auth = () => {
           text: "You clicked the button",
           icon: "success",
         });
+        const name = response.data.data.name;
+        const image = response.data.data.image;
         localStorage.setItem("token", response.data.data.token);
+        localStorage.setItem("name", name);
+        localStorage.setItem("image", image);
         navigate("/");
       } else {
         Swal.fire({

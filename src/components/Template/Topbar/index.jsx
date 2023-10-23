@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from "react";
 import Image from "../../../../src/assets/img/LOGO_MEDIALYS_ICON.png";
-import IconImage from "../../../../src/assets/img/messages-1.jpg";
+import IconImage from "../../../../src/assets/img/man.png";
 import "./style.css";
+import axios from "axios";
+import Swal from "sweetalert2";
+import { useNavigate } from "react-router-dom";
 
 function Topbar() {
   const [isSidebarToggled, setSidebarToggled] = useState(false);
-
+  const navigate = useNavigate();
+  const [name, setName] = useState(localStorage.getItem("name"));
+  const [image, setImage] = useState(localStorage.getItem("image"));
   useEffect(() => {
     // Sidebar toggle
     const toggleSidebarBtn = document.querySelector(".toggle-sidebar-btn");
@@ -32,6 +37,26 @@ function Topbar() {
       }
     };
   }, [isSidebarToggled]);
+
+  const token = localStorage.getItem("token");
+  const Logout = () => {
+    axios
+      .post(`${process.env.REACT_APP_BACKEND_URL}/users/logout`, null, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response) => {
+        localStorage.clear();
+        Swal.fire({
+          title: "Logout Berhasil",
+          text: response.data.message,
+          icon: "success",
+        });
+        navigate("/login");
+      })
+      .catch((error) => console.error(error));
+  };
 
   // console.log(isSidebarToggled);
   return (
@@ -180,15 +205,20 @@ function Topbar() {
               href="#"
               data-bs-toggle="dropdown"
             >
-              <img src={IconImage} alt="Profile" className="rounded-circle" />
+              <img
+                src={IconImage}
+                alt="Profile"
+                className="rounded-circle"
+                style={{ width: "38px", height: "50px" }}
+              />
               <span className="d-none d-md-block dropdown-toggle ps-2">
-                K. Anderson
+                {name}
               </span>
             </a>
             {/* End Profile Iamge Icon */}
             <ul className="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
               <li className="dropdown-header">
-                <h6>Kevin Anderson</h6>
+                <h6>{name}</h6>
                 <span>Web Designer</span>
               </li>
               <li>
@@ -231,10 +261,18 @@ function Topbar() {
                 <hr className="dropdown-divider" />
               </li>
               <li>
-                <a className="dropdown-item d-flex align-items-center" href="#">
+                <button
+                  className="dropdown-item d-flex align-items-center"
+                  style={{
+                    cursor: "pointer",
+                  }}
+                  onClick={() => {
+                    Logout();
+                  }}
+                >
                   <i className="bi bi-box-arrow-right" />
                   <span>Sign Out</span>
-                </a>
+                </button>
               </li>
             </ul>
             {/* End Profile Dropdown Items */}

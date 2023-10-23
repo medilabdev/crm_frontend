@@ -1,0 +1,21 @@
+export default [
+  {
+    id: 1,
+    uid: "safaga123",
+    name: "PT. Jodev",
+    webiste_url: "jodev.com",
+    telp_number: "08291232",
+    address: "jl. kutilang",
+    map_address: "lubuklinggau",
+    city: "lubuklinggau",
+    postal_code: "123124",
+    number_of_employee: "12",
+    number_of_patien: "12",
+    owner_user_uid: "joko",
+    company_type_uid: "12312",
+    company_source_uid: "123",
+    contact_uid: "123",
+    created_at: "12-10-2023",
+    updated_at: "12-11-2023",
+  },
+];

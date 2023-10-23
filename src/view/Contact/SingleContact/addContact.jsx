@@ -30,9 +30,9 @@ const AddContact = () => {
           <i class="bi bi-person-circle fs-4"></i>
           <span className="ms-2 fs-5 fw-bold mt-5">Contact</span>
         </h5>
+        {/* <form action="" method="post"> */}
       </Card.Header>
       <Card.Body>
-        <form action="" method="post">
           <FloatingLabel
             controlId="floatingInput"
             label="Name"
@@ -152,7 +152,7 @@ const AddContact = () => {
           >
             <Form.Control type="text" name="remarks" placeholder="@gmail" />
           </FloatingLabel>
-        </form>
+        {/* </form> */}
       </Card.Body>
     </Card>
   );

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Topbar from "../../../components/Template/Topbar";
 import Sidebar from "../../../components/Template/Sidebar";
 import Main from "../../../components/Template/Main";
@@ -9,8 +9,90 @@ import Footer from "../../../components/Template/Footer";
 import Profil from "./profil";
 import EditProfil from "./editProfil";
 import ChangePassword from "./changePassword";
+import axios from "axios";
+import { useNavigate, useParams } from "react-router-dom";
 
 const ShowUser = () => {
+  const { uid } = useParams();
+  const [userDetail, setUserDetail] = useState({});
+  const tokenAuth = localStorage.getItem("token");
+  const [roles, setRoles] = useState([]);
+  const [position, setPosition] = useState([{}]);
+  const [primaryTeam, setPrimaryTeam] = useState([]);
+  const [users, setUsers] = useState([]);
+
+  const getDataUserDetail = (uid, state, token) => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/users/${uid}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response) => {
+        // console.log(response?.data?.data);
+        state(response?.data?.data);
+      })
+      .catch((error) => {
+        if (error.response.data.message === "Unauthenticated.") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
+
+  // get all data roles
+  const getAllDataRole = (token) => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/roles`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response) => setRoles(response.data.data));
+  };
+
+  // get all data position
+  const getAllPosition = (token) => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/positions`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response) => setPosition(response.data.data));
+  };
+
+  // get all data primary team
+  const getAllPrimaryTeam = (token) => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/teams`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response) => setPrimaryTeam(response.data.data));
+  };
+
+  // get all user
+  const getAllUsers = (token) => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response) => setUsers(response.data.data));
+  };
+
+  useEffect(() => {
+    getAllPosition(tokenAuth);
+    getAllDataRole(tokenAuth);
+    getAllPrimaryTeam(tokenAuth);
+    getAllUsers(tokenAuth);
+    getDataUserDetail(uid, setUserDetail, tokenAuth);
+  }, [uid, tokenAuth]);
+
+  // console.log(userDetail);
   return (
     <body id="body">
       <Topbar />
@@ -42,12 +124,16 @@ const ShowUser = () => {
                 <Card.Body className="profile-card pt-4 d-flex flex-column align-items-center">
                   <img
                     // src=
-                    src={IconImage}
-                    alt=""
+                    src={userDetail.image ? userDetail.image : IconImage}
+                    alt={userDetail.image}
                     className="rounded-circle img-icon"
+                    style={{
+                      width: "26rem",
+                      height: "8.9rem",
+                    }}
                   />
-                  <h2>Joko</h2>
-                  <h6 className="mt-2 mb-2">Sales</h6>
+                  <h2>{userDetail?.name}</h2>
+                  <h6 className="mt-2 mb-2">{userDetail?.position?.name}</h6>
                 </Card.Body>
               </Card>
             </Col>
@@ -85,8 +171,13 @@ const ShowUser = () => {
                     </li>
                   </ul>
                   <div className="tab-content pt-2">
-                    <Profil />
-                    <EditProfil />
+                    <Profil detail={userDetail} />
+                    <EditProfil
+                      roles={roles}
+                      position={position}
+                      primaryTeam={primaryTeam}
+                      users={users}
+                    />
                     <ChangePassword />
                   </div>
                 </Card.Body>
