@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Topbar from "../../components/Template/Topbar";
 import Sidebar from "../../components/Template/Sidebar";
 import Main from "../../components/Template/Main";
@@ -7,10 +7,15 @@ import Card from "../../components/Card";
 import Footer from "../../components/Template/Footer";
 import DataTable from "react-data-table-component";
 import Dummy from "./Dummy/index";
-import IconCompany from "../../assets/img/office-building.png";
+import IconCompany from "../../assets/img/condo.png";
 import { useNavigate } from "react-router-dom";
 import "../Company/style.css";
+import DeleteCompany from "./Modals/deleteCompany";
+import iconGedung from "../../../src/assets/img/office.png";
+import axios from "axios";
 const Company = () => {
+  const [allCompany, setAllCompany] = useState([]);
+  const token = localStorage.getItem("token");
   const [isSideBar, setIsSideBar] = useState(false);
   const toggleSideBarCard = () => {
     setIsSideBar(!isSideBar);
@@ -26,9 +31,9 @@ const Company = () => {
   //   console.log(isSideBar);
   const navigate = useNavigate();
 
-  const [search, setSearch] = useState(Dummy);
+  const [search, setSearch] = useState(allCompany);
   function handleSearch(e) {
-    const newData = Dummy.filter((row) => {
+    const newData = allCompany.filter((row) => {
       return row.name.toLowerCase().includes(e.target.value.toLowerCase());
     });
     setSearch(newData);
@@ -39,6 +44,25 @@ const Company = () => {
     selectAllRowsItemText: "ALL",
   };
 
+  const [deleteCompany, setDeleteCompany] = useState(false);
+  const handleDeleteCompany = () => setDeleteCompany(false);
+
+  const getAllCompany = () => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/companies`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => {
+        setAllCompany(res.data.data);
+        setSearch(res.data.data);
+      });
+  };
+  console.log(allCompany);
+  useEffect(() => {
+    getAllCompany(token);
+  }, [token]);
   const columns = [
     {
       id: 1,
@@ -46,7 +70,7 @@ const Company = () => {
       selector: (row) => (
         <div className="image-name">
           <div className="d-flex align-items-center">
-            <img src={IconCompany} className="rounded-circle" />
+            <img src={IconCompany} style={{ width: "20px" }} />
             <div className="mt-1">
               <span className="fw-semibold">{row.name}</span>
             </div>
@@ -60,30 +84,91 @@ const Company = () => {
     {
       id: 2,
       name: "Associated with",
+      selector: (row) => (
+        <div>
+          {row?.associate?.map((item, index) => (
+            <OverlayTrigger
+              placement="top"
+              overlay={
+                <Tooltip
+                  id={`tooltip-${item?.contact?.name}- ${item?.contact?.phone?.[0]?.number}`}
+                >
+                  {item?.contact?.name}
+                  <br />
+                  {item?.contact?.phone?.[0]?.number}
+                </Tooltip>
+              }
+            >
+              <div>
+                {item?.contact ? (
+                  <img
+                    src={iconGedung}
+                    style={{ width: "20px" }}
+                    data-tip={item?.contact?.name}
+                  />
+                ) : null}
+              </div>
+            </OverlayTrigger>
+          ))}
+        </div>
+      ),
       sortable: true,
+      width: "130px",
     },
     {
       id: 3,
       name: "Type",
-      selector: (row) => row.company_type_uid,
+      selector: (row) => (
+        <div className="badge bg-secondary">{row?.company_type?.name}</div>
+      ),
       sortable: true,
     },
     {
       id: 4,
       name: "Owner/Created",
-      selector: (row) => (
-        <div className="mt-2">
-          <span className="fw-semibold">{row.owner_user_uid}</span> -{" "}
-          <p className="mt-1">{row.created_at}</p>
-        </div>
-      ),
+      selector: (row) => {
+        const date = new Date(row.created_at);
+        const formatOptions = {
+          year: "numeric",
+          month: "long",
+          day: "2-digit",
+        };
+        const formate = new Intl.DateTimeFormat("en-US", formatOptions);
+        const time = formate.format(date);
+        return (
+          <div className="mt-2">
+            <span className="fw-semibold">{row?.owner?.name}</span>
+            <p className="mt-1" style={{ fontSize: "10px" }}>
+              {time}
+            </p>
+          </div>
+        );
+      },
       sortable: true,
+      width: "140px",
     },
     {
       id: 5,
       name: "Updated",
-      selector: (row) => row.updated_at,
+      selector: (row) => {
+        const date = new Date(row.updated_at);
+        const formatOptions = {
+          year: "numeric",
+          month: "long",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+        };
+        const formatResult = new Intl.DateTimeFormat("en-US", formatOptions);
+        const time = formatResult.format(date);
+        return (
+          <p className="mt-2" style={{ fontSize: "11px" }}>
+            {time}
+          </p>
+        );
+      },
       sortable: true,
+      width: "180px",
     },
     {
       id: 6,
@@ -100,7 +185,11 @@ const Company = () => {
           <button className="ms-2 icon-button" title="edit" onClick="">
             <i className="bi bi-pen"></i>
           </button>
-          <button className="ms-2 icon-button" title="delete" onClick="">
+          <button
+            className="ms-2 icon-button"
+            title="delete"
+            onClick={() => setDeleteCompany(row.uid)}
+          >
             <i className="bi bi-trash-fill"></i>
           </button>
         </div>
@@ -108,6 +197,7 @@ const Company = () => {
       width: "150px",
     },
   ];
+
   return (
     <>
       <body id="body">
@@ -190,7 +280,10 @@ const Company = () => {
                     </li>
                   </ul>
                 </div>
-                <a href="#" class="btn btn-outline-primary ms-2 bulk-change">
+                <a
+                  href="/company/bulkchange"
+                  class="btn btn-outline-primary ms-2 bulk-change"
+                >
                   Bulk Change
                 </a>
                 <button class="btn btn-danger ms-2 delete">Delete</button>
@@ -468,6 +561,11 @@ const Company = () => {
                   />
                 </div>
               </div>
+              <DeleteCompany
+                onClose={handleDeleteCompany}
+                visible={deleteCompany !== false}
+                uid={deleteCompany}
+              />
             </Card>
           </div>
           <Footer />

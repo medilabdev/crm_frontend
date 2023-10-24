@@ -34,9 +34,7 @@ const BulkChange = () => {
             <Card.Body>
               <form>
                 <Form.Group className="mb-3 col-9">
-                  <Form.Label className="fw-bold">
-                    Selected Companies
-                  </Form.Label>
+                  <Form.Label className="fw-bold">Selected Contacts</Form.Label>
                   <Form.Select>
                     <option value="">Select Choose</option>
                     <option value="">1</option>

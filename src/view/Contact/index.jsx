@@ -9,6 +9,8 @@ import Card from "../../components/Card";
 import IconImage from "../../assets/img/person.png";
 import "../Contact/style.css";
 import { Row, Col, OverlayTrigger, Tooltip } from "react-bootstrap";
+import DeleteContact from "./Modals/deleteContact";
+import axios from "axios";
 
 const Contact = () => {
   const [isSidebarToggleCard, setSidebarToggled] = useState(false);
@@ -30,6 +32,38 @@ const Contact = () => {
   ) : (
     <Tooltip id="tooltip">Show Filter</Tooltip>
   );
+
+  const [deleteContact, setDeleteContact] = useState(false);
+  const handleDeleteContact = () => setDeleteContact(false);
+  // console.log(deleteContact);
+  const [contact, setContact] = useState([]);
+  const [search, setSearch] = useState(contact);
+
+  const TokenAuth = localStorage.getItem("token");
+
+  const getContactAll = (url, token, state) => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/${url}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => {
+        state(res.data.data);
+        setSearch(res.data.data);
+      })
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated.") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
+
+  console.log(contact);
+  useEffect(() => {
+    getContactAll("contacts", TokenAuth, setContact);
+  }, [TokenAuth]);
 
   const columns = [
     {
@@ -53,22 +87,43 @@ const Contact = () => {
         </div>
       ),
       left: true,
-      width: "200px",
+      width: "150px",
     },
     {
       name: "Contact Info",
-      selector: (row) => row.contact,
+      selector: (row) => row?.phone?.[0]?.number,
       sortable: true,
     },
     {
-      name: "Created/Updated",
-      selector: (row) => (
-        <div>
-          <span className="fw-normal">{row.created_at}</span>
-          <p className="fw-normal">{row.updated_at}</p>
-        </div>
-      ),
+      name: "Associated With",
       sortable: true,
+      width: "150px",
+    },
+    {
+      name: "Created/Updated",
+      selector: (row) => {
+        const createdAt = new Date(row.created_at);
+        const updatedAt = new Date(row.updated_at);
+        const formatOptions = {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+        };
+        const formatter = new Intl.DateTimeFormat("en-US", formatOptions);
+        const createdDateTime = formatter.format(createdAt);
+        const updatedDateTime = formatter.format(updatedAt);
+
+        return (
+          <div className="mt-2">
+            <p className="mt-1">{createdDateTime}</p>
+            <p style={{ marginTop: "-12px" }}>{updatedDateTime}</p>
+          </div>
+        );
+      },
+      sortable: true,
+      width: "150px",
     },
     {
       name: "Owner",
@@ -87,6 +142,7 @@ const Contact = () => {
         </OverlayTrigger>
       ),
       sortable: true,
+      center: true,
     },
     {
       name: "Action",
@@ -99,7 +155,11 @@ const Contact = () => {
           >
             <i className="bi bi-pen edit"></i>
           </button>
-          <button className="ms-2 icon-button" title="delete">
+          <button
+            className="ms-2 icon-button"
+            title="delete"
+            onClick={() => setDeleteContact(row.uid)}
+          >
             <i className="bi bi-trash-fill danger"></i>
           </button>
         </div>
@@ -107,13 +167,13 @@ const Contact = () => {
       width: "150px",
     },
   ];
+  // console.log(contact);
 
-  const [records, setRecords] = useState(dumyData);
   function handleFilter(event) {
-    const newData = dumyData.filter((row) => {
+    const newData = contact.filter((row) => {
       return row.name.toLowerCase().includes(event.target.value.toLowerCase());
     });
-    setRecords(newData);
+    setSearch(newData);
   }
   const paginationComponentOptions = {
     selectAllRowsItem: true,
@@ -453,7 +513,7 @@ const Contact = () => {
                 </div>
                 <DataTable
                   columns={columns}
-                  data={records}
+                  data={search}
                   defaultSortFieldId={1}
                   pagination
                   paginationComponentOptions={paginationComponentOptions}
@@ -461,6 +521,11 @@ const Contact = () => {
                 />
               </div>
             </div>
+            <DeleteContact
+              onClose={handleDeleteContact}
+              visible={deleteContact !== false}
+              uid={deleteContact}
+            />
           </Card>
           <Footer />
         </div>

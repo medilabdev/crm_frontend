@@ -77,7 +77,7 @@ const AddUser = ({ visible, onClose, roles, primary, refUsers, position }) => {
       window.location.reload();
       // if(addUser.data.message )
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       if (error.response) {
         Swal.fire({
           text: error.response.data.message,
@@ -229,7 +229,7 @@ const AddUser = ({ visible, onClose, roles, primary, refUsers, position }) => {
                 value={inputUser.role_uid}
                 onChange={handleChange}
               >
-                <option value="">Select Chose</option>
+                <option value="">Select Choose</option>
                 {roles.map((role) => (
                   <option key={role.uid} value={role.uid}>
                     {role.name}

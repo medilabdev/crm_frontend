@@ -18,6 +18,9 @@ import BulkChange from "../view/Contact/BulkChange";
 import Company from "../view/Company";
 import SingleCompany from "../view/Company/SingleCompany";
 import FileUploadCompany from "../view/Company/FileUpload";
+import BulkChangeCompany from "../view/Company/BulkChange";
+import Products from "../view/Products";
+import Documents from "../view/Documents";
 const Login = ({ children }) => {
   const token = localStorage.getItem("token");
   if (!token) {
@@ -109,6 +112,33 @@ function Router() {
           element={
             <Login>
               <FileUploadCompany />
+            </Login>
+          }
+        />
+
+        <Route
+          path="/company/bulkchange"
+          element={
+            <Login>
+              <BulkChangeCompany />
+            </Login>
+          }
+        />
+
+        <Route
+          path="/products"
+          element={
+            <Login>
+              <Products />
+            </Login>
+          }
+        />
+
+        <Route
+          path="/documents"
+          element={
+            <Login>
+              <Documents />
             </Login>
           }
         />

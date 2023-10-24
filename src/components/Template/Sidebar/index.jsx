@@ -43,6 +43,24 @@ function Sidebar() {
             isActive={1}
           />
           <MenuSidebar
+            typeMenu="nonColllapse"
+            name="Products"
+            key="products"
+            url="/products"
+            icon="bi bi-archive-fill"
+            noCollapse={true}
+            isActive={1}
+          />
+          <MenuSidebar
+            typeMenu="nonCollapse"
+            name="Documents"
+            key="documents"
+            url="/documents"
+            icon="bi bi-file-earmark-text-fill"
+            noCollapse={true}
+            isActive={1}
+          />
+          <MenuSidebar
             typeMenu="nonCollapse"
             name="Users"
             key="users"

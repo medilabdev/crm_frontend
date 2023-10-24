@@ -157,7 +157,7 @@ const User = () => {
                 className="mt-1"
                 style={{
                   fontSize: "11px",
-                }}
+                }}A
               >
                 {row.email}
               </p>
