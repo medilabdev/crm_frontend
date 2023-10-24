@@ -21,6 +21,9 @@ import FileUploadCompany from "../view/Company/FileUpload";
 import BulkChangeCompany from "../view/Company/BulkChange";
 import Products from "../view/Products";
 import Documents from "../view/Documents";
+import UploadFileContact from "../view/Contact/UploadFile";
+import EditContact from "../view/Contact/Edit";
+import EditCompany from "../view/Company/Edit";
 const Login = ({ children }) => {
   const token = localStorage.getItem("token");
   if (!token) {
@@ -88,6 +91,22 @@ function Router() {
             </Login>
           }
         />
+        <Route
+          path="/contact/upload-file"
+          element={
+            <Login>
+              <UploadFileContact />
+            </Login>
+          }
+        />
+        <Route
+          path="/contact/:uid/edit"
+          element={
+            <Login>
+              <EditContact />
+            </Login>
+          }
+        />
 
         <Route
           path="/company"
@@ -121,6 +140,14 @@ function Router() {
           element={
             <Login>
               <BulkChangeCompany />
+            </Login>
+          }
+        />
+        <Route
+          path="/company/:uid/edit"
+          element={
+            <Login>
+              <EditCompany />
             </Login>
           }
         />

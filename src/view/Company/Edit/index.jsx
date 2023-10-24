@@ -2,10 +2,11 @@ import React, { useState } from "react";
 import Topbar from "../../../components/Template/Topbar";
 import Sidebar from "../../../components/Template/Sidebar";
 import Main from "../../../components/Template/Main";
-import { Col, Card, FloatingLabel, Form, Button } from "react-bootstrap";
+import Footer from "../../../components/Template/Footer";
+import { Button, Card, FloatingLabel, Form } from "react-bootstrap";
 import ReactQuill from "react-quill";
 
-const SingleCompany = () => {
+const EditCompany = () => {
   const [telephone, setTelephone] = useState([""]);
 
   const addTelephone = () => {
@@ -30,7 +31,7 @@ const SingleCompany = () => {
           <div className="row">
             <div className="col">
               <div className="pagetitle">
-                <h1>Add Single Company</h1>
+                <h1>Edit Company</h1>
                 <nav>
                   <ol className="breadcrumb mt-2">
                     <li className="breadcrumb-item">
@@ -43,16 +44,15 @@ const SingleCompany = () => {
                         Company
                       </a>
                     </li>
-                    <li className="breadcrumb-item active">
-                      Add Single Company
-                    </li>
+                    <li className="breadcrumb-item active">Edit Company</li>
                   </ol>
                 </nav>
               </div>
             </div>
           </div>
           <div className="row">
-            <Col md={4}>
+            <div className="col-md-4">
+              {/* company */}
               <Card className="shadow">
                 <Card.Header>
                   <h5 className="mt-2">
@@ -150,6 +150,7 @@ const SingleCompany = () => {
                   </FloatingLabel>
                 </Card.Body>
               </Card>
+              {/* deals */}
               <Card className="shadow mt-3">
                 <Card.Header>
                   <h5 className="mt-2">
@@ -181,6 +182,7 @@ const SingleCompany = () => {
                   </div>
                 </Card.Body>
               </Card>
+              {/* contact */}
               <Card className="shadow mt-3">
                 <Card.Header>
                   <h5 className="mt-2">
@@ -212,6 +214,7 @@ const SingleCompany = () => {
                   </div>
                 </Card.Body>
               </Card>
+              {/* parent company */}
               <Card className="shadow">
                 <Card.Header>
                   <h5 className="mt-2">
@@ -245,22 +248,23 @@ const SingleCompany = () => {
                   </div>
                 </Card.Body>
               </Card>
-            </Col>
-            <Col md={8}>
-                <Card className="shadow">
-                    <Card.Header>
-                        <h6 className="fw-bold mt-2">Notes</h6>
-                    </Card.Header>
-                    <Card.Body>
-                        <ReactQuill className="p-2" theme="snow" />
-                    </Card.Body>
-                </Card>
-            </Col>
+            </div>
+            <div className="col-md-8">
+              <Card className="shadow">
+                <Card.Header>
+                  <h6 className="fw-bold mt-2">Notes</h6>
+                </Card.Header>
+                <Card.Body>
+                  <ReactQuill className="p-2" theme="snow" />
+                </Card.Body>
+              </Card>
+            </div>
           </div>
         </div>
+        <Footer />
       </Main>
     </body>
   );
 };
 
-export default SingleCompany;
+export default EditCompany;

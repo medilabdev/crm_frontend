@@ -11,6 +11,7 @@ import "../Contact/style.css";
 import { Row, Col, OverlayTrigger, Tooltip } from "react-bootstrap";
 import DeleteContact from "./Modals/deleteContact";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const Contact = () => {
   const [isSidebarToggleCard, setSidebarToggled] = useState(false);
@@ -38,7 +39,7 @@ const Contact = () => {
   // console.log(deleteContact);
   const [contact, setContact] = useState([]);
   const [search, setSearch] = useState(contact);
-
+  const navigate = useNavigate();
   const TokenAuth = localStorage.getItem("token");
 
   const getContactAll = (url, token, state) => {
@@ -149,7 +150,7 @@ const Contact = () => {
       selector: (row) => (
         <div className="action-icon">
           <button
-            onClick={() => row.id}
+            onClick={() => navigate(`/contact/${row.uid}/edit`)}
             className="ms-2 icon-button"
             title="edit"
           >
@@ -220,7 +221,7 @@ const Contact = () => {
                     </a>
                   </li>
                   <li>
-                    <a class="dropdown-item" href="#">
+                    <a class="dropdown-item" href="/contact/upload-file">
                       Upload File
                     </a>
                   </li>

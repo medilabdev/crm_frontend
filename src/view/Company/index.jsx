@@ -182,7 +182,11 @@ const Company = () => {
           >
             <i className="bi bi-building-fill"></i>
           </button>
-          <button className="ms-2 icon-button" title="edit" onClick="">
+          <button
+            className="ms-2 icon-button"
+            title="edit"
+            onClick={() => navigate(`/company/${row.uid}/edit`)}
+          >
             <i className="bi bi-pen"></i>
           </button>
           <button

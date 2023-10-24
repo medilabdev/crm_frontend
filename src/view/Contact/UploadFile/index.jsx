@@ -2,10 +2,10 @@ import React from "react";
 import Topbar from "../../../components/Template/Topbar";
 import Sidebar from "../../../components/Template/Sidebar";
 import Main from "../../../components/Template/Main";
-import { Card } from "react-bootstrap";
 import Footer from "../../../components/Template/Footer";
+import { Card } from "react-bootstrap";
 
-const FileUploadCompany = () => {
+const UploadFileContact = () => {
   return (
     <body id="body">
       <Topbar />
@@ -15,7 +15,7 @@ const FileUploadCompany = () => {
           <div className="row">
             <div className="col">
               <div className="pagetitle">
-                <h1>Upload Multiple Companies</h1>
+                <h1>Upload Multiple Contact</h1>
                 <nav>
                   <ol className="breadcrumb mt-2">
                     <li className="breadcrumb-item">
@@ -24,8 +24,8 @@ const FileUploadCompany = () => {
                       </a>
                     </li>
                     <li className="breadcrumb-item">
-                      <a href="/company" className="text-decoration-none">
-                        Company
+                      <a href="/contact" className="text-decoration-none">
+                        Contact
                       </a>
                     </li>
                     <li className="breadcrumb-item active">Upload File</li>
@@ -40,24 +40,24 @@ const FileUploadCompany = () => {
             <div className="row">
               <div className="col-md-8">
                 <div className="mt-5 ms-5">
-                  <h6 className="fw-semibold">Add Multiple Companies</h6>
-                  <p>Save time on adding more companies</p>
+                  <h6 className="fw-semibold">Add Multiple Contact</h6>
+                  <p>Save time on adding more contact</p>
                 </div>
                 <div className="mt-1 ms-4">
                   <div className="d-flex align-items-center">
                     <p className="btn btn-primary rounded fs-6 me-4 mt-3">1</p>
                     <span>
-                      The maximum row for uploading multiple companies is 7000
-                      rows. Prepare a file of your companies using our template.
+                      The maximum row for uploading multiple contact is 7000
+                      rows. Prepare a file of your contact using our template.
                       '.csv' <span className="text-primary">csv template</span>
                     </span>
                   </div>
                   <div className="d-flex align-items-center">
                     <p className="btn btn-primary rounded fs-6 me-4 mt-3">2</p>
                     <span>
-                      Fill the companies you want based on our template and
+                      Fill the contact you want based on our template and
                       upload the file from step 1 you've filled to add multiple
-                      companies.
+                      contact.
                     </span>
                   </div>
                   <div className="d-flex align-items-center">
@@ -84,8 +84,8 @@ const FileUploadCompany = () => {
               </div>
               <div className="col-md-4">
                 <div className="mt-5 ms-3">
-                  <h6 className="fw-semibold">Add Single Company</h6>
-                  <p>Enter a company in the following form field</p>
+                  <h6 className="fw-semibold">Add Single Contact</h6>
+                  <p>Enter a contact in the following form field</p>
                 </div>
                 <a
                   href="/company/single-company"
@@ -97,11 +97,10 @@ const FileUploadCompany = () => {
             </div>
           </div>
         </Card>
-
         <Footer />
       </Main>
     </body>
   );
 };
 
-export default FileUploadCompany;
+export default UploadFileContact;
