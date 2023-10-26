@@ -1,10 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 
-const MenuSidebar = ({ type, name, key, icon, noCollapse, url, isActive }) => {
+const MenuSidebar = ({
+  type,
+  name,
+  icon,
+  url,
+  isActive,
+  dataBsTarget,
+  openSubMenu,
+  setOpenSubMenu,
+}) => {
   const location = useLocation();
   const [urlActive, setUrlActive] = useState(false);
-
   useEffect(() => {
     if (location.pathname === url) {
       setUrlActive(true);
@@ -13,6 +21,16 @@ const MenuSidebar = ({ type, name, key, icon, noCollapse, url, isActive }) => {
     }
   }, [location.pathname, url]);
 
+  const handleSubMenuClick = () => {
+    if (type === "collapse") {
+      if (openSubMenu === dataBsTarget) {
+        setOpenSubMenu(null);
+      } else {
+        setOpenSubMenu(dataBsTarget);
+      }
+    }
+  };
+  console.log(dataBsTarget);
   return (
     <>
       {type !== "collapse" ? (
@@ -22,8 +40,8 @@ const MenuSidebar = ({ type, name, key, icon, noCollapse, url, isActive }) => {
               className={`nav-link ${urlActive ? "" : "collapsed"}`}
               href={url}
             >
-              <i className={icon} style={{ fontSize: "0.85rem" }} />
-              <span style={{ fontSize: "0.85rem" }}>{name}</span>
+              <i className={icon} style={{ fontSize: "0.95rem" }} />
+              <span style={{ fontSize: "0.95rem" }}>{name}</span>
             </a>
           </li>
         </>
@@ -31,13 +49,14 @@ const MenuSidebar = ({ type, name, key, icon, noCollapse, url, isActive }) => {
         <li className="nav-item">
           <a
             className={`nav-link ${urlActive ? "" : "collapsed"}`}
-            data-bs-target="#components-nav"
+            data-bs-target={dataBsTarget}
             data-bs-toggle={type}
             href={url}
+            onClick={handleSubMenuClick}
           >
             <i
               className="bi bi-menu-button-wide"
-              style={{ fontSize: "0.85rem" }}
+              style={{ fontSize: "0.95rem" }}
             />
             <span style={{ fontSize: "0.85rem" }}>{name}</span>
             <i
@@ -46,14 +65,22 @@ const MenuSidebar = ({ type, name, key, icon, noCollapse, url, isActive }) => {
             />
           </a>
           <ul
-            id="components-nav"
-            className="nav-content collapse "
+            id="products"
+            className={`nav-content collapse ${
+              openSubMenu === dataBsTarget ? "show" : ""
+            }`}
             data-bs-parent="#sidebar-nav"
           >
             <li>
-              <a href="components-alerts.html">
+              <a href="/package-product" className="text-decoration-none">
                 <i className="bi bi-circle" />
-                <span>Alerts</span>
+                <span>Product Package</span>
+              </a>
+            </li>
+            <li>
+              <a href="/products" className="text-decoration-none">
+                <i className="bi bi-circle" />
+                <span>Single Product</span>
               </a>
             </li>
           </ul>

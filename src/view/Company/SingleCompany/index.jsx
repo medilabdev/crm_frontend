@@ -1,26 +1,244 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Topbar from "../../../components/Template/Topbar";
 import Sidebar from "../../../components/Template/Sidebar";
 import Main from "../../../components/Template/Main";
 import { Col, Card, FloatingLabel, Form, Button } from "react-bootstrap";
 import ReactQuill from "react-quill";
+import axios from "axios";
+import Select from "react-select";
+import makeAnimated from "react-select/animated";
+import OverlayAddCompany from "../../../components/Overlay/addCompany";
+import OverlayAddDeals from "../../../components/Overlay/addDeals";
+import Swal from "sweetalert2";
 
 const SingleCompany = () => {
-  const [telephone, setTelephone] = useState([""]);
+  const token = localStorage.getItem("token");
+  const [inputCompany, setInputCompany] = useState({
+    name: "",
+    website_url: "",
+    telp_number: [""],
+    address: "",
+    map_address: "",
+    city: "",
+    postal_code: "",
+    number_of_employee: "",
+    number_of_patient: "",
+    parent_company_uid: "",
+    owner_user_uid: "",
+    company_source_uid: "",
+    company_type_uid: "",
+    contact_uid: [],
+    notes: "",
+  });
+  const [ownerUser, setOwnerUser] = useState([]);
+  const [typeCompany, setTypeCompany] = useState([]);
+  const [sourceCompany, setSourceCompany] = useState([]);
+  const [parentCompany, setParentCompany] = useState([]);
+  const [contact, setContact] = useState([]);
+  const animatedComponents = makeAnimated();
+  const [showCanvas, setShowCanvas] = useState(false);
+  const handleCloseCanvas = () => setShowCanvas(false);
+  const handleShowCanvas = () => setShowCanvas(true);
 
-  const addTelephone = () => {
-    setTelephone([...telephone, ""]);
+  const [showAddDeals, setShowAddDeals] = useState(false);
+  const handleCloseDeals = () => setShowAddDeals(false);
+  const handleShowDeals = () => setShowAddDeals(true);
+
+  const getContact = () => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/contacts`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => setContact(res.data.data))
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated.") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
   };
+
+  const getCompanyParent = () => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/companies`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => setParentCompany(res.data.data))
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated.") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
+
+  const getSourceCompany = () => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/companies-source`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => setSourceCompany(res.data.data))
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated.") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
+  const getCompanyType = () => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/companies-type`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => setTypeCompany(res.data.data))
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated.") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
+
+  const getOwnerUser = () => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => setOwnerUser(res.data.data))
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated.") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
+  const addTelephone = () => {
+    setInputCompany((prevInput) => ({
+      ...prevInput,
+      telp_number: [...prevInput.telp_number, ""],
+    }));
+  };
+
   const handleChangeTelephone = (index, value) => {
-    const newTelephone = [...telephone];
-    newTelephone[index] = value;
-    setTelephone(newTelephone);
+    setInputCompany((prevInput) => {
+      const newTelpNumb = [...prevInput.telp_number];
+      newTelpNumb[index] = value;
+      return {
+        ...prevInput,
+        telp_number: newTelpNumb,
+      };
+    });
   };
   const removeTelephone = (index) => {
-    const newTelephone = [...telephone];
-    newTelephone.splice(index, 1);
-    setTelephone(newTelephone);
+    setInputCompany((prevInput) => {
+      const newTelp = [...prevInput.telp_number];
+      newTelp.splice(index, 1);
+      return {
+        ...prevInput,
+        telp_number: newTelp,
+      };
+    });
   };
+  const contactSelect = () => {
+    const result = [];
+    contact?.map((data) => {
+      const contact = {
+        value: data.uid,
+        label: data.name,
+      };
+      result.push(contact);
+    });
+    return result;
+  };
+
+  const [resultContact, setResultContact] = useState([]);
+  const handleSelectContact = (select) => {
+    setResultContact(select.map((option) => option.value));
+  };
+
+  const handleInputCompany = (e) => {
+    setInputCompany({
+      ...inputCompany,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmitContact = async (e) => {
+    e.preventDefault();
+    const formData = new FormData();
+    for (const uid of resultContact) {
+      formData.append("contact_uid[]", uid);
+    }
+    inputCompany.telp_number.forEach((number) => {
+      formData.append("telp_number[]", number);
+    });
+    formData.append("name", inputCompany.name);
+    formData.append("website_url", inputCompany.website_url);
+    formData.append("address", inputCompany.address);
+    formData.append("map_address", inputCompany.map_address);
+    formData.append("city", inputCompany.city);
+    formData.append("postal_code", inputCompany.postal_code);
+    formData.append("number_of_employee", inputCompany.number_of_employee);
+    formData.append("number_of_patient", inputCompany.number_of_patient);
+    formData.append("parent_company_uid", inputCompany.parent_company_uid);
+    formData.append("owner_user_uid", inputCompany.owner_user_uid);
+    formData.append("company_source_uid", inputCompany.company_source_uid);
+    formData.append("company_type_uid", inputCompany.company_type_uid);
+    formData.append("notes", inputCompany.notes);
+    // console.log("FormData Content:");
+    // for (const pair of formData.entries()) {
+    //   console.log(pair[0] + ": " + pair[1]);
+    // }
+
+    try {
+      const addCompany = await axios.post(
+        `${process.env.REACT_APP_BACKEND_URL}/companies`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      Swal.fire({
+        title: addCompany.data.message,
+        text: "Successfully add company",
+        icon: "success",
+      });
+      window.location.href = "/company";
+    } catch (err) {
+      if (err.response) {
+        Swal.fire({
+          text: err.response.data.message,
+          icon: "warning",
+        });
+      } else {
+        Swal.fire({
+          text: "Something went wrong !",
+          icon: "error",
+        });
+      }
+    }
+  };
+
+  console.log(inputCompany);
+  useEffect(() => {
+    getOwnerUser(token);
+    getCompanyType(token);
+    getSourceCompany(token);
+    getCompanyParent(token);
+    getContact(token);
+  }, [token]);
   return (
     <body id="body">
       <Topbar />
@@ -51,7 +269,8 @@ const SingleCompany = () => {
               </div>
             </div>
           </div>
-          <div className="row">
+
+          <form onSubmit={handleSubmitContact} className="row">
             <Col md={4}>
               <Card className="shadow">
                 <Card.Header>
@@ -61,28 +280,75 @@ const SingleCompany = () => {
                   </h5>
                 </Card.Header>
                 <Card.Body>
-                  <FloatingLabel label="Company Name" className="mb-3">
-                    <Form.Control type="text" placeholder="name@example.com" />
+                  <FloatingLabel
+                    label={
+                      <span>
+                        Company Name
+                        <span style={{ color: "red" }} className="fs-6">
+                          *
+                        </span>
+                      </span>
+                    }
+                    className="mb-3"
+                  >
+                    <Form.Control
+                      type="text"
+                      placeholder="name@example.com"
+                      name="name"
+                      onChange={handleInputCompany}
+                      required
+                    />
                   </FloatingLabel>
                   <FloatingLabel label="Website" className="mb-3">
-                    <Form.Control type="text" placeholder="name@example.com" />
+                    <Form.Control
+                      type="text"
+                      placeholder="name@example.com"
+                      name="website_url"
+                      onChange={handleInputCompany}
+                    />
                   </FloatingLabel>
                   <FloatingLabel
                     className="mb-3"
                     controlId="floatingInput"
-                    label="Owner"
+                    label={
+                      <span>
+                        Owner
+                        <span style={{ color: "red" }} className="fs-6">
+                          *
+                        </span>
+                      </span>
+                    }
                   >
-                    <Form.Control type="text" placeholder="owner@example" />
+                    <Form.Select
+                      name="owner_user_uid"
+                      value={inputCompany.owner_user_uid}
+                      onChange={handleInputCompany}
+                    >
+                      <option value="">Select Owner</option>
+                      {ownerUser.map((user) => (
+                        <option key={user.uid} value={user.uid}>
+                          {user.name}
+                        </option>
+                      ))}
+                    </Form.Select>
                   </FloatingLabel>
-                  {telephone.map((telephone, index) => (
+                  {inputCompany.telp_number.map((telephone, index) => (
                     <div key={index}>
                       <FloatingLabel
-                        label={`Telephone #${index + 1}`}
+                        label={
+                          <>
+                            Telephone #{index + 1}{" "}
+                            <span style={{ color: "red" }} className="fs-6">
+                              *
+                            </span>
+                          </>
+                        }
                         className="mb-2"
                       >
                         <Form.Control
                           type="number"
-                          value={telephone}
+                          name={`telp_number[${index}]`}
+                          value={inputCompany.telp_number[index]}
                           onChange={(e) =>
                             handleChangeTelephone(index, e.target.value)
                           }
@@ -109,44 +375,94 @@ const SingleCompany = () => {
                     Add Telephone
                   </Button>
                   <FloatingLabel label="Address (Google Map)" className="mb-3">
-                    <Form.Control type="text" placeholder="name@example.com" />
+                    <Form.Control
+                      type="text"
+                      placeholder="name@example.com"
+                      name="map_address"
+                      onChange={handleInputCompany}
+                    />
                   </FloatingLabel>
-                  <FloatingLabel label="Address" className="mb-3">
-                    <Form.Control type="text" placeholder="name@example.com" />
+                  <FloatingLabel
+                    label={
+                      <span>
+                        Address
+                        <span style={{ color: "red" }} className="fs-6">
+                          *
+                        </span>
+                      </span>
+                    }
+                    className="mb-3"
+                  >
+                    <Form.Control
+                      type="text"
+                      placeholder="name@example.com"
+                      name="address"
+                      onChange={handleInputCompany}
+                    />
                   </FloatingLabel>
                   <FloatingLabel label="City" className="mb-3">
-                    <Form.Control type="text" placeholder="name@example.com" />
+                    <Form.Control
+                      type="text"
+                      placeholder="name@example.com"
+                      name="city"
+                      onChange={handleInputCompany}
+                    />
                   </FloatingLabel>
                   <FloatingLabel label="Zip Code" className="mb-3">
-                    <Form.Control type="text" placeholder="name@example.com" />
+                    <Form.Control
+                      type="number"
+                      placeholder="name@example.com"
+                      name="postal_code"
+                      onChange={handleInputCompany}
+                    />
                   </FloatingLabel>
-                  <Form.Select
-                    className="mb-3"
-                    size="lg"
-                    style={{ fontSize: "0.85rem" }}
-                    name="source"
-                  >
-                    <option>Type</option>
-                    <option value="database">Badan</option>
-                    <option value="event">Faskes</option>
-                  </Form.Select>
+                  <FloatingLabel label="Type Company">
+                    <Form.Select
+                      className="mb-3"
+                      size="lg"
+                      style={{ fontSize: "0.85rem" }}
+                      name="company_type_uid"
+                      onChange={handleInputCompany}
+                    >
+                      <option value="">Select Choose</option>
+                      {typeCompany.map((type) => (
+                        <option key={type.uid} value={type.uid}>
+                          {type.name}
+                        </option>
+                      ))}
+                    </Form.Select>
+                  </FloatingLabel>
                   <FloatingLabel label="Number of Employees" className="mb-3">
-                    <Form.Control type="text" placeholder="name@example.com" />
+                    <Form.Control
+                      type="text"
+                      placeholder="name@example.com"
+                      name="number_of_employee"
+                      onChange={handleInputCompany}
+                    />
                   </FloatingLabel>
-                  <Form.Select
-                    className="mb-3"
-                    size="lg"
-                    style={{ fontSize: "0.85rem" }}
-                    name="source"
-                  >
-                    <option>Source</option>
-                    <option value="database">Database</option>
-                    <option value="event">Event</option>
-                    <option value="referral">Referral</option>
-                    <option value="others">Others</option>
-                  </Form.Select>
+                  <FloatingLabel label="Source">
+                    <Form.Select
+                      className="mb-3"
+                      size="lg"
+                      style={{ fontSize: "0.85rem" }}
+                      name="company_source_uid"
+                      onChange={handleInputCompany}
+                    >
+                      <option value="">Select Choose</option>
+                      {sourceCompany.map((source) => (
+                        <option key={source.uid} value={source.uid}>
+                          {source.name}
+                        </option>
+                      ))}
+                    </Form.Select>
+                  </FloatingLabel>
                   <FloatingLabel label="Number of Patiens" className="mb-3">
-                    <Form.Control type="text" placeholder="name@example.com" />
+                    <Form.Control
+                      type="text"
+                      placeholder="name@example.com"
+                      name="number_of_patient"
+                      onChange={handleInputCompany}
+                    />
                   </FloatingLabel>
                 </Card.Body>
               </Card>
@@ -174,6 +490,7 @@ const SingleCompany = () => {
                       //   onClick={handleShowCanvasDeals}
                       className="text-primary text-decoration-none fw-semibold"
                       style={{ cursor: "pointer" }}
+                      onClick={handleShowDeals}
                     >
                       <i class="bi bi-plus-lg" style={{ fontSize: "15px" }}></i>
                       <span className="fs-6"> Create Another Deal</span>
@@ -181,25 +498,29 @@ const SingleCompany = () => {
                   </div>
                 </Card.Body>
               </Card>
+              <OverlayAddDeals
+                visible={showAddDeals}
+                onClose={handleCloseDeals}
+              />
               <Card className="shadow mt-3">
                 <Card.Header>
                   <h5 className="mt-2">
-                    <i class="bi bi-currency-dollar  fs-4"></i>
-                    <span className="ms-2 fs-5 fw-bold mt-5">Deals</span>
+                    <i class="bi bi-person-circle fs-4"></i>
+                    <span className="ms-2 fs-5 fw-bold mt-5">Contact</span>
                   </h5>
                 </Card.Header>
                 <Card.Body>
-                  <FloatingLabel
-                    controlId="floatingInput"
-                    label="Search Deals"
-                    className="mb-3"
-                  >
-                    <Form.Select>
-                      <option>Select Company</option>
-                      <option value="">Company 1</option>
-                      <option value="">Company 2</option>
-                    </Form.Select>
-                  </FloatingLabel>
+                  <Form.Label controlId="floatingInput" className="mb-3">
+                    Select Contact
+                  </Form.Label>
+                  <Select
+                    closeMenuOnSelect={false}
+                    components={animatedComponents}
+                    isMulti
+                    options={contactSelect()}
+                    onChange={(selected) => handleSelectContact(selected)}
+                    name="contact_uid[]"
+                  />
                   <div className="text-center">
                     <a
                       //   onClick={handleShowCanvasDeals}
@@ -207,11 +528,12 @@ const SingleCompany = () => {
                       style={{ cursor: "pointer" }}
                     >
                       <i class="bi bi-plus-lg" style={{ fontSize: "15px" }}></i>
-                      <span className="fs-6"> Create Another Deal</span>
+                      <span className="fs-6"> Create Another Contact</span>
                     </a>
                   </div>
                 </Card.Body>
               </Card>
+
               <Card className="shadow">
                 <Card.Header>
                   <h5 className="mt-2">
@@ -227,36 +549,65 @@ const SingleCompany = () => {
                     label="Search Deals"
                     className="mb-3"
                   >
-                    <Form.Select>
+                    <Form.Select
+                      name="parent_company_uid"
+                      onChange={handleInputCompany}
+                    >
                       <option>Select Company</option>
-                      <option value="">1</option>
-                      <option value="">2</option>
+                      {parentCompany.map((parent) => (
+                        <option key={parent.uid} value={parent.uid}>
+                          {parent.name}
+                        </option>
+                      ))}
                     </Form.Select>
                   </FloatingLabel>
                   <div className="text-center">
                     <a
-                      //   onClick={handleShowCanvasDeals}
+                      onClick={handleShowCanvas}
                       className="text-primary text-decoration-none fw-semibold"
                       style={{ cursor: "pointer" }}
                     >
                       <i class="bi bi-plus-lg" style={{ fontSize: "15px" }}></i>
-                      <span className="fs-6"> Create Another Contact</span>
+                      <span className="fs-6"> Create Company</span>
                     </a>
                   </div>
                 </Card.Body>
               </Card>
+              <OverlayAddCompany
+                visible={showCanvas}
+                onClose={handleCloseCanvas}
+              />
             </Col>
             <Col md={8}>
-                <Card className="shadow">
-                    <Card.Header>
-                        <h6 className="fw-bold mt-2">Notes</h6>
-                    </Card.Header>
-                    <Card.Body>
-                        <ReactQuill className="p-2" theme="snow" />
-                    </Card.Body>
-                </Card>
+              <Card className="shadow">
+                <Card.Header>
+                  <h6 className="fw-bold mt-2">Notes</h6>
+                </Card.Header>
+                <Card.Body>
+                  <ReactQuill
+                    className="p-2"
+                    theme="snow"
+                    name="notes"
+                    value={inputCompany.notes}
+                    onChange={(value) =>
+                      handleInputCompany({ target: { name: "notes", value } })
+                    }
+                  />
+                </Card.Body>
+              </Card>
+              <div className="float-enxd">
+                <button className="btn btn-primary me-2" type="submit">
+                  Save Changes
+                </button>
+                <a
+                  href="/company"
+                  className="btn btn-secondary text-decoration-none"
+                >
+                  Cancel
+                </a>
+              </div>
             </Col>
-          </div>
+          </form>
         </div>
       </Main>
     </body>

@@ -1,11 +1,126 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Topbar from "../../../components/Template/Topbar";
 import Sidebar from "../../../components/Template/Sidebar";
 import Main from "../../../components/Template/Main";
 import Footer from "../../../components/Template/Footer";
 import { Card, Form } from "react-bootstrap";
+import axios from "axios";
+import Select from "react-select";
+import makeAnimated from "react-select/animated";
+import Swal from "sweetalert2";
 
 const BulkChangeCompany = () => {
+  const token = localStorage.getItem("token");
+  const [bulkCompany, setBulkCompany] = useState([]);
+  const [user, setUser] = useState([]);
+  const [selectedOptions, setSelectedOptions] = useState([]);
+  // const [owner, setOwner] = useState(null);
+  const [permission, setPermission] = useState({
+    new_owner_user_uid: "",
+  });
+  const animatedComponents = makeAnimated();
+
+  const getCompanyTransfer = () => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/companies`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => setBulkCompany(res.data.data))
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated.") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
+  const getAllUser = () => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => setUser(res.data.data))
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated.") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
+
+  const bulkSelect = () => {
+    const result = [];
+    bulkCompany?.map((data) => {
+      const theme = {
+        value: data.uid,
+        label: data.name,
+      };
+      result.push(theme);
+    });
+    return result;
+  };
+
+  const handlePermission = (e) => {
+    setPermission({
+      ...permission,
+      [e.target.name]: e.target.value,
+    });
+  };
+  useEffect(() => {
+    getCompanyTransfer(token);
+    getAllUser(token);
+  }, [token]);
+
+  const [resultBulkCompany, setResultBulkCompany] = useState([]);
+  // console.log(resultBulkCompany);
+  const handleSelectChange = (selected) => {
+    setSelectedOptions(selected);
+    setResultBulkCompany(selected.map((option) => option.value));
+  };
+  // console.log(resultBulkCompany);
+  const handleSubmitBulk = async (e) => {
+    e.preventDefault();
+
+    try {
+      const formData = new FormData();
+      for (const uid of resultBulkCompany) {
+        formData.append("company_uid[]", uid);
+      }
+      formData.append("new_owner_user_uid", permission.new_owner_user_uid);
+      formData.append("_method", "PUT");
+      // ini buat log
+      // console.log("FormData Content:");
+      // for (const pair of formData.entries()) {
+      //   console.log(pair[0] + ": " + pair[1]);
+      // }
+      const bulk = await axios.post(
+        `${process.env.REACT_APP_BACKEND_URL}/companies/transfer/owner`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      Swal.fire({
+        title: bulk.data.message,
+        text: "Successfully bulk change",
+        icon: "success",
+      });
+    } catch (error) {
+      // console.log(error);
+      if (error.response) {
+        Swal.fire({
+          text: error.response.data.message,
+          icon: "warning",
+        });
+      }
+    }
+  };
   return (
     <body id="body">
       <Topbar />
@@ -31,33 +146,45 @@ const BulkChangeCompany = () => {
         </div>
         <Card className="shadow">
           <Card.Body className="mt-2">
-            <form action="">
+            <form action="" onSubmit={handleSubmitBulk}>
               <Form.Group className="mb-3 col-9">
                 <Form.Label className="fw-bold">Select Companies</Form.Label>
-                <Form.Select>
-                  <option value="">Select Choose</option>
-                  <option value="">1</option>
-                  <option value="">2</option>
-                  <option value="">3</option>
-                </Form.Select>
+                <Select
+                  closeMenuOnSelect={false}
+                  components={animatedComponents}
+                  isMulti
+                  options={bulkSelect()}
+                  value={selectedOptions}
+                  onChange={(selected) => handleSelectChange(selected)}
+                  name="company_uid[]"
+                />
               </Form.Group>
-              <Form.Group className="mb-3 col-5" md={5}>
+              {/* <Form.Group className="mb-3 col-5" md={5}>
                 <Form.Label className="fw-bold">Owner</Form.Label>
-                <Form.Select>
-                  <option value="">Select Owner</option>
-                  <option value="">1</option>
-                  <option value="">2</option>
-                </Form.Select>
-              </Form.Group>
+                <Select
+                  options={bulkUserSelect()}
+                  value={owner}
+                  onChange={handleOwnerChange}
+                  name="user"
+                />
+              </Form.Group> */}
               <Form.Group className="mb-3 col-5" md={5}>
                 <Form.Label className="fw-bold">Give Permission to</Form.Label>
-                <Form.Select>
+                <select
+                  name="new_owner_user_uid"
+                  onChange={handlePermission}
+                  value={permission.new_owner_user_uid}
+                  className="form-select"
+                >
                   <option value="">Select Choose</option>
-                  <option value="">2</option>
-                  <option value="">1</option>
-                </Form.Select>
+                  {user.map((data) => (
+                    <option key={data.uid} value={data.uid}>
+                      {data.name}
+                    </option>
+                  ))}
+                </select>
               </Form.Group>
-              <div className="mt-4"> 
+              <div className="mt-4">
                 <a href="/company" className="btn btn-secondary me-4">
                   Cancel
                 </a>

@@ -8,7 +8,7 @@ import {
   Row,
   Col,
 } from "react-bootstrap";
-import OverlayAddCompany from "./Overlay/addCompany";
+import OverlayAddCompany from "../../../components/Overlay/addCompany";
 
 const AddCompany = () => {
   const [selectedCompany, setSelectedCompany] = useState("");

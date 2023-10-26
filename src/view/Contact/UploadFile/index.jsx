@@ -1,11 +1,61 @@
-import React from "react";
+import React, { useState } from "react";
 import Topbar from "../../../components/Template/Topbar";
 import Sidebar from "../../../components/Template/Sidebar";
 import Main from "../../../components/Template/Main";
 import Footer from "../../../components/Template/Footer";
 import { Card } from "react-bootstrap";
+import Swal from "sweetalert2";
+import axios from "axios";
 
 const UploadFileContact = () => {
+  const tokenAuth = localStorage.getItem("token");
+  const [uploadExcel, setUploadExcel] = useState({
+    upload: null,
+  });
+  const handleChange = (e) => {
+    const file = e.target.files[0];
+    setUploadExcel({
+      ...uploadExcel,
+      upload: file,
+    });
+  };
+  // console.log(uploadExcel);
+  const handleUploadFile = async (e) => {
+    e.preventDefault();
+    try {
+      const form = new FormData();
+      form.append("upload", uploadExcel.upload);
+      const upload = await axios.post(
+        `${process.env.REACT_APP_BACKEND_URL}/contacts/upload/excel`,
+        form,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${tokenAuth}`,
+          },
+        }
+      );
+      Swal.fire({
+        title: upload.data.message,
+        text: "Successfully upload excel",
+        icon: "success",
+      });
+      window.location.reload();
+    } catch (err) {
+      // console.log(err);
+      if (err.response) {
+        Swal.fire({
+          text: err.response.data.message,
+          icon: "warning",
+        });
+      } else {
+        Swal.fire({
+          text: "Something Went Wrong",
+          icon: "error",
+        });
+      }
+    }
+  };
   return (
     <body id="body">
       <Topbar />
@@ -55,8 +105,8 @@ const UploadFileContact = () => {
                   <div className="d-flex align-items-center">
                     <p className="btn btn-primary rounded fs-6 me-4 mt-3">2</p>
                     <span>
-                      Fill the contact you want based on our template and
-                      upload the file from step 1 you've filled to add multiple
+                      Fill the contact you want based on our template and upload
+                      the file from step 1 you've filled to add multiple
                       contact.
                     </span>
                   </div>
@@ -66,10 +116,16 @@ const UploadFileContact = () => {
                       The number of uploads affects the upload duration.
                     </span>
                   </div>
-                  <form action="">
+                  <form action="" onSubmit={handleUploadFile}>
                     <div className="mt-3 mb-3 ms-2 col-10">
                       <label className="mb-2 fs-6">Upload File</label>
-                      <input type="file" className="form-control"></input>
+                      <input
+                        type="file"
+                        className="form-control"
+                        accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                        name="upload"
+                        onChange={handleChange}
+                      ></input>
                     </div>
                     <div className="mb-4">
                       <a href="/company" className="btn btn-secondary ms-2">

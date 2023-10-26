@@ -1,11 +1,62 @@
-import React from "react";
+import React, { useState } from "react";
 import Topbar from "../../../components/Template/Topbar";
 import Sidebar from "../../../components/Template/Sidebar";
 import Main from "../../../components/Template/Main";
 import { Card } from "react-bootstrap";
 import Footer from "../../../components/Template/Footer";
+import axios from "axios";
+import Swal from "sweetalert2";
 
 const FileUploadCompany = () => {
+  const tokenAuth = localStorage.getItem("token");
+
+  const [uploadExcel, setUploadExcel] = useState({
+    upload: null,
+  });
+  const hanldeChange = (e) => {
+    const file = e.target.files[0];
+    setUploadExcel({
+      ...uploadExcel,
+      upload: file,
+    });
+  };
+  // console.log(uploadExcel);
+  const handleUploadExcle = async (e) => {
+    e.preventDefault();
+    try {
+      const formData = new FormData();
+      formData.append("upload", uploadExcel.upload);
+      const upload = await axios.post(
+        `${process.env.REACT_APP_BACKEND_URL}/companies/upload/excel`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${tokenAuth}`,
+          },
+        }
+      );
+      Swal.fire({
+        title: upload.data.message,
+        text: "Successfully upload excel",
+        icon: "success",
+      });
+      window.location.reload();
+    } catch (err) {
+      console.log(err);
+      if (err.response) {
+        Swal.fire({
+          text: err.response.data.message,
+          icon: "warning",
+        });
+      } else {
+        Swal.fire({
+          text: "Something Went Wrong",
+          icon: "error",
+        });
+      }
+    }
+  };
   return (
     <body id="body">
       <Topbar />
@@ -66,10 +117,16 @@ const FileUploadCompany = () => {
                       The number of uploads affects the upload duration.
                     </span>
                   </div>
-                  <form action="">
+                  <form onSubmit={handleUploadExcle}>
                     <div className="mt-3 mb-3 ms-2 col-10">
                       <label className="mb-2 fs-6">Upload File</label>
-                      <input type="file" className="form-control"></input>
+                      <input
+                        type="file"
+                        className="form-control"
+                        accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                        name="upload"
+                        onChange={hanldeChange}
+                      ></input>
                     </div>
                     <div className="mb-4">
                       <a href="/company" className="btn btn-secondary ms-2">

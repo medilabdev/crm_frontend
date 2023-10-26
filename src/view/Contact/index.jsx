@@ -61,7 +61,7 @@ const Contact = () => {
       });
   };
 
-  console.log(contact);
+  // console.log(contact);
   useEffect(() => {
     getContactAll("contacts", TokenAuth, setContact);
   }, [TokenAuth]);

@@ -12,7 +12,8 @@ import { useNavigate } from "react-router-dom";
 import "../Company/style.css";
 import DeleteCompany from "./Modals/deleteCompany";
 import iconGedung from "../../../src/assets/img/office.png";
-import axios from "axios";
+import axios, { all } from "axios";
+import Swal from "sweetalert2";
 const Company = () => {
   const [allCompany, setAllCompany] = useState([]);
   const token = localStorage.getItem("token");
@@ -28,10 +29,29 @@ const Company = () => {
     <Tooltip id="tooltip">Show Filter</Tooltip>
   );
   const iconFilter = isSideBar ? "bi bi-x-lg" : "bi bi-funnel";
-  //   console.log(isSideBar);
   const navigate = useNavigate();
-
   const [search, setSearch] = useState(allCompany);
+  const [selectedUIDs, setSelectedUIDs] = useState([]);
+  const [deleteCompany, setDeleteCompany] = useState(false);
+  const handleDeleteCompany = () => setDeleteCompany(false);
+  const [owner, setOwner] = useState([]);
+
+  const getOwnerUser = () => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => setOwner(res.data.data))
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated.") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
+
   function handleSearch(e) {
     const newData = allCompany.filter((row) => {
       return row.name.toLowerCase().includes(e.target.value.toLowerCase());
@@ -44,8 +64,7 @@ const Company = () => {
     selectAllRowsItemText: "ALL",
   };
 
-  const [deleteCompany, setDeleteCompany] = useState(false);
-  const handleDeleteCompany = () => setDeleteCompany(false);
+  // console.log(allCompany);
 
   const getAllCompany = () => {
     axios
@@ -57,11 +76,90 @@ const Company = () => {
       .then((res) => {
         setAllCompany(res.data.data);
         setSearch(res.data.data);
+      })
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated.") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
       });
   };
-  console.log(allCompany);
+
+  const selectUid = (state) => {
+    const selectedRows = state.selectedRows.map((row) => row.uid);
+    setSelectedUIDs(selectedRows);
+  };
+  // console.log(selectedUIDs);
+  const donwloadAll = (e) => {
+    e.preventDefault();
+    try {
+      const formData = new FormData();
+      for (const uid of selectedUIDs) {
+        formData.append("company_uid[]", uid);
+      }
+
+      const donwload = axios.post(
+        `${process.env.REACT_APP_BACKEND_URL}/companies/export/excel`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+    } catch (error) {
+      if (error.response) {
+        Swal.fire({
+          text: error.response.data.message,
+          icon: "warning",
+        });
+      }
+    }
+  };
+  const handleSubmitDeleteSelect = async (e) => {
+    e.preventDefault();
+    const result = await Swal.fire({
+      title: "Apakah Anda yakin?",
+      text: "Anda tidak dapat mengembalikan data ini setelah menghapusnya!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Ya, hapus!",
+      cancelButtonText: "Batal",
+    });
+    if (result.isConfirmed) {
+      try {
+        const formData = new FormData();
+        for (const uid of selectedUIDs) {
+          formData.append("company_uid[]", uid);
+        }
+        // console.log("FormData Content:");
+        // for (const pair of formData.entries()) {
+        //   console.log(pair[0] + ": " + pair[1]);
+        // }
+        const deleteSelect = await axios.post(
+          `${process.env.REACT_APP_BACKEND_URL}/companies/delete/item`,
+          formData,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        Swal.fire({
+          title: deleteSelect.data.message,
+          text: "Successfully delete company",
+          icon: "success",
+        });
+        window.location.reload();
+      } catch (error) {
+        if (error.response) {
+          Swal.fire({
+            text: error.response.data.message,
+            icon: "warning",
+          });
+        }
+      }
+    }
+  };
   useEffect(() => {
     getAllCompany(token);
+    getOwnerUser(token);
   }, [token]);
   const columns = [
     {
@@ -263,23 +361,21 @@ const Company = () => {
                   </button>
                   <ul class="dropdown-menu">
                     <li>
-                      <a class="dropdown-item" href="#">
+                      <a
+                        class="dropdown-item"
+                        onClick={donwloadAll}
+                        style={{ cursor: "pointer" }}
+                      >
                         Donwload Selected
                       </a>
                     </li>
                     <li>
-                      <a class="dropdown-item" href="#">
-                        Donwload Selected With Detail
-                      </a>
-                    </li>
-                    <li>
-                      <a class="dropdown-item" href="#">
+                      <a
+                        class="dropdown-item"
+                        onClick={donwloadAll}
+                        style={{ cursor: "pointer" }}
+                      >
                         Donwload All
-                      </a>
-                    </li>
-                    <li>
-                      <a class="dropdown-item" href="#">
-                        Donwload All With Detail
                       </a>
                     </li>
                   </ul>
@@ -290,7 +386,12 @@ const Company = () => {
                 >
                   Bulk Change
                 </a>
-                <button class="btn btn-danger ms-2 delete">Delete</button>
+                <button
+                  class="btn btn-danger ms-2 delete"
+                  onClick={handleSubmitDeleteSelect}
+                >
+                  Delete
+                </button>
               </div>
             </div>
             <Card className="shadow">
@@ -344,7 +445,7 @@ const Company = () => {
                             <option value="">2</option>
                           </select>
                         </div>
-                        <div className="col mt-5">
+                        {/* <div className="col mt-5">
                           <h6>
                             <i className="bi bi-link-45deg"></i>
                             <span className="fw-semibold ms-2 fs-6">
@@ -375,7 +476,7 @@ const Company = () => {
                             <option value="">1</option>
                             <option value="">2</option>
                           </select>
-                        </div>
+                        </div> */}
                         <div className="col mt-5">
                           <h6>
                             <i className="bi bi-building"></i>
@@ -475,7 +576,7 @@ const Company = () => {
                               style={{ fontSize: "0.85rem" }}
                             />
                           </div>
-                          <div className="mb-1">
+                          {/* <div className="mb-1">
                             <input
                               type="text"
                               className="form-control"
@@ -483,7 +584,7 @@ const Company = () => {
                               placeholder="Notes"
                               style={{ fontSize: "0.85rem" }}
                             />
-                          </div>
+                          </div> */}
                           <div className="mb-1">
                             <select
                               name="source"
@@ -562,6 +663,7 @@ const Company = () => {
                     pagination
                     paginationComponentOptions={paginationComponentOptions}
                     selectableRows
+                    onSelectedRowsChange={selectUid}
                   />
                 </div>
               </div>

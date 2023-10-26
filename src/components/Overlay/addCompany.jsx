@@ -14,11 +14,10 @@ const OverlayAddCompany = ({ visible, onClose }) => {
   const [sourceContact, setSourceContact] = useState([]);
   const [parentCompany, setParentCompany] = useState([]);
   const [typeCompany, setTypeCompany] = useState([]);
-  const [telephone, setTelephone] = useState([""]);
   const [inputCompany, setInputCompany] = useState({
     name: "",
     website_url: "",
-    telp_number: [],
+    telp_number: [""],
     address: "",
     map_address: "",
     city: "",
@@ -34,21 +33,33 @@ const OverlayAddCompany = ({ visible, onClose }) => {
   const token = localStorage.getItem("token");
   //menambah telephone
   const addTelephone = () => {
-    setTelephone([...telephone, ""]);
+    setInputCompany((prevInputCompany) => ({
+      ...prevInputCompany,
+      telp_number: [...prevInputCompany.telp_number, ""],
+    }));
   };
   // mengubah nomor telephone indeks tertentu
   const handleChangeTelephone = (index, value) => {
-    const newTelephone = [...telephone];
-    newTelephone[index] = value;
-    setTelephone(newTelephone);
+    setInputCompany((prevInputCompany) => {
+      const newTelpNumbers = [...prevInputCompany.telp_number];
+      newTelpNumbers[index] = value;
+      return {
+        ...prevInputCompany,
+        telp_number: newTelpNumbers,
+      };
+    });
   };
   //menghapus telephone
   const handleDeleteTelephone = (index) => {
-    const newTelephone = [...telephone];
-    newTelephone.splice(index, 1);
-    setTelephone(newTelephone);
+    setInputCompany((prevInputCompany) => {
+      const newTelpNumbers = [...prevInputCompany.telp_number];
+      newTelpNumbers.splice(index, 1);
+      return {
+        ...prevInputCompany,
+        telp_number: newTelpNumbers,
+      };
+    });
   };
-
   const getOwnerUser = (token) => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
@@ -120,7 +131,6 @@ const OverlayAddCompany = ({ visible, onClose }) => {
       [e.target.name]: e.target.value,
     });
   };
-  // console.log(inputCompany);
   // console.log(sourceContact);
   useEffect(() => {
     getOwnerUser(token);
@@ -128,27 +138,14 @@ const OverlayAddCompany = ({ visible, onClose }) => {
     getCompanyParent(token);
     getCompanyType(token);
   }, [token]);
-  console.log(telephone);
+  // console.log(telephone);
   const handleSubmitCompany = async (e) => {
     e.preventDefault();
-    const formData = new FormData();
-    formData.append("name", inputCompany.name);
-    formData.append("website_url", inputCompany.website_url);
-    formData.append("address", inputCompany.address);
-    formData.append("map_address", inputCompany.map_address);
-    formData.append("city", inputCompany.city);
-    formData.append("postal_code", inputCompany.postal_code);
-    formData.append("number_of_employee", inputCompany.number_of_employee);
-    formData.append("number_of_patient", inputCompany.number_of_patient);
-    formData.append("parent_company_uid", inputCompany.parent_company_uid);
-    formData.append("company_source_uid", inputCompany.company_source_uid);
-    formData.append("company_type_uid", inputCompany.company_type_uid);
-    formData.append("owner_user_uid", inputCompany.owner_user_uid);
-    formData.append("telp_number[]", telephone);
+
     try {
       const addCompany = await axios.post(
         `${process.env.REACT_APP_BACKEND_URL}/companies`,
-        formData,
+        inputCompany,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -227,7 +224,7 @@ const OverlayAddCompany = ({ visible, onClose }) => {
           <Form.Group>
             <Form.Label>Telephone</Form.Label>
 
-            {telephone.map((telephone, index) => (
+            {inputCompany.telp_number.map((telephone, index) => (
               <div key={index}>
                 <FloatingLabel
                   label={`Telephone #${index + 1}`}
@@ -237,7 +234,7 @@ const OverlayAddCompany = ({ visible, onClose }) => {
                     type="number"
                     name={`telp_number[${index}]`}
                     placeholder="@gg"
-                    value={telephone}
+                    value={inputCompany.telp_number[index]}
                     onChange={(e) =>
                       handleChangeTelephone(index, e.target.value)
                     }
