@@ -36,14 +36,11 @@ function Sidebar() {
             isActive={1}
           />
           <MenuSidebar
-            type="collapse"
+            type="nonCollapse"
             name="Products"
             url="/products"
             icon="bi bi-archive-fill"
-            dataBsTarget="#products"
             isActive={1}
-            openSubMenu={openSubMenu}
-            setOpenSubMenu={setOpenSubMenu}
           />
           {/* <MenuSidebar
             type="collapse"

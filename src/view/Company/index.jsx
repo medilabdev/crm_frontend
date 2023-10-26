@@ -21,6 +21,7 @@ const Company = () => {
   const toggleSideBarCard = () => {
     setIsSideBar(!isSideBar);
   };
+  console.log(allCompany);
   const filterClass = isSideBar ? "col-md-3 d-block" : "col-sm-0 d-none";
   const datatableClass = isSideBar ? "col-md-9" : "col-sm-12";
   const showTooltip = isSideBar ? (

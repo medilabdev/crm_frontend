@@ -1,16 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 
-const MenuSidebar = ({
-  type,
-  name,
-  icon,
-  url,
-  isActive,
-  dataBsTarget,
-  openSubMenu,
-  setOpenSubMenu,
-}) => {
+const MenuSidebar = ({ type, name, icon, url, isActive }) => {
   const location = useLocation();
   const [urlActive, setUrlActive] = useState(false);
   useEffect(() => {
@@ -21,16 +12,7 @@ const MenuSidebar = ({
     }
   }, [location.pathname, url]);
 
-  const handleSubMenuClick = () => {
-    if (type === "collapse") {
-      if (openSubMenu === dataBsTarget) {
-        setOpenSubMenu(null);
-      } else {
-        setOpenSubMenu(dataBsTarget);
-      }
-    }
-  };
-  console.log(dataBsTarget);
+  // console.log(dataBsTarget);
   return (
     <>
       {type !== "collapse" ? (
@@ -47,13 +29,7 @@ const MenuSidebar = ({
         </>
       ) : (
         <li className="nav-item">
-          <a
-            className={`nav-link ${urlActive ? "" : "collapsed"}`}
-            data-bs-target={dataBsTarget}
-            data-bs-toggle={type}
-            href={url}
-            onClick={handleSubMenuClick}
-          >
+          <a className={`nav-link ${urlActive ? "" : "collapsed"}`}>
             <i
               className="bi bi-menu-button-wide"
               style={{ fontSize: "0.95rem" }}
@@ -64,13 +40,7 @@ const MenuSidebar = ({
               style={{ fontSize: "0.85rem" }}
             />
           </a>
-          <ul
-            id="products"
-            className={`nav-content collapse ${
-              openSubMenu === dataBsTarget ? "show" : ""
-            }`}
-            data-bs-parent="#sidebar-nav"
-          >
+          <ul id="products" data-bs-parent="#sidebar-nav">
             <li>
               <a href="/package-product" className="text-decoration-none">
                 <i className="bi bi-circle" />

@@ -24,6 +24,7 @@ import Documents from "../view/Documents";
 import UploadFileContact from "../view/Contact/UploadFile";
 import EditContact from "../view/Contact/Edit";
 import EditCompany from "../view/Company/Edit";
+import ShowCompany from "../view/Company/ShowCompany";
 const Login = ({ children }) => {
   const token = localStorage.getItem("token");
   if (!token) {
@@ -148,6 +149,14 @@ function Router() {
           element={
             <Login>
               <EditCompany />
+            </Login>
+          }
+        />
+        <Route
+          path="/company/:uid"
+          element={
+            <Login>
+              <ShowCompany />
             </Login>
           }
         />

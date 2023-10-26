@@ -416,7 +416,16 @@ const SingleCompany = () => {
                       onChange={handleInputCompany}
                     />
                   </FloatingLabel>
-                  <FloatingLabel label="Type Company">
+                  <FloatingLabel
+                    label={
+                      <span>
+                        Type Company
+                        <span style={{ color: "red" }} className="fs-6">
+                          *
+                        </span>
+                      </span>
+                    }
+                  >
                     <Form.Select
                       className="mb-3"
                       size="lg"
@@ -440,7 +449,14 @@ const SingleCompany = () => {
                       onChange={handleInputCompany}
                     />
                   </FloatingLabel>
-                  <FloatingLabel label="Source">
+                  <FloatingLabel label={
+                      <span>
+                        Source
+                        <span style={{ color: "red" }} className="fs-6">
+                          *
+                        </span>
+                      </span>
+                    }>
                     <Form.Select
                       className="mb-3"
                       size="lg"
@@ -595,7 +611,7 @@ const SingleCompany = () => {
                   />
                 </Card.Body>
               </Card>
-              <div className="float-enxd">
+              <div className="float-end">
                 <button className="btn btn-primary me-2" type="submit">
                   Save Changes
                 </button>
