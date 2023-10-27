@@ -337,7 +337,7 @@ const SingleCompany = () => {
                       <FloatingLabel
                         label={
                           <>
-                            Telephone #{index + 1}{" "}
+                            Telephone #{index + 1}
                             <span style={{ color: "red" }} className="fs-6">
                               *
                             </span>

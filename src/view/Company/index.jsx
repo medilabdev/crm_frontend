@@ -11,7 +11,8 @@ import IconCompany from "../../assets/img/condo.png";
 import { useNavigate } from "react-router-dom";
 import "../Company/style.css";
 import DeleteCompany from "./Modals/deleteCompany";
-import iconGedung from "../../../src/assets/img/office.png";
+import phone from "../../../src/assets/img/phone.png";
+import iconGedung from "../../../src/assets/img/office-building.png";
 import axios, { all } from "axios";
 import Swal from "sweetalert2";
 const Company = () => {
@@ -201,11 +202,17 @@ const Company = () => {
               <div>
                 {item?.contact ? (
                   <img
+                    src={phone}
+                    style={{ width: "20px" }}
+                    data-tip={item?.contact?.name}
+                  />
+                ) : (
+                  <img
                     src={iconGedung}
                     style={{ width: "20px" }}
                     data-tip={item?.contact?.name}
                   />
-                ) : null}
+                )}
               </div>
             </OverlayTrigger>
           ))}

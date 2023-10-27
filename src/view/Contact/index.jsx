@@ -131,7 +131,7 @@ const Contact = () => {
       selector: (row) => (
         <OverlayTrigger
           placement="top"
-          overlay={<Tooltip id={`tooltip-${row.name}`}>{row.name}</Tooltip>}
+          overlay={<Tooltip id={`tooltip-${row?.owner?.name}`}>{row?.owner?.name}</Tooltip>}
         >
           <div className="image-name">
             <img

@@ -70,12 +70,9 @@ const Products = () => {
                   </button>
                 </li>
               </ul>
-              <div className="tab-content pt-2">
-                <SingleProduct />
-              
-                <PackageProduct />
-              
-              </div>
+              <SingleProduct />
+
+              <PackageProduct />
             </Card.Body>
           </Card>
         </div>

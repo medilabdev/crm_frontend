@@ -1,11 +1,14 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import DataTable from "react-data-table-component";
-
+import AddPackageProduct from "./Overlay/addPackageProduct";
 const PackageProduct = () => {
   const token = localStorage.getItem("token");
   const [packageProduct, setPackageProduct] = useState([]);
   const [search, setSearch] = useState([]);
+  const [addPackageProduct, setAddPackageProduct] = useState(false);
+  const handleClosePackage = () => setAddPackageProduct(false);
+  const handleOpenPackage = () => setAddPackageProduct(true);
 
   const getPackageProduct = () => {
     axios
@@ -90,44 +93,48 @@ const PackageProduct = () => {
     setSearch(packageData);
   }
   return (
-    <div
-      className="tab-pane fade show active packageProduct"
-      id="packageProduct"
-    >
-      <button
-        className="btn btn-primary mt-5 ms-4"
-        style={{ fontSize: "0.85rem" }}
-      >
-        Add Package Product
-      </button>
-      <div className="float-end col-3 me-3">
-        <div className="input-group mt-5">
-          <div className="input-group-prepend">
-            <span
-              className="input-group-text"
-              style={{ borderEndEndRadius: 0, borderStartEndRadius: 0 }}
-            >
-              <i className="bi bi-search"></i>
-            </span>
+    <div className="tab-content pt-2">
+      <div className="tab-pane fade show packageProduct" id="packageProduct">
+        <button
+          className="btn btn-primary mt-5 ms-4"
+          style={{ fontSize: "0.85rem" }}
+          onClick={handleOpenPackage}
+        >
+          Add Package Product
+        </button>
+        <div className="float-end col-3 me-3">
+          <div className="input-group mt-5">
+            <div className="input-group-prepend">
+              <span
+                className="input-group-text"
+                style={{ borderEndEndRadius: 0, borderStartEndRadius: 0 }}
+              >
+                <i className="bi bi-search"></i>
+              </span>
+            </div>
+            <input
+              type="text"
+              placeholder="Search Package..."
+              className="form-control"
+              onChange={searchPackage}
+              style={{ fontSize: "0.85rem" }}
+            />
           </div>
-          <input
-            type="text"
-            placeholder="Search Package..."
-            className="form-control"
-            onChange={searchPackage}
-            style={{ fontSize: "0.85rem" }}
-          />
         </div>
+        <DataTable
+          className="mt-3"
+          defaultSortFieldId={1}
+          columns={columns}
+          data={search}
+          pagination
+          selectableRows
+          paginationComponentOptions={paginationComponentOptions}
+        />
+        <AddPackageProduct
+          visible={addPackageProduct}
+          onClose={handleClosePackage}
+        />
       </div>
-      <DataTable
-        className="mt-3"
-        defaultSortFieldId={1}
-        columns={columns}
-        data={search}
-        pagination
-        selectableRows
-        paginationComponentOptions={paginationComponentOptions}
-      />
     </div>
   );
 };

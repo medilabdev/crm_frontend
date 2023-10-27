@@ -6,6 +6,7 @@ import Swal from "sweetalert2";
 const DeleteCompany = ({ visible, onClose, uid }) => {
   const token = localStorage.getItem("token");
   const arrUid = [uid];
+  console.log(arrUid);
   const deleteCompany = async () => {
     try {
       const formData = new FormData();
@@ -27,6 +28,8 @@ const DeleteCompany = ({ visible, onClose, uid }) => {
       onClose();
       window.location.reload();
     } catch (err) {
+      
+      console.log(err);
       console.error("gagal menghapus company");
     }
   };

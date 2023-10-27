@@ -1,12 +1,18 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import DataTable from "react-data-table-component";
+import OverlayAddProducts from "./Overlay/addProduct";
+import DeleteSingle from "./Modals/delete";
 
 const SingleProduct = () => {
   const token = localStorage.getItem("token");
   const [product, setProduct] = useState([]);
   const [search, setSearch] = useState([]);
-
+  const [showAdd, setShowAdd] = useState(false);
+  const handleCloseAdd = () => setShowAdd(false);
+  const handleShowAdd = () => setShowAdd(true);
+  const [deleteSingle, setDeleteProduct] = useState(false);
+  const handleDeleteSingle = () => setDeleteProduct(false);
   const getProduct = () => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/products`, {
@@ -83,7 +89,7 @@ const SingleProduct = () => {
           <button
             title="delete"
             className="ms-3 icon-button"
-            onClick={() => `${row.uid}`}
+            onClick={() => setDeleteProduct(row.uid)}
           >
             <i className="bi bi-trash-fill"></i>
           </button>
@@ -99,41 +105,50 @@ const SingleProduct = () => {
     setSearch(newData);
   }
   return (
-    <div className="tab-pane fade show active product" id="product">
-      <button
-        className="btn btn-primary mt-5 ms-4"
-        style={{ fontSize: "0.85rem" }}
-      >
-        Add Product
-      </button>
-      <div className="float-end col-3 me-3">
-        <div className="input-group mt-5">
-          <div className="input-group-prepend">
-            <span
-              className="input-group-text"
-              style={{ borderEndEndRadius: 0, borderStartEndRadius: 0 }}
-            >
-              <i className="bi bi-search"></i>
-            </span>
+    <div className="tab-content pt-2">
+      <div className="tab-pane fade show active product" id="product">
+        <button
+          className="btn btn-primary mt-5 ms-4"
+          style={{ fontSize: "0.85rem" }}
+          onClick={handleShowAdd}
+        >
+          Add Product
+        </button>
+        <div className="float-end col-3 me-3">
+          <div className="input-group mt-5">
+            <div className="input-group-prepend">
+              <span
+                className="input-group-text"
+                style={{ borderEndEndRadius: 0, borderStartEndRadius: 0 }}
+              >
+                <i className="bi bi-search"></i>
+              </span>
+            </div>
+            <input
+              type="text"
+              placeholder="Search Product..."
+              className="form-control"
+              onChange={SearchFilter}
+              style={{ fontSize: "0.85rem" }}
+            />
           </div>
-          <input
-            type="text"
-            placeholder="Search Product..."
-            className="form-control"
-            onChange={SearchFilter}
-            style={{ fontSize: "0.85rem" }}
-          />
         </div>
+        <DataTable
+          className="mt-3"
+          defaultSortFieldId={1}
+          columns={columns}
+          data={search}
+          pagination
+          selectableRows
+          paginationComponentOptions={paginationComponentOptions}
+        />
+        <DeleteSingle
+          onClose={handleDeleteSingle}
+          visible={deleteSingle !== false}
+          uid={deleteSingle}
+        />
+        <OverlayAddProducts visible={showAdd} onClose={handleCloseAdd} />
       </div>
-      <DataTable
-        className="mt-3"
-        defaultSortFieldId={1}
-        columns={columns}
-        data={search}
-        pagination
-        selectableRows
-        paginationComponentOptions={paginationComponentOptions}
-      />
     </div>
   );
 };

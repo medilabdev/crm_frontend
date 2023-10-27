@@ -5,11 +5,14 @@ import Swal from "sweetalert2";
 
 const DeleteContact = ({ visible, onClose, uid }) => {
   const token = localStorage.getItem("token");
-  console.log(uid);
+  const arrUid = [uid];
   const deleteContact = async () => {
     try {
-      await axios.delete(
-        `${process.env.REACT_APP_BACKEND_URL}/contacts/${uid}`,
+      const formData = new FormData();
+      formData.append("contact_uid[]", arrUid);
+      await axios.post(
+        `${process.env.REACT_APP_BACKEND_URL}/contacts/delete/item`,
+        formData,
         {
           headers: {
             Authorization: `Bearer ${token}`,

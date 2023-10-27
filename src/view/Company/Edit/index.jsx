@@ -10,6 +10,7 @@ import axios from "axios";
 import Select from "react-select";
 import makeAnimated from "react-select/animated";
 import Swal from "sweetalert2";
+import { Chrono } from "react-chrono";
 const EditCompany = () => {
   const { uid } = useParams();
   const token = localStorage.getItem("token");
@@ -21,6 +22,33 @@ const EditCompany = () => {
   const [parentCompany, setParentCompany] = useState([]);
   const [contact, setContact] = useState([]);
   const animatedComponents = makeAnimated();
+
+  const items = [
+    {
+      title: "January 2022",
+      cardTitle: "Event 1",
+      cardSubtitle: "Event 1 Subtitle",
+      cardDetailedText: "This is the first event on the timeline.",
+    },
+    {
+      title: "February 2022",
+      cardTitle: "Event 2",
+      cardSubtitle: "Event 2 Subtitle",
+      cardDetailedText: "This is the second event on the timeline.",
+    },
+    {
+      title: "March 2022",
+      cardTitle: "Event 3",
+      cardSubtitle: "Event 3 Subtitle",
+      cardDetailedText: "This is the third event on the timeline.",
+    },
+    {
+      title: "April 2022",
+      cardTitle: "Event 4",
+      cardSubtitle: "Event 3 Subtitle",
+      cardDetailedText: "This is the third event on the timeline.",
+    },
+  ];
 
   // console.log(contact);
   const getContact = () => {
@@ -618,6 +646,7 @@ const EditCompany = () => {
                     />
                   </Card.Body>
                 </Card>
+
                 <div className="float-end">
                   <button className="btn btn-primary me-2" type="submit">
                     Save Changes
@@ -628,6 +657,19 @@ const EditCompany = () => {
                   >
                     Cancel
                   </a>
+                </div>
+                <div>
+                  <Chrono
+                    items={items}
+                    mode="VERTICAL"
+                    cardHeight={50}
+                    fontSizes={{
+                      cardSubtitle: "0.5rem",
+                      cardText: "0.8rem",
+                      cardTitle: "0.85rem",
+                      title: "0.85rem",
+                    }}
+                  />
                 </div>
               </div>
             </div>
