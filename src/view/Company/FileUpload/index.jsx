@@ -41,7 +41,7 @@ const FileUploadCompany = () => {
         text: "Successfully upload excel",
         icon: "success",
       });
-      window.location.reload();
+      window.location.href = "/company";
     } catch (err) {
       console.log(err);
       if (err.response) {

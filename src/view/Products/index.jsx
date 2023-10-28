@@ -9,24 +9,6 @@ import PackageProduct from "./packageProduct";
 
 const Products = () => {
   const token = localStorage.getItem("token");
-  const [product, setProduct] = useState([]);
-
-  const getAllProduct = (token) => {
-    axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/products`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => console.log(res.data.data))
-      .catch((err) => {
-        console.error(err);
-      });
-  };
-
-  useEffect(() => {
-    getAllProduct(token);
-  }, [token]);
   return (
     <body id="body">
       <Topbar />

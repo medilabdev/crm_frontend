@@ -659,7 +659,7 @@ const EditCompany = () => {
                   </a>
                 </div>
                 <div>
-                  <Chrono
+                  {/* <Chrono
                     items={items}
                     mode="VERTICAL"
                     cardHeight={50}
@@ -669,7 +669,7 @@ const EditCompany = () => {
                       cardTitle: "0.85rem",
                       title: "0.85rem",
                     }}
-                  />
+                  /> */}
                 </div>
               </div>
             </div>

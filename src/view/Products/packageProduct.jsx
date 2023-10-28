@@ -20,7 +20,8 @@ const PackageProduct = () => {
       .then((res) => {
         setPackageProduct(res.data.data);
         setSearch(res.data.data);
-      });
+      })
+      .catch((err) => console.error(err));
   };
 
   const paginationComponentOptions = {
@@ -28,6 +29,10 @@ const PackageProduct = () => {
     selectAllRowsItemText: "ALL",
   };
 
+  const productDetail = () => {
+    
+  };
+  // console.log(packageProduct);
   useEffect(() => {
     getPackageProduct(token);
   }, [token]);
@@ -128,6 +133,8 @@ const PackageProduct = () => {
           data={search}
           pagination
           selectableRows
+          expandableRows
+          expandableRowsComponent={productDetail}
           paginationComponentOptions={paginationComponentOptions}
         />
         <AddPackageProduct

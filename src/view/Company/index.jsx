@@ -163,6 +163,7 @@ const Company = () => {
     getAllCompany(token);
     getOwnerUser(token);
   }, [token]);
+  console.log(allCompany);
   const columns = [
     {
       id: 1,
@@ -185,7 +186,7 @@ const Company = () => {
       id: 2,
       name: "Associated with",
       selector: (row) => (
-        <div>
+        <div className="d-flex">
           {row?.associate?.map((item, index) => (
             <OverlayTrigger
               placement="top"
@@ -202,17 +203,12 @@ const Company = () => {
               <div>
                 {item?.contact ? (
                   <img
+                    className="ms-1"
                     src={phone}
-                    style={{ width: "20px" }}
+                    style={{ width: "18px" }}
                     data-tip={item?.contact?.name}
                   />
-                ) : (
-                  <img
-                    src={iconGedung}
-                    style={{ width: "20px" }}
-                    data-tip={item?.contact?.name}
-                  />
-                )}
+                ) : null}
               </div>
             </OverlayTrigger>
           ))}
@@ -281,13 +277,13 @@ const Company = () => {
       name: "Action",
       selector: (row) => (
         <div className="action-icon">
-          <button
+          {/* <button
             title="show"
             className="icon-button"
             onClick={() => navigate(`/company/${row.uid}`)}
           >
             <i className="bi bi-building-fill"></i>
-          </button>
+          </button> */}
           <button
             className="ms-2 icon-button"
             title="edit"
