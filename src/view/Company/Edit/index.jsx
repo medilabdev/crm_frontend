@@ -11,6 +11,8 @@ import Select from "react-select";
 import makeAnimated from "react-select/animated";
 import Swal from "sweetalert2";
 import { Chrono } from "react-chrono";
+import OverlayAddDeals from "../../../components/Overlay/addDeals";
+import OverlayAddCompany from "../../../components/Overlay/addCompany";
 const EditCompany = () => {
   const { uid } = useParams();
   const token = localStorage.getItem("token");
@@ -22,7 +24,15 @@ const EditCompany = () => {
   const [parentCompany, setParentCompany] = useState([]);
   const [contact, setContact] = useState([]);
   const animatedComponents = makeAnimated();
-
+  const [showCanvasDeals, setShowCanvasDeals] = useState(false);
+  const handleCloseCanvasDeals = () => setShowCanvasDeals(false);
+  const handleOpenCanvasDeals = () => setShowCanvasDeals(true);
+  const [showCanvasCompany, setShowCanvasCompany] = useState(false);
+  const handleCloseCanvasCompany = () => setShowCanvasCompany(false);
+  const handleOpenCanvasCompany = () => setShowCanvasCompany(true);
+  const [showCanvasContact, setShowCanvasContact] = useState(false);
+  const handleCloseCanvasContact = () => setShowCanvasContact(false);
+  const handleOpenCanvasContact = () => setShowCanvasContact(true);
   const items = [
     {
       title: "January 2022",
@@ -50,7 +60,7 @@ const EditCompany = () => {
     },
   ];
 
-  // console.log(contact);
+  console.log(editCompany);
   const getContact = () => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/contacts`, {
@@ -203,19 +213,19 @@ const EditCompany = () => {
     telephone.forEach((number) => {
       formData.append("telp_number[]", number);
     });
-    formData.append("name", editCompany.name);
-    formData.append("website_url", editCompany.website_url);
-    formData.append("address", editCompany.address);
-    formData.append("map_address", editCompany.map_address);
-    formData.append("city", editCompany.city);
-    formData.append("postal_code", editCompany.postal_code);
-    formData.append("number_of_employee", editCompany.number_of_employee);
-    formData.append("number_of_patient", editCompany.number_of_patient);
-    formData.append("parent_company_uid", editCompany.parent_company_uid);
-    formData.append("owner_user_uid", editCompany.owner_user_uid);
-    formData.append("company_source_uid", editCompany.company_source_uid);
-    formData.append("company_type_uid", editCompany.company_type_uid);
-    formData.append("notes", editCompany.notes);
+    formData.append("name", editCompany.name || "");
+    formData.append("website_url", editCompany.website_url || "");
+    formData.append("address", editCompany.address || "");
+    formData.append("map_address", editCompany.map_address || "");
+    formData.append("city", editCompany.city || "");
+    formData.append("postal_code", editCompany.postal_code || "");
+    formData.append("number_of_employee", editCompany.number_of_employee || "");
+    formData.append("number_of_patient", editCompany.number_of_patient || "");
+    formData.append("parent_company_uid", editCompany.parent_company_uid || "");
+    formData.append("owner_user_uid", editCompany.owner_user_uid || "");
+    formData.append("company_source_uid", editCompany.company_source_uid || "");
+    formData.append("company_type_uid", editCompany.company_type_uid || "");
+    formData.append("notes", editCompany.notes || "");
     formData.append("_method", "put");
     console.log("FormData Content:");
     for (const pair of formData.entries()) {
@@ -395,6 +405,7 @@ const EditCompany = () => {
                     >
                       <Form.Control
                         type="text"
+                        name="map_address"
                         value={editCompany.map_address}
                         onChange={handleInputChange}
                         placeholder="name@example.com"
@@ -421,6 +432,7 @@ const EditCompany = () => {
                     <FloatingLabel label="City" className="mb-3">
                       <Form.Control
                         type="text"
+                        name="city"
                         value={editCompany.city}
                         onChange={handleInputChange}
                         placeholder="name@example.com"
@@ -474,7 +486,6 @@ const EditCompany = () => {
                         name="number_of_employee"
                         value={editCompany.number_of_employee}
                         onChange={handleInputChange}
-                        required
                       />
                     </FloatingLabel>
                     <FloatingLabel label="Source">
@@ -536,6 +547,7 @@ const EditCompany = () => {
                         //   onClick={handleShowCanvasDeals}
                         className="text-primary text-decoration-none fw-semibold"
                         style={{ cursor: "pointer" }}
+                        onClick={handleOpenCanvasDeals}
                       >
                         <i
                           class="bi bi-plus-lg"
@@ -546,6 +558,10 @@ const EditCompany = () => {
                     </div>
                   </Card.Body>
                 </Card>
+                <OverlayAddDeals
+                  visible={showCanvasDeals}
+                  onClose={handleCloseCanvasDeals}
+                />
                 {/* contact */}
                 <Card className="shadow mt-3">
                   <Card.Header>
@@ -569,12 +585,13 @@ const EditCompany = () => {
                         //   onClick={handleShowCanvasDeals}
                         className="text-primary text-decoration-none fw-semibold"
                         style={{ cursor: "pointer" }}
+                        // onClick={handleOpenCanvasContact}
                       >
                         <i
                           class="bi bi-plus-lg"
                           style={{ fontSize: "15px" }}
                         ></i>
-                        <span className="fs-6"> Create Another Deal</span>
+                        <span className="fs-6"> Create Another Contact</span>
                       </a>
                     </div>
                   </Card.Body>
@@ -619,16 +636,21 @@ const EditCompany = () => {
                         //   onClick={handleShowCanvasDeals}
                         className="text-primary text-decoration-none fw-semibold"
                         style={{ cursor: "pointer" }}
+                        onClick={handleOpenCanvasCompany}
                       >
                         <i
                           class="bi bi-plus-lg"
                           style={{ fontSize: "15px" }}
                         ></i>
-                        <span className="fs-6"> Create Another Contact</span>
+                        <span className="fs-6"> Create Another Company</span>
                       </a>
                     </div>
                   </Card.Body>
                 </Card>
+                <OverlayAddCompany
+                  visible={showCanvasCompany}
+                  onClose={handleCloseCanvasCompany}
+                />
               </div>
               <div className="col-md-8">
                 <Card className="shadow">

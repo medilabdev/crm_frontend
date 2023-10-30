@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import DataTable from "react-data-table-component";
 import AddPackageProduct from "./Overlay/addPackageProduct";
+import EditPackageProduct from "./Overlay/editPackageProduct";
 const PackageProduct = () => {
   const token = localStorage.getItem("token");
   const [packageProduct, setPackageProduct] = useState([]);
@@ -10,6 +11,10 @@ const PackageProduct = () => {
   const handleClosePackage = () => setAddPackageProduct(false);
   const handleOpenPackage = () => setAddPackageProduct(true);
 
+  const [editPackageProduct, setEditPackageProduct] = useState(false);
+  const handleCloseEditPackage = () => {
+    setEditPackageProduct(false);
+  };
   const getPackageProduct = () => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/packages-product`, {
@@ -29,9 +34,7 @@ const PackageProduct = () => {
     selectAllRowsItemText: "ALL",
   };
 
-  const productDetail = () => {
-    
-  };
+  const productDetail = () => {};
   // console.log(packageProduct);
   useEffect(() => {
     getPackageProduct(token);
@@ -39,13 +42,24 @@ const PackageProduct = () => {
 
   const columns = [
     {
-      id: 1,
       name: "Name Package",
       selector: (row) => row.name,
       sortable: true,
     },
     {
-      id: 2,
+      name: "Discount",
+      selector: (row) => {
+        if (row.discount_type === "nominal") {
+          return `Rp. ${new Intl.NumberFormat().format(row.discount)}`;
+        } else if (row.discount_type === "percent") {
+          return `${row.discount} %`;
+        } else {
+          return "-";
+        }
+      },
+      sortable: true,
+    },
+    {
       name: "Last Updated",
       selector: (row) => {
         const date = new Date(row.updated_at);
@@ -66,15 +80,15 @@ const PackageProduct = () => {
       },
       sortable: true,
     },
+
     {
-      id: 3,
       name: "Action",
       selector: (row) => (
         <div>
           <button
             title="edit"
             className="icon-button"
-            onClick={() => `${row.uid}`}
+            onClick={() => setEditPackageProduct(row.uid)}
           >
             <i className="bi bi-pen"></i>
           </button>
@@ -106,6 +120,13 @@ const PackageProduct = () => {
           onClick={handleOpenPackage}
         >
           Add Package Product
+        </button>
+        <button
+          className="btn btn-danger mt-5 ms-4"
+          style={{ fontSize: "0.85rem" }}
+          onClick={handleOpenPackage}
+        >
+          Delete Package
         </button>
         <div className="float-end col-3 me-3">
           <div className="input-group mt-5">
@@ -140,6 +161,11 @@ const PackageProduct = () => {
         <AddPackageProduct
           visible={addPackageProduct}
           onClose={handleClosePackage}
+        />
+        <EditPackageProduct
+          onClose={handleCloseEditPackage}
+          visible={editPackageProduct !== false}
+          uid={editPackageProduct}
         />
       </div>
     </div>

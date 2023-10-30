@@ -12,9 +12,12 @@ import { Row, Col, OverlayTrigger, Tooltip } from "react-bootstrap";
 import DeleteContact from "./Modals/deleteContact";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 const Contact = () => {
+  const token = localStorage.getItem("token");
   const [isSidebarToggleCard, setSidebarToggled] = useState(false);
+  const [selectUid, setSelectedUid] = useState([]);
 
   const toggleSidebarCard = () => {
     setSidebarToggled(!isSidebarToggleCard);
@@ -50,6 +53,7 @@ const Contact = () => {
         },
       })
       .then((res) => {
+        console.log(res);
         state(res.data.data);
         setSearch(res.data.data);
       })
@@ -131,7 +135,11 @@ const Contact = () => {
       selector: (row) => (
         <OverlayTrigger
           placement="top"
-          overlay={<Tooltip id={`tooltip-${row?.owner?.name}`}>{row?.owner?.name}</Tooltip>}
+          overlay={
+            <Tooltip id={`tooltip-${row?.owner?.name}`}>
+              {row?.owner?.name}
+            </Tooltip>
+          }
         >
           <div className="image-name">
             <img
@@ -179,6 +187,60 @@ const Contact = () => {
   const paginationComponentOptions = {
     selectAllRowsItem: true,
     selectAllRowsItemText: "ALL",
+  };
+
+  const selectUidDataTable = (state) => {
+    const select = state.selectedRows.map((row) => row.uid);
+    setSelectedUid(select);
+  };
+
+  const handleDeleteSelected = async (e) => {
+    e.preventDefault();
+    const isResult = await Swal.fire({
+      title: "Apakah Anda Yakin",
+      text: "Anda tidak dapat mengembalikan data ini setelah menghapusnya!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Ya, Hapus!",
+      cancelButtonText: "Batal",
+    });
+    if (isResult.isConfirmed) {
+      try {
+        const formData = new FormData();
+        for (const uid of selectUid) {
+          formData.append("contact_uid[]", uid);
+        }
+        const deleteForSelect = await axios.post(
+          `${process.env.REACT_APP_BACKEND_URL}/contacts/delete/item`,
+          formData,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        Swal.fire({
+          title: deleteForSelect.data.message,
+          text: "Successfully delete contact",
+          icon: "success",
+        });
+        window.location.reload();
+      } catch (error) {
+        if (error.response.data.message === "Unauthenticated.") {
+          Swal.fire({
+            title: error.response.data.message,
+            text: "Tolong Login Kembali",
+            icon: "warning",
+          });
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+        if (error.message) {
+          Swal.fire({
+            text: error.response.data.message,
+            icon: "warning",
+          });
+        }
+      }
+    }
   };
   return (
     <body id="body">
@@ -244,17 +306,7 @@ const Contact = () => {
                   </li>
                   <li>
                     <a class="dropdown-item" href="#">
-                      Donwload Selected With Detail
-                    </a>
-                  </li>
-                  <li>
-                    <a class="dropdown-item" href="#">
                       Donwload All
-                    </a>
-                  </li>
-                  <li>
-                    <a class="dropdown-item" href="#">
-                      Donwload All With Detail
                     </a>
                   </li>
                 </ul>
@@ -265,7 +317,12 @@ const Contact = () => {
               >
                 Bulk Change
               </a>
-              <button class="btn btn-danger ms-2 delete">Delete</button>
+              <button
+                class="btn btn-danger ms-2 delete"
+                onClick={handleDeleteSelected}
+              >
+                Delete
+              </button>
             </div>
           </div>
 
@@ -519,6 +576,7 @@ const Contact = () => {
                   pagination
                   paginationComponentOptions={paginationComponentOptions}
                   selectableRows
+                  onSelectedRowsChange={selectUidDataTable}
                 />
               </div>
             </div>

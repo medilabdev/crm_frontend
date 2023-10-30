@@ -3,6 +3,8 @@ import React, { useEffect, useState } from "react";
 import DataTable from "react-data-table-component";
 import OverlayAddProducts from "./Overlay/addProduct";
 import DeleteSingle from "./Modals/delete";
+import Swal from "sweetalert2";
+import OverlayEditProduct from "./Overlay/editProduct";
 
 const SingleProduct = () => {
   const token = localStorage.getItem("token");
@@ -13,6 +15,65 @@ const SingleProduct = () => {
   const handleShowAdd = () => setShowAdd(true);
   const [deleteSingle, setDeleteProduct] = useState(false);
   const handleDeleteSingle = () => setDeleteProduct(false);
+  const [selectUid, setSelectUid] = useState(false);
+  const selectUidDataTable = (e) => {
+    const select = e.selectedRows.map((row) => row.uid);
+    setSelectUid(select);
+  };
+  const [editProduct, setEditProduct] = useState(false);
+  const handleCloseEditOverlay = () => {
+    setEditProduct(false);
+  };
+  // console.log(editProduct);
+  const handleDeleteSelected = async (e) => {
+    e.preventDefault();
+    const isResult = await Swal.fire({
+      title: "Apakah anda yakin",
+      text: "Anda tidak dapat mengembalikan data ini setelah menghapusnya!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Ya, Hapus!",
+      cancelButtonText: "Batal",
+    });
+    if (isResult.isConfirmed) {
+      try {
+        const formData = new FormData();
+        for (const uid of selectUid) {
+          formData.append("product_uid[]", uid);
+        }
+        formData.append("_method", "delete");
+        const deleteSelect = await axios.post(
+          `${process.env.REACT_APP_BACKEND_URL}/products/delete/item`,
+          formData,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        Swal.fire({
+          title: deleteSelect.data.message,
+          text: "Successfully delete contact",
+          icon: "success",
+        });
+        window.location.reload();
+      } catch (error) {
+        if (error.response.data.message === "Unauthenticated.") {
+          Swal.fire({
+            title: error.response.data.message,
+            text: "Tolong Login Kembali",
+            icon: "warning",
+          });
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+        if (error.message) {
+          Swal.fire({
+            text: error.response.data.message,
+            icon: "warning",
+          });
+        }
+      }
+    }
+  };
   const getProduct = () => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/products`, {
@@ -82,7 +143,7 @@ const SingleProduct = () => {
           <button
             title="edit"
             className="icon-button"
-            onClick={() => `${row.uid}`}
+            onClick={() => setEditProduct(row.uid)}
           >
             <i className="bi bi-pen"></i>
           </button>
@@ -114,6 +175,13 @@ const SingleProduct = () => {
         >
           Add Product
         </button>
+        <button
+          className="btn btn-danger mt-5 ms-4"
+          style={{ fontSize: "0.85rem" }}
+          onClick={handleDeleteSelected}
+        >
+          Delete Product
+        </button>
         <div className="float-end col-3 me-3">
           <div className="input-group mt-5">
             <div className="input-group-prepend">
@@ -141,11 +209,17 @@ const SingleProduct = () => {
           pagination
           selectableRows
           paginationComponentOptions={paginationComponentOptions}
+          onSelectedRowsChange={selectUidDataTable}
         />
         <DeleteSingle
           onClose={handleDeleteSingle}
           visible={deleteSingle !== false}
           uid={deleteSingle}
+        />
+        <OverlayEditProduct
+          onClose={handleCloseEditOverlay}
+          visible={editProduct !== false}
+          uid={editProduct}
         />
         <OverlayAddProducts visible={showAdd} onClose={handleCloseAdd} />
       </div>

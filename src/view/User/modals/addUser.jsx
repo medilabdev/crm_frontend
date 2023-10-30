@@ -40,7 +40,7 @@ const AddUser = ({ visible, onClose, roles, primary, refUsers, position }) => {
     }
   };
 
-  const handleInputUser = async (e) => {
+  const handleInputUser = (e) => {
     e.preventDefault();
     const formData = new FormData();
     if (inputUser.image) {
@@ -59,25 +59,25 @@ const AddUser = ({ visible, onClose, roles, primary, refUsers, position }) => {
     formData.append("position_uid", inputUser.position_uid);
     formData.append("reff_uid", inputUser.reff_uid);
     try {
-      const addUser = await axios.post(
-        `${process.env.REACT_APP_BACKEND_URL}/users`,
-        formData,
-        {
+      axios
+        .post(`${process.env.REACT_APP_BACKEND_URL}/users`, formData, {
           headers: {
             Authorization: `Bearer ${tokenAuth}`,
             "Content-Type": "multipart/form-data",
           },
-        }
-      );
-      Swal.fire({
-        title: addUser.data.message,
-        text: "Successfully add user",
-        icon: "success",
-      });
-      window.location.reload();
-      // if(addUser.data.message )
+        })
+        .then((res) => {
+          Swal.fire({
+            title: res.data.message,
+            text: "Successfully add user",
+            icon: "success",
+          }).then((res) => {
+            if (res.isConfirmed) {
+              window.location.reload();
+            }
+          });
+        });
     } catch (error) {
-      // console.log(error);
       if (error.response) {
         Swal.fire({
           text: error.response.data.message,

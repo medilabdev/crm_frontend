@@ -45,11 +45,14 @@ const EditUser = ({
           position_uid: oldUserData?.position?.uid,
           reff_uid: oldUserData?.refrence_user?.uid,
           secondary_team_uid: oldUserData?.secondary_team?.uid,
-          primary_team_uid: oldUserData?.primary_team?.uid
+          primary_team_uid: oldUserData?.primary_team?.uid,
         });
       })
       .catch((err) => {
-        console.error("gagal memuat data", err);
+        if (err.response.data.message === "Unauthenticated.") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
       });
   };
   useEffect(() => {
@@ -67,7 +70,7 @@ const EditUser = ({
     });
   };
 
-  const handleUpdateUser = async (e) => {
+  const handleUpdateUser = (e) => {
     e.preventDefault();
     const formData = new FormData();
     formData.append("name", editUser.name);
@@ -82,22 +85,23 @@ const EditUser = ({
     formData.append("reff_uid", editUser.reff_uid || "");
     formData.append("_method", "put");
     try {
-      const updateUser = await axios.post(
-        `${process.env.REACT_APP_BACKEND_URL}/users/${uid}`,
-        formData,
-        {
+      axios
+        .post(`${process.env.REACT_APP_BACKEND_URL}/users/${uid}`, formData, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
-      );
-      Swal.fire({
-        title: updateUser.data.message,
-        text: "updated successfully",
-        icon: "success",
-      });
-      window.location.reload();
-      onClose();
+        })
+        .then((res) => {
+          Swal.fire({
+            title: res.data.message,
+            text: "updated successfully",
+            icon: "success",
+          }).then((result) => {
+            if (result.isConfirmed) {
+              window.location.reload();
+            }
+          });
+        });
     } catch (err) {
       if (err.response) {
         Swal.fire({

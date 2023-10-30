@@ -6,10 +6,53 @@ import Main from "../../../components/Template/Main";
 import Footer from "../../../components/Template/Footer";
 import { Button, Card, FloatingLabel, Form } from "react-bootstrap";
 import ReactQuill from "react-quill";
-
+import IconPhoto from "../../../assets/img/person.png";
+import { useEffect } from "react";
+import axios from "axios";
 const EditContact = () => {
   const [telephone, setTelephone] = useState([""]);
-
+  const [editContact, setEditContact] = useState({});
+  const { uid } = useParams();
+  const token = localStorage.getItem("token");
+  const getContactDetail = (uid, token) => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/contacts/${uid}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => {
+        const contactDetail = res.data.data;
+        console.log(contactDetail);
+        const telp_number = contactDetail?.phone_number?.map(
+          (phone) => phone.number
+        );
+        setEditContact({
+          name: contactDetail.name,
+          birthday: contactDetail.birthday,
+          gender: contactDetail.gender,
+          email: contactDetail.email,
+          position: contactDetail.position,
+          address: contactDetail.address,
+          city: contactDetail.city,
+          postal_code: contactDetail.postal_code,
+          remarks: contactDetail.remarks,
+          image: contactDetail.image,
+          owner_user_uid: contactDetail.owner_user_uid,
+          source_uid: contactDetail.source_uid,
+          notes: contactDetail.notes,
+          company_uid: contactDetail.company_uid,
+          gps: contactDetail.gps,
+        });
+        setTelephone(telp_number ? telp_number : []);
+      })
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated.") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
   const addTelephone = () => {
     setTelephone([...telephone, ""]);
   };
@@ -25,6 +68,9 @@ const EditContact = () => {
     newTelephone.splice(index, 1);
     setTelephone(newTelephone);
   };
+  useEffect(() => {
+    getContactDetail(uid, token);
+  }, [uid, token]);
   return (
     <body id="body">
       <Topbar />
@@ -55,6 +101,28 @@ const EditContact = () => {
           </div>
           <div className="row">
             <div className="col-md-4">
+              <Card className="shadow">
+                <div className="row">
+                  <div className="col-md-4 p-2 text-center">
+                    <img
+                      src={IconPhoto}
+                      style={{
+                        width: "60px",
+                        marginTop: "25px",
+                        marginLeft: "25px"
+                      }}
+                    />
+                  </div>
+                  <div className="col-md-8 p-4">
+                    <h6 className="fw-bold mt-2">{editContact.name}</h6>
+                    <span className="fw-norma">{editContact.position}</span>
+                    <p className="fw-normal fs-6">
+                      <i class="bi bi-geo-alt-fill"></i>{" "}
+                      {editContact.address ? editContact.address : "-"}
+                    </p>
+                  </div>
+                </div>
+              </Card>
               {/* contact */}
               <Card className="shadow">
                 <Card.Header>

@@ -10,6 +10,7 @@ import OverlayAddDeals from "../../../components/Overlay/addDeals";
 import OverlayAddCompany from "../../../components/Overlay/addCompany";
 import axios from "axios";
 import Swal from "sweetalert2";
+import Select from "react-select";
 const SingleContact = () => {
   const token = localStorage.getItem("token");
   const [showCanvasDeals, setShowCanvasDeals] = useState(false);
@@ -37,7 +38,6 @@ const SingleContact = () => {
   const [source, setSource] = useState([]);
   const [company, setCompany] = useState([]);
   const [additionalForm, setAdditionalForm] = useState([]);
-  console.log(inputContact);
   const getCompany = () => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/companies`, {
@@ -68,7 +68,6 @@ const SingleContact = () => {
         }
       });
   };
-  // console.log(inputContact);
   const getOwnerUser = () => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
@@ -118,7 +117,24 @@ const SingleContact = () => {
       };
     });
   };
+  const ownerSelected = () => {
+    const resultOwner = [];
+    ownerUser.map((data) => {
+      const selectOwner = {
+        value: data.uid,
+        label: data.name,
+      };
+      resultOwner.push(selectOwner);
+    });
+    return resultOwner;
+  };
 
+  const handleInputOwner = (selected) => {
+    setInputContact({
+      ...inputContact,
+      owner_user_uid: selected.value,
+    });
+  };
   //   menghapus telephone
   const removeTelephone = (index) => {
     setInputContact((input) => {
@@ -137,7 +153,7 @@ const SingleContact = () => {
       [e.target.name]: e.target.value,
     });
   };
-
+  console.log(inputContact);
   useEffect(() => {
     getOwnerUser(token);
     getSource(token);
@@ -250,30 +266,6 @@ const SingleContact = () => {
                   <FloatingLabel
                     className="mb-3"
                     controlId="floatingInput"
-                    label={
-                      <span>
-                        Owner
-                        <span style={{ color: "red" }} className="fs-6">
-                          *
-                        </span>
-                      </span>
-                    }
-                  >
-                    <Form.Select
-                      name="owner_user_uid"
-                      onChange={handleInputContact}
-                    >
-                      <option value="">Select Choose</option>
-                      {ownerUser.map((owner) => (
-                        <option key={owner.uid} value={owner.uid}>
-                          {owner.name}
-                        </option>
-                      ))}
-                    </Form.Select>
-                  </FloatingLabel>
-                  <FloatingLabel
-                    className="mb-3"
-                    controlId="floatingInput"
                     label="Email"
                   >
                     <Form.Control
@@ -283,29 +275,40 @@ const SingleContact = () => {
                       placeholder="@gmail.com"
                     />
                   </FloatingLabel>
+                  <Form.Group className="mb-3">
+                    <Form.Label>
+                      Owner
+                      <span style={{ color: "red" }} className="fs-6">
+                        *
+                      </span>
+                    </Form.Label>
+                    <Select
+                      name="owner_user_uid"
+                      onChange={handleInputOwner}
+                      options={ownerSelected()}
+                      required
+                    />
+                  </Form.Group>
+                  <Form.Group>
+                    <Form.Label>
+                      No.Telp/WhatsApp
+                      <span style={{ color: "red" }} className="fs-6">
+                        *
+                      </span>
+                    </Form.Label>
+                  </Form.Group>
                   {inputContact.phone_number.map((telephone, index) => (
                     <div key={index}>
-                      <FloatingLabel
-                        label={
-                          <>
-                            Telephone #{index + 1}
-                            <span style={{ color: "red" }} className="fs-6">
-                              *
-                            </span>
-                          </>
-                        }
+                      <Form.Control
+                        type="number"
                         className="mb-2"
-                      >
-                        <Form.Control
-                          type="number"
-                          placeholder="@gmail."
-                          name={`phone_number[${index}]`}
-                          value={inputContact.phone_number[index]}
-                          onChange={(e) =>
-                            handleChangeTelephone(index, e.target.value)
-                          }
-                        />
-                      </FloatingLabel>
+                        placeholder={`No.Telp ${index + 1} `}
+                        name={`phone_number[${index}]`}
+                        value={inputContact.phone_number[index]}
+                        onChange={(e) =>
+                          handleChangeTelephone(index, e.target.value)
+                        }
+                      />
                       {index > 0 && (
                         <Button
                           variant="danger"

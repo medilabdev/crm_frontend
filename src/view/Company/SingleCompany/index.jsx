@@ -43,7 +43,7 @@ const SingleCompany = () => {
   const [showAddDeals, setShowAddDeals] = useState(false);
   const handleCloseDeals = () => setShowAddDeals(false);
   const handleShowDeals = () => setShowAddDeals(true);
-
+  console.log(inputCompany);
   const getContact = () => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/contacts`, {
@@ -122,6 +122,7 @@ const SingleCompany = () => {
         }
       });
   };
+
   const addTelephone = () => {
     setInputCompany((prevInput) => ({
       ...prevInput,
@@ -139,6 +140,7 @@ const SingleCompany = () => {
       };
     });
   };
+
   const removeTelephone = (index) => {
     setInputCompany((prevInput) => {
       const newTelp = [...prevInput.telp_number];
@@ -149,6 +151,7 @@ const SingleCompany = () => {
       };
     });
   };
+
   const contactSelect = () => {
     const result = [];
     contact?.map((data) => {
@@ -164,6 +167,25 @@ const SingleCompany = () => {
   const [resultContact, setResultContact] = useState([]);
   const handleSelectContact = (select) => {
     setResultContact(select.map((option) => option.value));
+  };
+
+  const ownerSelect = () => {
+    const result = [];
+    ownerUser?.map((data) => {
+      const select = {
+        value: data.uid,
+        label: data.name,
+      };
+      result.push(select);
+    });
+    return result;
+  };
+
+  const handleInputOwner = (selected) => {
+    setInputCompany({
+      ...inputCompany,
+      owner_user_uid: selected.value,
+    });
   };
 
   const handleInputCompany = (e) => {
@@ -231,7 +253,6 @@ const SingleCompany = () => {
     }
   };
 
-  console.log(inputCompany);
   useEffect(() => {
     getOwnerUser(token);
     getCompanyType(token);
@@ -307,53 +328,42 @@ const SingleCompany = () => {
                       onChange={handleInputCompany}
                     />
                   </FloatingLabel>
-                  <FloatingLabel
-                    className="mb-3"
-                    controlId="floatingInput"
-                    label={
+                  <Form.Group className="mb-3">
+                    <Form.Label controlId="floatingInput">
                       <span>
                         Owner
                         <span style={{ color: "red" }} className="fs-6">
                           *
                         </span>
                       </span>
-                    }
-                  >
-                    <Form.Select
+                    </Form.Label>
+                    <Select
                       name="owner_user_uid"
-                      value={inputCompany.owner_user_uid}
-                      onChange={handleInputCompany}
-                    >
-                      <option value="">Select Owner</option>
-                      {ownerUser.map((user) => (
-                        <option key={user.uid} value={user.uid}>
-                          {user.name}
-                        </option>
-                      ))}
-                    </Form.Select>
-                  </FloatingLabel>
+                      onChange={handleInputOwner}
+                      options={ownerSelect()}
+                      required
+                    />
+                  </Form.Group>
+                  <Form.Label>
+                    Telp.No/WhatApp{" "}
+                    <span style={{ color: "red" }} className="fs-6">
+                      *
+                    </span>
+                  </Form.Label>
                   {inputCompany.telp_number.map((telephone, index) => (
                     <div key={index}>
-                      <FloatingLabel
-                        label={
-                          <>
-                            Telephone #{index + 1}
-                            <span style={{ color: "red" }} className="fs-6">
-                              *
-                            </span>
-                          </>
-                        }
+                      <Form.Control
                         className="mb-2"
-                      >
-                        <Form.Control
-                          type="number"
-                          name={`telp_number[${index}]`}
-                          value={inputCompany.telp_number[index]}
-                          onChange={(e) =>
-                            handleChangeTelephone(index, e.target.value)
-                          }
-                        />
-                      </FloatingLabel>
+                        type="number"
+                        placeholder={`No.Telp ${index + 1}  `}
+                        name={`telp_number[${index}]`}
+                        value={inputCompany.telp_number[index]}
+                        onChange={(e) =>
+                          handleChangeTelephone(index, e.target.value)
+                        }
+                        required
+                      />
+
                       {index > 0 && (
                         <Button
                           variant="danger"
@@ -432,6 +442,7 @@ const SingleCompany = () => {
                       style={{ fontSize: "0.85rem" }}
                       name="company_type_uid"
                       onChange={handleInputCompany}
+                      required
                     >
                       <option value="">Select Choose</option>
                       {typeCompany.map((type) => (
@@ -449,14 +460,16 @@ const SingleCompany = () => {
                       onChange={handleInputCompany}
                     />
                   </FloatingLabel>
-                  <FloatingLabel label={
+                  <FloatingLabel
+                    label={
                       <span>
                         Source
                         <span style={{ color: "red" }} className="fs-6">
                           *
                         </span>
                       </span>
-                    }>
+                    }
+                  >
                     <Form.Select
                       className="mb-3"
                       size="lg"

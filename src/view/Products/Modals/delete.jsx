@@ -1,10 +1,48 @@
+import axios from "axios";
 import React from "react";
 import { Button, Modal } from "react-bootstrap";
-
+import Swal from "sweetalert2";
 const DeleteSingle = ({ visible, onClose, uid }) => {
   const token = localStorage.getItem("token");
   const arrUid = [uid];
-  const deleteData = async () => {};
+  // console.log(arrUid);
+
+  const deleteData = async () => {
+    try {
+      const formData = new FormData();
+      formData.append("product_uid[]", arrUid);
+      formData.append("_method", "delete");
+      const deleteSelect = await axios.post(
+        `${process.env.REACT_APP_BACKEND_URL}/products/delete/item`,
+        formData,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      Swal.fire({
+        title: deleteSelect.data.message,
+        text: "Successfully delete contact",
+        icon: "success",
+      });
+      window.location.reload();
+    } catch (error) {
+      if (error.response.data.message === "Unauthenticated.") {
+        Swal.fire({
+          title: error.response.data.message,
+          text: "Tolong Login Kembali",
+          icon: "warning",
+        });
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      if (error.message) {
+        Swal.fire({
+          text: error.response.data.message,
+          icon: "warning",
+        });
+      }
+    }
+  };
   return (
     <>
       <Modal show={visible} onHide={onClose} centered>

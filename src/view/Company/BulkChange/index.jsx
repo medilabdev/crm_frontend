@@ -13,8 +13,6 @@ const BulkChangeCompany = () => {
   const token = localStorage.getItem("token");
   const [bulkCompany, setBulkCompany] = useState([]);
   const [user, setUser] = useState([]);
-  const [selectedOptions, setSelectedOptions] = useState([]);
-  // const [owner, setOwner] = useState(null);
   const [permission, setPermission] = useState({
     new_owner_user_uid: "",
   });
@@ -62,13 +60,25 @@ const BulkChangeCompany = () => {
     });
     return result;
   };
+  const ownerPermission = () => {
+    const result = [];
+    user?.map((data) => {
+      const select = {
+        value: data.uid,
+        label: data.name,
+      };
+      result.push(select);
+    });
+    return result;
+  };
 
   const handlePermission = (e) => {
     setPermission({
       ...permission,
-      [e.target.name]: e.target.value,
+      new_owner_user_uid: e.value,
     });
   };
+  // console.log(permission);
   useEffect(() => {
     getCompanyTransfer(token);
     getAllUser(token);
@@ -77,7 +87,6 @@ const BulkChangeCompany = () => {
   const [resultBulkCompany, setResultBulkCompany] = useState([]);
   // console.log(resultBulkCompany);
   const handleSelectChange = (selected) => {
-    setSelectedOptions(selected);
     setResultBulkCompany(selected.map((option) => option.value));
   };
   // console.log(resultBulkCompany);
@@ -109,7 +118,7 @@ const BulkChangeCompany = () => {
       Swal.fire({
         title: bulk.data.message,
         text: "Successfully bulk change",
-        icon: "success",
+        icon: "success",  
       });
     } catch (error) {
       // console.log(error);
@@ -154,7 +163,6 @@ const BulkChangeCompany = () => {
                   components={animatedComponents}
                   isMulti
                   options={bulkSelect()}
-                  value={selectedOptions}
                   onChange={(selected) => handleSelectChange(selected)}
                   name="company_uid[]"
                 />
@@ -170,19 +178,11 @@ const BulkChangeCompany = () => {
               </Form.Group> */}
               <Form.Group className="mb-3 col-5" md={5}>
                 <Form.Label className="fw-bold">Give Permission to</Form.Label>
-                <select
+                <Select
+                  options={ownerPermission()}
                   name="new_owner_user_uid"
                   onChange={handlePermission}
-                  value={permission.new_owner_user_uid}
-                  className="form-select"
-                >
-                  <option value="">Select Choose</option>
-                  {user.map((data) => (
-                    <option key={data.uid} value={data.uid}>
-                      {data.name}
-                    </option>
-                  ))}
-                </select>
+                />
               </Form.Group>
               <div className="mt-4">
                 <a href="/company" className="btn btn-secondary me-4">
