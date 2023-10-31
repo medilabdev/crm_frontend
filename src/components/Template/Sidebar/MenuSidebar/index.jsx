@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 const MenuSidebar = ({ type, name, icon, url, isActive }) => {
   const location = useLocation();
@@ -12,19 +12,18 @@ const MenuSidebar = ({ type, name, icon, url, isActive }) => {
     }
   }, [location.pathname, url]);
 
-  // console.log(dataBsTarget);
   return (
     <>
       {type !== "collapse" ? (
         <>
           <li className={`nav-item ${isActive ? "" : "d-none"} `}>
-            <a
+            <Link
+              to={url}
               className={`nav-link ${urlActive ? "" : "collapsed"}`}
-              href={url}
             >
               <i className={icon} style={{ fontSize: "0.95rem" }} />
               <span style={{ fontSize: "0.95rem" }}>{name}</span>
-            </a>
+            </Link>
           </li>
         </>
       ) : (

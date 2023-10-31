@@ -11,6 +11,7 @@ import OverlayAddCompany from "../../../components/Overlay/addCompany";
 import axios from "axios";
 import Swal from "sweetalert2";
 import Select from "react-select";
+import { Link } from "react-router-dom";
 const SingleContact = () => {
   const token = localStorage.getItem("token");
   const [showCanvasDeals, setShowCanvasDeals] = useState(false);
@@ -205,14 +206,14 @@ const SingleContact = () => {
                 <nav>
                   <ol className="breadcrumb mt-2">
                     <li className="breadcrumb-item">
-                      <a href="/" className="text-decoration-none">
+                      <Link to="/" className="text-decoration-none">
                         Dashboard
-                      </a>
+                      </Link>
                     </li>
                     <li className="breadcrumb-item">
-                      <a href="/contact" className="text-decoration-none">
+                      <Link to="/contact" className="text-decoration-none">
                         Contact
-                      </a>
+                      </Link>
                     </li>
                     <li className="breadcrumb-item active">
                       Add Single Contact

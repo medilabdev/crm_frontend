@@ -6,6 +6,7 @@ import {
   useLocation,
   Route,
   useNavigate,
+  Switch,
 } from "react-router-dom";
 import Dashboard from "../view/Dashboard";
 import User from "../view/User";
@@ -25,6 +26,8 @@ import UploadFileContact from "../view/Contact/UploadFile";
 import EditContact from "../view/Contact/Edit";
 import EditCompany from "../view/Company/Edit";
 import ShowCompany from "../view/Company/ShowCompany";
+import Templates from "../view/Documents/Templates";
+import ShortCode from "../view/Documents/ShortCode";
 const Login = ({ children }) => {
   const token = localStorage.getItem("token");
   if (!token) {
@@ -33,6 +36,10 @@ const Login = ({ children }) => {
   return children;
 };
 
+function Error() {
+  return <h2>Halaman tidak ada</h2>;
+}
+
 function Router() {
   return (
     <BrowserRouter>
@@ -40,6 +47,7 @@ function Router() {
         <Route path="/login" element={<Auth />} />
 
         <Route
+          exact
           path="/"
           element={
             <Login>
@@ -49,6 +57,7 @@ function Router() {
         />
 
         <Route
+          exact
           path="/users"
           element={
             <Login>
@@ -58,6 +67,7 @@ function Router() {
         />
 
         <Route
+          exact
           path="/users/:uid"
           element={
             <Login>
@@ -67,6 +77,7 @@ function Router() {
         />
 
         <Route
+          exact
           path="/contact"
           element={
             <Login>
@@ -76,6 +87,7 @@ function Router() {
         />
 
         <Route
+          exact
           path="/single-contact"
           element={
             <Login>
@@ -85,6 +97,7 @@ function Router() {
         />
 
         <Route
+          exact
           path="/contact/bulk-change"
           element={
             <Login>
@@ -93,6 +106,7 @@ function Router() {
           }
         />
         <Route
+          exact
           path="/contact/upload-file"
           element={
             <Login>
@@ -101,6 +115,7 @@ function Router() {
           }
         />
         <Route
+          exact
           path="/contact/:uid/edit"
           element={
             <Login>
@@ -110,6 +125,7 @@ function Router() {
         />
 
         <Route
+          exact
           path="/company"
           element={
             <Login>
@@ -119,6 +135,7 @@ function Router() {
         />
 
         <Route
+          exact
           path="/company/single-company"
           element={
             <Login>
@@ -128,6 +145,7 @@ function Router() {
         />
 
         <Route
+          exact
           path="/company/upload-file"
           element={
             <Login>
@@ -145,6 +163,7 @@ function Router() {
           }
         />
         <Route
+          exact
           path="/company/:uid/edit"
           element={
             <Login>
@@ -153,6 +172,7 @@ function Router() {
           }
         />
         <Route
+          exact
           path="/company/:uid"
           element={
             <Login>
@@ -162,6 +182,7 @@ function Router() {
         />
 
         <Route
+          exact
           path="/products"
           element={
             <Login>
@@ -171,6 +192,7 @@ function Router() {
         />
 
         <Route
+          exact
           path="/documents"
           element={
             <Login>
@@ -178,6 +200,27 @@ function Router() {
             </Login>
           }
         />
+
+        <Route
+          exact
+          path="/templates"
+          element={
+            <Login>
+              <Templates />
+            </Login>
+          }
+        />
+        
+        <Route
+          exact
+          path="/short-code"
+          element={
+            <Login>
+              <ShortCode />
+            </Login>
+          }
+        />
+
       </Routes>
     </BrowserRouter>
   );

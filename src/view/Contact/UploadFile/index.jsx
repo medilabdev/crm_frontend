@@ -6,6 +6,7 @@ import Footer from "../../../components/Template/Footer";
 import { Card } from "react-bootstrap";
 import Swal from "sweetalert2";
 import axios from "axios";
+import { Link } from "react-router-dom";
 
 const UploadFileContact = () => {
   const tokenAuth = localStorage.getItem("token");
@@ -69,14 +70,14 @@ const UploadFileContact = () => {
                 <nav>
                   <ol className="breadcrumb mt-2">
                     <li className="breadcrumb-item">
-                      <a href="/" className="text-decoration-none">
+                      <Link to="/" className="text-decoration-none">
                         Dashboard
-                      </a>
+                      </Link>
                     </li>
                     <li className="breadcrumb-item">
-                      <a href="/contact" className="text-decoration-none">
+                      <Link to="/contact" className="text-decoration-none">
                         Contact
-                      </a>
+                      </Link>
                     </li>
                     <li className="breadcrumb-item active">Upload File</li>
                   </ol>

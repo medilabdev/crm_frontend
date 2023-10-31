@@ -11,7 +11,7 @@ import "../Contact/style.css";
 import { Row, Col, OverlayTrigger, Tooltip } from "react-bootstrap";
 import DeleteContact from "./Modals/deleteContact";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 
 const Contact = () => {
@@ -255,9 +255,9 @@ const Contact = () => {
                 <nav>
                   <ol className="breadcrumb mt-2">
                     <li className="breadcrumb-item">
-                      <a href="/" className="text-decoration-none">
+                      <Link to="/" className="text-decoration-none">
                         Dashboard
-                      </a>
+                      </Link>
                     </li>
                     <li className="breadcrumb-item active fw-bold">Contact</li>
                   </ol>
@@ -278,14 +278,14 @@ const Contact = () => {
                 </button>
                 <ul class="dropdown-menu">
                   <li>
-                    <a class="dropdown-item" href="/single-contact">
+                    <Link class="dropdown-item" to="/single-contact">
                       Single Contact
-                    </a>
+                    </Link>
                   </li>
                   <li>
-                    <a class="dropdown-item" href="/contact/upload-file">
+                    <Link class="dropdown-item" to="/contact/upload-file">
                       Upload File
-                    </a>
+                    </Link>
                   </li>
                 </ul>
               </div>
@@ -311,12 +311,12 @@ const Contact = () => {
                   </li>
                 </ul>
               </div>
-              <a
-                href="/contact/bulk-change"
+              <Link
+                to="/contact/bulk-change"
                 class="btn btn-outline-primary ms-2 bulk-change"
               >
                 Bulk Change
-              </a>
+              </Link>
               <button
                 class="btn btn-danger ms-2 delete"
                 onClick={handleDeleteSelected}

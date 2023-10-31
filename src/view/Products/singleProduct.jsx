@@ -42,19 +42,25 @@ const SingleProduct = () => {
           formData.append("product_uid[]", uid);
         }
         formData.append("_method", "delete");
-        const deleteSelect = await axios.post(
-          `${process.env.REACT_APP_BACKEND_URL}/products/delete/item`,
-          formData,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        Swal.fire({
-          title: deleteSelect.data.message,
-          text: "Successfully delete contact",
-          icon: "success",
-        });
-        window.location.reload();
+        const deleteSelect = await axios
+          .post(
+            `${process.env.REACT_APP_BACKEND_URL}/products/delete/item`,
+            formData,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          )
+          .then((res) => {
+            Swal.fire({
+              title: res.data.message,
+              text: "Successfully delete contact",
+              icon: "success",
+            }).then((res) => {
+              if (res.isConfirmed) {
+                window.location.reload();
+              }
+            });
+          });
       } catch (error) {
         if (error.response.data.message === "Unauthenticated.") {
           Swal.fire({

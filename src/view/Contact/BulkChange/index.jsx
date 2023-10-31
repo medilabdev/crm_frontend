@@ -10,6 +10,7 @@ import makeAnimated from "react-select/animated";
 import Select from "react-select";
 import { useEffect } from "react";
 import Swal from "sweetalert2";
+import { Link } from "react-router-dom";
 
 const BulkChange = () => {
   const token = localStorage.getItem("token");
@@ -17,9 +18,7 @@ const BulkChange = () => {
   const [user, setUser] = useState([]);
   const [bulkContact, setBulkContact] = useState([]);
   const [resultContact, setResultContact] = useState([]);
-  const [owner, setOwner] = useState({
-    owner_user_uid: "",
-  });
+
   const [permission, setPermission] = useState({
     new_owner_user_uid: "",
   });
@@ -83,13 +82,6 @@ const BulkChange = () => {
     setResultContact(e.map((option) => option.value));
   };
 
-  const handleOwner = (e) => {
-    setOwner({
-      ...owner,
-      owner_user_uid: e.value,
-    });
-  };
-
   const handleNewOwner = (e) => {
     setPermission({
       ...permission,
@@ -110,27 +102,33 @@ const BulkChange = () => {
       for (const uid of resultContact) {
         formData.append("contact_uid[]", uid);
       }
-      formData.append("owner_user_uid", owner.owner_user_uid);
       formData.append("new_owner_user_uid", permission.new_owner_user_uid);
       formData.append("_method", "PUT");
-      console.log("FormData Content:");
-      for (const pair of formData.entries()) {
-        console.log(pair[0] + ": " + pair[1]);
-      }
-      const bulk = await axios.post(
-        `${process.env.REACT_APP_BACKEND_URL}/contacts/transfer/owner`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      Swal.fire({
-        title: bulk.data.message,
-        text: "Successfully bulk change contact",
-        icon: "success",
-      });
+      // console.log("FormData Content:");
+      // for (const pair of formData.entries()) {
+      //   console.log(pair[0] + ": " + pair[1]);
+      // }
+      const bulk = await axios
+        .post(
+          `${process.env.REACT_APP_BACKEND_URL}/contacts/transfer/owner`,
+          formData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+        .then((res) => {
+          Swal.fire({
+            title: res.data.message,
+            text: "Successfully bulk change contact",
+            icon: "success",
+          }).then((res) => {
+            if (res.isConfirmed) {
+              window.location.href = "/contact";
+            }
+          });
+        });
     } catch (error) {
       console.log(error);
       if (error.response) {
@@ -152,14 +150,14 @@ const BulkChange = () => {
             <nav>
               <ol className="breadcrumb mt-2">
                 <li className="breadcrumb-item">
-                  <a href="/" className="text-decoration-none">
+                  <Link to="/" className="text-decoration-none">
                     Dahsboard
-                  </a>
+                  </Link>
                 </li>
                 <li className="breadcrumb-item">
-                  <a href="/contact" className="text-decoration-none">
+                  <Link to="/contact" className="text-decoration-none">
                     Contact
-                  </a>
+                  </Link>
                 </li>
                 <li className="breadcrumb-item active">Bulk Change</li>
               </ol>
@@ -177,15 +175,6 @@ const BulkChange = () => {
                     options={bulkSelect()}
                     onChange={(selected) => handleSelectBulk(selected)}
                     name="contact_uid[]"
-                  />
-                </Form.Group>
-                <Form.Group className="mb-3 col-5" md={5}>
-                  <Form.Label className="fw-bold">Owner</Form.Label>
-                  <Select
-                    options={selectUser()}
-                    name="owner_user_uid"
-                    onChange={handleOwner}
-                    required
                   />
                 </Form.Group>
                 <Form.Group className="mb-3 col-5" md={5}>

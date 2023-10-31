@@ -7,11 +7,75 @@ import makeAnimated from "react-select/animated";
 import Swal from "sweetalert2";
 const EditPackageProduct = ({ visible, uid, onClose }) => {
   const token = localStorage.getItem("token");
+  console.log(uid);
   const [editPackage, setEditPackage] = useState({});
   const [editProduct, setEditProduct] = useState([]);
   const [dataProduct, setDataProduct] = useState([]);
-  const animated = makeAnimated();
+  const [selectUid, setSelectUid] = useState(false);
 
+  const selectUidProduct = (e) => {
+    const select = e.selectedRows.map((row) => row.uid);
+    setSelectUid(select);
+  };
+
+  const animated = makeAnimated();
+  const handleDeleteSelected = async (e) => {
+    e.preventDefault();
+    const isResult = await Swal.fire({
+      title: "Apakah anda yakin",
+      text: "anda yakin untuk menghapusnya!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Ya, Hapus!",
+      cancelButtonText: "Batal",
+    });
+    if (isResult.isConfirmed) {
+      try {
+        const formData = new FormData();
+        for (const uidP of selectUid) {
+          formData.append("package_item_uid[]", uidP);
+        }
+        formData.append("package_uid", uid);
+        formData.append("_method", "delete");
+        axios
+          .post(
+            `${process.env.REACT_APP_BACKEND_URL}/packages-product/package/item/delete`,
+            formData,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          )
+          .then((res) => {
+            console.log(res);
+            Swal.fire({
+              title: res.data.message,
+              text: "Successfully delete product",
+              icon: "success",
+            }).then((res) => {
+              if (res.isConfirmed) {
+                window.location.reload();
+              }
+            });
+          });
+      } catch (error) {
+        if (error.response.data.message === "Unauthenticated.") {
+          Swal.fire({
+            title: error.response.data.message,
+            text: "Tolong Login Kembali",
+            icon: "warning",
+          });
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+        if (error.message) {
+          Swal.fire({
+            text: error.response.data.message,
+            icon: "warning",
+          });
+        }
+      }
+    }
+  };
   const getDetailPackage = () => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/packages-product/${uid}`, {
@@ -21,10 +85,11 @@ const EditPackageProduct = ({ visible, uid, onClose }) => {
       })
       .then((res) => {
         const packageData = res.data.data;
-        // console.log(packageData);
         const productPackage = packageData?.package_detail_with_product?.map(
-          (data) => data?.product
+          (data) => data
         );
+        console.log(productPackage);
+
         setEditPackage({
           name: packageData.name,
           discount: packageData.discount,
@@ -33,6 +98,7 @@ const EditPackageProduct = ({ visible, uid, onClose }) => {
         setEditProduct(productPackage ? productPackage : []);
       });
   };
+
   const getProduct = () => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/products`, {
@@ -48,10 +114,13 @@ const EditPackageProduct = ({ visible, uid, onClose }) => {
         }
       });
   };
+
   const selectProduct = () => {
     const result = [];
     dataProduct?.map((data) => {
-      const isProduct = editProduct.some((product) => product.uid === data.uid);
+      const isProduct = editProduct.some(
+        (product) => product?.product?.uid === data.uid
+      );
       if (!isProduct) {
         const theme = {
           value: data.uid,
@@ -72,6 +141,7 @@ const EditPackageProduct = ({ visible, uid, onClose }) => {
   };
 
   const [selectedProduct, setSelectProduct] = useState([]);
+  // console.log(selectedProduct);
   const handleProdutct = (e) => {
     setSelectProduct(e.map((opt) => opt.value));
   };
@@ -83,20 +153,27 @@ const EditPackageProduct = ({ visible, uid, onClose }) => {
     }
     formData.append("package_product_uid", uid);
     try {
-      axios.post(
-        `${process.env.REACT_APP_BACKEND_URL}/packages-product/add/item`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      Swal.fire({
-        text: "Product added successfully",
-        icon: "success",
-      });
-      window.location.reload();
+      axios
+        .post(
+          `${process.env.REACT_APP_BACKEND_URL}/packages-product/add/item`,
+          formData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+        .then((res) => {
+          Swal.fire({
+            title: res.data.message,
+            text: "Successfully add item product",
+            icon: "success",
+          }).then((res) => {
+            if (res.isConfirmed) {
+              window.location.reload();
+            }
+          });
+        });
     } catch (error) {
       if (error.response) {
         Swal.fire({
@@ -160,15 +237,61 @@ const EditPackageProduct = ({ visible, uid, onClose }) => {
     {
       id: 1,
       name: "Name Product",
-      selector: (row) => <p className="mt-1">{row.name}</p>,
+      selector: (row) => <p className="mt-1">{row?.product?.name}</p>,
       sortable: true,
     },
-
     {
       id: 2,
       name: "Action",
       selector: (row) => (
-        <button onClick={() => row.uid} className="icon-button" title="delete">
+        <button
+          onClick={() => {
+            Swal.fire({
+              title: "Konfirmasi",
+              text: "Apa anda yakin ingin menghapus item product ini?",
+              icon: "warning",
+              showCancelButton: true,
+              confirmButtonColor: "#3085d6",
+              cancelButtonColor: "#d33",
+              confirmButtonText: "Ya, Hapus!",
+              cancelButtonText: "Batal",
+            }).then((result) => {
+              if (result.isConfirmed) {
+                const formData = new FormData();
+                formData.append("package_uid", uid);
+                formData.append("package_item_uid[]", row.uid);
+                formData.append("_method", "delete");
+                axios
+                  .post(
+                    `${process.env.REACT_APP_BACKEND_URL}/packages-product/package/item/delete`,
+                    formData,
+                    {
+                      headers: { Authorization: `Bearer ${token}` },
+                    }
+                  )
+                  .then((res) => {
+                    Swal.fire({
+                      title: res.data.message,
+                      text: "Successfully delete item product",
+                      icon: "success",
+                    }).then((res) => {
+                      if (res.isConfirmed) {
+                        window.location.reload();
+                      }
+                    });
+                  });
+              } else {
+                Swal.fire({
+                  title: "Cancelled",
+                  text: "The item was not deleted.",
+                  icon: "error",
+                });
+              }
+            });
+          }}
+          className="icon-button"
+          title="delete"
+        >
           <i className="bi bi-trash-fill danger"></i>
         </button>
       ),
@@ -262,7 +385,10 @@ const EditPackageProduct = ({ visible, uid, onClose }) => {
         <div className="p-2 mt-5">
           <div className="row ">
             <div className="col">
-              <button className="btn btn-outline-danger float-end mb-2">
+              <button
+                className="btn btn-outline-danger float-end mb-2"
+                onClick={handleDeleteSelected}
+              >
                 Delete
               </button>
               <button
@@ -305,6 +431,7 @@ const EditPackageProduct = ({ visible, uid, onClose }) => {
             columns={columns}
             customStyles={customStyle}
             selectableRows
+            onSelectedRowsChange={selectUidProduct}
             className="rounded"
           />
         </div>

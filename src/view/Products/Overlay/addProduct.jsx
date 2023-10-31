@@ -19,22 +19,23 @@ const OverlayAddProducts = ({ visible, onClose }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const add = await axios.post(
-        `${process.env.REACT_APP_BACKEND_URL}/products`,
-        inputProduct,
-        {
+      const add = await axios
+        .post(`${process.env.REACT_APP_BACKEND_URL}/products`, inputProduct, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
-      );
-      Swal.fire({
-        title: add.data.message,
-        text: "Successfully add product",
-        icon: "success",
-      });
-      onClose();
-      window.location.reload();
+        })
+        .then((res) => {
+          Swal.fire({
+            title: res.data.message,
+            text: "Successfully add product",
+            icon: "success",
+          }).then((res) => {
+            if (res.isConfirmed) {
+              window.location.reload();
+            }
+          });
+        });
     } catch (error) {
       console.log(error);
       if (error.response) {
@@ -67,13 +68,23 @@ const OverlayAddProducts = ({ visible, onClose }) => {
             <Form.Label>
               Name Product <span className="text-danger fs-5">*</span>
             </Form.Label>
-            <Form.Control type="text" name="name" onChange={handleInput} required />
+            <Form.Control
+              type="text"
+              name="name"
+              onChange={handleInput}
+              required
+            />
           </Form.Group>
           <Form.Group className="mb-2">
             <Form.Label>
               Price <span className="text-danger fs-5">*</span>
             </Form.Label>
-            <Form.Control type="number" name="price" onChange={handleInput} required/>
+            <Form.Control
+              type="number"
+              name="price"
+              onChange={handleInput}
+              required
+            />
           </Form.Group>
           <div className="mt-5">
             <button className="btn btn-primary" type="submit">

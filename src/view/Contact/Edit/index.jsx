@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Topbar from "../../../components/Template/Topbar";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import Sidebar from "../../../components/Template/Sidebar";
 import Main from "../../../components/Template/Main";
 import Footer from "../../../components/Template/Footer";
@@ -84,14 +84,14 @@ const EditContact = () => {
                 <nav>
                   <ol className="breadcrumb mt-2">
                     <li className="breadcrumb-item">
-                      <a href="/" className="text-decoration-none">
+                      <Link to="/" className="text-decoration-none">
                         Dashboard
-                      </a>
+                      </Link>
                     </li>
                     <li className="breadcrumb-item">
-                      <a href="/contact" className="text-decoration-none">
+                      <Link to="/contact" className="text-decoration-none">
                         Contact
-                      </a>
+                      </Link>
                     </li>
                     <li className="breadcrumb-item active">Edit Contact</li>
                   </ol>

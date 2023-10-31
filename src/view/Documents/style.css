@@ -1,0 +1,12 @@
+.documents:hover{
+    background-color: #526D82;
+    font-weight: 800;
+    color: aliceblue !important;
+    
+}
+.active-side{
+    background-color: #526D82;
+    font-weight: 800;
+    border-radius: 3px;
+    color: white !important;
+}

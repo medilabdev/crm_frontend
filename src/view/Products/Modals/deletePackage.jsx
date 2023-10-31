@@ -2,27 +2,29 @@ import axios from "axios";
 import React from "react";
 import { Button, Modal } from "react-bootstrap";
 import Swal from "sweetalert2";
-const DeleteSingle = ({ visible, onClose, uid }) => {
-  const token = localStorage.getItem("token");
-  const arrUid = [uid];
 
-  const deleteData = () => {
+const DeletePackage = ({ onClose, visible, uid }) => {
+  const token = localStorage.getItem("token");
+  const uidArr = [uid];
+  const deleteData = async () => {
     try {
       const formData = new FormData();
-      formData.append("product_uid[]", arrUid);
+      formData.append("package_product[]", uidArr);
       formData.append("_method", "delete");
       axios
         .post(
-          `${process.env.REACT_APP_BACKEND_URL}/products/delete/item`,
+          `${process.env.REACT_APP_BACKEND_URL}/packages-product/package/delete`,
           formData,
           {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           }
         )
         .then((res) => {
           Swal.fire({
             title: res.data.message,
-            text: "Successfully delete contact",
+            text: "Successfully delete package product",
             icon: "success",
           }).then((res) => {
             if (res.isConfirmed) {
@@ -68,4 +70,4 @@ const DeleteSingle = ({ visible, onClose, uid }) => {
   );
 };
 
-export default DeleteSingle;
+export default DeletePackage;
