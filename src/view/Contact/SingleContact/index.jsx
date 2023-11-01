@@ -154,13 +154,12 @@ const SingleContact = () => {
       [e.target.name]: e.target.value,
     });
   };
-  console.log(inputContact);
   useEffect(() => {
     getOwnerUser(token);
     getSource(token);
     getCompany(token);
   }, [token]);
-
+  // console.log(inputContact);
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -393,6 +392,8 @@ const SingleContact = () => {
                       size="lg"
                       style={{ fontSize: "0.85rem" }}
                       name="source_uid"
+                      onChange={handleInputContact}
+                      required
                     >
                       <option value="">Source Choose</option>
                       {source.map((so) => (

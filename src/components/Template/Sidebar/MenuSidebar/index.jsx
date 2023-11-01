@@ -16,7 +16,7 @@ const MenuSidebar = ({ type, name, icon, url, isActive }) => {
     <>
       {type !== "collapse" ? (
         <>
-          <li className={`nav-item ${isActive ? "" : "d-none"} `}>
+          <li className={`nav-item ${isActive ? "active" : "d-none"} `}>
             <Link
               to={url}
               className={`nav-link ${urlActive ? "" : "collapsed"}`}

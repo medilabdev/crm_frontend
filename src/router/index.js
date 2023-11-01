@@ -28,6 +28,7 @@ import EditCompany from "../view/Company/Edit";
 import ShowCompany from "../view/Company/ShowCompany";
 import Templates from "../view/Documents/Templates";
 import ShortCode from "../view/Documents/ShortCode";
+import Deals from "../view/Deals";
 const Login = ({ children }) => {
   const token = localStorage.getItem("token");
   if (!token) {
@@ -180,6 +181,15 @@ function Router() {
             </Login>
           }
         />
+        <Route
+          exact
+          path="/deals"
+          element={
+            <Login>
+              <Deals />
+            </Login>
+          }
+        />
 
         <Route
           exact
@@ -210,7 +220,7 @@ function Router() {
             </Login>
           }
         />
-        
+
         <Route
           exact
           path="/short-code"
@@ -220,7 +230,6 @@ function Router() {
             </Login>
           }
         />
-
       </Routes>
     </BrowserRouter>
   );

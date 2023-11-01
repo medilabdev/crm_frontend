@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import MenuSidebar from "../../Template/Sidebar/MenuSidebar";
 
 function Sidebar() {
-
   const [openSubMenu, setOpenSubMenu] = useState(null);
   useEffect(() => {
     return () => {
@@ -57,6 +56,13 @@ function Sidebar() {
             name="Documents"
             url="/documents"
             icon="bi bi-file-earmark-text-fill"
+            isActive={1}
+          />
+          <MenuSidebar
+            typeMenu="nonCollapse"
+            name="Deals"
+            url="/deals"
+            icon="bi bi-tags"
             isActive={1}
           />
           <MenuSidebar

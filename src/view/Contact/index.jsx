@@ -13,6 +13,7 @@ import DeleteContact from "./Modals/deleteContact";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import Select from "react-select";
 
 const Contact = () => {
   const token = localStorage.getItem("token");
@@ -39,11 +40,38 @@ const Contact = () => {
 
   const [deleteContact, setDeleteContact] = useState(false);
   const handleDeleteContact = () => setDeleteContact(false);
-  // console.log(deleteContact);
   const [contact, setContact] = useState([]);
   const [search, setSearch] = useState(contact);
+  const [user, setUser] = useState([]);
+  // const [searchMultiple, setSearchMultiple] = useState({
+  //   name: "",
+  //   email: "",
+  //   position: "",
+  //   source_uid: "",
+  //   address: "",
+  //   created_at: "",
+  //   city: "",
+  // });
+
   const navigate = useNavigate();
   const TokenAuth = localStorage.getItem("token");
+  const uid = localStorage.getItem("uid");
+
+  const getAllUser = (token) => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => setUser(res.data.data))
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated.") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
 
   const getContactAll = (url, token, state) => {
     axios
@@ -53,9 +81,9 @@ const Contact = () => {
         },
       })
       .then((res) => {
-        console.log(res);
         state(res.data.data);
         setSearch(res.data.data);
+        // setSearchMultiple(res.data.data);
       })
       .catch((err) => {
         if (err.response.data.message === "Unauthenticated.") {
@@ -65,9 +93,28 @@ const Contact = () => {
       });
   };
 
+  const [selectedUser, setSelectedUser] = useState([]);
+  const handleSelectUser = (e) => {
+    setSelectedUser(e.map((opt) => opt.value));
+  };
+  console.log(selectedUser);
+
+  const selectUser = () => {
+    const result = [];
+    user?.map((data) => {
+      const dataUser = {
+        value: data.uid,
+        label: data.name,
+      };
+      result.push(dataUser);
+    });
+    return result;
+  };
+
   // console.log(contact);
   useEffect(() => {
     getContactAll("contacts", TokenAuth, setContact);
+    getAllUser(TokenAuth);
   }, [TokenAuth]);
 
   const columns = [
@@ -184,6 +231,23 @@ const Contact = () => {
     });
     setSearch(newData);
   }
+  const handleContactMyOrPerson = (e) => {
+    const target = e.target.value;
+    let filterData = [];
+    if (target === "all") {
+      setSearch(contact);
+    } else {
+      filterData = contact.filter((row) => row.owner_user_uid === uid);
+      setSearch(filterData);
+    }
+  };
+  const handleSearchMultiple = (e) => {
+    const data = contact.filter((row) => {
+      return row.name.toLowerCase().includes(e.target.value.toLowerCase());
+      // row.emai.toLowerCase().includes(e.target.value.toLowerCase());
+    });
+  };
+
   const paginationComponentOptions = {
     selectAllRowsItem: true,
     selectAllRowsItemText: "ALL",
@@ -341,33 +405,28 @@ const Contact = () => {
                   <div className="row">
                     <div className="col">
                       <select
-                        name=""
-                        id=""
                         className="form-select"
                         style={{ fontSize: "0.85rem" }}
+                        name="select"
+                        onChange={handleContactMyOrPerson}
                       >
-                        <option value="">All Contact</option>
-                        <option value="">My Contact</option>
+                        <option value="all">All Contact</option>
+                        <option value="my">My Contact</option>
                       </select>
                     </div>
                   </div>
+                  <form></form>
                   <div className="row mt-2">
                     <div className="col">
-                      <select
-                        name=""
-                        id=""
-                        className="form-select"
-                        style={{ fontSize: "0.85rem" }}
-                      >
-                        <option disabled selected>
-                          Owner
-                        </option>
-                        <option value="">Person 1</option>
-                        <option value="">Person 2</option>
-                      </select>
+                      <Select
+                        closeMenuOnSelect={false}
+                        isMulti
+                        options={selectUser()}
+                        onChange={(selected) => handleSelectUser(selected)}
+                      />
                     </div>
                   </div>
-                  <div className="row mt-2">
+                  {/* <div className="row mt-2">
                     <div className="col">
                       <select
                         name=""
@@ -382,7 +441,7 @@ const Contact = () => {
                         <option value="">Team 2</option>
                       </select>
                     </div>
-                  </div>
+                  </div> */}
                   <div className="row mt-5">
                     <div className="col">
                       <h6>
@@ -497,24 +556,6 @@ const Contact = () => {
                         type="date"
                         name="date"
                         className="form-control"
-                        style={{ fontSize: "0.85rem" }}
-                      />
-                    </div>
-                    <div className="mb-1">
-                      <input
-                        type="text"
-                        className="form-control"
-                        name="notes"
-                        placeholder="Notes"
-                        style={{ fontSize: "0.85rem" }}
-                      />
-                    </div>
-                    <div className="mb-1">
-                      <input
-                        type="text"
-                        className="form-control"
-                        name="remarks"
-                        placeholder="Remarks (Other Source)"
                         style={{ fontSize: "0.85rem" }}
                       />
                     </div>
