@@ -15,14 +15,16 @@ import phone from "../../../src/assets/img/phone.png";
 import iconGedung from "../../../src/assets/img/office-building.png";
 import axios, { all } from "axios";
 import Swal from "sweetalert2";
+import Select from "react-select";
+
 const Company = () => {
+  const uid = localStorage.getItem("uid");
   const [allCompany, setAllCompany] = useState([]);
   const token = localStorage.getItem("token");
   const [isSideBar, setIsSideBar] = useState(false);
   const toggleSideBarCard = () => {
     setIsSideBar(!isSideBar);
   };
-  console.log(allCompany);
   const filterClass = isSideBar ? "col-md-3 d-block" : "col-sm-0 d-none";
   const datatableClass = isSideBar ? "col-md-9" : "col-sm-12";
   const showTooltip = isSideBar ? (
@@ -30,6 +32,7 @@ const Company = () => {
   ) : (
     <Tooltip id="tooltip">Show Filter</Tooltip>
   );
+  
   const iconFilter = isSideBar ? "bi bi-x-lg" : "bi bi-funnel";
   const navigate = useNavigate();
   const [search, setSearch] = useState(allCompany);
@@ -37,37 +40,38 @@ const Company = () => {
   const [deleteCompany, setDeleteCompany] = useState(false);
   const handleDeleteCompany = () => setDeleteCompany(false);
   const [owner, setOwner] = useState([]);
-
-  const getOwnerUser = () => {
-    axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => setOwner(res.data.data))
-      .catch((err) => {
-        if (err.response.data.message === "Unauthenticated.") {
-          localStorage.clear();
-          window.location.href = "/login";
-        }
-      });
-  };
-
-  function handleSearch(e) {
-    const newData = allCompany.filter((row) => {
-      return row.name.toLowerCase().includes(e.target.value.toLowerCase());
+  const [resultOwner, setResultOwner] = useState([]);
+  const [source, setSource] = useState([]);
+  const [resultSource, setResultSource] = useState([]);
+  const [companyType, setCompanyType] = useState([]);
+  const [searchMultiple, setSearchMultiple] = useState({
+    name: "",
+    website_url: "",
+    address: "",
+    city: "",
+    company_type_uid: "",
+    created_at: "",
+    number_of_patient: "",
+    parent_company_uid: "",
+  });
+  const handleSelectSearchCompany = (e) => {
+    setSearchMultiple({
+      ...searchMultiple,
+      [e.target.name]: e.target.value,
     });
-    setSearch(newData);
-  }
-
-  const paginationComponentOptions = {
-    selectAllRowsItem: true,
-    selectAllRowsItemText: "ALL",
   };
-
-  // console.log(allCompany);
-
+  const handleSelectTypeCompany = (e) => {
+    setSearchMultiple({
+      ...searchMultiple,
+      company_type_uid: e.value,
+    });
+  };
+  const handleParentCompany = (e) => {
+    setSearchMultiple({
+      ...searchMultiple,
+      parent_company_uid: e.value,
+    });
+  };
   const getAllCompany = () => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/companies`, {
@@ -86,12 +90,124 @@ const Company = () => {
         }
       });
   };
+  const getAlltypeCompany = () => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/companies-type`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => {
+        setCompanyType(res.data.data);
+      })
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated.") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
+  const getSource = () => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/companies-source`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => setSource(res.data.data))
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
+  const getOwnerUser = () => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => setOwner(res.data.data))
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated.") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
+
+  const dataUser = () => {
+    const result = [];
+    owner?.map((data) => {
+      const dataResult = {
+        value: data.uid,
+        label: data.name,
+      };
+      result.push(dataResult);
+    });
+    return result;
+  };
+
+  const typeCompany = () => {
+    const result = [];
+    companyType?.map((data) => {
+      const dataResult = {
+        value: data.uid,
+        label: data.name,
+      };
+      result.push(dataResult);
+    });
+    return result;
+  };
+
+  const dataSource = () => {
+    const result = [];
+    source?.map((data) => {
+      const resultData = {
+        value: data.uid,
+        label: data.name,
+      };
+      result.push(resultData);
+    });
+    return result;
+  };
+  const handleSelectUser = (e) => {
+    setResultOwner(e.map((data) => data.value));
+  };
+  const handleSelectSource = (e) => {
+    setResultSource(e.map((data) => data.value));
+  };
+
+  function handleSearch(e) {
+    const newData = allCompany.filter((row) => {
+      return row.name.toLowerCase().includes(e.target.value.toLowerCase());
+    });
+    setSearch(newData);
+  }
+
+  const paginationComponentOptions = {
+    selectAllRowsItem: true,
+    selectAllRowsItemText: "ALL",
+  };
+
+  const ParentCompany = () => {
+    const result = [];
+    allCompany?.map((data) => {
+      const resultData = {
+        value: data.uid,
+        label: data.name,
+      };
+      result.push(resultData);
+    });
+    return result;
+  };
 
   const selectUid = (state) => {
     const selectedRows = state.selectedRows.map((row) => row.uid);
     setSelectedUIDs(selectedRows);
   };
-  // console.log(selectedUIDs);
   const donwloadAll = (e) => {
     e.preventDefault();
     try {
@@ -109,6 +225,11 @@ const Company = () => {
           },
         }
       );
+      Swal.fire({
+        title: donwload.data.message,
+        text: "Successfully delete company",
+        icon: "success",
+      });
     } catch (error) {
       if (error.response) {
         Swal.fire({
@@ -118,6 +239,58 @@ const Company = () => {
       }
     }
   };
+
+  const handleCompanyMyOrPerson = (e) => {
+    const target = e.target.value;
+    let filterData = [];
+    if (target === "all") {
+      setSearch(allCompany);
+    } else {
+      filterData = allCompany.filter((row) => row.owner_user_uid === uid);
+      setSearch(filterData);
+    }
+  };
+
+  const handleSubmitSearch = () => {
+    const filterdata = allCompany.filter((row) => {
+      return (
+        (!searchMultiple.name ||
+          row.name
+            ?.toLowerCase()
+            .includes(searchMultiple?.name?.toLowerCase())) &&
+        (!searchMultiple.website_url ||
+          row.website_url
+            ?.toLowerCase()
+            .includes(searchMultiple?.website_url?.toLowerCase())) &&
+        (!searchMultiple.address ||
+          row.address
+            ?.toLowerCase()
+            .includes(searchMultiple?.address?.toLowerCase())) &&
+        (!searchMultiple.city ||
+          row.city
+            ?.toLowerCase()
+            .includes(searchMultiple?.city?.toLowerCase())) &&
+        (!searchMultiple.company_type_uid ||
+          row.company_type_uid
+            ?.toLowerCase()
+            .includes(searchMultiple?.company_type_uid?.toLowerCase())) &&
+        (!searchMultiple.created_at ||
+          row.created_at?.includes(searchMultiple?.created_at)) &&
+        (!searchMultiple.number_of_patient ||
+          row.number_of_patient.includes(searchMultiple?.number_of_patient)) &&
+        (!searchMultiple?.parent_company_uid ||
+          row.parent_company_uid?.includes(
+            searchMultiple?.parent_company_uid
+          )) &&
+        (resultOwner.length === 0 ||
+          resultOwner.includes(row.owner_user_uid)) &&
+        (resultSource.length === 0 ||
+          resultSource.includes(row.company_source_uid))
+      );
+    });
+    setSearch(filterdata);
+  };
+  
   const handleSubmitDeleteSelect = async (e) => {
     e.preventDefault();
     const result = await Swal.fire({
@@ -162,8 +335,9 @@ const Company = () => {
   useEffect(() => {
     getAllCompany(token);
     getOwnerUser(token);
+    getSource(token);
+    getAlltypeCompany(token);
   }, [token]);
-  console.log(allCompany);
   const columns = [
     {
       id: 1,
@@ -409,33 +583,27 @@ const Company = () => {
                           <span className="fw-semibold ms-2 fs-6 ">Filter</span>
                         </h6>
                       </div>
-                      <form action="">
+                      <form onSubmit={handleSubmitSearch}>
                         <div className="col mt-3">
                           <select
-                            name=""
-                            id=""
+                            name="select"
                             className="form-select"
                             style={{ fontSize: "0.85rem" }}
+                            onChange={handleCompanyMyOrPerson}
                           >
-                            <option value="">All Contact</option>
-                            <option value="">My Contact</option>
+                            <option value="all">All Company</option>
+                            <option value="my">My Company</option>
                           </select>
                         </div>
                         <div className="col mt-2">
-                          <select
-                            name=""
-                            id=""
-                            className="form-select"
-                            style={{ fontSize: "0.85rem" }}
-                          >
-                            <option disabled selected>
-                              Owner
-                            </option>
-                            <option value=""> 1</option>
-                            <option value=""> 2</option>
-                          </select>
+                          <Select
+                            options={dataUser()}
+                            isMulti
+                            closeMenuOnSelect={false}
+                            onChange={(select) => handleSelectUser(select)}
+                          />
                         </div>
-                        <div className="col mt-2">
+                        {/* <div className="col mt-2">
                           <select
                             name=""
                             id=""
@@ -448,7 +616,7 @@ const Company = () => {
                             <option value="">1</option>
                             <option value="">2</option>
                           </select>
-                        </div>
+                        </div> */}
                         {/* <div className="col mt-5">
                           <h6>
                             <i className="bi bi-link-45deg"></i>
@@ -493,18 +661,18 @@ const Company = () => {
                           <div className="mb-1">
                             <input
                               type="text"
-                              name=""
-                              id=""
+                              name="name"
                               className="form-control"
                               placeholder="Company Name"
+                              onChange={handleSelectSearchCompany}
                               style={{ fontSize: "0.85rem" }}
                             />
                           </div>
                           <div className="mb-1">
                             <input
                               type="text"
-                              name=""
-                              id=""
+                              name="website_url"
+                              onChange={handleSelectSearchCompany}
                               className="form-control"
                               placeholder="Company Website"
                               style={{ fontSize: "0.85rem" }}
@@ -513,18 +681,8 @@ const Company = () => {
                           <div className="mb-1">
                             <input
                               type="text"
-                              name=""
-                              id=""
-                              className="form-control"
-                              placeholder="Telephone"
-                              style={{ fontSize: "0.85rem" }}
-                            />
-                          </div>
-                          <div className="mb-1">
-                            <input
-                              type="text"
-                              name=""
-                              id=""
+                              name="address"
+                              onChange={handleSelectSearchCompany}
                               className="form-control"
                               placeholder="Address"
                               style={{ fontSize: "0.85rem" }}
@@ -533,92 +691,68 @@ const Company = () => {
                           <div className="mb-1">
                             <input
                               type="text"
-                              name=""
-                              id=""
+                              name="city"
+                              onChange={handleSelectSearchCompany}
                               className="form-control"
                               placeholder="City"
                               style={{ fontSize: "0.85rem" }}
                             />
                           </div>
                           <div className="mb-1">
-                            <select
-                              name=""
-                              id=""
-                              className="form-select"
-                              placeholder="Company type"
-                              style={{ fontSize: "0.85rem" }}
-                            >
-                              <option disabled selected>
-                                Company Type
-                              </option>
-                              <option value="">faskes</option>
-                              <option value="">Badan</option>
-                            </select>
+                            <Select
+                              options={typeCompany()}
+                              name="company_type_uid"
+                              onChange={handleSelectTypeCompany}
+                            />
                           </div>
                           <div className="mb-1">
-                            <select
-                              name="source"
-                              id=""
-                              className="form-select"
-                              style={{ fontSize: "0.85rem" }}
-                            >
-                              <option disabled selected>
-                                Source
-                              </option>
-                              <option value="event">Event</option>
-                              <option value="referal">Referal</option>
-                              <option value="database">Database</option>
-                              <option value="others">Others</option>
-                            </select>
+                            <Select
+                              closeMenuOnSelect={false}
+                              isMulti
+                              options={dataSource()}
+                              onChange={(selected) =>
+                                handleSelectSource(selected)
+                              }
+                            />
                           </div>
                           <div className="mb-1">
                             <label htmlFor="date">Created</label>
                             <input
                               type="date"
-                              name="date"
+                              name="created_at"
+                              onChange={handleSelectSearchCompany}
                               className="form-control"
                               style={{ fontSize: "0.85rem" }}
                             />
                           </div>
-                          {/* <div className="mb-1">
-                            <input
-                              type="text"
-                              className="form-control"
-                              name="notes"
-                              placeholder="Notes"
-                              style={{ fontSize: "0.85rem" }}
-                            />
-                          </div> */}
                           <div className="mb-1">
-                            <select
-                              name="source"
-                              id=""
-                              className="form-select"
-                              style={{ fontSize: "0.85rem" }}
-                            >
-                              <option disabled selected>
-                                Parent Company
-                              </option>
-                              <option value="">1</option>
-                              <option value="">2</option>
-                            </select>
+                            <Select
+                              options={ParentCompany()}
+                              placeholder="parent company..."
+                              onChange={handleParentCompany}
+                            />
                           </div>
                           <div className="mb-1">
                             <input
-                              type="text"
+                              type="number"
+                              name="number_of_patient"
+                              onChange={handleSelectSearchCompany}
                               className="form-control"
-                              placeholder="Number Of Patiens"
+                              placeholder="Number Of Patient"
                               style={{ fontSize: "0.85rem" }}
                             />
                           </div>
                         </div>
                         <button
+                          type="button"
+                          onClick={handleSubmitSearch}
                           className="btn btn-primary mt-2"
                           style={{ fontSize: "0.85rem" }}
                         >
                           Apply
                         </button>
                         <button
+                          type="submit"
                           className="btn btn-secondary mt-2 ms-2"
                           style={{ fontSize: "0.85rem" }}
                         >

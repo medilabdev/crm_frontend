@@ -43,20 +43,54 @@ const Contact = () => {
   const [contact, setContact] = useState([]);
   const [search, setSearch] = useState(contact);
   const [user, setUser] = useState([]);
-  // const [searchMultiple, setSearchMultiple] = useState({
-  //   name: "",
-  //   email: "",
-  //   position: "",
-  //   source_uid: "",
-  //   address: "",
-  //   created_at: "",
-  //   city: "",
-  // });
+  const [source, setSource] = useState([]);
+  const [associateCompany, setAssociateCompany] = useState([]);
+
+  const [searchMultiple, setSearchMultiple] = useState({
+    name: "",
+    email: "",
+    position: "",
+    address: "",
+    created_at: "",
+    city: "",
+  });
 
   const navigate = useNavigate();
   const TokenAuth = localStorage.getItem("token");
   const uid = localStorage.getItem("uid");
 
+  const getSource = (token) => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/companies-source`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => setSource(res.data.data))
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
+
+  const getAssociateCompany = (token) => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/associate`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => setAssociateCompany(res.data.data))
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
+  // console.log(associateCompany);
   const getAllUser = (token) => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
@@ -97,8 +131,13 @@ const Contact = () => {
   const handleSelectUser = (e) => {
     setSelectedUser(e.map((opt) => opt.value));
   };
-  console.log(selectedUser);
 
+  const handleSearchMultiple = (e) => {
+    setSearchMultiple({
+      ...searchMultiple,
+      [e.target.name]: e.target.value,
+    });
+  };
   const selectUser = () => {
     const result = [];
     user?.map((data) => {
@@ -111,10 +150,50 @@ const Contact = () => {
     return result;
   };
 
-  // console.log(contact);
+  const selectAssociateCompany = () => {
+    const uniqueAssCompany = [];
+    associateCompany?.forEach((data) => {
+      const key = `${data?.company?.name}-${data?.company_uid}`;
+      if (!uniqueAssCompany[key]) {
+        const dataAssCompany = {
+          value: data.contact_uid,
+          label: data?.company?.name,
+        };
+        uniqueAssCompany[key] = dataAssCompany;
+      }
+    });
+    const result = Object.values(uniqueAssCompany);
+    return result;
+  };
+
+  const [selectAssCompany, setSelectAssCompany] = useState([]);
+
+  const handleSelectAssCompany = (e) => {
+    setSelectAssCompany(e.map((data) => data.value));
+  };
+  const [selectedSource, setSelectSource] = useState([]);
+  const handleSelectSource = (e) => {
+    setSelectSource(e.map((data) => data.value));
+  };
+  // console.log(selectedUser);
+  const selectSource = () => {
+    const result = [];
+    source?.map((data) => {
+      const dataSource = {
+        value: data.uid,
+        label: data.name,
+      };
+      result.push(dataSource);
+    });
+    return result;
+  };
+
+  // console.log(contact[4]?.associate[0]?.company_uid);
   useEffect(() => {
     getContactAll("contacts", TokenAuth, setContact);
     getAllUser(TokenAuth);
+    getSource(TokenAuth);
+    getAssociateCompany(TokenAuth);
   }, [TokenAuth]);
 
   const columns = [
@@ -223,7 +302,6 @@ const Contact = () => {
       width: "150px",
     },
   ];
-  // console.log(contact);
 
   function handleFilter(event) {
     const newData = contact.filter((row) => {
@@ -241,11 +319,42 @@ const Contact = () => {
       setSearch(filterData);
     }
   };
-  const handleSearchMultiple = (e) => {
-    const data = contact.filter((row) => {
-      return row.name.toLowerCase().includes(e.target.value.toLowerCase());
-      // row.emai.toLowerCase().includes(e.target.value.toLowerCase());
+  // console.log(selectAssCompany);
+  const handleSubmitSearch = () => {
+    const filteredData = contact.filter((row) => {
+      return (
+        (selectAssCompany.length === 0 || selectAssCompany.includes(row.uid)) &&
+        (selectedUser.length === 0 ||
+          selectedUser.includes(row.owner_user_uid)) &&
+        (selectedSource.length === 0 ||
+          selectedSource.includes(row.source_uid)) &&
+        (!searchMultiple.name ||
+          row.name
+            ?.toLowerCase()
+            .includes(searchMultiple.name?.toLowerCase())) &&
+        (!searchMultiple.email ||
+          row.email
+            ?.toLowerCase()
+            .includes(searchMultiple.email?.toLowerCase())) &&
+        (!searchMultiple.position ||
+          row.position
+            ?.toLowerCase()
+            .includes(searchMultiple.position?.toLowerCase())) &&
+        (!searchMultiple.address ||
+          row.address
+            ?.toLowerCase()
+            .includes(searchMultiple.address?.toLowerCase())) &&
+        (!searchMultiple.city ||
+          row.city
+            ?.toLowerCase()
+            .includes(searchMultiple.city?.toLowerCase())) &&
+        (!searchMultiple.created_at ||
+          row.created_at
+            ?.toLowerCase()
+            .includes(searchMultiple.created_at?.toLowerCase()))
+      );
     });
+    setSearch(filteredData);
   };
 
   const paginationComponentOptions = {
@@ -415,18 +524,18 @@ const Contact = () => {
                       </select>
                     </div>
                   </div>
-                  <form></form>
-                  <div className="row mt-2">
-                    <div className="col">
-                      <Select
-                        closeMenuOnSelect={false}
-                        isMulti
-                        options={selectUser()}
-                        onChange={(selected) => handleSelectUser(selected)}
-                      />
+                  <form onSubmit={handleSubmitSearch}>
+                    <div className="row mt-2">
+                      <div className="col">
+                        <Select
+                          closeMenuOnSelect={false}
+                          isMulti
+                          options={selectUser()}
+                          onChange={(selected) => handleSelectUser(selected)}
+                        />
+                      </div>
                     </div>
-                  </div>
-                  {/* <div className="row mt-2">
+                    {/* <div className="row mt-2">
                     <div className="col">
                       <select
                         name=""
@@ -442,58 +551,54 @@ const Contact = () => {
                       </select>
                     </div>
                   </div> */}
-                  <div className="row mt-5">
-                    <div className="col">
-                      <h6>
-                        <i class="bi bi-link-45deg"></i>
-                        <span className="fw-semibold ms-2">Associated</span>
-                      </h6>
+                    <div className="row mt-5">
+                      <div className="col">
+                        <h6>
+                          <i class="bi bi-link-45deg"></i>
+                          <span className="fw-semibold ms-2">Associated</span>
+                        </h6>
+                      </div>
                     </div>
-                  </div>
-                  <div className="row">
-                    <div className="col">
-                      <select
-                        name=""
-                        id=""
-                        className="form-select"
-                        style={{ fontSize: "0.85rem" }}
-                      >
-                        <option value="">Select Company</option>
-                        <option value="">Company 1</option>
-                        <option value="">Company 2</option>
-                      </select>
+                    <div className="row">
+                      <div className="col">
+                        <Select
+                          options={selectAssociateCompany()}
+                          isMulti
+                          closeMenuOnSelect={false}
+                          onChange={(select) => handleSelectAssCompany(select)}
+                        />
+                      </div>
                     </div>
-                  </div>
-                  <div className="row mt-3">
-                    <div className="col">
-                      <select
-                        name=""
-                        id=""
-                        className="form-select"
-                        style={{ fontSize: "0.85rem" }}
-                      >
-                        <option disabled selected>
-                          Select Deals
-                        </option>
-                        <option value="">Deals 1</option>
-                        <option value="">Deals 2</option>
-                      </select>
+                    <div className="row mt-3">
+                      <div className="col">
+                        <select
+                          name=""
+                          id=""
+                          className="form-select"
+                          style={{ fontSize: "0.85rem" }}
+                        >
+                          <option disabled selected>
+                            Select Deals
+                          </option>
+                          <option value="">Deals 1</option>
+                          <option value="">Deals 2</option>
+                        </select>
+                      </div>
                     </div>
-                  </div>
-                  <div className="row mt-5">
-                    <div className="col">
-                      <h6>
-                        <i class="bi bi-person-circle"></i>
-                        <span className="fw-semibold ms-2">Contacts</span>
-                      </h6>
+                    <div className="row mt-5">
+                      <div className="col">
+                        <h6>
+                          <i class="bi bi-person-circle"></i>
+                          <span className="fw-semibold ms-2">Contacts</span>
+                        </h6>
+                      </div>
                     </div>
-                  </div>
-                  <form action="">
                     <div className="mb-1">
                       <input
                         type="text"
                         className="form-control"
                         name="name"
+                        onChange={handleSearchMultiple}
                         placeholder="name"
                         style={{ fontSize: "0.85rem" }}
                       />
@@ -503,6 +608,7 @@ const Contact = () => {
                         type="email"
                         className="form-control"
                         name="email"
+                        onChange={handleSearchMultiple}
                         placeholder="email"
                         style={{ fontSize: "0.85rem" }}
                       />
@@ -511,32 +617,26 @@ const Contact = () => {
                       <input
                         type="text"
                         className="form-control"
-                        name="job_title"
+                        name="position"
+                        onChange={handleSearchMultiple}
                         placeholder="Job Title"
                         style={{ fontSize: "0.85rem" }}
                       />
                     </div>
                     <div className="mb-1">
-                      <select
-                        name="source"
-                        id=""
-                        className="form-select"
-                        style={{ fontSize: "0.85rem" }}
-                      >
-                        <option disabled selected>
-                          Source
-                        </option>
-                        <option value="event">Event</option>
-                        <option value="referal">Referal</option>
-                        <option value="database">Database</option>
-                        <option value="others">Others</option>
-                      </select>
+                      <Select
+                        options={selectSource()}
+                        isMulti
+                        closeMenuOnSelect={false}
+                        onChange={(select) => handleSelectSource(select)}
+                      />
                     </div>
                     <div className="mb-1">
                       <input
                         type="text"
                         className="form-control"
                         name="address"
+                        onChange={handleSearchMultiple}
                         placeholder="Address"
                         style={{ fontSize: "0.85rem" }}
                       />
@@ -546,6 +646,7 @@ const Contact = () => {
                         type="text"
                         className="form-control"
                         name="city"
+                        onChange={handleSearchMultiple}
                         placeholder="City"
                         style={{ fontSize: "0.85rem" }}
                       />
@@ -555,17 +656,21 @@ const Contact = () => {
                       <input
                         type="date"
                         name="date"
+                        onChange={handleSearchMultiple}
                         className="form-control"
                         style={{ fontSize: "0.85rem" }}
                       />
                     </div>
                     <button
+                      type="button"
+                      onClick={handleSubmitSearch}
                       className="btn btn-primary mt-2"
                       style={{ fontSize: "0.85rem" }}
                     >
                       Apply
                     </button>
                     <button
+                      type="submit"
                       className="btn btn-secondary mt-2 ms-2"
                       style={{ fontSize: "0.85rem" }}
                     >

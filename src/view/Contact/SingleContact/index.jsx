@@ -12,6 +12,8 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import Select from "react-select";
 import { Link } from "react-router-dom";
+
+
 const SingleContact = () => {
   const token = localStorage.getItem("token");
   const [showCanvasDeals, setShowCanvasDeals] = useState(false);
@@ -39,6 +41,7 @@ const SingleContact = () => {
   const [source, setSource] = useState([]);
   const [company, setCompany] = useState([]);
   const [additionalForm, setAdditionalForm] = useState([]);
+  
   const getCompany = () => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/companies`, {
@@ -54,6 +57,7 @@ const SingleContact = () => {
         }
       });
   };
+
   const getSource = () => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/companies-source`, {
@@ -69,6 +73,7 @@ const SingleContact = () => {
         }
       });
   };
+
   const getOwnerUser = () => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
@@ -154,6 +159,7 @@ const SingleContact = () => {
       [e.target.name]: e.target.value,
     });
   };
+
   useEffect(() => {
     getOwnerUser(token);
     getSource(token);
