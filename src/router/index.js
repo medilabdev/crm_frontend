@@ -29,6 +29,8 @@ import ShowCompany from "../view/Company/ShowCompany";
 import Templates from "../view/Documents/Templates";
 import ShortCode from "../view/Documents/ShortCode";
 import Deals from "../view/Deals";
+import SingleDeals from "../view/Deals/SingleDeals";
+import BulkChangeDeals from "../view/Deals/BulkChange";
 const Login = ({ children }) => {
   const token = localStorage.getItem("token");
   if (!token) {
@@ -227,6 +229,24 @@ function Router() {
           element={
             <Login>
               <ShortCode />
+            </Login>
+          }
+        />
+        <Route
+          exact
+          path="/deals/single-deals"
+          element={
+            <Login>
+              <SingleDeals />
+            </Login>
+          }
+        />
+        <Route
+          exact
+          path="/deals/bulk-change"
+          element={
+            <Login>
+              <BulkChangeDeals />
             </Login>
           }
         />

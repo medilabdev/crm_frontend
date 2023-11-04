@@ -32,7 +32,7 @@ const Company = () => {
   ) : (
     <Tooltip id="tooltip">Show Filter</Tooltip>
   );
-  
+
   const iconFilter = isSideBar ? "bi bi-x-lg" : "bi bi-funnel";
   const navigate = useNavigate();
   const [search, setSearch] = useState(allCompany);
@@ -44,6 +44,7 @@ const Company = () => {
   const [source, setSource] = useState([]);
   const [resultSource, setResultSource] = useState([]);
   const [companyType, setCompanyType] = useState([]);
+  const [associateContact, setAssocicateContact] = useState([]);
   const [searchMultiple, setSearchMultiple] = useState({
     name: "",
     website_url: "",
@@ -71,6 +72,22 @@ const Company = () => {
       ...searchMultiple,
       parent_company_uid: e.value,
     });
+  };
+
+  const getAssociateContact = (token) => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/associate`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => setAssocicateContact(res.data.data))
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
   };
   const getAllCompany = () => {
     axios
@@ -136,6 +153,35 @@ const Company = () => {
           window.location.href = "/login";
         }
       });
+  };
+  const selectAssContact = () => {
+    const uniqueAssCont = {};
+    associateContact?.forEach((data) => {
+      const contactName = data?.contact?.name;
+      const key = `${contactName}-${data.contact_uid}`;
+
+      if (!uniqueAssCont[key]) {
+        uniqueAssCont[key] = {
+          label: contactName,
+          values: [],
+        };
+      }
+      uniqueAssCont[key].values.push(data.company_uid);
+    });
+    const result = Object.values(uniqueAssCont).map((data) => {
+      return {
+        label: data.label,
+        value: data.values,
+      };
+    });
+    return result;
+  };
+
+  const [assContact, setAssContact] = useState([]);
+  const handleSelectAssContact = (e) => {
+    const selectValue = e.map((data) => data.value);
+    const allValue = selectValue.reduce((acc, value) => acc.concat(value), []);
+    setAssContact(allValue);
   };
 
   const dataUser = () => {
@@ -254,6 +300,7 @@ const Company = () => {
   const handleSubmitSearch = () => {
     const filterdata = allCompany.filter((row) => {
       return (
+        (assContact.length === 0 || assContact.includes(row.uid)) &&
         (!searchMultiple.name ||
           row.name
             ?.toLowerCase()
@@ -276,8 +323,8 @@ const Company = () => {
             .includes(searchMultiple?.company_type_uid?.toLowerCase())) &&
         (!searchMultiple.created_at ||
           row.created_at?.includes(searchMultiple?.created_at)) &&
-        (!searchMultiple.number_of_patient ||
-          row.number_of_patient.includes(searchMultiple?.number_of_patient)) &&
+        (!searchMultiple?.number_of_patient ||
+          row?.number_of_patient === searchMultiple?.number_of_patient) &&
         (!searchMultiple?.parent_company_uid ||
           row.parent_company_uid?.includes(
             searchMultiple?.parent_company_uid
@@ -290,7 +337,7 @@ const Company = () => {
     });
     setSearch(filterdata);
   };
-  
+
   const handleSubmitDeleteSelect = async (e) => {
     e.preventDefault();
     const result = await Swal.fire({
@@ -337,6 +384,7 @@ const Company = () => {
     getOwnerUser(token);
     getSource(token);
     getAlltypeCompany(token);
+    getAssociateContact(token);
   }, [token]);
   const columns = [
     {
@@ -597,6 +645,7 @@ const Company = () => {
                         </div>
                         <div className="col mt-2">
                           <Select
+                            placeholder="Select Owner"
                             options={dataUser()}
                             isMulti
                             closeMenuOnSelect={false}
@@ -617,7 +666,7 @@ const Company = () => {
                             <option value="">2</option>
                           </select>
                         </div> */}
-                        {/* <div className="col mt-5">
+                        <div className="col mt-5">
                           <h6>
                             <i className="bi bi-link-45deg"></i>
                             <span className="fw-semibold ms-2 fs-6">
@@ -626,16 +675,15 @@ const Company = () => {
                           </h6>
                         </div>
                         <div className="col mt-3">
-                          <select
-                            name=""
-                            id=""
-                            className="form-select"
-                            style={{ fontSize: "0.85rem" }}
-                          >
-                            <option value="">Select Company</option>
-                            <option value="">1</option>
-                            <option value="">2</option>
-                          </select>
+                          <Select
+                            placeholder="Select Contact"
+                            options={selectAssContact()}
+                            onChange={(select) =>
+                              handleSelectAssContact(select)
+                            }
+                            isMulti
+                            closeMenuOnSelect={false}
+                          />
                         </div>
                         <div className="col mt-3">
                           <select
@@ -648,7 +696,7 @@ const Company = () => {
                             <option value="">1</option>
                             <option value="">2</option>
                           </select>
-                        </div> */}
+                        </div>
                         <div className="col mt-5">
                           <h6>
                             <i className="bi bi-building"></i>
@@ -700,6 +748,7 @@ const Company = () => {
                           </div>
                           <div className="mb-1">
                             <Select
+                              placeholder="Type Company"
                               options={typeCompany()}
                               name="company_type_uid"
                               onChange={handleSelectTypeCompany}
@@ -707,6 +756,7 @@ const Company = () => {
                           </div>
                           <div className="mb-1">
                             <Select
+                              placeholder="Source Company"
                               closeMenuOnSelect={false}
                               isMulti
                               options={dataSource()}

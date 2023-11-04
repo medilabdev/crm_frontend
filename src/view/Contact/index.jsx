@@ -90,7 +90,6 @@ const Contact = () => {
         }
       });
   };
-  // console.log(associateCompany);
   const getAllUser = (token) => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
@@ -138,6 +137,7 @@ const Contact = () => {
       [e.target.name]: e.target.value,
     });
   };
+
   const selectUser = () => {
     const result = [];
     user?.map((data) => {
@@ -151,31 +151,45 @@ const Contact = () => {
   };
 
   const selectAssociateCompany = () => {
-    const uniqueAssCompany = [];
+    const uniqueAssCompany = {};
     associateCompany?.forEach((data) => {
-      const key = `${data?.company?.name}-${data?.company_uid}`;
+      const companyName = data?.company?.name;
+      const key = `${companyName}-${data.company_uid}`;
+
       if (!uniqueAssCompany[key]) {
-        const dataAssCompany = {
-          value: data.contact_uid,
-          label: data?.company?.name,
+        uniqueAssCompany[key] = {
+          label: companyName,
+          values: [],
         };
-        uniqueAssCompany[key] = dataAssCompany;
       }
+      uniqueAssCompany[key].values.push(data.contact_uid);
     });
-    const result = Object.values(uniqueAssCompany);
+
+    const result = Object.values(uniqueAssCompany).map((item) => {
+      return {
+        label: item.label,
+        value: item.values,
+      };
+    });
+
     return result;
   };
 
   const [selectAssCompany, setSelectAssCompany] = useState([]);
-
   const handleSelectAssCompany = (e) => {
-    setSelectAssCompany(e.map((data) => data.value));
+    const selectValue = e.map((data) => data.value);
+    const allValues = selectValue.reduce(
+      (acc, values) => acc.concat(values),
+      []
+    );
+    setSelectAssCompany(allValues);
   };
+
   const [selectedSource, setSelectSource] = useState([]);
   const handleSelectSource = (e) => {
     setSelectSource(e.map((data) => data.value));
   };
-  // console.log(selectedUser);
+
   const selectSource = () => {
     const result = [];
     source?.map((data) => {
@@ -188,7 +202,6 @@ const Contact = () => {
     return result;
   };
 
-  // console.log(contact[4]?.associate[0]?.company_uid);
   useEffect(() => {
     getContactAll("contacts", TokenAuth, setContact);
     getAllUser(TokenAuth);
@@ -309,6 +322,7 @@ const Contact = () => {
     });
     setSearch(newData);
   }
+
   const handleContactMyOrPerson = (e) => {
     const target = e.target.value;
     let filterData = [];
@@ -319,7 +333,7 @@ const Contact = () => {
       setSearch(filterData);
     }
   };
-  // console.log(selectAssCompany);
+
   const handleSubmitSearch = () => {
     const filteredData = contact.filter((row) => {
       return (
@@ -348,10 +362,8 @@ const Contact = () => {
           row.city
             ?.toLowerCase()
             .includes(searchMultiple.city?.toLowerCase())) &&
-        (!searchMultiple.created_at ||
-          row.created_at
-            ?.toLowerCase()
-            .includes(searchMultiple.created_at?.toLowerCase()))
+        (!searchMultiple?.created_at ||
+          row?.created_at?.includes(searchMultiple?.created_at))
       );
     });
     setSearch(filteredData);
@@ -415,6 +427,7 @@ const Contact = () => {
       }
     }
   };
+
   return (
     <body id="body">
       <Topbar />
@@ -528,6 +541,7 @@ const Contact = () => {
                     <div className="row mt-2">
                       <div className="col">
                         <Select
+                          placeholder="Select Owner"
                           closeMenuOnSelect={false}
                           isMulti
                           options={selectUser()}
@@ -562,6 +576,7 @@ const Contact = () => {
                     <div className="row">
                       <div className="col">
                         <Select
+                          placeholder="Select Company"
                           options={selectAssociateCompany()}
                           isMulti
                           closeMenuOnSelect={false}
@@ -625,6 +640,7 @@ const Contact = () => {
                     </div>
                     <div className="mb-1">
                       <Select
+                        placeholder="Source"
                         options={selectSource()}
                         isMulti
                         closeMenuOnSelect={false}
@@ -655,7 +671,7 @@ const Contact = () => {
                       <label htmlFor="date">Created</label>
                       <input
                         type="date"
-                        name="date"
+                        name="created_at"
                         onChange={handleSearchMultiple}
                         className="form-control"
                         style={{ fontSize: "0.85rem" }}

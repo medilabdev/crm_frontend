@@ -5,17 +5,27 @@ import Main from "../../components/Template/Main";
 import { Link } from "react-router-dom";
 import Card from "../../components/Card";
 import { useState } from "react";
+import Dummy from "./Dummy";
+import DataTableComponet from "./Datatable";
+
 const Deals = () => {
   const token = localStorage.getItem("token");
   const [isSideFilter, setIsSideFilter] = useState(false);
+  const [search, setSearch] = useState(Dummy);
+  const [selectUid, setSelectUid] = useState([]);
 
+  const selectUidDataTable = (e) => {
+    const select = e.selectedRows.map((row) => row.uid);
+    setSelectUid(select);
+  };
+  console.log(selectUid);
   const toggleSideFilter = () => {
     setIsSideFilter(!isSideFilter);
   };
-
   const filterClass = isSideFilter ? "col-md-3 d-block" : "col-md-0 d-none";
-  const boardKanban = isSideFilter ? "col-md-9" : "col-md-12";
+  const boardKanbanDatatable = isSideFilter ? "col-md-9" : "col-md-12";
   const IconFilter = isSideFilter ? "bi bi-x-lg" : "bi bi-funnel";
+
   return (
     <body id="body">
       <Topbar />
@@ -52,7 +62,7 @@ const Deals = () => {
                 </button>
                 <ul className="dropdown-menu">
                   <li>
-                    <Link className="dropdown-item" to="">
+                    <Link className="dropdown-item" to="/deals/single-deals">
                       Single Deals
                     </Link>
                   </li>
@@ -96,12 +106,13 @@ const Deals = () => {
               >
                 Need Approval
               </button>
-              <button
-                className="btn btn-outline-primary ms-2"
+              <Link
+                to="/deals/bulk-change"
+                className="btn btn-outline-primary ms-2 text-decoration-none"
                 style={{ fontSize: "0.85rem" }}
               >
                 Bulk Change
-              </button>
+              </Link>
               <button
                 className="btn btn-outline-danger ms-2"
                 style={{ fontSize: "0.85rem" }}
@@ -309,14 +320,59 @@ const Deals = () => {
                 </form>
               </div>
             </div>
-            <div className={`${boardKanban}`}>
-              <button
-                className="btn btn-primary mt-3"
-                onClick={toggleSideFilter}
-                style={{ fontSize: "0.85rem" }}
-              >
-                <i className={`${IconFilter}`}></i>
-              </button>
+            <div className={`${boardKanbanDatatable}`}>
+              <div className="row">
+                <div className="col d-flex">
+                  <button
+                    className="btn btn-primary mt-3"
+                    onClick={toggleSideFilter}
+                    style={{ fontSize: "0.85rem" }}
+                  >
+                    <i className={`${IconFilter}`}></i>
+                  </button>
+                  <div
+                    className="input-group mt-3 ms-3"
+                    style={{ width: "20rem" }}
+                  >
+                    <div className="input-group-prepend">
+                      <span
+                        className="input-group-text"
+                        style={{
+                          borderEndEndRadius: 0,
+                          borderStartEndRadius: 0,
+                        }}
+                      >
+                        <i className="bi bi-search"></i>
+                      </span>
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Search"
+                      className="form-control"
+                      style={{ fontSize: "0.85rem" }}
+                    />
+                  </div>
+                  <div className="mt-3 ms-3">
+                    <select
+                      name=""
+                      id=""
+                      className="form-select"
+                      style={{ fontSize: "0.85rem" }}
+                    >
+                      <option value="">Select Sales</option>
+                      <option value="">Sales Pipeline</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div className="row">
+                <div className="col">
+                  <DataTableComponet
+                    data={search}
+                    selectUidDataTable={selectUidDataTable}
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </Card>
