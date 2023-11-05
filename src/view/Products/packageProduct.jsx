@@ -2,10 +2,11 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import DataTable, { ExpanderComponentProps } from "react-data-table-component";
 import AddPackageProduct from "./Overlay/addPackageProduct";
-import EditPackageProduct from "./Overlay/editPackageProduct";
+// import EditPackageProduct from "./Overlay/editPackageProduct";
 import Swal from "sweetalert2";
 import DeletePackage from "./Modals/deletePackage";
 import { Table } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 const PackageProduct = () => {
   const token = localStorage.getItem("token");
   const [packageProduct, setPackageProduct] = useState([]);
@@ -15,17 +16,18 @@ const PackageProduct = () => {
   const handleClosePackage = () => setAddPackageProduct(false);
   const handleOpenPackage = () => setAddPackageProduct(true);
 
-  const [editPackageProduct, setEditPackageProduct] = useState(false);
+  // const [editPackageProduct, setEditPackageProduct] = useState(false);
   const [packageDelete, setPackageDelete] = useState(false);
   const handleDeletePackage = () => setPackageDelete(false);
   const [selectUid, setSelectUid] = useState(false);
+  const navigate = useNavigate();
   const selectUidDatatable = (e) => {
     const select = e.selectedRows.map((row) => row.uid);
     setSelectUid(select);
   };
-  const handleCloseEditPackage = () => {
-    setEditPackageProduct(false);
-  };
+  // const handleCloseEditPackage = () => {
+  //   setEditPackageProduct(false);
+  // };
   // console.log(selectUid);
   const handleSelectedDeleted = async (e) => {
     e.preventDefault();
@@ -194,7 +196,7 @@ const PackageProduct = () => {
           <button
             title="edit"
             className="icon-button"
-            onClick={() => setEditPackageProduct(row.uid)}
+            onClick={() => navigate(`/packed-product/${row.uid}/edit`)}
           >
             <i className="bi bi-pen"></i>
           </button>
@@ -280,11 +282,11 @@ const PackageProduct = () => {
           visible={addPackageProduct}
           onClose={handleClosePackage}
         />
-        <EditPackageProduct
+        {/* <EditPackageProduct
           onClose={handleCloseEditPackage}
           visible={editPackageProduct !== false}
           uid={editPackageProduct}
-        />
+        /> */}
         <DeletePackage
           onClose={handleDeletePackage}
           visible={packageDelete !== false}

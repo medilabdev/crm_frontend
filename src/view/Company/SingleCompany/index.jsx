@@ -10,6 +10,7 @@ import makeAnimated from "react-select/animated";
 import OverlayAddCompany from "../../../components/Overlay/addCompany";
 import OverlayAddDeals from "../../../components/Overlay/addDeals";
 import Swal from "sweetalert2";
+import OverlayAddContact from "../../../components/Overlay/addContact";
 
 const SingleCompany = () => {
   const token = localStorage.getItem("token");
@@ -43,7 +44,11 @@ const SingleCompany = () => {
   const [showAddDeals, setShowAddDeals] = useState(false);
   const handleCloseDeals = () => setShowAddDeals(false);
   const handleShowDeals = () => setShowAddDeals(true);
-  console.log(inputCompany);
+
+  const [showAddContact, setShowAddContact] = useState(false);
+  const handleCloseContact = () => setShowAddContact(false);
+  const handleShowContact = () => setShowAddContact(true);
+  // console.log(inputCompany);
   const getContact = () => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/contacts`, {
@@ -550,9 +555,9 @@ const SingleCompany = () => {
                     onChange={(selected) => handleSelectContact(selected)}
                     name="contact_uid[]"
                   />
-                  <div className="text-center">
+                  <div className="text-center mt-3">
                     <a
-                      //   onClick={handleShowCanvasDeals}
+                      onClick={handleShowContact}
                       className="text-primary text-decoration-none fw-semibold"
                       style={{ cursor: "pointer" }}
                     >
@@ -562,7 +567,10 @@ const SingleCompany = () => {
                   </div>
                 </Card.Body>
               </Card>
-
+              <OverlayAddContact
+                visible={showAddContact}
+                onClose={handleCloseContact}
+              />
               <Card className="shadow">
                 <Card.Header>
                   <h5 className="mt-2">

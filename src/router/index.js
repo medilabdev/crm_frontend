@@ -31,6 +31,7 @@ import ShortCode from "../view/Documents/ShortCode";
 import Deals from "../view/Deals";
 import SingleDeals from "../view/Deals/SingleDeals";
 import BulkChangeDeals from "../view/Deals/BulkChange";
+import EditPackageProduct from "../view/Products/EditPackageProduct";
 const Login = ({ children }) => {
   const token = localStorage.getItem("token");
   if (!token) {
@@ -202,7 +203,15 @@ function Router() {
             </Login>
           }
         />
-
+        <Route
+          exact
+          path="/packed-product/:uid/edit"
+          element={
+            <Login>
+              <EditPackageProduct />
+            </Login>
+          }
+        />
         <Route
           exact
           path="/documents"

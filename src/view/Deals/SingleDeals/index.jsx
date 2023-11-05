@@ -11,6 +11,7 @@ import { useEffect } from "react";
 import Select from "react-select";
 import OverlayAddCompany from "../../../components/Overlay/addCompany";
 import ReactQuill from "react-quill";
+import OverlayAddContact from "../../../components/Overlay/addContact";
 const SingleDeals = () => {
   const token = localStorage.getItem("token");
   const [owner, setOwner] = useState([]);
@@ -21,9 +22,9 @@ const SingleDeals = () => {
   const [showAddCampCanvas, setShowAddCampCanvas] = useState(false);
   const handleCloseAddCampCanvas = () => setShowAddCampCanvas(false);
   const handleShowAddCampCanvas = () => setShowAddCampCanvas(true);
-  const [showAddContCanvas, setShowAddContCanvas] = useState(false);
-  const handleCloseAddContCanvas = () => setShowAddContCanvas(false);
-  const handleShowAddContCanvas = () => setShowAddContCanvas(true);
+  const [showAddContact, setShowAddContact] = useState(false);
+  const handleCloseContact = () => setShowAddContact(false);
+  const handleShowContact = () => setShowAddContact(true);
 
   const getOwnerUser = () => {
     axios
@@ -289,7 +290,7 @@ const SingleDeals = () => {
                   <div>
                     <div className="mt-3 text-center">
                       <a
-                        onClick={handleShowAddContCanvas}
+                        onClick={handleShowContact}
                         className="fw-semibold fs-6"
                         style={{
                           cursor: "pointer",
@@ -301,6 +302,10 @@ const SingleDeals = () => {
                   </div>
                 </Card.Body>
               </Card>
+              <OverlayAddContact
+                visible={showAddContact}
+                onClose={handleCloseContact}
+              />
               <Card className="shadow">
                 <Card.Header>
                   <h5 className="mt-2">
