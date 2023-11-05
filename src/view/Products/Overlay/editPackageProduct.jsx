@@ -7,7 +7,6 @@ import makeAnimated from "react-select/animated";
 import Swal from "sweetalert2";
 const EditPackageProduct = ({ visible, uid, onClose }) => {
   const token = localStorage.getItem("token");
-  console.log(uid);
   const [editPackage, setEditPackage] = useState({});
   const [editProduct, setEditProduct] = useState([]);
   const [dataProduct, setDataProduct] = useState([]);

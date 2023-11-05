@@ -12,6 +12,7 @@ import Select from "react-select";
 import OverlayAddCompany from "../../../components/Overlay/addCompany";
 import ReactQuill from "react-quill";
 import OverlayAddContact from "../../../components/Overlay/addContact";
+import AddProductOverlay from "../../../components/Overlay/addProduct";
 const SingleDeals = () => {
   const token = localStorage.getItem("token");
   const [owner, setOwner] = useState([]);
@@ -22,10 +23,14 @@ const SingleDeals = () => {
   const [showAddCampCanvas, setShowAddCampCanvas] = useState(false);
   const handleCloseAddCampCanvas = () => setShowAddCampCanvas(false);
   const handleShowAddCampCanvas = () => setShowAddCampCanvas(true);
+
   const [showAddContact, setShowAddContact] = useState(false);
   const handleCloseContact = () => setShowAddContact(false);
   const handleShowContact = () => setShowAddContact(true);
 
+  const [showAddProduct, setShowAddProduct] = useState(false);
+  const handleCloseProduct = () => setShowAddProduct(false);
+  const handleShowProduct = () => setShowAddProduct(true);
   const getOwnerUser = () => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
@@ -303,8 +308,8 @@ const SingleDeals = () => {
                 </Card.Body>
               </Card>
               <OverlayAddContact
-                visible={showAddContact}
                 onClose={handleCloseContact}
+                visible={showAddContact}
               />
               <Card className="shadow">
                 <Card.Header>
@@ -324,17 +329,22 @@ const SingleDeals = () => {
                   <div>
                     <div className="mt-3 text-center">
                       <a
-                        className="fw-semibold fs-6"
+                        onClick={handleShowProduct}
+                        className="fw-semibold fs-6 btn btn-outline-primary"
                         style={{
                           cursor: "pointer",
                         }}
                       >
-                        Create Product
+                        Add Product
                       </a>
                     </div>
                   </div>
                 </Card.Body>
               </Card>
+              <AddProductOverlay
+                onClose={handleCloseProduct}
+                visible={showAddProduct}
+              />
             </div>
             <div className="col-md-8">
               <Card className="shadow">

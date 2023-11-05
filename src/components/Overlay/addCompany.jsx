@@ -9,6 +9,7 @@ import {
   Offcanvas,
 } from "react-bootstrap";
 import Swal from "sweetalert2";
+import Select from "react-select";
 const OverlayAddCompany = ({ visible, onClose }) => {
   const [ownerUser, setOwnerUser] = useState([]);
   const [sourceContact, setSourceContact] = useState([]);
@@ -138,6 +139,60 @@ const OverlayAddCompany = ({ visible, onClose }) => {
     getCompanyParent(token);
     getCompanyType(token);
   }, [token]);
+
+  const selectOwner = () => {
+    const result = [];
+    ownerUser?.map((data) => {
+      const daOwn = {
+        value: data.uid,
+        label: data.name,
+      };
+      result.push(daOwn);
+    });
+    return result;
+  };
+
+  const selectSource = () => {
+    const result = [];
+    sourceContact?.map((data) => {
+      const souCont = {
+        value: data.uid,
+        label: data.name,
+      };
+      result.push(souCont);
+    });
+    return result;
+  };
+
+  const selectType = () => {
+    const result = [];
+    typeCompany?.map((data) => {
+      const tyComp = {
+        value: data.uid,
+        label: data.name,
+      };
+      result.push(tyComp);
+    });
+    return result;
+  };
+  const handleInputOwner = (e) => {
+    setInputCompany({
+      ...inputCompany,
+      owner_user_uid: e.value,
+    });
+  };
+  const handleInputSource = (e) => {
+    setInputCompany({
+      ...inputCompany,
+      company_source_uid: e.value,
+    });
+  };
+  const handleTypeComp = (e) => {
+    setInputCompany({
+      ...inputCompany,
+      company_type_uid: e.value,
+    });
+  };
   // console.log(telephone);
   const handleSubmitCompany = async (e) => {
     e.preventDefault();
@@ -208,38 +263,28 @@ const OverlayAddCompany = ({ visible, onClose }) => {
             <Form.Label>
               Owner <span className="text-danger fs-5">*</span>
             </Form.Label>
-            <Form.Select
-              name="owner_user_uid"
-              value={inputCompany.owner_user_uid}
-              onChange={handleInputChange}
-            >
-              <option value="">Select Owner</option>
-              {ownerUser.map((user) => (
-                <option key={user.uid} value={user.uid}>
-                  {user.name}
-                </option>
-              ))}
-            </Form.Select>
+            <Select
+              options={selectOwner()}
+              onChange={(e) => handleInputOwner(e)}
+              required
+            />
           </Form.Group>
           <Form.Group>
-            <Form.Label>Telephone</Form.Label>
+            <Form.Label>
+              Telephone <span className="text-danger fs-5">*</span>
+            </Form.Label>
 
             {inputCompany.telp_number.map((telephone, index) => (
               <div key={index}>
-                <FloatingLabel
-                  label={`Telephone #${index + 1}`}
-                  className="mb-3"
-                >
-                  <Form.Control
-                    type="number"
-                    name={`telp_number[${index}]`}
-                    placeholder="@gg"
-                    value={inputCompany.telp_number[index]}
-                    onChange={(e) =>
-                      handleChangeTelephone(index, e.target.value)
-                    }
-                  />
-                </FloatingLabel>
+                <Form.Control
+                  type="number"
+                  name={`telp_number[${index}]`}
+                  placeholder="Telephone"
+                  value={inputCompany.telp_number[index]}
+                  onChange={(e) => handleChangeTelephone(index, e.target.value)}
+                  required
+                  className="mb-2"
+                />
                 {index > 0 && (
                   <Button
                     variant="danger"
@@ -306,18 +351,10 @@ const OverlayAddCompany = ({ visible, onClose }) => {
             <Form.Label>
               Type <span className="text-danger fs-5">*</span>
             </Form.Label>
-            <Form.Select
-              name="company_type_uid"
-              value={inputCompany.company_type_uid}
-              onChange={handleInputChange}
-            >
-              <option value="">Select Choose</option>
-              {typeCompany.map((type) => (
-                <option key={type.uid} value={type.uid}>
-                  {type.name}
-                </option>
-              ))}
-            </Form.Select>
+            <Select
+              options={selectType()}
+              onChange={(e) => handleTypeComp(e)}
+            />
           </Form.Group>
           <Form.Group className="mb-3" controlId="formBasicEmail">
             <Form.Label>Number of Employees</Form.Label>
@@ -332,18 +369,10 @@ const OverlayAddCompany = ({ visible, onClose }) => {
             <Form.Label>
               Source <span className="text-danger fs-5">*</span>
             </Form.Label>
-            <Form.Select
-              name="company_source_uid"
-              value={inputCompany.company_source_uid}
-              onChange={handleInputChange}
-            >
-              <option value="">Select Source</option>
-              {sourceContact.map((source) => (
-                <option key={source.uid} value={source.uid}>
-                  {source.name}
-                </option>
-              ))}
-            </Form.Select>
+            <Select
+              options={selectSource()}
+              onChange={(e) => handleInputSource(e)}
+            />
           </Form.Group>
           <Form.Group className="mb-3" controlId="formBasicEmail">
             <Form.Label>Number of Patiens</Form.Label>
@@ -378,7 +407,10 @@ const OverlayAddCompany = ({ visible, onClose }) => {
               ))}
             </Form.Select>
           </Form.Group>
-          <button className="btn btn-primary mb-4 ms-3" type="submit">
+          <button
+            className="btn btn-primary mb-4 ms-3"
+            onClick={handleSubmitCompany}
+          >
             Add Company
           </button>
           <button className="btn btn-secondary mb-4 ms-2" onClick={onClose}>
