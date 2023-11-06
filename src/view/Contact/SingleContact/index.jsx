@@ -165,7 +165,7 @@ const SingleContact = () => {
     getSource(token);
     getCompany(token);
   }, [token]);
-  // console.log(inputContact);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {

@@ -50,7 +50,6 @@ const OverlayAddContact = ({ visible, onClose }) => {
       };
     });
   };
-  console.log(inputContact);
   const handleInputContact = (e) => {
     setInputContact({
       ...inputContact,

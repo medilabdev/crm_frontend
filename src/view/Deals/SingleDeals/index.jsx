@@ -4,7 +4,7 @@ import Sidebar from "../../../components/Template/Sidebar";
 import Main from "../../../components/Template/Main";
 
 import BreadcrumbSingleDeals from "../Component/BreadcrumbSingleDeals";
-import { Card, FloatingLabel, Form } from "react-bootstrap";
+import { Card, Col, FloatingLabel, Form, Row } from "react-bootstrap";
 import { useState } from "react";
 import axios from "axios";
 import { useEffect } from "react";
@@ -13,6 +13,8 @@ import OverlayAddCompany from "../../../components/Overlay/addCompany";
 import ReactQuill from "react-quill";
 import OverlayAddContact from "../../../components/Overlay/addContact";
 import AddProductOverlay from "../../../components/Overlay/addProduct";
+import DataTable from "react-data-table-component";
+import Swal from "sweetalert2";
 const SingleDeals = () => {
   const token = localStorage.getItem("token");
   const [owner, setOwner] = useState([]);
@@ -20,17 +22,31 @@ const SingleDeals = () => {
   const [dealCategory, setDealCategory] = useState([]);
   const [companies, setCompanies] = useState([]);
   const [contact, setContact] = useState([]);
+  // overlay add company
   const [showAddCampCanvas, setShowAddCampCanvas] = useState(false);
   const handleCloseAddCampCanvas = () => setShowAddCampCanvas(false);
   const handleShowAddCampCanvas = () => setShowAddCampCanvas(true);
-
+  // overlay add contact
   const [showAddContact, setShowAddContact] = useState(false);
   const handleCloseContact = () => setShowAddContact(false);
   const handleShowContact = () => setShowAddContact(true);
 
+  // overlay add product
   const [showAddProduct, setShowAddProduct] = useState(false);
   const handleCloseProduct = () => setShowAddProduct(false);
   const handleShowProduct = () => setShowAddProduct(true);
+
+  const allData = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.startsWith("DataProduct")) {
+      const data = JSON.parse(localStorage.getItem(key));
+      allData.push(data);
+    }
+  }
+
+  console.log(allData[0]);
+
   const getOwnerUser = () => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
@@ -165,6 +181,81 @@ const SingleDeals = () => {
     return result;
   };
 
+  const columns = [
+    {
+      id: 1,
+      name: "Name Product",
+      selector: (row) => row.product_uid,
+      sortable: true,
+    },
+    {
+      id: 2,
+      name: "Action",
+      // selector: (row) => (
+      //   <button
+      //     onClick={() => {
+      //       Swal.fire({
+      //         title: "Konfirmasi",
+      //         text: "Apakah anda yakin ingin menghapus item product ini",
+      //         icon: "warning",
+      //         showCancelButton: true,
+      //         confirmButtonColor: "#3085d6",
+      //         cancelButtonColor: "#d33",
+      //         confirmButtonText: "Ya, Hapus!",
+      //         cancelButtonText: "Batal",
+      //       }).then((res) => {
+      //         if (res.isConfirmed) {
+      //           const idDelete = row.id;
+      //           const dataIndexToDelete = allData[0].findIndex(
+      //             (data) => data.id === idDelete
+      //           );
+      //           if (dataIndexToDelete !== -1) {
+      //             allData[0].splice(dataIndexToDelete, 1);
+      //             localStorage.removeItem("DataProduct" );
+      //             localStorage.setItem("DataProduct", JSON.stringify(allData));
+      //             Swal.fire({
+      //               title: res.data.message,
+      //               text: "Successfully delete contact",
+      //               icon: "success",
+      //             }).then((res) => {
+      //               if (res.isConfirmed) {
+      //                 window.location.reload();
+      //               }
+      //             });
+      //           } else {
+      //             Swal.fire({
+      //               title: "Error",
+      //               text: "Item not found in data",
+      //               icon: "error",
+      //             });
+      //           }
+      //         }
+      //       });
+      //     }}
+      //     className="icon-button"
+      //   >
+      //     <i className="bi bi-trash-fill danger"></i>
+      //   </button>
+      // ),
+    },
+  ];
+  const customStyle = {
+    headRow: {
+      style: {
+        backgroundColor: "#427D9D",
+        color: "white",
+        marginTop: "12px",
+        borderRadius: "5px",
+      },
+    },
+    cells: {
+      style: {
+        fontSize: "4px",
+        fontWeight: "600",
+        marginTop: "4px",
+      },
+    },
+  };
   useEffect(() => {
     getOwnerUser(token);
     getPriority(token);
@@ -320,10 +411,10 @@ const SingleDeals = () => {
                 </Card.Header>
                 <Card.Body>
                   <div>
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Select Product"
+                    <DataTable
+                      data={allData[0]}
+                      columns={columns}
+                      customStyles={customStyle}
                     />
                   </div>
                   <div>
@@ -353,6 +444,14 @@ const SingleDeals = () => {
                 </Card.Header>
                 <Card.Body>
                   <ReactQuill className="p-2" theme="snow" />
+                  <Form.Group as={Row} xs={2} md={4} lg={6} className="p-2">
+                    <Form.Label column lg={4} className="fw-semibold fs-6">
+                      Mention Users :
+                    </Form.Label>
+                    <Col lg={6} style={{ marginLeft: "-5rem" }}>
+                      <Select options={ownerSelect()} isMulti />
+                    </Col>
+                  </Form.Group>
                 </Card.Body>
               </Card>
               <div className="float-end">

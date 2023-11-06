@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Topbar from "../../components/Template/Topbar";
 import Sidebar from "../../components/Template/Sidebar";
 import Main from "../../components/Template/Main";
@@ -7,18 +7,36 @@ import Card from "../../components/Card";
 import { useState } from "react";
 import Dummy from "./Dummy";
 import DataTableComponet from "./Datatable";
+import axios from "axios";
+import Select from "react-select";
 
 const Deals = () => {
   const token = localStorage.getItem("token");
   const [isSideFilter, setIsSideFilter] = useState(false);
   const [search, setSearch] = useState(Dummy);
   const [selectUid, setSelectUid] = useState([]);
+  const [owner, setOwner] = useState([]);
 
+  const getOwnerUser = () => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => setOwner(res.data.data))
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated.") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
   const selectUidDataTable = (e) => {
     const select = e.selectedRows.map((row) => row.uid);
     setSelectUid(select);
   };
-  console.log(selectUid);
+  // console.log(selectUid);
   const toggleSideFilter = () => {
     setIsSideFilter(!isSideFilter);
   };
@@ -26,6 +44,30 @@ const Deals = () => {
   const boardKanbanDatatable = isSideFilter ? "col-md-9" : "col-md-12";
   const IconFilter = isSideFilter ? "bi bi-x-lg" : "bi bi-funnel";
 
+  function handleSearchDatatable(e) {
+    const newData = Dummy.filter((row) => {
+      return row.name_deals
+        .toLowerCase()
+        .includes(e.target.value.toLowerCase());
+    });
+    setSearch(newData);
+  }
+
+  const selectOwner = () => {
+    const result = [];
+    owner?.map((data) => {
+      const ownRes = {
+        value: data.uid,
+        label: data.name,
+      };
+      result.push(ownRes);
+    });
+    return result;
+  };
+
+  useEffect(() => {
+    getOwnerUser(token);
+  }, [token]);
   return (
     <body id="body">
       <Topbar />
@@ -63,19 +105,19 @@ const Deals = () => {
                 <ul className="dropdown-menu">
                   <li>
                     <Link className="dropdown-item" to="/deals/single-deals">
-                      Single Deals
+                      Single Deal
                     </Link>
                   </li>
                   <li>
                     <Link className="dropdown-item" to="">
-                      Upload Deal
+                      Upload Deals
                     </Link>
                   </li>
-                  <li>
+                  {/* <li>
                     <Link className="dropdown-item" to="">
                       Upload Product
                     </Link>
-                  </li>
+                  </li> */}
                 </ul>
               </div>
               <div className="dropdown button-flex">
@@ -148,19 +190,12 @@ const Deals = () => {
                   </div>
                 </div>
                 <div className="row mt-2">
-                  <div className="col">
-                    <select
-                      name=""
-                      id=""
-                      className="form-select"
-                      style={{ fontSize: "0.85rem" }}
-                    >
-                      <option disabled selected>
-                        Owner
-                      </option>
-                      <option value="">Person 1</option>
-                      <option value="">Person 2</option>
-                    </select>
+                  <div className="col mb-2">
+                    <Select
+                      options={selectOwner()}
+                      isMulti
+                      placeholder="Select Owner"
+                      />
                   </div>
                 </div>
                 <div className="row">
@@ -348,11 +383,12 @@ const Deals = () => {
                     <input
                       type="text"
                       placeholder="Search"
+                      onChange={handleSearchDatatable}
                       className="form-control"
                       style={{ fontSize: "0.85rem" }}
                     />
                   </div>
-                  <div className="mt-3 ms-3">
+                  {/* <div className="mt-3 ms-3">
                     <select
                       name=""
                       id=""
@@ -362,7 +398,7 @@ const Deals = () => {
                       <option value="">Select Sales</option>
                       <option value="">Sales Pipeline</option>
                     </select>
-                  </div>
+                  </div> */}
                 </div>
               </div>
               <div className="row">
