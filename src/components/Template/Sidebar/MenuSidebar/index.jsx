@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
-const MenuSidebar = ({ type, name, key, icon, noCollapse, url, isActive }) => {
+const MenuSidebar = ({ type, name, icon, url, isActive }) => {
   const location = useLocation();
   const [urlActive, setUrlActive] = useState(false);
-
   useEffect(() => {
     if (location.pathname === url) {
       setUrlActive(true);
@@ -17,27 +16,22 @@ const MenuSidebar = ({ type, name, key, icon, noCollapse, url, isActive }) => {
     <>
       {type !== "collapse" ? (
         <>
-          <li className={`nav-item ${isActive ? "" : "d-none"} `}>
-            <a
+          <li className={`nav-item ${isActive ? "active" : "d-none"} `}>
+            <Link
+              to={url}
               className={`nav-link ${urlActive ? "" : "collapsed"}`}
-              href={url}
             >
-              <i className={icon} style={{ fontSize: "0.85rem" }} />
-              <span style={{ fontSize: "0.85rem" }}>{name}</span>
-            </a>
+              <i className={icon} style={{ fontSize: "0.95rem" }} />
+              <span style={{ fontSize: "0.95rem" }}>{name}</span>
+            </Link>
           </li>
         </>
       ) : (
         <li className="nav-item">
-          <a
-            className={`nav-link ${urlActive ? "" : "collapsed"}`}
-            data-bs-target="#components-nav"
-            data-bs-toggle={type}
-            href={url}
-          >
+          <a className={`nav-link ${urlActive ? "" : "collapsed"}`}>
             <i
               className="bi bi-menu-button-wide"
-              style={{ fontSize: "0.85rem" }}
+              style={{ fontSize: "0.95rem" }}
             />
             <span style={{ fontSize: "0.85rem" }}>{name}</span>
             <i
@@ -45,15 +39,17 @@ const MenuSidebar = ({ type, name, key, icon, noCollapse, url, isActive }) => {
               style={{ fontSize: "0.85rem" }}
             />
           </a>
-          <ul
-            id="components-nav"
-            className="nav-content collapse "
-            data-bs-parent="#sidebar-nav"
-          >
+          <ul id="products" data-bs-parent="#sidebar-nav">
             <li>
-              <a href="components-alerts.html">
+              <a href="/package-product" className="text-decoration-none">
                 <i className="bi bi-circle" />
-                <span>Alerts</span>
+                <span>Product Package</span>
+              </a>
+            </li>
+            <li>
+              <a href="/products" className="text-decoration-none">
+                <i className="bi bi-circle" />
+                <span>Single Product</span>
               </a>
             </li>
           </ul>

@@ -66,7 +66,7 @@ const EditProfil = ({ roles, position, primaryTeam, users }) => {
   useEffect(() => {
     getDataUser(uid, token);
   }, [uid, token]);
-  // console.log(editUser);
+
   const handleUpdateUser = async (e) => {
     e.preventDefault();
     const formData = new FormData();

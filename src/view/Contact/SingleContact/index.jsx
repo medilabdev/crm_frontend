@@ -1,15 +1,243 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Topbar from "../../../components/Template/Topbar";
 import Sidebar from "../../../components/Template/Sidebar";
 import Main from "../../../components/Template/Main";
 import Footer from "../../../components/Template/Footer";
-import { Card, Col } from "react-bootstrap";
-import AddContact from "./addContact";
-import AddCompany from "./addCompany";
-import AddDeals from "./addDeals";
+import { Card, Col, FloatingLabel, Form, Button } from "react-bootstrap";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import OverlayAddDeals from "../../../components/Overlay/addDeals";
+import OverlayAddCompany from "../../../components/Overlay/addCompany";
+import axios from "axios";
+import Swal from "sweetalert2";
+import Select from "react-select";
+import { Link } from "react-router-dom";
+
 const SingleContact = () => {
+  const token = localStorage.getItem("token");
+  const [showCanvasDeals, setShowCanvasDeals] = useState(false);
+  const handleCloseCanvasDeals = () => setShowCanvasDeals(false);
+  const handleShowCanvasDeals = () => setShowCanvasDeals(true);
+  const [inputContact, setInputContact] = useState({
+    name: "",
+    birthday: "",
+    gender: "",
+    email: "",
+    position: "",
+    address: "",
+    city: "",
+    postal_code: "",
+    remarks: "",
+    image: "",
+    phone_number: [""],
+    owner_user_uid: "",
+    source_uid: "",
+    notes: "",
+    gps: "",
+  });
+  const [ownerUser, setOwnerUser] = useState([]);
+  const [source, setSource] = useState([]);
+  const [company, setCompany] = useState([]);
+
+  const getCompany = () => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/companies`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => setCompany(res.data.data))
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
+
+  const getSource = () => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/companies-source`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => setSource(res.data.data))
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
+
+  const getOwnerUser = () => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => setOwnerUser(res.data.data))
+      .catch((error) => {
+        if (error.response.data.message === "Unauthenticated") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
+
+  const [showCanvas, setShowCanvas] = useState(false);
+  const handleCloseCanvas = () => setShowCanvas(false);
+  const handleShowCanvas = () => setShowCanvas(true);
+
+  //  menambah telephone
+  const addTelephone = () => {
+    setInputContact((input) => ({
+      ...input,
+      phone_number: [...input.phone_number, ""],
+    }));
+  };
+
+  //   mengubah nomor telepon pada indeks tertentu
+  const handleChangeTelephone = (index, value) => {
+    setInputContact((input) => {
+      const telp = [...input.phone_number];
+      telp[index] = value;
+      return {
+        ...input,
+        phone_number: telp,
+      };
+    });
+  };
+  const ownerSelected = () => {
+    const resultOwner = [];
+    ownerUser.map((data) => {
+      const selectOwner = {
+        value: data.uid,
+        label: data.name,
+      };
+      resultOwner.push(selectOwner);
+    });
+    return resultOwner;
+  };
+
+  const selectSource = () => {
+    const result = [];
+    source?.map((data) => {
+      const seSourc = {
+        value: data.uid,
+        label: data.name,
+      };
+      result.push(seSourc);
+    });
+    return result;
+  };
+
+  const selectComp = () => {
+    const result = [];
+    company?.map((data) => {
+      const comSe = {
+        value: data.uid,
+        label: data.name,
+      };
+      result.push(comSe);
+    });
+    return result;
+  };
+
+  const handleSourceSelect = (e) => {
+    setInputContact({
+      ...inputContact,
+      source_uid: e.value,
+    });
+  };
+  const handleInputOwner = (selected) => {
+    setInputContact({
+      ...inputContact,
+      owner_user_uid: selected.value,
+    });
+  };
+  //   menghapus telephone
+  const removeTelephone = (index) => {
+    setInputContact((input) => {
+      const telp = [...input.phone_number];
+      telp.splice(index, 1);
+      return {
+        ...input,
+        phone_number: telp,
+      };
+    });
+  };
+
+  const handleInputContact = (e) => {
+    setInputContact({
+      ...inputContact,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  useEffect(() => {
+    getOwnerUser(token);
+    getSource(token);
+    getCompany(token);
+  }, [token]);
+  const [compParent, setCompParent] = useState([]);
+  const handleSelectParentComp = (e) => {
+    setCompParent(e.map((opt) => opt.value));
+  };
+  console.log(compParent);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const formData = new FormData();
+      for (const compUid of compParent) {
+        formData.append("company_uid[]", compUid);
+      }
+      formData.append("name", inputContact.name);
+      formData.append("birthday", inputContact.birthday);
+      formData.append("email", inputContact.email);
+      formData.append("gender", inputContact.gender);
+      formData.append("position", inputContact.position);
+      formData.append("address", inputContact.address);
+      formData.append("city", inputContact.city);
+      formData.append("remarks", inputContact.remarks);
+      formData.append("source_uid", inputContact.source_uid);
+      formData.append("owner_user_uid", inputContact.owner_user_uid);
+      formData.append("phone_number[]", inputContact.phone_number);
+      // console.log("FormData Content:");
+      // for (const pair of formData.entries()) {
+      //   console.log(pair[0] + ": " + pair[1]);
+      // }
+      const addContact = await axios.post(
+        `${process.env.REACT_APP_BACKEND_URL}/contacts`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      Swal.fire({
+        title: addContact.data.message,
+        text: "Successfully add contact",
+        icon: "success",
+      });
+      window.location.href = "/contact";
+    } catch (err) {
+      if (err.response) {
+        Swal.fire({
+          text: err.response.data.message,
+          icon: "warning",
+        });
+      } else {
+        Swal.fire({
+          text: "Something went wrong !",
+          icon: "error",
+        });
+      }
+    }
+  };
   return (
     <body id="body">
       <Topbar />
@@ -23,14 +251,14 @@ const SingleContact = () => {
                 <nav>
                   <ol className="breadcrumb mt-2">
                     <li className="breadcrumb-item">
-                      <a href="/" className="text-decoration-none">
+                      <Link to="/" className="text-decoration-none">
                         Dashboard
-                      </a>
+                      </Link>
                     </li>
                     <li className="breadcrumb-item">
-                      <a href="/contact" className="text-decoration-none">
+                      <Link to="/contact" className="text-decoration-none">
                         Contact
-                      </a>
+                      </Link>
                     </li>
                     <li className="breadcrumb-item active">
                       Add Single Contact
@@ -40,34 +268,299 @@ const SingleContact = () => {
               </div>
             </div>
           </div>
-          <div className="row">
+          <form onSubmit={handleSubmit} className="row">
             <Col md={4}>
-              <AddContact />
-              <AddCompany />
-              <AddDeals />
+              <Card className="shadow">
+                <Card.Header>
+                  <h5 className="mt-2">
+                    <i class="bi bi-person-circle fs-4"></i>
+                    <span className="ms-2 fs-5 fw-bold mt-5">Contact</span>
+                  </h5>
+                </Card.Header>
+                <Card.Body>
+                  <FloatingLabel
+                    controlId="floatingInput"
+                    label={
+                      <span>
+                        Name
+                        <span style={{ color: "red" }} className="fs-6">
+                          *
+                        </span>
+                      </span>
+                    }
+                    className="mb-3"
+                  >
+                    <Form.Control
+                      type="text"
+                      name="name"
+                      onChange={handleInputContact}
+                      placeholder="name@example.com"
+                    />
+                  </FloatingLabel>
+                  <FloatingLabel
+                    controlId="floatingInput"
+                    label="Job Title"
+                    className="mb-3"
+                  >
+                    <Form.Control
+                      type="text"
+                      name="position"
+                      onChange={handleInputContact}
+                      placeholder="name@example.com"
+                    />
+                  </FloatingLabel>
+                  <FloatingLabel
+                    className="mb-3"
+                    controlId="floatingInput"
+                    label="Email"
+                  >
+                    <Form.Control
+                      type="email"
+                      name="email"
+                      onChange={handleInputContact}
+                      placeholder="@gmail.com"
+                    />
+                  </FloatingLabel>
+                  <Form.Group className="mb-3">
+                    <Form.Label>
+                      Owner
+                      <span style={{ color: "red" }} className="fs-6">
+                        *
+                      </span>
+                    </Form.Label>
+                    <Select
+                      name="owner_user_uid"
+                      onChange={handleInputOwner}
+                      options={ownerSelected()}
+                      required
+                    />
+                  </Form.Group>
+                  <Form.Group>
+                    <Form.Label>
+                      No.Telp/WhatsApp
+                      <span style={{ color: "red" }} className="fs-6">
+                        *
+                      </span>
+                    </Form.Label>
+                  </Form.Group>
+                  {inputContact.phone_number.map((telephone, index) => (
+                    <div key={index}>
+                      <Form.Control
+                        type="number"
+                        className="mb-2"
+                        placeholder={`No.Telp ${index + 1} `}
+                        name={`phone_number[${index}]`}
+                        value={inputContact.phone_number[index]}
+                        onChange={(e) =>
+                          handleChangeTelephone(index, e.target.value)
+                        }
+                      />
+                      {index > 0 && (
+                        <Button
+                          variant="danger"
+                          onClick={() => removeTelephone(index)}
+                          style={{ fontSize: "0.65rem" }}
+                          className="mb-1"
+                        >
+                          Remove
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                  <Button
+                    variant="primary"
+                    onClick={addTelephone}
+                    style={{ fontSize: "0.65rem" }}
+                    className="mb-2"
+                  >
+                    Add Telephone
+                  </Button>
+                  <FloatingLabel
+                    className="mb-3"
+                    controlId="floatingInput"
+                    label="Address"
+                  >
+                    <Form.Control
+                      type="text"
+                      name="address"
+                      onChange={handleInputContact}
+                      placeholder="@gmail"
+                    />
+                  </FloatingLabel>
+                  <FloatingLabel
+                    className="mb-3"
+                    controlId="floatingInput"
+                    label="City"
+                  >
+                    <Form.Control
+                      type="text"
+                      name="city"
+                      onChange={handleInputContact}
+                      placeholder="@gmail"
+                    />
+                  </FloatingLabel>
+                  <FloatingLabel
+                    className="mb-3"
+                    controlId="floatingInput"
+                    label="Zip Code"
+                  >
+                    <Form.Control
+                      type="number"
+                      name="postal_code"
+                      onChange={handleInputContact}
+                      placeholder="@gmail"
+                    />
+                  </FloatingLabel>
+                  <FloatingLabel
+                    className="mb-3"
+                    controlId="floatingInput"
+                    label="Date"
+                  >
+                    <Form.Control
+                      type="date"
+                      placeholder="@gmail"
+                      name="birthday"
+                      onChange={handleInputContact}
+                    />
+                  </FloatingLabel>
+                  <Form.Group className="mb-3">
+                    <Form.Label>
+                      Source<span className="text-danger fs-6">*</span>
+                    </Form.Label>
+                    <Select
+                      options={selectSource()}
+                      onChange={handleSourceSelect}
+                    />
+                  </Form.Group>
+
+                  <Form.Group>
+                    <Form.Label>
+                      Gender<span className="text-danger fs-6">*</span>
+                    </Form.Label>
+                    <Form.Select
+                      className="mb-3"
+                      size="lg"
+                      style={{ fontSize: "0.85rem" }}
+                      name="gender"
+                      onChange={handleInputContact}
+                      required
+                    >
+                      <option value="">Select Choose</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                    </Form.Select>
+                  </Form.Group>
+                  <Form.Group>
+                    <Form.Label>Remarks</Form.Label>
+                    <Form.Control
+                      type="text"
+                      name="remarks"
+                      onChange={handleInputContact}
+                    />
+                  </Form.Group>
+                </Card.Body>
+              </Card>
+              <Card className="shadow">
+                <Card.Header>
+                  <h5 className="mt-2">
+                    <i class="bi bi-building  fs-4"></i>
+                    <span className="ms-2 fs-5 fw-bold mt-5">Companies</span>
+                  </h5>
+                </Card.Header>
+                <Card.Body>
+                  <Select
+                    closeMenuOnSelect={false}
+                    options={selectComp()}
+                    onChange={(e) => handleSelectParentComp(e)}
+                    className="mb-3"
+                    placeholder="Primary Company"
+                    isMulti
+                  />
+                  <div className="mt-3 text-center">
+                    <a
+                      onClick={handleShowCanvas}
+                      className="fw-semibold fs-6"
+                      style={{
+                        cursor: "pointer",
+                      }}
+                    >
+                      Or Create Company
+                    </a>
+                  </div>
+                </Card.Body>
+              </Card>
+              <OverlayAddCompany
+                visible={showCanvas}
+                onClose={handleCloseCanvas}
+              />
+              <Card className="shadow">
+                <Card.Header>
+                  <h5 className="mt-2">
+                    <i class="bi bi-currency-dollar  fs-4"></i>
+                    <span className="ms-2 fs-5 fw-bold mt-5">Deals</span>
+                  </h5>
+                </Card.Header>
+                <Card.Body>
+                  <form action="" method="post">
+                    <FloatingLabel
+                      controlId="floatingInput"
+                      label="Search Deals"
+                      className="mb-3"
+                    >
+                      <Form.Select>
+                        <option>Select Company</option>
+                        <option value="">Company 1</option>
+                        <option value="">Company 2</option>
+                      </Form.Select>
+                    </FloatingLabel>
+                  </form>
+                  <div className="text-center">
+                    <a
+                      onClick={handleShowCanvasDeals}
+                      className="text-primary text-decoration-none fw-semibold"
+                      style={{ cursor: "pointer" }}
+                    >
+                      <i class="bi bi-plus-lg" style={{ fontSize: "15px" }}></i>
+                      <span className="fs-6"> Create Another Deal</span>
+                    </a>
+                  </div>
+                </Card.Body>
+              </Card>
+              <OverlayAddDeals
+                visible={showCanvasDeals}
+                onClose={handleCloseCanvasDeals}
+              />
             </Col>
             <Col md={8}>
               <Card className="shadow">
                 <Card.Header>
                   <h6 className="fw-bold mt-2">Notes</h6>
                 </Card.Header>
-                <Card.Body
-                //   style={{
-                //     minHeight: "100px",
-                //   }}
-                >
+                <Card.Body>
                   <ReactQuill
                     className="p-2"
                     theme="snow"
-                    
-                    // style={{
-                    //   minHeight: "100px",
-                    // }}
+                    name="notes"
+                    value={inputContact.notes}
+                    onChange={(value) =>
+                      handleInputContact({ target: { name: "notes", value } })
+                    }
                   />
                 </Card.Body>
               </Card>
+              <div className="float-end">
+                <button className="btn btn-primary me-2" type="submit">
+                  Save Changes
+                </button>
+                <a
+                  href="/company"
+                  className="btn btn-secondary text-decoration-none"
+                >
+                  Cancel
+                </a>
+              </div>
             </Col>
-          </div>
+          </form>
         </div>
         <Footer />
       </Main>

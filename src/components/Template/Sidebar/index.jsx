@@ -1,7 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import MenuSidebar from "../../Template/Sidebar/MenuSidebar";
 
 function Sidebar() {
+  const [openSubMenu, setOpenSubMenu] = useState(null);
+  useEffect(() => {
+    return () => {
+      setOpenSubMenu(null);
+    };
+  }, []);
   return (
     <>
       <aside id="sidebar" className="sidebar shadow-">
@@ -9,46 +15,61 @@ function Sidebar() {
           <MenuSidebar
             type="nonCollapse"
             name="Dashboard"
-            key="dashboard"
             icon="bi bi-grid"
-            noCollapse={true}
             url="/"
             isActive={1}
           />
-          {/* <MenuSidebar
-            type="collapse"
-            name="Report Template"
-            key="report-template"
-            icon="bi bi-clipboard-data-fill"
-            noCollapse={true}
-            url="/report-template"
-            isActive={1}
-          /> */}
+
           <MenuSidebar
             typeMenu="nonCollapse"
             name="Contact"
-            key="contact"
             url="/contact"
             icon="bi bi-person-rolodex"
-            noCollapse={true}
             isActive={1}
           />
           <MenuSidebar
             type="nonCollapse"
             name="Company"
-            key="company"
             url="/company"
             icon="bi bi-building"
-            noCollapse={true}
+            isActive={1}
+          />
+          <MenuSidebar
+            type="nonCollapse"
+            name="Products"
+            url="/products"
+            icon="bi bi-archive-fill"
+            isActive={1}
+          />
+          {/* <MenuSidebar
+            type="collapse"
+            name="Report Template"
+            icon="bi bi-clipboard-data-fill"
+            url="/report-template"
+            isActive={1}
+            dataBsTarget="#components-nav"
+            openSubMenu={openSubMenu}
+            setOpenSubMenu={setOpenSubMenu}
+          /> */}
+          <MenuSidebar
+            typeMenu="nonCollapse"
+            name="Documents"
+            url="/documents"
+            icon="bi bi-file-earmark-text-fill"
+            isActive={1}
+          />
+          <MenuSidebar
+            typeMenu="nonCollapse"
+            name="Deals"
+            url="/deals"
+            icon="bi bi-tags"
             isActive={1}
           />
           <MenuSidebar
             typeMenu="nonCollapse"
             name="Users"
-            key="users"
             url="/users"
             icon="bi bi-person-fill"
-            noCollapse={true}
             isActive={1}
           />
         </ul>

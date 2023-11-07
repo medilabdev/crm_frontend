@@ -6,6 +6,7 @@ import {
   useLocation,
   Route,
   useNavigate,
+  Switch,
 } from "react-router-dom";
 import Dashboard from "../view/Dashboard";
 import User from "../view/User";
@@ -18,6 +19,19 @@ import BulkChange from "../view/Contact/BulkChange";
 import Company from "../view/Company";
 import SingleCompany from "../view/Company/SingleCompany";
 import FileUploadCompany from "../view/Company/FileUpload";
+import BulkChangeCompany from "../view/Company/BulkChange";
+import Products from "../view/Products";
+import Documents from "../view/Documents";
+import UploadFileContact from "../view/Contact/UploadFile";
+import EditContact from "../view/Contact/Edit";
+import EditCompany from "../view/Company/Edit";
+import ShowCompany from "../view/Company/ShowCompany";
+import Templates from "../view/Documents/Templates";
+import ShortCode from "../view/Documents/ShortCode";
+import Deals from "../view/Deals";
+import SingleDeals from "../view/Deals/SingleDeals";
+import BulkChangeDeals from "../view/Deals/BulkChange";
+import EditPackageProduct from "../view/Products/EditPackageProduct";
 const Login = ({ children }) => {
   const token = localStorage.getItem("token");
   if (!token) {
@@ -26,6 +40,10 @@ const Login = ({ children }) => {
   return children;
 };
 
+function Error() {
+  return <h2>Halaman tidak ada</h2>;
+}
+
 function Router() {
   return (
     <BrowserRouter>
@@ -33,6 +51,7 @@ function Router() {
         <Route path="/login" element={<Auth />} />
 
         <Route
+          exact
           path="/"
           element={
             <Login>
@@ -42,6 +61,7 @@ function Router() {
         />
 
         <Route
+          exact
           path="/users"
           element={
             <Login>
@@ -51,6 +71,7 @@ function Router() {
         />
 
         <Route
+          exact
           path="/users/:uid"
           element={
             <Login>
@@ -60,6 +81,7 @@ function Router() {
         />
 
         <Route
+          exact
           path="/contact"
           element={
             <Login>
@@ -69,6 +91,7 @@ function Router() {
         />
 
         <Route
+          exact
           path="/single-contact"
           element={
             <Login>
@@ -78,6 +101,7 @@ function Router() {
         />
 
         <Route
+          exact
           path="/contact/bulk-change"
           element={
             <Login>
@@ -85,8 +109,27 @@ function Router() {
             </Login>
           }
         />
+        <Route
+          exact
+          path="/contact/upload-file"
+          element={
+            <Login>
+              <UploadFileContact />
+            </Login>
+          }
+        />
+        <Route
+          exact
+          path="/contact/:uid/edit"
+          element={
+            <Login>
+              <EditContact />
+            </Login>
+          }
+        />
 
         <Route
+          exact
           path="/company"
           element={
             <Login>
@@ -96,6 +139,7 @@ function Router() {
         />
 
         <Route
+          exact
           path="/company/single-company"
           element={
             <Login>
@@ -105,10 +149,113 @@ function Router() {
         />
 
         <Route
+          exact
           path="/company/upload-file"
           element={
             <Login>
               <FileUploadCompany />
+            </Login>
+          }
+        />
+
+        <Route
+          path="/company/bulkchange"
+          element={
+            <Login>
+              <BulkChangeCompany />
+            </Login>
+          }
+        />
+        <Route
+          exact
+          path="/company/:uid/edit"
+          element={
+            <Login>
+              <EditCompany />
+            </Login>
+          }
+        />
+        <Route
+          exact
+          path="/company/:uid"
+          element={
+            <Login>
+              <ShowCompany />
+            </Login>
+          }
+        />
+        <Route
+          exact
+          path="/deals"
+          element={
+            <Login>
+              <Deals />
+            </Login>
+          }
+        />
+
+        <Route
+          exact
+          path="/products"
+          element={
+            <Login>
+              <Products />
+            </Login>
+          }
+        />
+        <Route
+          exact
+          path="/packed-product/:uid/edit"
+          element={
+            <Login>
+              <EditPackageProduct />
+            </Login>
+          }
+        />
+        <Route
+          exact
+          path="/documents"
+          element={
+            <Login>
+              <Documents />
+            </Login>
+          }
+        />
+
+        <Route
+          exact
+          path="/templates"
+          element={
+            <Login>
+              <Templates />
+            </Login>
+          }
+        />
+
+        <Route
+          exact
+          path="/short-code"
+          element={
+            <Login>
+              <ShortCode />
+            </Login>
+          }
+        />
+        <Route
+          exact
+          path="/deals/single-deals"
+          element={
+            <Login>
+              <SingleDeals />
+            </Login>
+          }
+        />
+        <Route
+          exact
+          path="/deals/bulk-change"
+          element={
+            <Login>
+              <BulkChangeDeals />
             </Login>
           }
         />

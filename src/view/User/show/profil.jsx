@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Col, Row, Card } from "react-bootstrap";
 const Profil = ({ detail }) => {
-  console.log(detail);
+  // console.log(detail);
   return (
     <div
       className="tab-pane fade show active profile-overview"

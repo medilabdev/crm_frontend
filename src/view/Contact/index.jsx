@@ -9,9 +9,16 @@ import Card from "../../components/Card";
 import IconImage from "../../assets/img/person.png";
 import "../Contact/style.css";
 import { Row, Col, OverlayTrigger, Tooltip } from "react-bootstrap";
+import DeleteContact from "./Modals/deleteContact";
+import axios from "axios";
+import { Link, useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
+import Select from "react-select";
 
 const Contact = () => {
+  const token = localStorage.getItem("token");
   const [isSidebarToggleCard, setSidebarToggled] = useState(false);
+  const [selectUid, setSelectedUid] = useState([]);
 
   const toggleSidebarCard = () => {
     setSidebarToggled(!isSidebarToggleCard);
@@ -30,6 +37,177 @@ const Contact = () => {
   ) : (
     <Tooltip id="tooltip">Show Filter</Tooltip>
   );
+
+  const [deleteContact, setDeleteContact] = useState(false);
+  const handleDeleteContact = () => setDeleteContact(false);
+  const [contact, setContact] = useState([]);
+  const [search, setSearch] = useState(contact);
+  const [user, setUser] = useState([]);
+  const [source, setSource] = useState([]);
+  const [associateCompany, setAssociateCompany] = useState([]);
+
+  const [searchMultiple, setSearchMultiple] = useState({
+    name: "",
+    email: "",
+    position: "",
+    address: "",
+    created_at: "",
+    city: "",
+  });
+
+  const navigate = useNavigate();
+  const TokenAuth = localStorage.getItem("token");
+  const uid = localStorage.getItem("uid");
+
+  const getSource = (token) => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/companies-source`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => setSource(res.data.data))
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
+
+  const getAssociateCompany = (token) => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/associate`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => setAssociateCompany(res.data.data))
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
+  const getAllUser = (token) => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => setUser(res.data.data))
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated.") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
+
+  const getContactAll = (url, token, state) => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/${url}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => {
+        state(res.data.data);
+        setSearch(res.data.data);
+        // setSearchMultiple(res.data.data);
+      })
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated.") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
+
+  const [selectedUser, setSelectedUser] = useState([]);
+  const handleSelectUser = (e) => {
+    setSelectedUser(e.map((opt) => opt.value));
+  };
+
+  const handleSearchMultiple = (e) => {
+    setSearchMultiple({
+      ...searchMultiple,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const selectUser = () => {
+    const result = [];
+    user?.map((data) => {
+      const dataUser = {
+        value: data.uid,
+        label: data.name,
+      };
+      result.push(dataUser);
+    });
+    return result;
+  };
+
+  const selectAssociateCompany = () => {
+    const uniqueAssCompany = {};
+    associateCompany?.forEach((data) => {
+      const companyName = data?.company?.name;
+      const key = `${companyName}-${data.company_uid}`;
+
+      if (!uniqueAssCompany[key]) {
+        uniqueAssCompany[key] = {
+          label: companyName,
+          values: [],
+        };
+      }
+      uniqueAssCompany[key].values.push(data.contact_uid);
+    });
+
+    const result = Object.values(uniqueAssCompany).map((item) => {
+      return {
+        label: item.label,
+        value: item.values,
+      };
+    });
+
+    return result;
+  };
+
+  const [selectAssCompany, setSelectAssCompany] = useState([]);
+  const handleSelectAssCompany = (e) => {
+    const selectValue = e.map((data) => data.value);
+    const allValues = selectValue.reduce(
+      (acc, values) => acc.concat(values),
+      []
+    );
+    setSelectAssCompany(allValues);
+  };
+
+  const [selectedSource, setSelectSource] = useState([]);
+  const handleSelectSource = (e) => {
+    setSelectSource(e.map((data) => data.value));
+  };
+
+  const selectSource = () => {
+    const result = [];
+    source?.map((data) => {
+      const dataSource = {
+        value: data.uid,
+        label: data.name,
+      };
+      result.push(dataSource);
+    });
+    return result;
+  };
+
+  useEffect(() => {
+    getContactAll("contacts", TokenAuth, setContact);
+    getAllUser(TokenAuth);
+    getSource(TokenAuth);
+    getAssociateCompany(TokenAuth);
+  }, [TokenAuth]);
 
   const columns = [
     {
@@ -53,29 +231,54 @@ const Contact = () => {
         </div>
       ),
       left: true,
-      width: "200px",
+      width: "150px",
     },
     {
       name: "Contact Info",
-      selector: (row) => row.contact,
+      selector: (row) => row?.phone?.[0]?.number,
       sortable: true,
     },
     {
-      name: "Created/Updated",
-      selector: (row) => (
-        <div>
-          <span className="fw-normal">{row.created_at}</span>
-          <p className="fw-normal">{row.updated_at}</p>
-        </div>
-      ),
+      name: "Associated With",
       sortable: true,
+      width: "150px",
+    },
+    {
+      name: "Created/Updated",
+      selector: (row) => {
+        const createdAt = new Date(row.created_at);
+        const updatedAt = new Date(row.updated_at);
+        const formatOptions = {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+        };
+        const formatter = new Intl.DateTimeFormat("en-US", formatOptions);
+        const createdDateTime = formatter.format(createdAt);
+        const updatedDateTime = formatter.format(updatedAt);
+
+        return (
+          <div className="mt-2">
+            <p className="mt-1">{createdDateTime}</p>
+            <p style={{ marginTop: "-12px" }}>{updatedDateTime}</p>
+          </div>
+        );
+      },
+      sortable: true,
+      width: "150px",
     },
     {
       name: "Owner",
       selector: (row) => (
         <OverlayTrigger
           placement="top"
-          overlay={<Tooltip id={`tooltip-${row.name}`}>{row.name}</Tooltip>}
+          overlay={
+            <Tooltip id={`tooltip-${row?.owner?.name}`}>
+              {row?.owner?.name}
+            </Tooltip>
+          }
         >
           <div className="image-name">
             <img
@@ -87,19 +290,24 @@ const Contact = () => {
         </OverlayTrigger>
       ),
       sortable: true,
+      center: true,
     },
     {
       name: "Action",
       selector: (row) => (
         <div className="action-icon">
           <button
-            onClick={() => row.id}
+            onClick={() => navigate(`/contact/${row.uid}/edit`)}
             className="ms-2 icon-button"
             title="edit"
           >
             <i className="bi bi-pen edit"></i>
           </button>
-          <button className="ms-2 icon-button" title="delete">
+          <button
+            className="ms-2 icon-button"
+            title="delete"
+            onClick={() => setDeleteContact(row.uid)}
+          >
             <i className="bi bi-trash-fill danger"></i>
           </button>
         </div>
@@ -108,17 +316,118 @@ const Contact = () => {
     },
   ];
 
-  const [records, setRecords] = useState(dumyData);
   function handleFilter(event) {
-    const newData = dumyData.filter((row) => {
+    const newData = contact.filter((row) => {
       return row.name.toLowerCase().includes(event.target.value.toLowerCase());
     });
-    setRecords(newData);
+    setSearch(newData);
   }
+
+  const handleContactMyOrPerson = (e) => {
+    const target = e.target.value;
+    let filterData = [];
+    if (target === "all") {
+      setSearch(contact);
+    } else {
+      filterData = contact.filter((row) => row.owner_user_uid === uid);
+      setSearch(filterData);
+    }
+  };
+
+  const handleSubmitSearch = () => {
+    const filteredData = contact.filter((row) => {
+      return (
+        (selectAssCompany.length === 0 || selectAssCompany.includes(row.uid)) &&
+        (selectedUser.length === 0 ||
+          selectedUser.includes(row.owner_user_uid)) &&
+        (selectedSource.length === 0 ||
+          selectedSource.includes(row.source_uid)) &&
+        (!searchMultiple.name ||
+          row.name
+            ?.toLowerCase()
+            .includes(searchMultiple.name?.toLowerCase())) &&
+        (!searchMultiple.email ||
+          row.email
+            ?.toLowerCase()
+            .includes(searchMultiple.email?.toLowerCase())) &&
+        (!searchMultiple.position ||
+          row.position
+            ?.toLowerCase()
+            .includes(searchMultiple.position?.toLowerCase())) &&
+        (!searchMultiple.address ||
+          row.address
+            ?.toLowerCase()
+            .includes(searchMultiple.address?.toLowerCase())) &&
+        (!searchMultiple.city ||
+          row.city
+            ?.toLowerCase()
+            .includes(searchMultiple.city?.toLowerCase())) &&
+        (!searchMultiple?.created_at ||
+          row?.created_at?.includes(searchMultiple?.created_at))
+      );
+    });
+    setSearch(filteredData);
+  };
+
   const paginationComponentOptions = {
     selectAllRowsItem: true,
     selectAllRowsItemText: "ALL",
   };
+
+  const selectUidDataTable = (state) => {
+    const select = state.selectedRows.map((row) => row.uid);
+    setSelectedUid(select);
+  };
+
+  const handleDeleteSelected = async (e) => {
+    e.preventDefault();
+    const isResult = await Swal.fire({
+      title: "Apakah Anda Yakin",
+      text: "Anda tidak dapat mengembalikan data ini setelah menghapusnya!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Ya, Hapus!",
+      cancelButtonText: "Batal",
+    });
+    if (isResult.isConfirmed) {
+      try {
+        const formData = new FormData();
+        for (const uid of selectUid) {
+          formData.append("contact_uid[]", uid);
+        }
+        const deleteForSelect = await axios.post(
+          `${process.env.REACT_APP_BACKEND_URL}/contacts/delete/item`,
+          formData,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        Swal.fire({
+          title: deleteForSelect.data.message,
+          text: "Successfully delete contact",
+          icon: "success",
+        });
+        window.location.reload();
+      } catch (error) {
+        if (error.response.data.message === "Unauthenticated.") {
+          Swal.fire({
+            title: error.response.data.message,
+            text: "Tolong Login Kembali",
+            icon: "warning",
+          });
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+        if (error.message) {
+          Swal.fire({
+            text: error.response.data.message,
+            icon: "warning",
+          });
+        }
+      }
+    }
+  };
+
   return (
     <body id="body">
       <Topbar />
@@ -132,9 +441,9 @@ const Contact = () => {
                 <nav>
                   <ol className="breadcrumb mt-2">
                     <li className="breadcrumb-item">
-                      <a href="/" className="text-decoration-none">
+                      <Link to="/" className="text-decoration-none">
                         Dashboard
-                      </a>
+                      </Link>
                     </li>
                     <li className="breadcrumb-item active fw-bold">Contact</li>
                   </ol>
@@ -155,14 +464,14 @@ const Contact = () => {
                 </button>
                 <ul class="dropdown-menu">
                   <li>
-                    <a class="dropdown-item" href="/single-contact">
+                    <Link class="dropdown-item" to="/single-contact">
                       Single Contact
-                    </a>
+                    </Link>
                   </li>
                   <li>
-                    <a class="dropdown-item" href="#">
+                    <Link class="dropdown-item" to="/contact/upload-file">
                       Upload File
-                    </a>
+                    </Link>
                   </li>
                 </ul>
               </div>
@@ -183,28 +492,23 @@ const Contact = () => {
                   </li>
                   <li>
                     <a class="dropdown-item" href="#">
-                      Donwload Selected With Detail
-                    </a>
-                  </li>
-                  <li>
-                    <a class="dropdown-item" href="#">
                       Donwload All
-                    </a>
-                  </li>
-                  <li>
-                    <a class="dropdown-item" href="#">
-                      Donwload All With Detail
                     </a>
                   </li>
                 </ul>
               </div>
-              <a
-                href="/contact/bulk-change"
+              <Link
+                to="/contact/bulk-change"
                 class="btn btn-outline-primary ms-2 bulk-change"
               >
                 Bulk Change
-              </a>
-              <button class="btn btn-danger ms-2 delete">Delete</button>
+              </Link>
+              <button
+                class="btn btn-danger ms-2 delete"
+                onClick={handleDeleteSelected}
+              >
+                Delete
+              </button>
             </div>
           </div>
 
@@ -223,33 +527,29 @@ const Contact = () => {
                   <div className="row">
                     <div className="col">
                       <select
-                        name=""
-                        id=""
                         className="form-select"
                         style={{ fontSize: "0.85rem" }}
+                        name="select"
+                        onChange={handleContactMyOrPerson}
                       >
-                        <option value="">All Contact</option>
-                        <option value="">My Contact</option>
+                        <option value="all">All Contact</option>
+                        <option value="my">My Contact</option>
                       </select>
                     </div>
                   </div>
-                  <div className="row mt-2">
-                    <div className="col">
-                      <select
-                        name=""
-                        id=""
-                        className="form-select"
-                        style={{ fontSize: "0.85rem" }}
-                      >
-                        <option disabled selected>
-                          Owner
-                        </option>
-                        <option value="">Person 1</option>
-                        <option value="">Person 2</option>
-                      </select>
+                  <form onSubmit={handleSubmitSearch}>
+                    <div className="row mt-2">
+                      <div className="col">
+                        <Select
+                          placeholder="Select Owner"
+                          closeMenuOnSelect={false}
+                          isMulti
+                          options={selectUser()}
+                          onChange={(selected) => handleSelectUser(selected)}
+                        />
+                      </div>
                     </div>
-                  </div>
-                  <div className="row mt-2">
+                    {/* <div className="row mt-2">
                     <div className="col">
                       <select
                         name=""
@@ -264,59 +564,56 @@ const Contact = () => {
                         <option value="">Team 2</option>
                       </select>
                     </div>
-                  </div>
-                  <div className="row mt-5">
-                    <div className="col">
-                      <h6>
-                        <i class="bi bi-link-45deg"></i>
-                        <span className="fw-semibold ms-2">Associated</span>
-                      </h6>
+                  </div> */}
+                    <div className="row mt-5">
+                      <div className="col">
+                        <h6>
+                          <i class="bi bi-link-45deg"></i>
+                          <span className="fw-semibold ms-2">Associated</span>
+                        </h6>
+                      </div>
                     </div>
-                  </div>
-                  <div className="row">
-                    <div className="col">
-                      <select
-                        name=""
-                        id=""
-                        className="form-select"
-                        style={{ fontSize: "0.85rem" }}
-                      >
-                        <option value="">Select Company</option>
-                        <option value="">Company 1</option>
-                        <option value="">Company 2</option>
-                      </select>
+                    <div className="row">
+                      <div className="col">
+                        <Select
+                          placeholder="Select Company"
+                          options={selectAssociateCompany()}
+                          isMulti
+                          closeMenuOnSelect={false}
+                          onChange={(select) => handleSelectAssCompany(select)}
+                        />
+                      </div>
                     </div>
-                  </div>
-                  <div className="row mt-3">
-                    <div className="col">
-                      <select
-                        name=""
-                        id=""
-                        className="form-select"
-                        style={{ fontSize: "0.85rem" }}
-                      >
-                        <option disabled selected>
-                          Select Deals
-                        </option>
-                        <option value="">Deals 1</option>
-                        <option value="">Deals 2</option>
-                      </select>
+                    <div className="row mt-3">
+                      <div className="col">
+                        <select
+                          name=""
+                          id=""
+                          className="form-select"
+                          style={{ fontSize: "0.85rem" }}
+                        >
+                          <option disabled selected>
+                            Select Deals
+                          </option>
+                          <option value="">Deals 1</option>
+                          <option value="">Deals 2</option>
+                        </select>
+                      </div>
                     </div>
-                  </div>
-                  <div className="row mt-5">
-                    <div className="col">
-                      <h6>
-                        <i class="bi bi-person-circle"></i>
-                        <span className="fw-semibold ms-2">Contacts</span>
-                      </h6>
+                    <div className="row mt-5">
+                      <div className="col">
+                        <h6>
+                          <i class="bi bi-person-circle"></i>
+                          <span className="fw-semibold ms-2">Contacts</span>
+                        </h6>
+                      </div>
                     </div>
-                  </div>
-                  <form action="">
                     <div className="mb-1">
                       <input
                         type="text"
                         className="form-control"
                         name="name"
+                        onChange={handleSearchMultiple}
                         placeholder="name"
                         style={{ fontSize: "0.85rem" }}
                       />
@@ -326,6 +623,7 @@ const Contact = () => {
                         type="email"
                         className="form-control"
                         name="email"
+                        onChange={handleSearchMultiple}
                         placeholder="email"
                         style={{ fontSize: "0.85rem" }}
                       />
@@ -334,32 +632,27 @@ const Contact = () => {
                       <input
                         type="text"
                         className="form-control"
-                        name="job_title"
+                        name="position"
+                        onChange={handleSearchMultiple}
                         placeholder="Job Title"
                         style={{ fontSize: "0.85rem" }}
                       />
                     </div>
                     <div className="mb-1">
-                      <select
-                        name="source"
-                        id=""
-                        className="form-select"
-                        style={{ fontSize: "0.85rem" }}
-                      >
-                        <option disabled selected>
-                          Source
-                        </option>
-                        <option value="event">Event</option>
-                        <option value="referal">Referal</option>
-                        <option value="database">Database</option>
-                        <option value="others">Others</option>
-                      </select>
+                      <Select
+                        placeholder="Source"
+                        options={selectSource()}
+                        isMulti
+                        closeMenuOnSelect={false}
+                        onChange={(select) => handleSelectSource(select)}
+                      />
                     </div>
                     <div className="mb-1">
                       <input
                         type="text"
                         className="form-control"
                         name="address"
+                        onChange={handleSearchMultiple}
                         placeholder="Address"
                         style={{ fontSize: "0.85rem" }}
                       />
@@ -369,6 +662,7 @@ const Contact = () => {
                         type="text"
                         className="form-control"
                         name="city"
+                        onChange={handleSearchMultiple}
                         placeholder="City"
                         style={{ fontSize: "0.85rem" }}
                       />
@@ -377,41 +671,28 @@ const Contact = () => {
                       <label htmlFor="date">Created</label>
                       <input
                         type="date"
-                        name="date"
+                        name="created_at"
+                        onChange={handleSearchMultiple}
                         className="form-control"
-                        style={{ fontSize: "0.85rem" }}
-                      />
-                    </div>
-                    <div className="mb-1">
-                      <input
-                        type="text"
-                        className="form-control"
-                        name="notes"
-                        placeholder="Notes"
-                        style={{ fontSize: "0.85rem" }}
-                      />
-                    </div>
-                    <div className="mb-1">
-                      <input
-                        type="text"
-                        className="form-control"
-                        name="remarks"
-                        placeholder="Remarks (Other Source)"
                         style={{ fontSize: "0.85rem" }}
                       />
                     </div>
                     <button
+                      type="button"
+                      onClick={handleSubmitSearch}
                       className="btn btn-primary mt-2"
                       style={{ fontSize: "0.85rem" }}
                     >
                       Apply
                     </button>
-                    <button
-                      className="btn btn-secondary mt-2 ms-2"
+                    <a
+                      href="/contact"
+                      type="submit"
+                      className="btn btn-secondary mt-2 ms-2 text-decoration-none"
                       style={{ fontSize: "0.85rem" }}
                     >
                       Cancel
-                    </button>
+                    </a>
                   </form>
                 </div>
               </div>
@@ -453,14 +734,20 @@ const Contact = () => {
                 </div>
                 <DataTable
                   columns={columns}
-                  data={records}
+                  data={search}
                   defaultSortFieldId={1}
                   pagination
                   paginationComponentOptions={paginationComponentOptions}
                   selectableRows
+                  onSelectedRowsChange={selectUidDataTable}
                 />
               </div>
             </div>
+            <DeleteContact
+              onClose={handleDeleteContact}
+              visible={deleteContact !== false}
+              uid={deleteContact}
+            />
           </Card>
           <Footer />
         </div>

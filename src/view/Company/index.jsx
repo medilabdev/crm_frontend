@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Topbar from "../../components/Template/Topbar";
 import Sidebar from "../../components/Template/Sidebar";
 import Main from "../../components/Template/Main";
@@ -7,10 +7,20 @@ import Card from "../../components/Card";
 import Footer from "../../components/Template/Footer";
 import DataTable from "react-data-table-component";
 import Dummy from "./Dummy/index";
-import IconCompany from "../../assets/img/office-building.png";
+import IconCompany from "../../assets/img/condo.png";
 import { useNavigate } from "react-router-dom";
 import "../Company/style.css";
+import DeleteCompany from "./Modals/deleteCompany";
+import phone from "../../../src/assets/img/phone.png";
+import iconGedung from "../../../src/assets/img/office-building.png";
+import axios, { all } from "axios";
+import Swal from "sweetalert2";
+import Select from "react-select";
+
 const Company = () => {
+  const uid = localStorage.getItem("uid");
+  const [allCompany, setAllCompany] = useState([]);
+  const token = localStorage.getItem("token");
   const [isSideBar, setIsSideBar] = useState(false);
   const toggleSideBarCard = () => {
     setIsSideBar(!isSideBar);
@@ -22,13 +32,202 @@ const Company = () => {
   ) : (
     <Tooltip id="tooltip">Show Filter</Tooltip>
   );
-  const iconFilter = isSideBar ? "bi bi-x-lg" : "bi bi-funnel";
-  //   console.log(isSideBar);
-  const navigate = useNavigate();
 
-  const [search, setSearch] = useState(Dummy);
+  const iconFilter = isSideBar ? "bi bi-x-lg" : "bi bi-funnel";
+  const navigate = useNavigate();
+  const [search, setSearch] = useState(allCompany);
+  const [selectedUIDs, setSelectedUIDs] = useState([]);
+  const [deleteCompany, setDeleteCompany] = useState(false);
+  const handleDeleteCompany = () => setDeleteCompany(false);
+  const [owner, setOwner] = useState([]);
+  const [resultOwner, setResultOwner] = useState([]);
+  const [source, setSource] = useState([]);
+  const [resultSource, setResultSource] = useState([]);
+  const [companyType, setCompanyType] = useState([]);
+  const [associateContact, setAssocicateContact] = useState([]);
+  const [searchMultiple, setSearchMultiple] = useState({
+    name: "",
+    website_url: "",
+    address: "",
+    city: "",
+    company_type_uid: "",
+    created_at: "",
+    number_of_patient: "",
+    parent_company_uid: "",
+  });
+  const handleSelectSearchCompany = (e) => {
+    setSearchMultiple({
+      ...searchMultiple,
+      [e.target.name]: e.target.value,
+    });
+  };
+  const handleSelectTypeCompany = (e) => {
+    setSearchMultiple({
+      ...searchMultiple,
+      company_type_uid: e.value,
+    });
+  };
+  const handleParentCompany = (e) => {
+    setSearchMultiple({
+      ...searchMultiple,
+      parent_company_uid: e.value,
+    });
+  };
+
+  const getAssociateContact = (token) => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/associate`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => setAssocicateContact(res.data.data))
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
+  const getAllCompany = () => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/companies`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => {
+        setAllCompany(res.data.data);
+        setSearch(res.data.data);
+      })
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated.") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
+  const getAlltypeCompany = () => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/companies-type`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => {
+        setCompanyType(res.data.data);
+      })
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated.") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
+  const getSource = () => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/companies-source`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => setSource(res.data.data))
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
+  const getOwnerUser = () => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => setOwner(res.data.data))
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated.") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
+  const selectAssContact = () => {
+    const uniqueAssCont = {};
+    associateContact?.forEach((data) => {
+      const contactName = data?.contact?.name;
+      const key = `${contactName}-${data.contact_uid}`;
+
+      if (!uniqueAssCont[key]) {
+        uniqueAssCont[key] = {
+          label: contactName,
+          values: [],
+        };
+      }
+      uniqueAssCont[key].values.push(data.company_uid);
+    });
+    const result = Object.values(uniqueAssCont).map((data) => {
+      return {
+        label: data.label,
+        value: data.values,
+      };
+    });
+    return result;
+  };
+
+  const [assContact, setAssContact] = useState([]);
+  const handleSelectAssContact = (e) => {
+    const selectValue = e.map((data) => data.value);
+    const allValue = selectValue.reduce((acc, value) => acc.concat(value), []);
+    setAssContact(allValue);
+  };
+
+  const dataUser = () => {
+    const result = [];
+    owner?.map((data) => {
+      const dataResult = {
+        value: data.uid,
+        label: data.name,
+      };
+      result.push(dataResult);
+    });
+    return result;
+  };
+
+  const typeCompany = () => {
+    const result = [];
+    companyType?.map((data) => {
+      const dataResult = {
+        value: data.uid,
+        label: data.name,
+      };
+      result.push(dataResult);
+    });
+    return result;
+  };
+
+  const dataSource = () => {
+    const result = [];
+    source?.map((data) => {
+      const resultData = {
+        value: data.uid,
+        label: data.name,
+      };
+      result.push(resultData);
+    });
+    return result;
+  };
+  const handleSelectUser = (e) => {
+    setResultOwner(e.map((data) => data.value));
+  };
+  const handleSelectSource = (e) => {
+    setResultSource(e.map((data) => data.value));
+  };
+
   function handleSearch(e) {
-    const newData = Dummy.filter((row) => {
+    const newData = allCompany.filter((row) => {
       return row.name.toLowerCase().includes(e.target.value.toLowerCase());
     });
     setSearch(newData);
@@ -39,6 +238,154 @@ const Company = () => {
     selectAllRowsItemText: "ALL",
   };
 
+  const ParentCompany = () => {
+    const result = [];
+    allCompany?.map((data) => {
+      const resultData = {
+        value: data.uid,
+        label: data.name,
+      };
+      result.push(resultData);
+    });
+    return result;
+  };
+
+  const selectUid = (state) => {
+    const selectedRows = state.selectedRows.map((row) => row.uid);
+    setSelectedUIDs(selectedRows);
+  };
+  const donwloadAll = (e) => {
+    e.preventDefault();
+    try {
+      const formData = new FormData();
+      for (const uid of selectedUIDs) {
+        formData.append("company_uid[]", uid);
+      }
+
+      const donwload = axios.post(
+        `${process.env.REACT_APP_BACKEND_URL}/companies/export/excel`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      Swal.fire({
+        title: donwload.data.message,
+        text: "Successfully delete company",
+        icon: "success",
+      });
+    } catch (error) {
+      if (error.response) {
+        Swal.fire({
+          text: error.response.data.message,
+          icon: "warning",
+        });
+      }
+    }
+  };
+
+  const handleCompanyMyOrPerson = (e) => {
+    const target = e.target.value;
+    let filterData = [];
+    if (target === "all") {
+      setSearch(allCompany);
+    } else {
+      filterData = allCompany.filter((row) => row.owner_user_uid === uid);
+      setSearch(filterData);
+    }
+  };
+
+  const handleSubmitSearch = () => {
+    const filterdata = allCompany.filter((row) => {
+      return (
+        (assContact.length === 0 || assContact.includes(row.uid)) &&
+        (!searchMultiple.name ||
+          row.name
+            ?.toLowerCase()
+            .includes(searchMultiple?.name?.toLowerCase())) &&
+        (!searchMultiple.website_url ||
+          row.website_url
+            ?.toLowerCase()
+            .includes(searchMultiple?.website_url?.toLowerCase())) &&
+        (!searchMultiple.address ||
+          row.address
+            ?.toLowerCase()
+            .includes(searchMultiple?.address?.toLowerCase())) &&
+        (!searchMultiple.city ||
+          row.city
+            ?.toLowerCase()
+            .includes(searchMultiple?.city?.toLowerCase())) &&
+        (!searchMultiple.company_type_uid ||
+          row.company_type_uid
+            ?.toLowerCase()
+            .includes(searchMultiple?.company_type_uid?.toLowerCase())) &&
+        (!searchMultiple.created_at ||
+          row.created_at?.includes(searchMultiple?.created_at)) &&
+        (!searchMultiple?.number_of_patient ||
+          row?.number_of_patient === searchMultiple?.number_of_patient) &&
+        (!searchMultiple?.parent_company_uid ||
+          row.parent_company_uid?.includes(
+            searchMultiple?.parent_company_uid
+          )) &&
+        (resultOwner.length === 0 ||
+          resultOwner.includes(row.owner_user_uid)) &&
+        (resultSource.length === 0 ||
+          resultSource.includes(row.company_source_uid))
+      );
+    });
+    setSearch(filterdata);
+  };
+
+  const handleSubmitDeleteSelect = async (e) => {
+    e.preventDefault();
+    const result = await Swal.fire({
+      title: "Apakah Anda yakin?",
+      text: "Anda tidak dapat mengembalikan data ini setelah menghapusnya!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Ya, hapus!",
+      cancelButtonText: "Batal",
+    });
+    if (result.isConfirmed) {
+      try {
+        const formData = new FormData();
+        for (const uid of selectedUIDs) {
+          formData.append("company_uid[]", uid);
+        }
+        // console.log("FormData Content:");
+        // for (const pair of formData.entries()) {
+        //   console.log(pair[0] + ": " + pair[1]);
+        // }
+        const deleteSelect = await axios.post(
+          `${process.env.REACT_APP_BACKEND_URL}/companies/delete/item`,
+          formData,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        Swal.fire({
+          title: deleteSelect.data.message,
+          text: "Successfully delete company",
+          icon: "success",
+        });
+        window.location.reload();
+      } catch (error) {
+        if (error.response) {
+          Swal.fire({
+            text: error.response.data.message,
+            icon: "warning",
+          });
+        }
+      }
+    }
+  };
+  useEffect(() => {
+    getAllCompany(token);
+    getOwnerUser(token);
+    getSource(token);
+    getAlltypeCompany(token);
+    getAssociateContact(token);
+  }, [token]);
   const columns = [
     {
       id: 1,
@@ -46,7 +393,7 @@ const Company = () => {
       selector: (row) => (
         <div className="image-name">
           <div className="d-flex align-items-center">
-            <img src={IconCompany} className="rounded-circle" />
+            <img src={IconCompany} style={{ width: "20px" }} />
             <div className="mt-1">
               <span className="fw-semibold">{row.name}</span>
             </div>
@@ -60,47 +407,117 @@ const Company = () => {
     {
       id: 2,
       name: "Associated with",
+      selector: (row) => (
+        <div className="d-flex">
+          {row?.associate?.map((item, index) => (
+            <OverlayTrigger
+              placement="top"
+              overlay={
+                <Tooltip
+                  id={`tooltip-${item?.contact?.name}- ${item?.contact?.phone?.[0]?.number}`}
+                >
+                  {item?.contact?.name}
+                  <br />
+                  {item?.contact?.phone?.[0]?.number}
+                </Tooltip>
+              }
+            >
+              <div>
+                {item?.contact ? (
+                  <img
+                    className="ms-1"
+                    src={phone}
+                    style={{ width: "18px" }}
+                    data-tip={item?.contact?.name}
+                  />
+                ) : null}
+              </div>
+            </OverlayTrigger>
+          ))}
+        </div>
+      ),
       sortable: true,
+      width: "130px",
     },
     {
       id: 3,
       name: "Type",
-      selector: (row) => row.company_type_uid,
+      selector: (row) => (
+        <div className="badge bg-secondary">{row?.company_type?.name}</div>
+      ),
       sortable: true,
     },
     {
       id: 4,
       name: "Owner/Created",
-      selector: (row) => (
-        <div className="mt-2">
-          <span className="fw-semibold">{row.owner_user_uid}</span> -{" "}
-          <p className="mt-1">{row.created_at}</p>
-        </div>
-      ),
+      selector: (row) => {
+        const date = new Date(row.created_at);
+        const formatOptions = {
+          year: "numeric",
+          month: "long",
+          day: "2-digit",
+        };
+        const formate = new Intl.DateTimeFormat("en-US", formatOptions);
+        const time = formate.format(date);
+        return (
+          <div className="mt-2">
+            <span className="fw-semibold">{row?.owner?.name}</span>
+            <p className="mt-1" style={{ fontSize: "10px" }}>
+              {time}
+            </p>
+          </div>
+        );
+      },
       sortable: true,
+      width: "140px",
     },
     {
       id: 5,
       name: "Updated",
-      selector: (row) => row.updated_at,
+      selector: (row) => {
+        const date = new Date(row.updated_at);
+        const formatOptions = {
+          year: "numeric",
+          month: "long",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+        };
+        const formatResult = new Intl.DateTimeFormat("en-US", formatOptions);
+        const time = formatResult.format(date);
+        return (
+          <p className="mt-2" style={{ fontSize: "11px" }}>
+            {time}
+          </p>
+        );
+      },
       sortable: true,
+      width: "180px",
     },
     {
       id: 6,
       name: "Action",
       selector: (row) => (
         <div className="action-icon">
-          <button
+          {/* <button
             title="show"
             className="icon-button"
             onClick={() => navigate(`/company/${row.uid}`)}
           >
             <i className="bi bi-building-fill"></i>
-          </button>
-          <button className="ms-2 icon-button" title="edit" onClick="">
+          </button> */}
+          <button
+            className="ms-2 icon-button"
+            title="edit"
+            onClick={() => navigate(`/company/${row.uid}/edit`)}
+          >
             <i className="bi bi-pen"></i>
           </button>
-          <button className="ms-2 icon-button" title="delete" onClick="">
+          <button
+            className="ms-2 icon-button"
+            title="delete"
+            onClick={() => setDeleteCompany(row.uid)}
+          >
             <i className="bi bi-trash-fill"></i>
           </button>
         </div>
@@ -108,6 +525,7 @@ const Company = () => {
       width: "150px",
     },
   ];
+
   return (
     <>
       <body id="body">
@@ -169,31 +587,37 @@ const Company = () => {
                   </button>
                   <ul class="dropdown-menu">
                     <li>
-                      <a class="dropdown-item" href="#">
+                      <a
+                        class="dropdown-item"
+                        onClick={donwloadAll}
+                        style={{ cursor: "pointer" }}
+                      >
                         Donwload Selected
                       </a>
                     </li>
                     <li>
-                      <a class="dropdown-item" href="#">
-                        Donwload Selected With Detail
-                      </a>
-                    </li>
-                    <li>
-                      <a class="dropdown-item" href="#">
+                      <a
+                        class="dropdown-item"
+                        onClick={donwloadAll}
+                        style={{ cursor: "pointer" }}
+                      >
                         Donwload All
-                      </a>
-                    </li>
-                    <li>
-                      <a class="dropdown-item" href="#">
-                        Donwload All With Detail
                       </a>
                     </li>
                   </ul>
                 </div>
-                <a href="#" class="btn btn-outline-primary ms-2 bulk-change">
+                <a
+                  href="/company/bulkchange"
+                  class="btn btn-outline-primary ms-2 bulk-change"
+                >
                   Bulk Change
                 </a>
-                <button class="btn btn-danger ms-2 delete">Delete</button>
+                <button
+                  class="btn btn-danger ms-2 delete"
+                  onClick={handleSubmitDeleteSelect}
+                >
+                  Delete
+                </button>
               </div>
             </div>
             <Card className="shadow">
@@ -207,33 +631,28 @@ const Company = () => {
                           <span className="fw-semibold ms-2 fs-6 ">Filter</span>
                         </h6>
                       </div>
-                      <form action="">
+                      <form onSubmit={handleSubmitSearch}>
                         <div className="col mt-3">
                           <select
-                            name=""
-                            id=""
+                            name="select"
                             className="form-select"
                             style={{ fontSize: "0.85rem" }}
+                            onChange={handleCompanyMyOrPerson}
                           >
-                            <option value="">All Contact</option>
-                            <option value="">My Contact</option>
+                            <option value="all">All Company</option>
+                            <option value="my">My Company</option>
                           </select>
                         </div>
                         <div className="col mt-2">
-                          <select
-                            name=""
-                            id=""
-                            className="form-select"
-                            style={{ fontSize: "0.85rem" }}
-                          >
-                            <option disabled selected>
-                              Owner
-                            </option>
-                            <option value=""> 1</option>
-                            <option value=""> 2</option>
-                          </select>
+                          <Select
+                            placeholder="Select Owner"
+                            options={dataUser()}
+                            isMulti
+                            closeMenuOnSelect={false}
+                            onChange={(select) => handleSelectUser(select)}
+                          />
                         </div>
-                        <div className="col mt-2">
+                        {/* <div className="col mt-2">
                           <select
                             name=""
                             id=""
@@ -246,7 +665,7 @@ const Company = () => {
                             <option value="">1</option>
                             <option value="">2</option>
                           </select>
-                        </div>
+                        </div> */}
                         <div className="col mt-5">
                           <h6>
                             <i className="bi bi-link-45deg"></i>
@@ -256,16 +675,15 @@ const Company = () => {
                           </h6>
                         </div>
                         <div className="col mt-3">
-                          <select
-                            name=""
-                            id=""
-                            className="form-select"
-                            style={{ fontSize: "0.85rem" }}
-                          >
-                            <option value="">Select Company</option>
-                            <option value="">1</option>
-                            <option value="">2</option>
-                          </select>
+                          <Select
+                            placeholder="Select Contact"
+                            options={selectAssContact()}
+                            onChange={(select) =>
+                              handleSelectAssContact(select)
+                            }
+                            isMulti
+                            closeMenuOnSelect={false}
+                          />
                         </div>
                         <div className="col mt-3">
                           <select
@@ -291,18 +709,18 @@ const Company = () => {
                           <div className="mb-1">
                             <input
                               type="text"
-                              name=""
-                              id=""
+                              name="name"
                               className="form-control"
                               placeholder="Company Name"
+                              onChange={handleSelectSearchCompany}
                               style={{ fontSize: "0.85rem" }}
                             />
                           </div>
                           <div className="mb-1">
                             <input
                               type="text"
-                              name=""
-                              id=""
+                              name="website_url"
+                              onChange={handleSelectSearchCompany}
                               className="form-control"
                               placeholder="Company Website"
                               style={{ fontSize: "0.85rem" }}
@@ -311,18 +729,8 @@ const Company = () => {
                           <div className="mb-1">
                             <input
                               type="text"
-                              name=""
-                              id=""
-                              className="form-control"
-                              placeholder="Telephone"
-                              style={{ fontSize: "0.85rem" }}
-                            />
-                          </div>
-                          <div className="mb-1">
-                            <input
-                              type="text"
-                              name=""
-                              id=""
+                              name="address"
+                              onChange={handleSelectSearchCompany}
                               className="form-control"
                               placeholder="Address"
                               style={{ fontSize: "0.85rem" }}
@@ -331,97 +739,75 @@ const Company = () => {
                           <div className="mb-1">
                             <input
                               type="text"
-                              name=""
-                              id=""
+                              name="city"
+                              onChange={handleSelectSearchCompany}
                               className="form-control"
                               placeholder="City"
                               style={{ fontSize: "0.85rem" }}
                             />
                           </div>
                           <div className="mb-1">
-                            <select
-                              name=""
-                              id=""
-                              className="form-select"
-                              placeholder="Company type"
-                              style={{ fontSize: "0.85rem" }}
-                            >
-                              <option disabled selected>
-                                Company Type
-                              </option>
-                              <option value="">faskes</option>
-                              <option value="">Badan</option>
-                            </select>
+                            <Select
+                              placeholder="Type Company"
+                              options={typeCompany()}
+                              name="company_type_uid"
+                              onChange={handleSelectTypeCompany}
+                            />
                           </div>
                           <div className="mb-1">
-                            <select
-                              name="source"
-                              id=""
-                              className="form-select"
-                              style={{ fontSize: "0.85rem" }}
-                            >
-                              <option disabled selected>
-                                Source
-                              </option>
-                              <option value="event">Event</option>
-                              <option value="referal">Referal</option>
-                              <option value="database">Database</option>
-                              <option value="others">Others</option>
-                            </select>
+                            <Select
+                              placeholder="Source Company"
+                              closeMenuOnSelect={false}
+                              isMulti
+                              options={dataSource()}
+                              onChange={(selected) =>
+                                handleSelectSource(selected)
+                              }
+                            />
                           </div>
                           <div className="mb-1">
                             <label htmlFor="date">Created</label>
                             <input
                               type="date"
-                              name="date"
+                              name="created_at"
+                              onChange={handleSelectSearchCompany}
                               className="form-control"
                               style={{ fontSize: "0.85rem" }}
                             />
                           </div>
                           <div className="mb-1">
-                            <input
-                              type="text"
-                              className="form-control"
-                              name="notes"
-                              placeholder="Notes"
-                              style={{ fontSize: "0.85rem" }}
+                            <Select
+                              options={ParentCompany()}
+                              placeholder="parent company..."
+                              onChange={handleParentCompany}
                             />
                           </div>
                           <div className="mb-1">
-                            <select
-                              name="source"
-                              id=""
-                              className="form-select"
-                              style={{ fontSize: "0.85rem" }}
-                            >
-                              <option disabled selected>
-                                Parent Company
-                              </option>
-                              <option value="">1</option>
-                              <option value="">2</option>
-                            </select>
-                          </div>
-                          <div className="mb-1">
                             <input
-                              type="text"
+                              type="number"
+                              name="number_of_patient"
+                              onChange={handleSelectSearchCompany}
                               className="form-control"
-                              placeholder="Number Of Patiens"
+                              placeholder="Number Of Patient"
                               style={{ fontSize: "0.85rem" }}
                             />
                           </div>
                         </div>
                         <button
+                          type="button"
+                          onClick={handleSubmitSearch}
                           className="btn btn-primary mt-2"
                           style={{ fontSize: "0.85rem" }}
                         >
                           Apply
                         </button>
-                        <button
-                          className="btn btn-secondary mt-2 ms-2"
+                        <a
+                          href="/company"
+                          className="btn btn-secondary mt-2 ms-2 text-decoration-none"
                           style={{ fontSize: "0.85rem" }}
                         >
                           Cancel
-                        </button>
+                        </a>
                       </form>
                     </div>
                   </div>
@@ -465,9 +851,15 @@ const Company = () => {
                     pagination
                     paginationComponentOptions={paginationComponentOptions}
                     selectableRows
+                    onSelectedRowsChange={selectUid}
                   />
                 </div>
               </div>
+              <DeleteCompany
+                onClose={handleDeleteCompany}
+                visible={deleteCompany !== false}
+                uid={deleteCompany}
+              />
             </Card>
           </div>
           <Footer />

@@ -157,7 +157,7 @@ const User = () => {
                 className="mt-1"
                 style={{
                   fontSize: "11px",
-                }}
+                }}A
               >
                 {row.email}
               </p>
@@ -238,7 +238,7 @@ const User = () => {
               <ol className="breadcrumb mt-2">
                 <li className="breadcrumb-item">
                   <a href="/" className="text-decoration-none">
-                    Home
+                    Dashboard
                   </a>
                 </li>
                 <li className="breadcrumb-item active fw-bold ">Users</li>

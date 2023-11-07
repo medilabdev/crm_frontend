@@ -35,8 +35,10 @@ const Auth = () => {
         });
         const name = response.data.data.name;
         const image = response.data.data.image;
+        const uid = response.data.data.uid;
         localStorage.setItem("token", response.data.data.token);
         localStorage.setItem("name", name);
+        localStorage.setItem("uid", uid);
         localStorage.setItem("image", image);
         navigate("/");
       } else {

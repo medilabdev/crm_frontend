@@ -2,18 +2,18 @@ import React, { useState } from "react";
 import Topbar from "../../../components/Template/Topbar";
 import Sidebar from "../../../components/Template/Sidebar";
 import Main from "../../../components/Template/Main";
-import { Card } from "react-bootstrap";
 import Footer from "../../../components/Template/Footer";
-import axios from "axios";
+import { Card } from "react-bootstrap";
 import Swal from "sweetalert2";
+import axios from "axios";
+import { Link } from "react-router-dom";
 
-const FileUploadCompany = () => {
+const UploadFileContact = () => {
   const tokenAuth = localStorage.getItem("token");
-
   const [uploadExcel, setUploadExcel] = useState({
     upload: null,
   });
-  const hanldeChange = (e) => {
+  const handleChange = (e) => {
     const file = e.target.files[0];
     setUploadExcel({
       ...uploadExcel,
@@ -21,14 +21,14 @@ const FileUploadCompany = () => {
     });
   };
   // console.log(uploadExcel);
-  const handleUploadExcle = async (e) => {
+  const handleUploadFile = async (e) => {
     e.preventDefault();
     try {
-      const formData = new FormData();
-      formData.append("upload", uploadExcel.upload);
+      const form = new FormData();
+      form.append("upload", uploadExcel.upload);
       const upload = await axios.post(
-        `${process.env.REACT_APP_BACKEND_URL}/companies/upload/excel`,
-        formData,
+        `${process.env.REACT_APP_BACKEND_URL}/contacts/upload/excel`,
+        form,
         {
           headers: {
             "Content-Type": "multipart/form-data",
@@ -41,9 +41,9 @@ const FileUploadCompany = () => {
         text: "Successfully upload excel",
         icon: "success",
       });
-      window.location.href = "/company";
+      window.location.reload();
     } catch (err) {
-      console.log(err);
+      // console.log(err);
       if (err.response) {
         Swal.fire({
           text: err.response.data.message,
@@ -66,18 +66,18 @@ const FileUploadCompany = () => {
           <div className="row">
             <div className="col">
               <div className="pagetitle">
-                <h1>Upload Multiple Companies</h1>
+                <h1>Upload Multiple Contact</h1>
                 <nav>
                   <ol className="breadcrumb mt-2">
                     <li className="breadcrumb-item">
-                      <a href="/" className="text-decoration-none">
+                      <Link to="/" className="text-decoration-none">
                         Dashboard
-                      </a>
+                      </Link>
                     </li>
                     <li className="breadcrumb-item">
-                      <a href="/company" className="text-decoration-none">
-                        Company
-                      </a>
+                      <Link to="/contact" className="text-decoration-none">
+                        Contact
+                      </Link>
                     </li>
                     <li className="breadcrumb-item active">Upload File</li>
                   </ol>
@@ -91,24 +91,24 @@ const FileUploadCompany = () => {
             <div className="row">
               <div className="col-md-8">
                 <div className="mt-5 ms-5">
-                  <h6 className="fw-semibold">Add Multiple Companies</h6>
-                  <p>Save time on adding more companies</p>
+                  <h6 className="fw-semibold">Add Multiple Contact</h6>
+                  <p>Save time on adding more contact</p>
                 </div>
                 <div className="mt-1 ms-4">
                   <div className="d-flex align-items-center">
                     <p className="btn btn-primary rounded fs-6 me-4 mt-3">1</p>
                     <span>
-                      The maximum row for uploading multiple companies is 7000
-                      rows. Prepare a file of your companies using our template.
+                      The maximum row for uploading multiple contact is 7000
+                      rows. Prepare a file of your contact using our template.
                       '.csv' <span className="text-primary">csv template</span>
                     </span>
                   </div>
                   <div className="d-flex align-items-center">
                     <p className="btn btn-primary rounded fs-6 me-4 mt-3">2</p>
                     <span>
-                      Fill the companies you want based on our template and
-                      upload the file from step 1 you've filled to add multiple
-                      companies.
+                      Fill the contact you want based on our template and upload
+                      the file from step 1 you've filled to add multiple
+                      contact.
                     </span>
                   </div>
                   <div className="d-flex align-items-center">
@@ -117,7 +117,7 @@ const FileUploadCompany = () => {
                       The number of uploads affects the upload duration.
                     </span>
                   </div>
-                  <form onSubmit={handleUploadExcle}>
+                  <form action="" onSubmit={handleUploadFile}>
                     <div className="mt-3 mb-3 ms-2 col-10">
                       <label className="mb-2 fs-6">Upload File</label>
                       <input
@@ -125,7 +125,7 @@ const FileUploadCompany = () => {
                         className="form-control"
                         accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
                         name="upload"
-                        onChange={hanldeChange}
+                        onChange={handleChange}
                       ></input>
                     </div>
                     <div className="mb-4">
@@ -141,8 +141,8 @@ const FileUploadCompany = () => {
               </div>
               <div className="col-md-4">
                 <div className="mt-5 ms-3">
-                  <h6 className="fw-semibold">Add Single Company</h6>
-                  <p>Enter a company in the following form field</p>
+                  <h6 className="fw-semibold">Add Single Contact</h6>
+                  <p>Enter a contact in the following form field</p>
                 </div>
                 <a
                   href="/company/single-company"
@@ -154,11 +154,10 @@ const FileUploadCompany = () => {
             </div>
           </div>
         </Card>
-
         <Footer />
       </Main>
     </body>
   );
 };
 
-export default FileUploadCompany;
+export default UploadFileContact;
