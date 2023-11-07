@@ -801,13 +801,13 @@ const Company = () => {
                         >
                           Apply
                         </button>
-                        <button
-                          type="submit"
-                          className="btn btn-secondary mt-2 ms-2"
+                        <a
+                          href="/company"
+                          className="btn btn-secondary mt-2 ms-2 text-decoration-none"
                           style={{ fontSize: "0.85rem" }}
                         >
                           Cancel
-                        </button>
+                        </a>
                       </form>
                     </div>
                   </div>

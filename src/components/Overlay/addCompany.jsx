@@ -175,6 +175,19 @@ const OverlayAddCompany = ({ visible, onClose }) => {
     });
     return result;
   };
+
+  const selectCompany = () => {
+    const result = [];
+    parentCompany?.map((data) => {
+      const parco = {
+        value: data.uid,
+        label: data.name,
+      };
+      result.push(parco);
+    });
+    return result;
+  };
+
   const handleInputOwner = (e) => {
     setInputCompany({
       ...inputCompany,
@@ -191,6 +204,12 @@ const OverlayAddCompany = ({ visible, onClose }) => {
     setInputCompany({
       ...inputCompany,
       company_type_uid: e.value,
+    });
+  };
+  const handleParentComp = (e) => {
+    setInputCompany({
+      ...inputCompany,
+      parent_company_uid: e.value,
     });
   };
   // console.log(telephone);
@@ -385,27 +404,11 @@ const OverlayAddCompany = ({ visible, onClose }) => {
           </Form.Group>
           <Form.Group className="mb-3" controlId="formBasicEmail">
             <Form.Label>Deals</Form.Label>
-            <Form.Select>
-              <option value="">Select Deals</option>
-              <option value="">1</option>
-              <option value="">2</option>
-              <option value="">3</option>
-            </Form.Select>
+            <Select />
           </Form.Group>
           <Form.Group className="mb-4" controlId="formBasicEmail">
             <Form.Label>Parent Company</Form.Label>
-            <Form.Select
-              name="parent_company_uid"
-              value={inputCompany.parent_company_uid}
-              onChange={handleInputChange}
-            >
-              <option value="">Select Company</option>
-              {parentCompany.map((parent) => (
-                <option key={parent.uid} value={parent.uid}>
-                  {parent.name}
-                </option>
-              ))}
-            </Form.Select>
+            <Select options={selectCompany()} onChange={handleParentComp} />
           </Form.Group>
           <button
             className="btn btn-primary mb-4 ms-3"

@@ -35,6 +35,7 @@ const SingleDeals = () => {
   const [showAddProduct, setShowAddProduct] = useState(false);
   const handleCloseProduct = () => setShowAddProduct(false);
   const handleShowProduct = () => setShowAddProduct(true);
+  const [allProductData, setAllProductData] = useState([]);
 
   const allData = [];
   for (let i = 0; i < localStorage.length; i++) {
@@ -45,8 +46,57 @@ const SingleDeals = () => {
     }
   }
 
-  console.log(allData[0]);
+  const [inputDeals, setInputDeals] = useState({
+    deal_name: "",
+    deal_size: "",
+    priority: "",
+    deal_status: "",
+    deal_category: "",
+    staging: "",
+    company_uid: "",
+    product_uid: "",
+    notes: "",
+    gps: "",
+    owner_user_uid: "",
+  });
 
+  const [inputContact, setInputContact] = useState([]);
+  const handleInputDeals = (e) => {
+    setInputDeals({
+      ...inputDeals,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleInputOwner = (e) => {
+    setInputDeals({
+      ...inputDeals,
+      owner_user_uid: e.value,
+    });
+  };
+  const handleInputPriority = (e) => {
+    setInputDeals({
+      ...inputDeals,
+      priority: e.value,
+    });
+  };
+  const handleInputDealCategory = (e) => {
+    setInputDeals({
+      ...inputDeals,
+      deal_category: e.value,
+    });
+  };
+
+  const handleCompanyUid = (e) => {
+    setInputDeals({
+      ...inputDeals,
+      company_uid: e.value,
+    });
+  };
+  const handleContactUid = (e) => {
+    setInputContact(e.map((opt) => opt.value));
+  };
+  // ambil data owner
   const getOwnerUser = () => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
@@ -62,6 +112,7 @@ const SingleDeals = () => {
         }
       });
   };
+  // ambil data priority
   const getPriority = () => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/priorities`, {
@@ -77,6 +128,7 @@ const SingleDeals = () => {
         }
       });
   };
+  // ambil data deal category
   const getDealCategory = () => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/deal-categories`, {
@@ -92,6 +144,7 @@ const SingleDeals = () => {
         }
       });
   };
+  // Ambil data company
   const getCompanies = () => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/companies`, {
@@ -107,6 +160,7 @@ const SingleDeals = () => {
         }
       });
   };
+  // ambil data contact
   const getContact = () => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/contacts`, {
@@ -122,6 +176,7 @@ const SingleDeals = () => {
         }
       });
   };
+  // select owner
   const ownerSelect = () => {
     const result = [];
     owner.map((data) => {
@@ -133,7 +188,7 @@ const SingleDeals = () => {
     });
     return result;
   };
-
+  // select priority
   const prioritySelect = () => {
     const result = [];
     priority.map((data) => {
@@ -145,7 +200,7 @@ const SingleDeals = () => {
     });
     return result;
   };
-
+  // select category deal
   const dealCategorySelect = () => {
     const result = [];
     dealCategory.map((data) => {
@@ -157,7 +212,7 @@ const SingleDeals = () => {
     });
     return result;
   };
-
+  // select company
   const companySelect = () => {
     const result = [];
     companies.map((data) => {
@@ -169,6 +224,7 @@ const SingleDeals = () => {
     });
     return result;
   };
+  // select contact
   const contactSelect = () => {
     const result = [];
     contact.map((data) => {
@@ -181,64 +237,35 @@ const SingleDeals = () => {
     return result;
   };
 
+  // handle delete product product
+  const handleDeleteProduct = (productId) => {
+    const updateData = allData[0].filter((product) => product.id !== productId);
+    setAllProductData(updateData);
+    localStorage.setItem("DataProduct", JSON.stringify(updateData));
+  };
+
+  // columns datatable produk
   const columns = [
     {
       id: 1,
       name: "Name Product",
-      selector: (row) => row.product_uid,
+      selector: (row) => row.product_name,
       sortable: true,
     },
     {
       id: 2,
       name: "Action",
-      // selector: (row) => (
-      //   <button
-      //     onClick={() => {
-      //       Swal.fire({
-      //         title: "Konfirmasi",
-      //         text: "Apakah anda yakin ingin menghapus item product ini",
-      //         icon: "warning",
-      //         showCancelButton: true,
-      //         confirmButtonColor: "#3085d6",
-      //         cancelButtonColor: "#d33",
-      //         confirmButtonText: "Ya, Hapus!",
-      //         cancelButtonText: "Batal",
-      //       }).then((res) => {
-      //         if (res.isConfirmed) {
-      //           const idDelete = row.id;
-      //           const dataIndexToDelete = allData[0].findIndex(
-      //             (data) => data.id === idDelete
-      //           );
-      //           if (dataIndexToDelete !== -1) {
-      //             allData[0].splice(dataIndexToDelete, 1);
-      //             localStorage.removeItem("DataProduct" );
-      //             localStorage.setItem("DataProduct", JSON.stringify(allData));
-      //             Swal.fire({
-      //               title: res.data.message,
-      //               text: "Successfully delete contact",
-      //               icon: "success",
-      //             }).then((res) => {
-      //               if (res.isConfirmed) {
-      //                 window.location.reload();
-      //               }
-      //             });
-      //           } else {
-      //             Swal.fire({
-      //               title: "Error",
-      //               text: "Item not found in data",
-      //               icon: "error",
-      //             });
-      //           }
-      //         }
-      //       });
-      //     }}
-      //     className="icon-button"
-      //   >
-      //     <i className="bi bi-trash-fill danger"></i>
-      //   </button>
-      // ),
+      selector: (row) => (
+        <button
+          onClick={() => handleDeleteProduct(row.id)}
+          className="icon-button"
+        >
+          <i className="bi bi-trash-fill danger"></i>
+        </button>
+      ),
     },
   ];
+  // custom style
   const customStyle = {
     headRow: {
       style: {
@@ -262,7 +289,46 @@ const SingleDeals = () => {
     getDealCategory(token);
     getCompanies(token);
     getContact(token);
+
+    // jika windows di reload maka data product akan hilang
+    const clearDataProductLocalStorage = () => {
+      localStorage.removeItem("DataProduct");
+    };
+    window.addEventListener("beforeunload", clearDataProductLocalStorage);
+    return () => {
+      window.removeEventListener("beforeunload", clearDataProductLocalStorage);
+    };
   }, [token]);
+
+  const uidProduct = allData[0]?.map((data) => data.product_uid);
+  const qtyProduct = allData[0]?.map((data) => data.qty);
+  // const 
+  // console.log(qtyProduct);
+  const handleSubmitDeals = (e) => {
+    e.preventDefault();
+    try {
+      const formdata = new FormData();
+      for (const uidContact of inputContact) {
+        formdata.append("contact_person[]", uidContact);
+      }
+      // for(){
+        
+      // }
+    } catch (err) {
+      if (err.response) {
+        Swal.fire({
+          text: err.response.data.message,
+          icon: "warning",
+        });
+      } else {
+        Swal.fire({
+          text: "Something went wrong !",
+          icon: "error",
+        });
+      }
+    }
+  };
+  console.log(inputDeals);
   return (
     <body id="body">
       <Topbar />
@@ -282,11 +348,20 @@ const SingleDeals = () => {
                   </h5>
                 </Card.Header>
                 <Card.Body>
-                  <select name="" id="" className="form-select">
+                  <select
+                    className="form-select"
+                    name="staging"
+                    onChange={handleInputDeals}
+                  >
                     <option value="">Select Pipeline</option>
-                    <option value="">1</option>
-                    <option value="">2</option>
-                    <option value="">3</option>
+                    <option value="leads">Leads</option>
+                    <option value="qualifying">Qualifying</option>
+                    <option value="approaching">Approaching</option>
+                    <option value="negotiation">Negotiation</option>
+                    <option value="implementation">Implementation</option>
+                    <option value="payment">Payment</option>
+                    <option value="closed_won">Closed Won</option>
+                    <option value="closed_lost">Closed Lost</option>
                   </select>
                 </Card.Body>
               </Card>
@@ -311,13 +386,30 @@ const SingleDeals = () => {
                     }
                     className="mb-3"
                   >
-                    <Form.Control type="text" placeholder="text" required />
+                    <Form.Control
+                      type="text"
+                      name="deal_name"
+                      onChange={handleInputDeals}
+                      placeholder="text"
+                      required
+                    />
                   </FloatingLabel>
                   <FloatingLabel label="Deal Size" className="mb-3">
-                    <Form.Control type="number" placeholder="text" />
+                    <Form.Control
+                      type="number"
+                      name="deal_size"
+                      placeholder="text"
+                      onChange={handleInputDeals}
+                      required
+                    />
                   </FloatingLabel>
                   <FloatingLabel label="Deal Status" className="mb-3">
-                    <Form.Control type="text" placeholder="text" />
+                    <Form.Control
+                      type="text"
+                      name="deal_status"
+                      placeholder="text"
+                      onChange={handleInputDeals}
+                    />
                   </FloatingLabel>
                   <Form.Group className="mb-3">
                     <Form.Label>
@@ -326,15 +418,27 @@ const SingleDeals = () => {
                         *
                       </span>
                     </Form.Label>
-                    <Select options={ownerSelect()} required />
+                    <Select
+                      options={ownerSelect()}
+                      onChange={(e) => handleInputOwner(e)}
+                      required
+                    />
                   </Form.Group>
                   <Form.Group className="mb-3">
                     <Form.Label>Priority</Form.Label>
-                    <Select options={prioritySelect()} required />
+                    <Select
+                      options={prioritySelect()}
+                      onChange={(e) => handleInputPriority(e)}
+                      required
+                    />
                   </Form.Group>
                   <Form.Group className="mb-3">
                     <Form.Label>Deal Category</Form.Label>
-                    <Select options={dealCategorySelect()} required />
+                    <Select
+                      options={dealCategorySelect()}
+                      onChange={(e) => handleInputDealCategory(e)}
+                      required
+                    />
                   </Form.Group>
                 </Card.Body>
               </Card>
@@ -349,6 +453,7 @@ const SingleDeals = () => {
                   <div>
                     <Select
                       placeholder="Companies Select"
+                      onChange={(e) => handleCompanyUid(e)}
                       options={companySelect()}
                     />
                   </div>
@@ -380,7 +485,9 @@ const SingleDeals = () => {
                   <div>
                     <Select
                       placeholder="Select Contact"
+                      isMulti
                       options={contactSelect()}
+                      onChange={(e) => handleContactUid(e)}
                     />
                   </div>
                   <div>
@@ -443,7 +550,15 @@ const SingleDeals = () => {
                   <h6 className="fw-bold mt-2">Notes</h6>
                 </Card.Header>
                 <Card.Body>
-                  <ReactQuill className="p-2" theme="snow" />
+                  <ReactQuill
+                    className="p-2"
+                    theme="snow"
+                    name="notes"
+                    value={inputDeals.notes}
+                    onChange={(value) =>
+                      handleInputDeals({ target: { name: "notes", value } })
+                    }
+                  />
                   <Form.Group as={Row} xs={2} md={4} lg={6} className="p-2">
                     <Form.Label column lg={4} className="fw-semibold fs-6">
                       Mention Users :

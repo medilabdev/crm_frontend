@@ -13,7 +13,6 @@ import Swal from "sweetalert2";
 import Select from "react-select";
 import { Link } from "react-router-dom";
 
-
 const SingleContact = () => {
   const token = localStorage.getItem("token");
   const [showCanvasDeals, setShowCanvasDeals] = useState(false);
@@ -34,14 +33,12 @@ const SingleContact = () => {
     owner_user_uid: "",
     source_uid: "",
     notes: "",
-    company_uid: [],
     gps: "",
   });
   const [ownerUser, setOwnerUser] = useState([]);
   const [source, setSource] = useState([]);
   const [company, setCompany] = useState([]);
-  const [additionalForm, setAdditionalForm] = useState([]);
-  
+
   const getCompany = () => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/companies`, {
@@ -90,16 +87,6 @@ const SingleContact = () => {
       });
   };
 
-  const addAditionalCompany = () => {
-    setAdditionalForm([...additionalForm, {}]);
-  };
-
-  const removeAdditionalComapany = (e) => {
-    const removeCompany = [...additionalForm];
-    removeCompany.splice(e, 1);
-    setAdditionalForm(removeCompany);
-  };
-
   const [showCanvas, setShowCanvas] = useState(false);
   const handleCloseCanvas = () => setShowCanvas(false);
   const handleShowCanvas = () => setShowCanvas(true);
@@ -135,6 +122,36 @@ const SingleContact = () => {
     return resultOwner;
   };
 
+  const selectSource = () => {
+    const result = [];
+    source?.map((data) => {
+      const seSourc = {
+        value: data.uid,
+        label: data.name,
+      };
+      result.push(seSourc);
+    });
+    return result;
+  };
+
+  const selectComp = () => {
+    const result = [];
+    company?.map((data) => {
+      const comSe = {
+        value: data.uid,
+        label: data.name,
+      };
+      result.push(comSe);
+    });
+    return result;
+  };
+
+  const handleSourceSelect = (e) => {
+    setInputContact({
+      ...inputContact,
+      source_uid: e.value,
+    });
+  };
   const handleInputOwner = (selected) => {
     setInputContact({
       ...inputContact,
@@ -165,13 +182,36 @@ const SingleContact = () => {
     getSource(token);
     getCompany(token);
   }, [token]);
-
+  const [compParent, setCompParent] = useState([]);
+  const handleSelectParentComp = (e) => {
+    setCompParent(e.map((opt) => opt.value));
+  };
+  console.log(compParent);
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const formData = new FormData();
+      for (const compUid of compParent) {
+        formData.append("company_uid[]", compUid);
+      }
+      formData.append("name", inputContact.name);
+      formData.append("birthday", inputContact.birthday);
+      formData.append("email", inputContact.email);
+      formData.append("gender", inputContact.gender);
+      formData.append("position", inputContact.position);
+      formData.append("address", inputContact.address);
+      formData.append("city", inputContact.city);
+      formData.append("remarks", inputContact.remarks);
+      formData.append("source_uid", inputContact.source_uid);
+      formData.append("owner_user_uid", inputContact.owner_user_uid);
+      formData.append("phone_number[]", inputContact.phone_number);
+      // console.log("FormData Content:");
+      // for (const pair of formData.entries()) {
+      //   console.log(pair[0] + ": " + pair[1]);
+      // }
       const addContact = await axios.post(
         `${process.env.REACT_APP_BACKEND_URL}/contacts`,
-        inputContact,
+        formData,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -383,66 +423,41 @@ const SingleContact = () => {
                       onChange={handleInputContact}
                     />
                   </FloatingLabel>
-                  <FloatingLabel
-                    label={
-                      <span>
-                        Source
-                        <span style={{ color: "red" }} className="fs-6">
-                          *
-                        </span>
-                      </span>
-                    }
-                  >
-                    <Form.Select
-                      className="mb-3"
-                      size="lg"
-                      style={{ fontSize: "0.85rem" }}
-                      name="source_uid"
-                      onChange={handleInputContact}
-                      required
-                    >
-                      <option value="">Source Choose</option>
-                      {source.map((so) => (
-                        <option key={so.uid} value={so.uid}>
-                          {so.name}
-                        </option>
-                      ))}
-                    </Form.Select>
-                  </FloatingLabel>
-                  <FloatingLabel
-                    label={
-                      <span>
-                        Gender
-                        <span style={{ color: "red" }} className="fs-6">
-                          *
-                        </span>
-                      </span>
-                    }
-                  >
+                  <Form.Group className="mb-3">
+                    <Form.Label>
+                      Source<span className="text-danger fs-6">*</span>
+                    </Form.Label>
+                    <Select
+                      options={selectSource()}
+                      onChange={handleSourceSelect}
+                    />
+                  </Form.Group>
+
+                  <Form.Group>
+                    <Form.Label>
+                      Gender<span className="text-danger fs-6">*</span>
+                    </Form.Label>
                     <Form.Select
                       className="mb-3"
                       size="lg"
                       style={{ fontSize: "0.85rem" }}
                       name="gender"
                       onChange={handleInputContact}
+                      required
                     >
                       <option value="">Select Choose</option>
                       <option value="male">Male</option>
                       <option value="female">Female</option>
                     </Form.Select>
-                  </FloatingLabel>
-                  <FloatingLabel
-                    className="mb-3"
-                    controlId="floatingInput"
-                    label="Remarks(Other Source)"
-                  >
+                  </Form.Group>
+                  <Form.Group>
+                    <Form.Label>Remarks</Form.Label>
                     <Form.Control
                       type="text"
                       name="remarks"
                       onChange={handleInputContact}
-                      placeholder="@gmail"
                     />
-                  </FloatingLabel>
+                  </Form.Group>
                 </Card.Body>
               </Card>
               <Card className="shadow">
@@ -453,59 +468,14 @@ const SingleContact = () => {
                   </h5>
                 </Card.Header>
                 <Card.Body>
-                  <FloatingLabel
-                    controlId="floatingInput"
-                    label="Primary Company"
+                  <Select
+                    closeMenuOnSelect={false}
+                    options={selectComp()}
+                    onChange={(e) => handleSelectParentComp(e)}
                     className="mb-3"
-                  >
-                    <Form.Select
-                      name={`company_uid[]`}
-                      onChange={handleInputContact}
-                    >
-                      <option value="">Select Company</option>
-                      {company.map((com) => (
-                        <option key={com.uid} value={com.uid}>
-                          {com.name}
-                        </option>
-                      ))}
-                    </Form.Select>
-                  </FloatingLabel>
-                  {additionalForm.map((_, index) => (
-                    <div key={index}>
-                      <FloatingLabel
-                        label="Additional Company"
-                        className="mb-3"
-                      >
-                        <Form.Select
-                          name={`company_uid[]`}
-                          onChange={handleInputContact}
-                        >
-                          <option value="">Select Company</option>
-                          {company.map((com) => (
-                            <option key={com.uid} value={com.uid}>
-                              {com.name}
-                            </option>
-                          ))}
-                        </Form.Select>
-                      </FloatingLabel>
-                      <Button
-                        variant="danger"
-                        className="mb-2"
-                        style={{ fontSize: "0.65rem" }}
-                        onClick={() => removeAdditionalComapany(index)}
-                      >
-                        Remove Additional
-                      </Button>
-                    </div>
-                  ))}
-
-                  <Button
-                    variant="primary"
-                    style={{ fontSize: "0.65rem" }}
-                    onClick={addAditionalCompany}
-                  >
-                    Add Additional
-                  </Button>
+                    placeholder="Primary Company"
+                    isMulti
+                  />
                   <div className="mt-3 text-center">
                     <a
                       onClick={handleShowCanvas}

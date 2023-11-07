@@ -31,6 +31,12 @@ const SingleCompany = () => {
     contact_uid: [],
     notes: "",
   });
+  const handleSelectParentCompany = (e) => {
+    setInputCompany({
+      ...inputCompany,
+      parent_company_uid: e.value,
+    });
+  };
   const [ownerUser, setOwnerUser] = useState([]);
   const [typeCompany, setTypeCompany] = useState([]);
   const [sourceCompany, setSourceCompany] = useState([]);
@@ -168,6 +174,17 @@ const SingleCompany = () => {
     });
     return result;
   };
+  const selectCompany = () => {
+    const result = [];
+    parentCompany?.map((data) => {
+      const parCo = {
+        value: data.uid,
+        label: data.name,
+      };
+      result.push(parCo);
+    });
+    return result;
+  };
 
   const [resultContact, setResultContact] = useState([]);
   const handleSelectContact = (select) => {
@@ -228,21 +245,23 @@ const SingleCompany = () => {
     // }
 
     try {
-      const addCompany = await axios.post(
-        `${process.env.REACT_APP_BACKEND_URL}/companies`,
-        formData,
-        {
+      const addCompany = await axios
+        .post(`${process.env.REACT_APP_BACKEND_URL}/companies`, formData, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
-      );
-      Swal.fire({
-        title: addCompany.data.message,
-        text: "Successfully add company",
-        icon: "success",
-      });
-      window.location.href = "/company";
+        })
+        .then((res) => {
+          Swal.fire({
+            title: "Successfully",
+            text: "Successfully create company",
+            icon: "success",
+          }).then((res) => {
+            if (res.isConfirmed) {
+              window.location.href = "/company";
+            }
+          });
+        });
     } catch (err) {
       if (err.response) {
         Swal.fire({
@@ -350,7 +369,7 @@ const SingleCompany = () => {
                     />
                   </Form.Group>
                   <Form.Label>
-                    Telp.No/WhatApp{" "}
+                    Telp.No/WhatApp
                     <span style={{ color: "red" }} className="fs-6">
                       *
                     </span>
@@ -581,23 +600,11 @@ const SingleCompany = () => {
                   </h5>
                 </Card.Header>
                 <Card.Body>
-                  <FloatingLabel
-                    controlId="floatingInput"
-                    label="Search Deals"
+                  <Select
+                    onChange={handleSelectParentCompany}
+                    options={selectCompany()}
                     className="mb-3"
-                  >
-                    <Form.Select
-                      name="parent_company_uid"
-                      onChange={handleInputCompany}
-                    >
-                      <option>Select Company</option>
-                      {parentCompany.map((parent) => (
-                        <option key={parent.uid} value={parent.uid}>
-                          {parent.name}
-                        </option>
-                      ))}
-                    </Form.Select>
-                  </FloatingLabel>
+                  />
                   <div className="text-center">
                     <a
                       onClick={handleShowCanvas}

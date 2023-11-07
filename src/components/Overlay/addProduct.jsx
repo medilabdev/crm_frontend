@@ -33,7 +33,8 @@ const AddProductOverlay = ({ visible, onClose, onSaveData }) => {
       setQuantityPackage(1);
       setSaveDataProvide({
         ...saveDataProvide,
-        product: selcPackage.uid,
+        uid: selcPackage.uid,
+        product_name: selcPackage.name,
       });
     } else {
       setSelectPriceProduct(0);
@@ -54,7 +55,8 @@ const AddProductOverlay = ({ visible, onClose, onSaveData }) => {
       setQuantityProduct(1);
       setSaveDataProvide({
         ...saveDataProvide,
-        product: selcProduct.uid,
+        uid: selcProduct.uid,
+        product_name: selcProduct.name,
       });
     } else {
       setSelectPriceProduct(0);
@@ -164,28 +166,68 @@ const AddProductOverlay = ({ visible, onClose, onSaveData }) => {
     discountNominalProduct,
   ]);
 
+  const initialSelectedPackage = null;
+  const initialSelectedPackagePrice = null;
+  const initialQuantityPackage = 0;
+  const initialDiscountPercentPackage = 0;
+  const initialTotalPricePackage = 0;
+  const initialDiscountNominalPackage = 0;
+
+  const initialSelectedProduct = null;
+  const initialSelectedPriceProduct = 0;
+  const initialQuantityProduct = 0;
+  const initialDiscountPercentProduct = 0;
+  const initialDiscountNominalProduct = 0;
+  const initialTotalPriceProduct = 0;
+
+  const initialTypeProductOrPackage = {
+    type: "",
+    discount_type: "",
+  };
+
+  const resetState = () => {
+    setSaveDataProvide(saveDataProvide);
+    setSelectPackage(initialSelectedPackage);
+    setSelectedPackagePrice(initialSelectedPackagePrice);
+    setQuantityPackage(initialQuantityPackage);
+    setDiscountPercentPackage(initialDiscountPercentPackage);
+    setTotalPricePackage(initialTotalPricePackage);
+    setDiscountNominalPackage(initialDiscountNominalPackage);
+
+    setSelectProduct(initialSelectedProduct);
+    setSelectPriceProduct(initialSelectedPriceProduct);
+    setQuantityProduct(initialQuantityProduct);
+    setDiscountPercentProduct(initialDiscountPercentProduct);
+    setDiscountNominalProduct(initialDiscountNominalProduct);
+    setTotalPriceProduct(initialTotalPriceProduct);
+
+    setTypeProductOrPackage(initialTypeProductOrPackage);
+  };
+
   // menyimpan data
-  const handleSaveProvide = () => {
+  const handleSaveProvide = (e) => {
+    e.preventDefault();
     if (saveDataProvide) {
       const dataExist = JSON.parse(localStorage.getItem("DataProduct")) || [];
       const id = `data_${Date.now()}`;
       const newData = {
         id: id,
-        product_uid: saveDataProvide.product,
-        // product_name: saveDataProvide.product,
-        qty: quantityPackage ? quantityPackage : quantityProduct,
+        product_uid: saveDataProvide.uid,
+        product_name: saveDataProvide.product_name,
+        qty: quantityPackage || quantityProduct,
         discount_type: typeProductOrPackage.discount_type,
         discount:
           discountNominalPackage ||
           discountNominalProduct ||
           discountPercentPackage ||
           discountPercentProduct,
-        total_price: totalPricePackage ? totalPricePackage : totalPriceProduct,
+        total_price: totalPricePackage || totalPriceProduct,
       };
       dataExist.push(newData);
       localStorage.setItem("DataProduct", JSON.stringify(dataExist));
       onClose();
-    } 
+      resetState();
+    }
   };
 
   return (
@@ -194,7 +236,7 @@ const AddProductOverlay = ({ visible, onClose, onSaveData }) => {
         <Offcanvas.Title>Product</Offcanvas.Title>
       </Offcanvas.Header>
       <Offcanvas.Body>
-        <form onSubmit={handleSaveProvide}>
+        <form>
           <Form.Group className="mb-3">
             <Form.Label>Type Product</Form.Label>
             <Form.Select
