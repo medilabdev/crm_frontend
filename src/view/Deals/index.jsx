@@ -76,17 +76,19 @@ const Deals = () => {
         <div className="container">
           <div className="row">
             <div className="col">
-              <h1>Deals</h1>
-              <nav>
-                <ol className="breadcrumb mt-2">
-                  <li className="breadcrumb-item">
-                    <Link to="/" className="text-decoration-none">
-                      Dashboard
-                    </Link>
-                  </li>
-                  <li className="breadcrumb-item active">Deals</li>
-                </ol>
-              </nav>
+              <div className="pagetitle">
+                <h1>Deals</h1>
+                <nav>
+                  <ol className="breadcrumb mt-2">
+                    <li className="breadcrumb-item">
+                      <Link to="/" className="text-decoration-none">
+                        Dashboard
+                      </Link>
+                    </li>
+                    <li className="breadcrumb-item active">Deals</li>
+                  </ol>
+                </nav>
+              </div>
             </div>
           </div>
         </div>
@@ -195,7 +197,7 @@ const Deals = () => {
                       options={selectOwner()}
                       isMulti
                       placeholder="Select Owner"
-                      />
+                    />
                   </div>
                 </div>
                 <div className="row">
