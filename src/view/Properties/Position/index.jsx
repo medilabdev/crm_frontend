@@ -78,7 +78,7 @@ const Position = () => {
   const columns = [
     {
       id: 1,
-      name: "Name Teams",
+      name: "Name Position",
       selector: (row) => row.name,
       sortable: true,
     },
@@ -199,6 +199,24 @@ const Position = () => {
                         <div className="input-group">
                           <i class="bi bi-person-badge-fill fs-4 ms-2"></i>
                           <h5 className="mt-2 ms-2">Roles</h5>
+                        </div>
+                      </Link>
+                      <Link
+                        to="/properties/source"
+                        className="text-decoration-none text-black fw-semibold border-bottom documents "
+                      >
+                        <div className="input-group">
+                          <i class="bi bi-building-fill-up fs-4 ms-2"></i>
+                          <h5 className="mt-2 ms-2">Source</h5>
+                        </div>
+                      </Link>
+                      <Link
+                        to="/properties/company-type"
+                        className="text-decoration-none text-black fw-semibold border-bottom documents "
+                      >
+                        <div className="input-group">
+                          <i class="bi bi-buildings fs-4 ms-2"></i>
+                          <h5 className="mt-2 ms-2">Company Type</h5>
                         </div>
                       </Link>
                     </div>

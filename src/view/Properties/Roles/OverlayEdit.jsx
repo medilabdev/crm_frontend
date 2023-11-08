@@ -54,7 +54,12 @@ const OverlayEdit = ({ visible, onClose, uid }) => {
           }
         });
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        Swal.fire({
+          text: err.response.data.message,
+          icon: "warning",
+        });
+      });
   };
   return (
     <Offcanvas

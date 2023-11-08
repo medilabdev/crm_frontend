@@ -1,39 +1,54 @@
 import React from "react";
-import Topbar from "../../components/Template/Topbar";
-import Sidebar from "../../components/Template/Sidebar";
-import Main from "../../components/Template/Main";
+import Topbar from "../../../components/Template/Topbar";
+import Sidebar from "../../../components/Template/Sidebar";
+import Main from "../../../components/Template/Main";
 import { Link } from "react-router-dom";
 import { Card } from "react-bootstrap";
-import "../Documents/style.css";
-import IconTeams from "../../assets/img/link.png";
 import DataTable from "react-data-table-component";
 import { useState } from "react";
 import axios from "axios";
 import { useEffect } from "react";
-import OverlayAdd from "./Teams/OverlayAdd";
 import Swal from "sweetalert2";
-import OverlayEdit from "./Teams/OverlayEdit";
-const Properties = () => {
+import OverlayAdd from "./OverlayAdd";
+import OverlayEdit from "./OverlayEdit";
+
+const Source = () => {
   const token = localStorage.getItem("token");
-  const [dataTeams, setDataTeams] = useState([]);
+  const [source, setSource] = useState([]);
   const [search, setSearch] = useState([]);
   const [selectUid, setSelectUid] = useState([]);
-  const [addTeams, setAddTeams] = useState(false);
-  const handleCloseAdd = () => setAddTeams(false);
-  const handleOpenAdd = () => setAddTeams(true);
-  const [editTeams, setEditTeams] = useState(false);
+  const [addSource, setAddSource] = useState(false);
+  const handleOpenAdd = () => setAddSource(true);
+  const handleCloseAdd = () => setAddSource(false);
+  const [editSource, setEditSource] = useState(false);
   const handleCloseEdit = () => {
-    setEditTeams(false);
+    setEditSource(false);
   };
-  const getTeams = () => {
+  const selUid = (e) => {
+    const selRow = e.selectedRows.map((row) => row.uid);
+    setSelectUid(selRow);
+  };
+  //   console.log(selectUid);
+  const handleSubmitDeleteSelect = async (e) => {
+    e.preventDefault();
+    const result = await Swal.fire({
+      title: "Apakah Anda yakin?",
+      text: "Anda tidak dapat mengembalikan data ini setelah menghapusnya!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Ya, hapus!",
+      cancelButtonText: "Batal",
+    });
+  };
+  const getSource = () => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/teams`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/companies-source`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
       .then((res) => {
-        setDataTeams(res.data.data);
+        setSource(res.data.data);
         setSearch(res.data.data);
       })
       .catch((err) => {
@@ -43,25 +58,20 @@ const Properties = () => {
         }
       });
   };
-  // console.log(search);
-  useEffect(() => {
-    getTeams(token);
-  }, [token]);
-
-  const SearchFilter = (e) => {
-    const newData = dataTeams.filter((row) => {
+  const handleFilter = (e) => {
+    const newData = source.filter((row) => {
       return row.name.toLowerCase().includes(e.target.value.toLowerCase());
     });
     setSearch(newData);
   };
-  const selUid = (state) => {
-    const selectRow = state.selectedRows.map((row) => row.uid);
-    setSelectUid(selectRow);
-  };
+  useEffect(() => {
+    getSource(token);
+  }, [token]);
+
   const columnsDatatable = [
     {
       id: 1,
-      name: "Name Teams",
+      name: "Name Source",
       selector: (row) => row.name,
       sortable: true,
     },
@@ -73,7 +83,7 @@ const Properties = () => {
           <button
             title="Edit"
             className="icon-button"
-            onClick={() => setEditTeams(row.uid)}
+            onClick={() => setEditSource(row.uid)}
           >
             <i className="bi bi-pen"></i>
           </button>
@@ -83,7 +93,7 @@ const Properties = () => {
             onClick={() => {
               Swal.fire({
                 title: "Konfirmasi",
-                text: "Apakah kamy yakin ingin menghapus teams ini?",
+                text: "Apakah kamy yakin ingin menghapus ini?",
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#3085d6",
@@ -94,7 +104,7 @@ const Properties = () => {
                 if (res.isConfirmed) {
                   axios
                     .delete(
-                      `${process.env.REACT_APP_BACKEND_URL}/teams/${row.uid}`,
+                      `${process.env.REACT_APP_BACKEND_URL}/companies-source/${row.uid}`,
                       {
                         headers: { Authorization: `Bearer ${token}` },
                       }
@@ -102,7 +112,7 @@ const Properties = () => {
                     .then((res) => {
                       Swal.fire({
                         title: res.data.message,
-                        text: "Successfully delete item product",
+                        text: "Successfully delete item source",
                         icon: "success",
                       }).then((res) => {
                         if (res.isConfirmed) {
@@ -126,12 +136,10 @@ const Properties = () => {
       ),
     },
   ];
-
   const paginationComponentOptions = {
     selectAllRowsItem: true,
     selectAllRowsItemText: "ALL",
   };
-  // console.log(selectUid);
   const customStyle = {
     headRow: {
       style: {
@@ -148,19 +156,8 @@ const Properties = () => {
       },
     },
   };
-  const handleSubmitDeleteSelect = async (e) => {
-    e.preventDefault();
-    const result = await Swal.fire({
-      title: "Apakah Anda yakin?",
-      text: "Anda tidak dapat mengembalikan data ini setelah menghapusnya!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Ya, hapus!",
-      cancelButtonText: "Batal",
-    });
-  };
   return (
-    <div id="body">
+    <body id="body">
       <Topbar />
       <Sidebar />
       <Main>
@@ -194,7 +191,7 @@ const Properties = () => {
                         to="/properties"
                         className="text-decoration-none text-black fw-semibold border-bottom documents "
                       >
-                        <div className="input-group active-side">
+                        <div className="input-group ">
                           <i class="bi bi-people-fill fs-4 ms-2"></i>
                           <h5 className="mt-2 ms-2">Teams</h5>
                         </div>
@@ -221,7 +218,7 @@ const Properties = () => {
                         to="/properties/source"
                         className="text-decoration-none text-black fw-semibold border-bottom documents "
                       >
-                        <div className="input-group">
+                        <div className="input-group active-side">
                           <i class="bi bi-building-fill-up fs-4 ms-2"></i>
                           <h5 className="mt-2 ms-2">Source</h5>
                         </div>
@@ -269,9 +266,9 @@ const Properties = () => {
                         </div>
                         <input
                           type="text"
-                          placeholder="Search Teams..."
+                          placeholder="Search Source..."
                           className="form-control"
-                          onChange={SearchFilter}
+                          onChange={handleFilter}
                           style={{ fontSize: "0.85rem" }}
                         />
                       </div>
@@ -281,17 +278,20 @@ const Properties = () => {
                         className="mt-2"
                         data={search}
                         columns={columnsDatatable}
+                        paginationComponentOptions={paginationComponentOptions}
                         pagination
                         selectableRows
-                        paginationComponentOptions={paginationComponentOptions}
                         onSelectedRowsChange={selUid}
                         customStyles={customStyle}
                       />
-                      <OverlayAdd visible={addTeams} onClose={handleCloseAdd} />
+                      <OverlayAdd
+                        visible={addSource}
+                        onClose={handleCloseAdd}
+                      />
                       <OverlayEdit
+                        visible={editSource !== false}
                         onClose={handleCloseEdit}
-                        visible={editTeams !== false}
-                        uid={editTeams}
+                        uid={editSource}
                       />
                     </div>
                   </div>
@@ -301,8 +301,8 @@ const Properties = () => {
           </div>
         </div>
       </Main>
-    </div>
+    </body>
   );
 };
 
-export default Properties;
+export default Source;

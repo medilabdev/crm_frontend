@@ -1,39 +1,34 @@
-import React from "react";
-import Topbar from "../../components/Template/Topbar";
-import Sidebar from "../../components/Template/Sidebar";
-import Main from "../../components/Template/Main";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import Topbar from "../../../components/Template/Topbar";
+import Sidebar from "../../../components/Template/Sidebar";
+import Main from "../../../components/Template/Main";
 import { Card } from "react-bootstrap";
-import "../Documents/style.css";
-import IconTeams from "../../assets/img/link.png";
+import { Link } from "react-router-dom";
 import DataTable from "react-data-table-component";
-import { useState } from "react";
 import axios from "axios";
-import { useEffect } from "react";
-import OverlayAdd from "./Teams/OverlayAdd";
 import Swal from "sweetalert2";
-import OverlayEdit from "./Teams/OverlayEdit";
-const Properties = () => {
+import OverlayAdd from "./OverlayAdd";
+import OverlayEdit from "./OverlayEdit";
+const CompanyType = () => {
   const token = localStorage.getItem("token");
-  const [dataTeams, setDataTeams] = useState([]);
+  const [comType, setCompType] = useState([]);
   const [search, setSearch] = useState([]);
-  const [selectUid, setSelectUid] = useState([]);
-  const [addTeams, setAddTeams] = useState(false);
-  const handleCloseAdd = () => setAddTeams(false);
-  const handleOpenAdd = () => setAddTeams(true);
-  const [editTeams, setEditTeams] = useState(false);
+  const [addCompType, setAddCompType] = useState(false);
+  const handleOpenAdd = () => setAddCompType(true);
+  const handleCloseAdd = () => setAddCompType(false);
+  const [editComType, setEditCompType] = useState(false);
   const handleCloseEdit = () => {
-    setEditTeams(false);
+    setEditCompType(false);
   };
-  const getTeams = () => {
+  const getCompType = () => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/teams`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/companies-type`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
       .then((res) => {
-        setDataTeams(res.data.data);
+        setCompType(res.data.data);
         setSearch(res.data.data);
       })
       .catch((err) => {
@@ -43,25 +38,20 @@ const Properties = () => {
         }
       });
   };
-  // console.log(search);
-  useEffect(() => {
-    getTeams(token);
-  }, [token]);
-
-  const SearchFilter = (e) => {
-    const newData = dataTeams.filter((row) => {
+  const handleFilter = (e) => {
+    const newData = comType.filter((row) => {
       return row.name.toLowerCase().includes(e.target.value.toLowerCase());
     });
     setSearch(newData);
   };
-  const selUid = (state) => {
-    const selectRow = state.selectedRows.map((row) => row.uid);
-    setSelectUid(selectRow);
-  };
+  useEffect(() => {
+    getCompType(token);
+  }, [token]);
+
   const columnsDatatable = [
     {
       id: 1,
-      name: "Name Teams",
+      name: "Name Source",
       selector: (row) => row.name,
       sortable: true,
     },
@@ -73,7 +63,7 @@ const Properties = () => {
           <button
             title="Edit"
             className="icon-button"
-            onClick={() => setEditTeams(row.uid)}
+            onClick={() => setEditCompType(row.uid)}
           >
             <i className="bi bi-pen"></i>
           </button>
@@ -83,7 +73,7 @@ const Properties = () => {
             onClick={() => {
               Swal.fire({
                 title: "Konfirmasi",
-                text: "Apakah kamy yakin ingin menghapus teams ini?",
+                text: "Apakah kamy yakin ingin menghapus ini?",
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#3085d6",
@@ -94,7 +84,7 @@ const Properties = () => {
                 if (res.isConfirmed) {
                   axios
                     .delete(
-                      `${process.env.REACT_APP_BACKEND_URL}/teams/${row.uid}`,
+                      `${process.env.REACT_APP_BACKEND_URL}/companies-type/${row.uid}`,
                       {
                         headers: { Authorization: `Bearer ${token}` },
                       }
@@ -102,7 +92,7 @@ const Properties = () => {
                     .then((res) => {
                       Swal.fire({
                         title: res.data.message,
-                        text: "Successfully delete item product",
+                        text: "Successfully delete item source",
                         icon: "success",
                       }).then((res) => {
                         if (res.isConfirmed) {
@@ -126,12 +116,6 @@ const Properties = () => {
       ),
     },
   ];
-
-  const paginationComponentOptions = {
-    selectAllRowsItem: true,
-    selectAllRowsItemText: "ALL",
-  };
-  // console.log(selectUid);
   const customStyle = {
     headRow: {
       style: {
@@ -148,19 +132,12 @@ const Properties = () => {
       },
     },
   };
-  const handleSubmitDeleteSelect = async (e) => {
-    e.preventDefault();
-    const result = await Swal.fire({
-      title: "Apakah Anda yakin?",
-      text: "Anda tidak dapat mengembalikan data ini setelah menghapusnya!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Ya, hapus!",
-      cancelButtonText: "Batal",
-    });
+  const paginationComponentOptions = {
+    selectAllRowsItem: true,
+    selectAllRowsItemText: "ALL",
   };
   return (
-    <div id="body">
+    <body id="body">
       <Topbar />
       <Sidebar />
       <Main>
@@ -194,7 +171,7 @@ const Properties = () => {
                         to="/properties"
                         className="text-decoration-none text-black fw-semibold border-bottom documents "
                       >
-                        <div className="input-group active-side">
+                        <div className="input-group ">
                           <i class="bi bi-people-fill fs-4 ms-2"></i>
                           <h5 className="mt-2 ms-2">Teams</h5>
                         </div>
@@ -230,7 +207,7 @@ const Properties = () => {
                         to="/properties/company-type"
                         className="text-decoration-none text-black fw-semibold border-bottom documents "
                       >
-                        <div className="input-group">
+                        <div className="input-group active-side">
                           <i class="bi bi-buildings fs-4 ms-2"></i>
                           <h5 className="mt-2 ms-2">Company Type</h5>
                         </div>
@@ -244,14 +221,14 @@ const Properties = () => {
                         style={{ fontSize: "0.85rem" }}
                         onClick={handleOpenAdd}
                       >
-                        Add Teams
+                        Add Company Type
                       </button>
                       <button
                         className="btn btn-danger mt-5 ms-4"
                         style={{ fontSize: "0.85rem" }}
-                        onClick={handleSubmitDeleteSelect}
+                        // onClick={handleSubmitDeleteSelect}
                       >
-                        Delete Teams
+                        Delete Company Type
                       </button>
                     </div>
                     <div className="float-end col-5 me-3">
@@ -269,29 +246,29 @@ const Properties = () => {
                         </div>
                         <input
                           type="text"
-                          placeholder="Search Teams..."
+                          placeholder="Search Type..."
                           className="form-control"
-                          onChange={SearchFilter}
+                          onChange={handleFilter}
                           style={{ fontSize: "0.85rem" }}
                         />
                       </div>
                     </div>
                     <div className="p-2">
                       <DataTable
-                        className="mt-2"
-                        data={search}
-                        columns={columnsDatatable}
                         pagination
-                        selectableRows
-                        paginationComponentOptions={paginationComponentOptions}
-                        onSelectedRowsChange={selUid}
+                        columns={columnsDatatable}
+                        data={search}
                         customStyles={customStyle}
+                        paginationComponentOptions={paginationComponentOptions}
                       />
-                      <OverlayAdd visible={addTeams} onClose={handleCloseAdd} />
+                      <OverlayAdd
+                        visible={addCompType}
+                        onClose={handleCloseAdd}
+                      />
                       <OverlayEdit
+                        visible={editComType !== false}
                         onClose={handleCloseEdit}
-                        visible={editTeams !== false}
-                        uid={editTeams}
+                        uid={editComType}
                       />
                     </div>
                   </div>
@@ -301,8 +278,8 @@ const Properties = () => {
           </div>
         </div>
       </Main>
-    </div>
+    </body>
   );
 };
 
-export default Properties;
+export default CompanyType;

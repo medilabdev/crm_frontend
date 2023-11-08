@@ -35,6 +35,8 @@ import EditPackageProduct from "../view/Products/EditPackageProduct";
 import Properties from "../view/Properties";
 import Position from "../view/Properties/Position";
 import Roles from "../view/Properties/Roles";
+import Source from "../view/Properties/Source";
+import CompanyType from "../view/Properties/CompanyType";
 const Login = ({ children }) => {
   const token = localStorage.getItem("token");
   if (!token) {
@@ -286,6 +288,24 @@ function Router() {
           element={
             <Login>
               <Roles />
+            </Login>
+          }
+        />
+        <Route
+          exact
+          path="/properties/source"
+          element={
+            <Login>
+              <Source />
+            </Login>
+          }
+        />
+        <Route
+          exact
+          path="/properties/company-type"
+          element={
+            <Login>
+              <CompanyType />
             </Login>
           }
         />

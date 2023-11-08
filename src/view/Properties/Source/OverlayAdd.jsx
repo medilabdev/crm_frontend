@@ -3,7 +3,6 @@ import React from "react";
 import { useState } from "react";
 import { Form, Offcanvas } from "react-bootstrap";
 import Swal from "sweetalert2";
-
 const OverlayAdd = ({ visible, onClose }) => {
   const token = localStorage.getItem("token");
   const [input, setInput] = useState([]);
@@ -16,7 +15,7 @@ const OverlayAdd = ({ visible, onClose }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     axios
-      .post(`${process.env.REACT_APP_BACKEND_URL}/teams`, input, {
+      .post(`${process.env.REACT_APP_BACKEND_URL}/companies-source`, input, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -24,7 +23,7 @@ const OverlayAdd = ({ visible, onClose }) => {
       .then((res) => {
         Swal.fire({
           title: res.data.message,
-          text: "Successfully add teams",
+          text: "Successfully create item",
           icon: "success",
         }).then((res) => {
           if (res.isConfirmed) {
@@ -47,13 +46,13 @@ const OverlayAdd = ({ visible, onClose }) => {
       className="offcanvas-content"
     >
       <Offcanvas.Header closeButton>
-        <Offcanvas.Title>Add Teams</Offcanvas.Title>
+        <Offcanvas.Title>Add Source</Offcanvas.Title>
       </Offcanvas.Header>
       <Offcanvas.Body>
         <form onSubmit={handleSubmit}>
           <Form className="mb-2">
             <Form.Label>
-              Name Teams <span className="text-danger fs-5">*</span>
+              Name Source <span className="text-danger fs-5">*</span>
             </Form.Label>
             <Form.Control
               type="text"

@@ -7,24 +7,24 @@ import Swal from "sweetalert2";
 
 const OverlayEdit = ({ visible, uid, onClose }) => {
   const token = localStorage.getItem("token");
-  const [editPost, setEditPost] = useState({});
+  const [editCompType, setEditCompType] = useState({});
   const handleInput = (e) => {
     const { name, value } = e.target;
-    setEditPost({
-      ...editPost,
+    setEditCompType({
+      ...editCompType,
       [name]: value,
     });
   };
   const getDetailPost = () => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/positions/${uid}`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/companies-type/${uid}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
       .then((res) => {
         const oldData = res.data.data;
-        setEditPost({
+        setEditCompType({
           name: oldData.name,
         });
       })
@@ -43,11 +43,15 @@ const OverlayEdit = ({ visible, uid, onClose }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     axios
-      .put(`${process.env.REACT_APP_BACKEND_URL}/positions/${uid}`, editPost, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      .put(
+        `${process.env.REACT_APP_BACKEND_URL}/companies-type/${uid}`,
+        editCompType,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
       .then((res) => {
         Swal.fire({
           title: res.data.message,
@@ -80,12 +84,12 @@ const OverlayEdit = ({ visible, uid, onClose }) => {
         <form onSubmit={handleSubmit}>
           <Form.Group className="mb-2">
             <Form.Label>
-              Name Position <span className="text-danger fs-5">*</span>
+              Name Company Type <span className="text-danger fs-5">*</span>
             </Form.Label>
             <Form.Control
               type="text"
               name="name"
-              value={editPost.name}
+              value={editCompType.name}
               onChange={handleInput}
               required
             />

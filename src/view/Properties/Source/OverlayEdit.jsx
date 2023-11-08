@@ -1,30 +1,55 @@
 import axios from "axios";
 import React from "react";
+import { useEffect } from "react";
 import { useState } from "react";
 import { Form, Offcanvas } from "react-bootstrap";
 import Swal from "sweetalert2";
-
-const OverlayAdd = ({ visible, onClose }) => {
+const OverlayEdit = ({ onClose, visible, uid }) => {
+  // console.log(uid);
+  const [inputSo, setInputSo] = useState({});
   const token = localStorage.getItem("token");
-  const [input, setInput] = useState([]);
   const handleInput = (e) => {
-    setInput({
-      ...input,
-      [e.target.name]: e.target.value,
+    const { name, value } = e.target;
+    setInputSo({
+      ...inputSo,
+      [name]: value,
     });
   };
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const getSourceUid = (token, uid) => {
     axios
-      .post(`${process.env.REACT_APP_BACKEND_URL}/teams`, input, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/companies-source/${uid}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
       .then((res) => {
+        const oldData = res.data.data;
+        setInputSo({
+          name: oldData.name,
+        });
+      });
+  };
+  useEffect(() => {
+    if (visible && uid) {
+      getSourceUid(token, uid);
+    }
+  }, [token, uid]);
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    axios
+      .put(
+        `${process.env.REACT_APP_BACKEND_URL}/companies-source/${uid}`,
+        inputSo,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+      .then((res) => {
         Swal.fire({
           title: res.data.message,
-          text: "Successfully add teams",
+          text: "Successfully edit item",
           icon: "success",
         }).then((res) => {
           if (res.isConfirmed) {
@@ -47,17 +72,18 @@ const OverlayAdd = ({ visible, onClose }) => {
       className="offcanvas-content"
     >
       <Offcanvas.Header closeButton>
-        <Offcanvas.Title>Add Teams</Offcanvas.Title>
+        <Offcanvas.Title>Edit Resource</Offcanvas.Title>
       </Offcanvas.Header>
       <Offcanvas.Body>
         <form onSubmit={handleSubmit}>
           <Form className="mb-2">
             <Form.Label>
-              Name Teams <span className="text-danger fs-5">*</span>
+              Name Source <span className="text-danger fs-5">*</span>
             </Form.Label>
             <Form.Control
               type="text"
               name="name"
+              value={inputSo.name}
               onChange={handleInput}
               required
             />
@@ -76,4 +102,4 @@ const OverlayAdd = ({ visible, onClose }) => {
   );
 };
 
-export default OverlayAdd;
+export default OverlayEdit;

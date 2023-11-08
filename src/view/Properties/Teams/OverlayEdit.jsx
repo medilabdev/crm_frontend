@@ -56,6 +56,12 @@ const OverlayEdit = ({ visible, onClose, uid }) => {
             window.location.href = "/properties";
           }
         });
+      })
+      .catch((err) => {
+        Swal.fire({
+          text: err.response.data.message,
+          icon: "warning",
+        });
       });
   };
   return (
