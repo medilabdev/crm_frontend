@@ -32,6 +32,9 @@ import Deals from "../view/Deals";
 import SingleDeals from "../view/Deals/SingleDeals";
 import BulkChangeDeals from "../view/Deals/BulkChange";
 import EditPackageProduct from "../view/Products/EditPackageProduct";
+import Properties from "../view/Properties";
+import Position from "../view/Properties/Position";
+import Roles from "../view/Properties/Roles";
 const Login = ({ children }) => {
   const token = localStorage.getItem("token");
   if (!token) {
@@ -256,6 +259,33 @@ function Router() {
           element={
             <Login>
               <BulkChangeDeals />
+            </Login>
+          }
+        />
+        <Route
+          exact
+          path="/properties"
+          element={
+            <Login>
+              <Properties />
+            </Login>
+          }
+        />
+        <Route
+          exact
+          path="/properties/position"
+          element={
+            <Login>
+              <Position />
+            </Login>
+          }
+        />
+        <Route
+          exact
+          path="/properties/roles"
+          element={
+            <Login>
+              <Roles />
             </Login>
           }
         />

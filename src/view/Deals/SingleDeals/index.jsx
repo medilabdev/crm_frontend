@@ -36,6 +36,7 @@ const SingleDeals = () => {
   const handleCloseProduct = () => setShowAddProduct(false);
   const handleShowProduct = () => setShowAddProduct(true);
   const [allProductData, setAllProductData] = useState([]);
+  const [mentionUsers, setMentionUsers] = useState([]);
 
   const allData = [];
   for (let i = 0; i < localStorage.length; i++) {
@@ -95,6 +96,9 @@ const SingleDeals = () => {
   };
   const handleContactUid = (e) => {
     setInputContact(e.map((opt) => opt.value));
+  };
+  const mantionUsersUid = (e) => {
+    setMentionUsers(e.map((opt) => opt.value));
   };
   // ambil data owner
   const getOwnerUser = () => {
@@ -299,10 +303,9 @@ const SingleDeals = () => {
       window.removeEventListener("beforeunload", clearDataProductLocalStorage);
     };
   }, [token]);
-
   const uidProduct = allData[0]?.map((data) => data.product_uid);
   const qtyProduct = allData[0]?.map((data) => data.qty);
-  // const 
+  // const
   // console.log(qtyProduct);
   const handleSubmitDeals = (e) => {
     e.preventDefault();
@@ -311,8 +314,16 @@ const SingleDeals = () => {
       for (const uidContact of inputContact) {
         formdata.append("contact_person[]", uidContact);
       }
+      for (const uidMention of mentionUsers) {
+        formdata.append("mention_user_uid", uidMention);
+      }
+      formdata.append("deal_name", inputDeals.deal_name);
+      formdata.append("deal_size", inputDeals.deal_size);
+      formdata.append("deal_status", inputDeals.deal_status);
+      formdata.append("priority", inputDeals.priority);
+      formdata.append("company_uid", inputDeals.company_uid);
       // for(){
-        
+
       // }
     } catch (err) {
       if (err.response) {
@@ -564,7 +575,11 @@ const SingleDeals = () => {
                       Mention Users :
                     </Form.Label>
                     <Col lg={6} style={{ marginLeft: "-5rem" }}>
-                      <Select options={ownerSelect()} isMulti />
+                      <Select
+                        options={ownerSelect()}
+                        isMulti
+                        onChange={(e) => mantionUsersUid(e)}
+                      />
                     </Col>
                   </Form.Group>
                 </Card.Body>

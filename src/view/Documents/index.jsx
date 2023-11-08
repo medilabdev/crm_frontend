@@ -109,7 +109,12 @@ const Documents = () => {
                       >
                         <div className="input-group">
                           <i class="bi bi-file-code fs-4 ms-2"></i>
-                          <h5 className="p-1 mt-1 ms-2">Short Code</h5>
+                          <h5
+                            className="p-1 mt-1 ms-2"
+                            style={{ fontWeight: 600 }}
+                          >
+                            Short Code
+                          </h5>
                         </div>
                       </Link>
                     </div>

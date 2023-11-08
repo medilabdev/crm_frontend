@@ -25,7 +25,7 @@ const Company = () => {
   const toggleSideBarCard = () => {
     setIsSideBar(!isSideBar);
   };
-  const filterClass = isSideBar ? "col-md-3 d-block" : "col-sm-0 d-none";
+  const filterClass = isSideBar ? "col-md-3 d-block border-end" : "col-sm-0 d-none";
   const datatableClass = isSideBar ? "col-md-9" : "col-sm-12";
   const showTooltip = isSideBar ? (
     <Tooltip id="tooltip">Close Filter</Tooltip>

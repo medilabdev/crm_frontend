@@ -72,6 +72,13 @@ function Sidebar() {
             icon="bi bi-person-fill"
             isActive={1}
           />
+          <MenuSidebar
+            typeMenu="nonCollapse"
+            name="Properties"
+            url="/properties"
+            icon="bi bi-gear-fill"
+            isActive={1}
+          />
         </ul>
       </aside>
     </>

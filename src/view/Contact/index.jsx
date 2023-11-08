@@ -25,7 +25,7 @@ const Contact = () => {
   };
 
   const filterClass = isSidebarToggleCard
-    ? "col-md-3 d-block"
+    ? "col-md-3 d-block border-end"
     : "col-sm-0 d-none";
 
   const datatableClass = isSidebarToggleCard ? "col-md-9" : "col-sm-12";

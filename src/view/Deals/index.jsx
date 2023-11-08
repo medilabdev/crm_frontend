@@ -40,7 +40,7 @@ const Deals = () => {
   const toggleSideFilter = () => {
     setIsSideFilter(!isSideFilter);
   };
-  const filterClass = isSideFilter ? "col-md-3 d-block" : "col-md-0 d-none";
+  const filterClass = isSideFilter ? "col-md-3 d-block border-end" : "col-md-0 d-none";
   const boardKanbanDatatable = isSideFilter ? "col-md-9" : "col-md-12";
   const IconFilter = isSideFilter ? "bi bi-x-lg" : "bi bi-funnel";
 
