@@ -1,7 +1,31 @@
+import axios from "axios";
 import React from "react";
+import { useEffect } from "react";
+import { useState } from "react";
 import DataTable from "react-data-table-component";
 
 const DataTableComponet = ({ data, selectUidDataTable }) => {
+  const token = localStorage.getItem("token");
+  const [dataDeals, setDataDeals] = useState([]);
+
+  const getDeals = () => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/deals`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => {
+        setDataDeals(res.data.data);
+      })
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated.") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
+
   const columns = [
     {
       name: "Name",
@@ -10,7 +34,7 @@ const DataTableComponet = ({ data, selectUidDataTable }) => {
         <div style={{ whiteSpace: "normal" }}>{row.name_deals}</div>
       ),
       sortable: true,
-      width:"150px"
+      width: "150px",
     },
     {
       name: "Stage",
@@ -76,12 +100,14 @@ const DataTableComponet = ({ data, selectUidDataTable }) => {
     selectAllRowsItem: true,
     selectAllRowsItemText: "ALL",
   };
-
+  useEffect(() => {
+    getDeals(token);
+  }, [token]);
   return (
     <div>
       <DataTable
         columns={columns}
-        data={data}
+        data={dataDeals}
         defaultSortFieldId={1}
         pagination
         paginationComponentOptions={paginationComponentOptions}

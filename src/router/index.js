@@ -37,6 +37,7 @@ import Position from "../view/Properties/Position";
 import Roles from "../view/Properties/Roles";
 import Source from "../view/Properties/Source";
 import CompanyType from "../view/Properties/CompanyType";
+import DealsCategory from "../view/Properties/DealsStage";
 const Login = ({ children }) => {
   const token = localStorage.getItem("token");
   if (!token) {
@@ -306,6 +307,15 @@ function Router() {
           element={
             <Login>
               <CompanyType />
+            </Login>
+          }
+        />
+        <Route
+          exact
+          path="/properties/deal-stage"
+          element={
+            <Login>
+              <DealsCategory />
             </Login>
           }
         />
