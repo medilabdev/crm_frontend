@@ -38,6 +38,7 @@ import Roles from "../view/Properties/Roles";
 import Source from "../view/Properties/Source";
 import CompanyType from "../view/Properties/CompanyType";
 import DealsCategory from "../view/Properties/DealsStage";
+import NeedsApproval from "../view/Deals/NeedApproval";
 const Login = ({ children }) => {
   const token = localStorage.getItem("token");
   if (!token) {
@@ -262,6 +263,15 @@ function Router() {
           element={
             <Login>
               <BulkChangeDeals />
+            </Login>
+          }
+        />
+        <Route
+          exact
+          path="/deals/need-approval"
+          element={
+            <Login>
+              <NeedsApproval />
             </Login>
           }
         />

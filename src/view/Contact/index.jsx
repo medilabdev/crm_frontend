@@ -45,6 +45,7 @@ const Contact = () => {
   const [user, setUser] = useState([]);
   const [source, setSource] = useState([]);
   const [associateCompany, setAssociateCompany] = useState([]);
+  const [deals, setDeals] = useState([]);
 
   const [searchMultiple, setSearchMultiple] = useState({
     name: "",
@@ -67,6 +68,22 @@ const Contact = () => {
         },
       })
       .then((res) => setSource(res.data.data))
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
+
+  const getDeals = (token) => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/deals`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => setDeals(res.data.data))
       .catch((err) => {
         if (err.response.data.message === "Unauthenticated") {
           localStorage.clear();
@@ -150,6 +167,22 @@ const Contact = () => {
     return result;
   };
 
+  const [resultDeals, setResultDeals] = useState([]);
+  const handleDeals = (e) => {
+    setResultDeals(e.map((opt) => opt.value));
+  };
+  const selectDeals = () => {
+    const result = [];
+    deals?.map((data) => {
+      const selRes = {
+        value: data.uid,
+        label: data.deal_name,
+      };
+      result.push(selRes);
+    });
+    return result;
+  };
+
   const selectAssociateCompany = () => {
     const uniqueAssCompany = {};
     associateCompany?.forEach((data) => {
@@ -207,6 +240,7 @@ const Contact = () => {
     getAllUser(TokenAuth);
     getSource(TokenAuth);
     getAssociateCompany(TokenAuth);
+    getDeals(TokenAuth);
   }, [TokenAuth]);
 
   const columns = [
@@ -586,18 +620,13 @@ const Contact = () => {
                     </div>
                     <div className="row mt-3">
                       <div className="col">
-                        <select
-                          name=""
-                          id=""
-                          className="form-select"
-                          style={{ fontSize: "0.85rem" }}
-                        >
-                          <option disabled selected>
-                            Select Deals
-                          </option>
-                          <option value="">Deals 1</option>
-                          <option value="">Deals 2</option>
-                        </select>
+                        <Select
+                          options={selectDeals()}
+                          isMulti
+                          onChange={(e) => handleDeals(e)}
+                          placeholder="Select Deals"
+                          closeMenuOnSelect={false}
+                        />
                       </div>
                     </div>
                     <div className="row mt-5">

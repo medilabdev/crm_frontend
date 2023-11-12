@@ -25,7 +25,9 @@ const Company = () => {
   const toggleSideBarCard = () => {
     setIsSideBar(!isSideBar);
   };
-  const filterClass = isSideBar ? "col-md-3 d-block border-end" : "col-sm-0 d-none";
+  const filterClass = isSideBar
+    ? "col-md-3 d-block border-end"
+    : "col-sm-0 d-none";
   const datatableClass = isSideBar ? "col-md-9" : "col-sm-12";
   const showTooltip = isSideBar ? (
     <Tooltip id="tooltip">Close Filter</Tooltip>
@@ -45,6 +47,7 @@ const Company = () => {
   const [resultSource, setResultSource] = useState([]);
   const [companyType, setCompanyType] = useState([]);
   const [associateContact, setAssocicateContact] = useState([]);
+  const [deals, setDeals] = useState([]);
   const [searchMultiple, setSearchMultiple] = useState({
     name: "",
     website_url: "",
@@ -72,6 +75,22 @@ const Company = () => {
       ...searchMultiple,
       parent_company_uid: e.value,
     });
+  };
+
+  const getDeals = (token) => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/deals`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => setDeals(res.data.data))
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
   };
 
   const getAssociateContact = (token) => {
@@ -184,6 +203,24 @@ const Company = () => {
     setAssContact(allValue);
   };
 
+  const [resultDeals, setResultDeals] = useState([]);
+  const handleDeals = (e) => {
+    const selValue = e.map((data) => data.value);
+    const allValue = selValue.reduce((acc, value) => acc.concat(value), []);
+    setResultDeals(allValue);
+  };
+
+  const selDeals = () => {
+    const result = [];
+    deals?.map((data) => {
+      const dataResult = {
+        value: data.uid,
+        label: data.deal_name,
+      };
+      result.push(dataResult);
+    });
+    return result;
+  };
   const dataUser = () => {
     const result = [];
     owner?.map((data) => {
@@ -300,6 +337,7 @@ const Company = () => {
   const handleSubmitSearch = () => {
     const filterdata = allCompany.filter((row) => {
       return (
+        (resultDeals.length === 0 || resultDeals.includes(row.uid)) &&
         (assContact.length === 0 || assContact.includes(row.uid)) &&
         (!searchMultiple.name ||
           row.name
@@ -385,6 +423,7 @@ const Company = () => {
     getSource(token);
     getAlltypeCompany(token);
     getAssociateContact(token);
+    getDeals(token);
   }, [token]);
   const columns = [
     {
@@ -686,16 +725,14 @@ const Company = () => {
                           />
                         </div>
                         <div className="col mt-3">
-                          <select
-                            name=""
-                            id=""
-                            className="form-select"
-                            style={{ fontSize: "0.85rem" }}
-                          >
-                            <option value="">Select Deals</option>
-                            <option value="">1</option>
-                            <option value="">2</option>
-                          </select>
+                          <Select
+                            options={selDeals()}
+                            isMulti
+                            closeMenuOnSelect={false}
+                            onChange={(e) => handleDeals(e)}
+                            placeholder="Select Deals..."
+                            className="mb-2"
+                          />
                         </div>
                         <div className="col mt-5">
                           <h6>

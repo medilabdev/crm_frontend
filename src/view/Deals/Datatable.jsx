@@ -6,80 +6,94 @@ import DataTable from "react-data-table-component";
 
 const DataTableComponet = ({ data, selectUidDataTable }) => {
   const token = localStorage.getItem("token");
-  const [dataDeals, setDataDeals] = useState([]);
-
-  const getDeals = () => {
-    axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/deals`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => {
-        setDataDeals(res.data.data);
-      })
-      .catch((err) => {
-        if (err.response.data.message === "Unauthenticated.") {
-          localStorage.clear();
-          window.location.href = "/login";
-        }
-      });
-  };
 
   const columns = [
     {
       name: "Name",
-      selector: (row) => row.name_deals,
+      selector: (row) => row.deal_name,
       cell: (row) => (
-        <div style={{ whiteSpace: "normal" }}>{row.name_deals}</div>
+        <div style={{ whiteSpace: "normal" }}>{row.deal_name}</div>
       ),
       sortable: true,
       width: "150px",
     },
     {
       name: "Stage",
-      selector: (row) => row.Stage,
+      selector: (row) => row.staging?.name,
       sortable: true,
     },
     {
       name: "Jumlah/Tertanggal",
-      selector: (row) => row.jumlah,
+      selector: (row) => `Rp. ${new Intl.NumberFormat().format(row.deal_size)}`,
       sortable: true,
+      width: "150px",
     },
     {
       name: "Associated with",
       //   selector:
       sortable: true,
+      width: "150px",
     },
     {
       name: "Owner/Created",
       selector: (row) => {
+        const date = new Date(row.created_at);
+        const formatDate = {
+          year: "numeric",
+          month: "long",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+        };
+        const formatResult = new Intl.DateTimeFormat("en-US", formatDate);
+        const time = formatResult.format(date);
         return (
           <div>
-            <p className="mt-2 fw-semibold" style={{ fontSize: "13px" }}>
-              {row.name_owner} -
+            <p
+              className="mt-2 fw-semibold"
+              style={{ fontSize: "13px", whiteSpace: "normal" }}
+            >
+              {row.owner?.name} -
             </p>
-            <p style={{ marginTop: "-8px" }}>{row.created_at}</p>
+            <p style={{ marginTop: "-8px", whiteSpace: "normal" }}>{time}</p>
           </div>
         );
       },
       sortable: true,
+      width: "130px",
     },
     {
       name: "Approval Status",
       selector: (row) => {
-        return (
-          <div className="btn btn-primary mt-1" style={{ fontSize: "0.65rem" }}>
-            {row.approval_status}
-          </div>
-        );
+        return "-";
       },
       sortable: true,
+      width: "150px",
     },
     {
       name: "Updated at",
-      selector: (row) => row.updated_at,
+      selector: (row) => {
+        const date = new Date(row.updated_at);
+        const formatDate = {
+          year: "numeric",
+          month: "long",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+        };
+        const formatResult = new Intl.DateTimeFormat("en-US", formatDate);
+        const time = formatResult.format(date);
+        return (
+          <p
+            className="mt-2"
+            style={{ fontSize: "11px", whiteSpace: "normal" }}
+          >
+            {time}
+          </p>
+        );
+      },
       sortable: true,
+      width: "120px",
     },
     {
       name: "Action",
@@ -100,14 +114,12 @@ const DataTableComponet = ({ data, selectUidDataTable }) => {
     selectAllRowsItem: true,
     selectAllRowsItemText: "ALL",
   };
-  useEffect(() => {
-    getDeals(token);
-  }, [token]);
+
   return (
     <div>
       <DataTable
         columns={columns}
-        data={dataDeals}
+        data={data}
         defaultSortFieldId={1}
         pagination
         paginationComponentOptions={paginationComponentOptions}

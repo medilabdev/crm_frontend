@@ -38,6 +38,22 @@ const SingleContact = () => {
   const [ownerUser, setOwnerUser] = useState([]);
   const [source, setSource] = useState([]);
   const [company, setCompany] = useState([]);
+  const [deals, setDeals] = useState([]);
+  const getDeals = () => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/deals`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => setDeals(res.data.data))
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
 
   const getCompany = () => {
     axios
@@ -146,6 +162,23 @@ const SingleContact = () => {
     return result;
   };
 
+  const selDeals = () => {
+    const result = [];
+    deals?.map((data) => {
+      const sel = {
+        value: data.uid,
+        label: data.deal_name,
+      };
+      result.push(sel);
+    });
+    return result;
+  };
+
+  const [resultDeals, setResultDeals] = useState([]);
+  const handleDeals = (e) => {
+    setResultDeals(e.map((opt) => opt.value));
+  };
+
   const handleSourceSelect = (e) => {
     setInputContact({
       ...inputContact,
@@ -181,6 +214,7 @@ const SingleContact = () => {
     getOwnerUser(token);
     getSource(token);
     getCompany(token);
+    getDeals(token);
   }, [token]);
   const [compParent, setCompParent] = useState([]);
   const handleSelectParentComp = (e) => {
@@ -501,19 +535,14 @@ const SingleContact = () => {
                   </h5>
                 </Card.Header>
                 <Card.Body>
-                  <form action="" method="post">
-                    <FloatingLabel
-                      controlId="floatingInput"
-                      label="Search Deals"
-                      className="mb-3"
-                    >
-                      <Form.Select>
-                        <option>Select Company</option>
-                        <option value="">Company 1</option>
-                        <option value="">Company 2</option>
-                      </Form.Select>
-                    </FloatingLabel>
-                  </form>
+                  <Select
+                    options={selDeals()}
+                    closeMenuOnSelect={false}
+                    onChange={(e) => handleDeals(e)}
+                    isMulti
+                    placeholder="Select Deals"
+                    className="mb-3"
+                  />
                   <div className="text-center">
                     <a
                       onClick={handleShowCanvasDeals}
