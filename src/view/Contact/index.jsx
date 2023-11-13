@@ -171,6 +171,7 @@ const Contact = () => {
   const handleDeals = (e) => {
     setResultDeals(e.map((opt) => opt.value));
   };
+  // console.log(resultDeals);
   const selectDeals = () => {
     const result = [];
     deals?.map((data) => {
@@ -371,6 +372,7 @@ const Contact = () => {
   const handleSubmitSearch = () => {
     const filteredData = contact.filter((row) => {
       return (
+        (resultDeals.length === 0 || resultDeals.includes(row.uid)) &&
         (selectAssCompany.length === 0 || selectAssCompany.includes(row.uid)) &&
         (selectedUser.length === 0 ||
           selectedUser.includes(row.owner_user_uid)) &&

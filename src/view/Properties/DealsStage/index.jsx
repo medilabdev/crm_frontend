@@ -86,13 +86,14 @@ const DealsCategory = () => {
               }
             });
           })
-          .catch((error) => {
-            console.error("Error deleting category:", error);
-            Swal.fire({
-              title: "Error",
-              text: "An error occurred while deleting the item.",
-              icon: "error",
-            });
+          .catch((err) => {
+            if (err.response.data.message === "Delete failed!") {
+              Swal.fire({
+                title: "Delete Failed",
+                text: "Tidak dapat menghapus, data master ini terkait dengan data lainnya",
+                icon: "warning",
+              });
+            }
           });
       } else {
         Swal.fire({

@@ -47,6 +47,7 @@ const Company = () => {
   const [resultSource, setResultSource] = useState([]);
   const [companyType, setCompanyType] = useState([]);
   const [associateContact, setAssocicateContact] = useState([]);
+  const [associateDeals, setAssociateDeals] = useState([]);
   const [deals, setDeals] = useState([]);
   const [searchMultiple, setSearchMultiple] = useState({
     name: "",
@@ -100,7 +101,10 @@ const Company = () => {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((res) => setAssocicateContact(res.data.data))
+      .then((res) => {
+        setAssocicateContact(res.data.data);
+        setAssociateDeals(res.data.data);
+      })
       .catch((err) => {
         if (err.response.data.message === "Unauthenticated") {
           localStorage.clear();
@@ -210,17 +214,28 @@ const Company = () => {
     setResultDeals(allValue);
   };
 
-  const selDeals = () => {
+  const selectAssDeals = () => {
     const result = [];
-    deals?.map((data) => {
-      const dataResult = {
-        value: data.uid,
-        label: data.deal_name,
-      };
-      result.push(dataResult);
+    associateDeals?.map((data) => {
+      const dealName = data?.deals?.name;
+      const key = `${dealName}-${data.deal_uid}`;
+      if (!result[key]) {
+        result[key] = {
+          label: dealName,
+          values: [],
+        };
+      }
+      result[key].values.push(data.company_uid);
     });
-    return result;
+    const hasil = Object.values(result).map((data) => {
+      return {
+        label: data.label,
+        value: data.values,
+      };
+    });
+    return hasil;
   };
+
   const dataUser = () => {
     const result = [];
     owner?.map((data) => {
@@ -726,7 +741,7 @@ const Company = () => {
                         </div>
                         <div className="col mt-3">
                           <Select
-                            options={selDeals()}
+                            options={selectAssDeals()}
                             isMulti
                             closeMenuOnSelect={false}
                             onChange={(e) => handleDeals(e)}

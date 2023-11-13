@@ -3,10 +3,12 @@ import React from "react";
 import { useEffect } from "react";
 import { useState } from "react";
 import DataTable from "react-data-table-component";
+import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 const DataTableComponet = ({ data, selectUidDataTable }) => {
   const token = localStorage.getItem("token");
-
+  const navigate = useNavigate();
   const columns = [
     {
       name: "Name",
@@ -99,10 +101,64 @@ const DataTableComponet = ({ data, selectUidDataTable }) => {
       name: "Action",
       selector: (row) => (
         <div className="action-icon">
-          <button className="ms-2 icon-button" title="edit">
+          <button
+            className="ms-2 icon-button"
+            title="edit"
+            onClick={() => navigate(`/deals/${row.uid}/edit`)}
+          >
             <i className="bi bi-pen edit"></i>
           </button>
-          <button className="icon-button" title="delete">
+          <button
+            className="icon-button"
+            title="delete"
+            onClick={() => {
+              Swal.fire({
+                title: "Konfirmasi",
+                text: "Apakah kamu yakin ingin menghapus ini deals ini?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Ya, Hapus!",
+                cancelButtonText: "Batal",
+              }).then((res) => {
+                if (res.isConfirmed) {
+                  const formData = new FormData();
+                  formData.append("deals_uid[]", row.uid);
+                  axios
+                    .post(
+                      `${process.env.REACT_APP_BACKEND_URL}/deals/item/delete`,
+                      formData,
+                      {
+                        headers: {
+                          Authorization: `Bearer ${token}`,
+                        },
+                      }
+                    )
+                    .then((res) => {
+                      Swal.fire({
+                        title: res.data.message,
+                        text: "Successfully delete deals",
+                        icon: "success",
+                      }).then((res) => {
+                        if (res.isConfirmed) {
+                          window.location.reload();
+                        }
+                      });
+                    })
+                    .catch((err) => {
+                      if (err.response.data.message === "Delete failed!") {
+                        Swal.fire({
+                          title: "Delete Failed",
+                          text: "Tidak dapat menghapus, data master ini terkait dengan data lainnya",
+                          icon: "warning",
+                        });
+                      }
+                    });
+                }
+              });
+            }}
+          >
             <i className="bi bi-trash-fill danger"></i>
           </button>
         </div>

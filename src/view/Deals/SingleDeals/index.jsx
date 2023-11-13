@@ -238,7 +238,7 @@ const SingleDeals = () => {
     dealCategory.map((data) => {
       const deCat = {
         value: data.uid,
-        label: data.name,
+        label: `${data.name} (${data.scale})`,
       };
       result.push(deCat);
     });

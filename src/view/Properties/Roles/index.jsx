@@ -103,6 +103,15 @@ const Roles = () => {
                           window.location.reload();
                         }
                       });
+                    })
+                    .catch((err) => {
+                      if (err.response.data.message === "Delete failed!") {
+                        Swal.fire({
+                          title: "Delete Failed",
+                          text: "Tidak dapat menghapus, data master ini terkait dengan data lainnya",
+                          icon: "warning",
+                        });
+                      }
                     });
                 } else {
                   Swal.fire({

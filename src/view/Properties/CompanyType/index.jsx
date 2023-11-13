@@ -73,7 +73,7 @@ const CompanyType = () => {
             onClick={() => {
               Swal.fire({
                 title: "Konfirmasi",
-                text: "Apakah kamy yakin ingin menghapus ini?",
+                text: "Apakah kamu yakin ingin menghapus ini?",
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#3085d6",
@@ -99,6 +99,15 @@ const CompanyType = () => {
                           window.location.reload();
                         }
                       });
+                    })
+                    .catch((err) => {
+                      if (err.response.data.message === "Delete failed!") {
+                        Swal.fire({
+                          title: "Delete Failed",
+                          text: "Tidak dapat menghapus, data master ini terkait dengan data lainnya",
+                          icon: "warning",
+                        });
+                      }
                     });
                 } else {
                   Swal.fire({

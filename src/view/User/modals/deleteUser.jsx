@@ -8,18 +8,32 @@ const DeleteUser = ({ visible, onClose, uid }) => {
   const token = localStorage.getItem("token");
   const deleteUser = async () => {
     try {
-      await axios.delete(`${process.env.REACT_APP_BACKEND_URL}/users/${uid}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      Swal.fire({
-        title: "Successfully delete user",
-        text: "Successfuly delete user",
-        icon: "success",
-      });
-      onClose();
-      window.location.reload();
+      await axios
+        .delete(`${process.env.REACT_APP_BACKEND_URL}/users/${uid}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((res) => {
+          Swal.fire({
+            title: res.data.message,
+            text: "Successfully delete user",
+            icon: "success",
+          }).then((res) => {
+            if (res.isConfirmed) {
+              window.location.reload();
+            }
+          });
+        })
+        .catch((err) => {
+          if (err.response.data.message === "Delete failed!") {
+            Swal.fire({
+              title: "Delete Failed",
+              text: "Tidak dapat menghapus, data master ini terkait dengan data lainnya",
+              icon: "warning",
+            });
+          }
+        });
     } catch (error) {
       console.error("gagal menghapus pengguna");
     }

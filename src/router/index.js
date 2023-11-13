@@ -39,6 +39,7 @@ import Source from "../view/Properties/Source";
 import CompanyType from "../view/Properties/CompanyType";
 import DealsCategory from "../view/Properties/DealsStage";
 import NeedsApproval from "../view/Deals/NeedApproval";
+import EditDeals from "../view/Deals/SingleDeals/EditDeals";
 const Login = ({ children }) => {
   const token = localStorage.getItem("token");
   if (!token) {
@@ -272,6 +273,15 @@ function Router() {
           element={
             <Login>
               <NeedsApproval />
+            </Login>
+          }
+        />
+        <Route
+          exact
+          path="/deals/:uid/edit"
+          element={
+            <Login>
+              <EditDeals />
             </Login>
           }
         />
