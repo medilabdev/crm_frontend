@@ -71,13 +71,12 @@ const Deals = () => {
     });
     setSearch(newData);
   }
-  console.log(search);
 
   const selectOwner = () => {
     const result = [];
     owner?.map((data) => {
       const ownRes = {
-        value: data.uid,
+        value: data.uid,  
         label: data.name,
       };
       result.push(ownRes);

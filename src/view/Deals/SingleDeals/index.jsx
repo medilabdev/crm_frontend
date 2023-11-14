@@ -292,7 +292,6 @@ const SingleDeals = () => {
     },
     {
       id: 3,
-      name: "Price",
       name: "Total Price",
       selector: (row) =>
         `Rp. ${new Intl.NumberFormat().format(row.total_price)}`,
