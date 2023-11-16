@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 
 const DataTableComponet = ({ data, selectUidDataTable }) => {
+  console.log(data);
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
   const columns = [
@@ -32,7 +33,6 @@ const DataTableComponet = ({ data, selectUidDataTable }) => {
     },
     {
       name: "Associated with",
-      //   selector:
       sortable: true,
       width: "150px",
     },

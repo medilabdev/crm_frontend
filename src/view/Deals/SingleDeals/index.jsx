@@ -370,9 +370,9 @@ const SingleDeals = () => {
       for (const uidContact of inputContact) {
         formData.append("contact_person[]", uidContact);
       }
-      for (const uidMention of mentionUsers) {
-        formData.append("mention_user_uid", uidMention);
-      }
+      mentionUsers.forEach((ment, index) => {
+        formData.append(`mention_user[${index}]`, ment);
+      });
       formData.append("deal_name", inputDeals.deal_name);
       formData.append("deal_size", price);
       formData.append("deal_status", inputDeals.deal_status);
@@ -381,7 +381,7 @@ const SingleDeals = () => {
       formData.append("staging_uid", selectedPipeline);
       formData.append("owner_user_uid", inputDeals.owner_user_uid);
       formData.append("company_uid", inputDeals.company_uid);
-      formData.append("notes", inputDeals.notes);
+      formData.append("notes", inputDeals.notes ? inputDeals.notes : "");
       allData[0].forEach((product, index) => {
         formData.append(`products[${index}][product_uid]`, product.product_uid);
         formData.append(`products[${index}][qty]`, product.qty);
@@ -392,9 +392,9 @@ const SingleDeals = () => {
         formData.append(`products[${index}][discount]`, product.discount);
         formData.append(`products[${index}][total_price]`, product.total_price);
       });
-      for (const pair of formData.entries()) {
-        console.log(pair[0] + ": " + pair[1]);
-      }
+      // for (const pair of formData.entries()) {
+      //   console.log(pair[0] + ": " + pair[1]);
+      // }
       axios
         .post(`${process.env.REACT_APP_BACKEND_URL}/deals`, formData, {
           headers: {
@@ -463,7 +463,7 @@ const SingleDeals = () => {
                   {pipeline.map((data) => (
                     <div className="form-check form-check-inline ms-3">
                       <input
-                        type="checkbox"
+                        type="radio"
                         className="form-check-input me-2"
                         value={data.uid}
                         checked={data.uid === selectedPipeline}

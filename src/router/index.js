@@ -40,6 +40,8 @@ import CompanyType from "../view/Properties/CompanyType";
 import DealsCategory from "../view/Properties/DealsStage";
 import NeedsApproval from "../view/Deals/NeedApproval";
 import EditDeals from "../view/Deals/SingleDeals/EditDeals";
+import Accounting from "../view/Deals/Accounting";
+import Task from "../view/Task";
 const Login = ({ children }) => {
   const token = localStorage.getItem("token");
   if (!token) {
@@ -282,6 +284,24 @@ function Router() {
           element={
             <Login>
               <EditDeals />
+            </Login>
+          }
+        />
+        <Route
+          exact
+          path="/deals/:uid/accounting"
+          element={
+            <Login>
+              <Accounting />
+            </Login>
+          }
+        />
+        <Route
+          exact
+          path="/task"
+          element={
+            <Login>
+              <Task />
             </Login>
           }
         />

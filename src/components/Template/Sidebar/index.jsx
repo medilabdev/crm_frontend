@@ -74,6 +74,13 @@ function Sidebar() {
           />
           <MenuSidebar
             typeMenu="nonCollapse"
+            name="Task"
+            url="/task"
+            icon="bi bi-list-task"
+            isActive={1}
+          />
+          <MenuSidebar
+            typeMenu="nonCollapse"
             name="Properties"
             url="/properties"
             icon="bi bi-gear-fill"

@@ -9,6 +9,7 @@ import Dummy from "./Dummy";
 import DataTableComponet from "./Datatable";
 import axios from "axios";
 import Select from "react-select";
+import Swal from "sweetalert2";
 
 const Deals = () => {
   const token = localStorage.getItem("token");
@@ -55,7 +56,62 @@ const Deals = () => {
         }
       });
   };
-  // console.log(selectUid);
+
+  const handleDeleteSelect = async (e) => {
+    e.preventDefault();
+    const isResult = await Swal.fire({
+      title: "Apakah Anda Yakin",
+      text: "Anda tidak dapat mengembalikan data ini setelah menghapusnya!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Ya, Hapus!",
+      cancelButtonText: "Batal",
+    });
+    if (isResult.isConfirmed) {
+      try {
+        const formData = new FormData();
+        selectUid.map((data, indek) => {
+          formData.append(`deals_uid[${indek}]`, data);
+        });
+
+        for (const pair of formData.entries()) {
+          console.log(pair[0] + ": " + pair[1]);
+        }
+        axios
+          .post(
+            `${process.env.REACT_APP_BACKEND_URL}/deals/item/delete`,
+            formData,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          )
+          .then((res) => {
+            Swal.fire({
+              title: res.data.message,
+              text: "Successfully deleted",
+              icon: "success",
+            }).then((res) => {
+              if (res.isConfirmed) {
+                window.location.reload();
+              }
+            });
+          });
+      } catch (err) {
+        if (err.response.data.message === "Unauthenticated.") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+        if (err.message) {
+          Swal.fire({
+            text: err.response.data.message,
+            icon: "warning",
+          });
+        }
+      }
+    }
+  };
   const toggleSideFilter = () => {
     setIsSideFilter(!isSideFilter);
   };
@@ -76,7 +132,7 @@ const Deals = () => {
     const result = [];
     owner?.map((data) => {
       const ownRes = {
-        value: data.uid,  
+        value: data.uid,
         label: data.name,
       };
       result.push(ownRes);
@@ -199,6 +255,7 @@ const Deals = () => {
                 Bulk Change
               </Link>
               <button
+                onClick={handleDeleteSelect}
                 className="btn btn-outline-danger ms-2"
                 style={{ fontSize: "0.85rem" }}
               >

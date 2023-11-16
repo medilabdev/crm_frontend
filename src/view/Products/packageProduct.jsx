@@ -145,7 +145,8 @@ const PackageProduct = () => {
     {
       name: "Name Package",
       selector: (row) => (
-        <p className="mt-2"
+        <p
+          className="mt-2"
           style={{
             whiteSpace: "normal",
             fontWeight: "400",
@@ -191,7 +192,10 @@ const PackageProduct = () => {
         const formatResult = new Intl.DateTimeFormat("en-US", formatDate);
         const time = formatResult.format(date);
         return (
-          <p className="mt-2" style={{ fontSize: "11px", whiteSpace:"normal" }}>
+          <p
+            className="mt-2"
+            style={{ fontSize: "11px", whiteSpace: "normal" }}
+          >
             {time}
           </p>
         );

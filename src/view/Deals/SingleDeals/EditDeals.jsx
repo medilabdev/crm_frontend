@@ -11,7 +11,9 @@ import { useEffect } from "react";
 import axios from "axios";
 import DataTable from "react-data-table-component";
 import IconPerson from "../../../assets/img/telephone-call.png";
+import IconCompany from "../../../assets/img/condo.png";
 import AddProductOverlay from "../../../components/Overlay/addProduct";
+import Swal from "sweetalert2";
 const EditDeals = () => {
   const token = localStorage.getItem("token");
   const { uid } = useParams();
@@ -24,11 +26,17 @@ const EditDeals = () => {
   const [contact, setContact] = useState([]);
   const [contactDetail, setContactDetail] = useState({});
   const [history, setHistory] = useState([]);
-  const [stageOld, setStageOld] = useState([]);
   const [showAddProduct, setShowAddProduct] = useState(false);
+  const [mentionUsers, setMentionUsers] = useState([]);
+  const [selectedPipeline, setSelectedPipeline] = useState(null);
+  const [stageOld, setStageOld] = useState([]);
   const handleCloseProduct = () => setShowAddProduct(false);
   const handleShowProduct = () => setShowAddProduct(true);
 
+  // mention user
+  const mantionUsersUid = (e) => {
+    setMentionUsers(e.map((opt) => opt.value));
+  };
   const getContact = () => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/contacts`, {
@@ -53,14 +61,13 @@ const EditDeals = () => {
       allProduct.push(data);
     }
   }
-
   let totalPrice = 0;
   if (allProduct[0]) {
     const totalPriceArray = allProduct.map((data) => {
       data.map((item) => (totalPrice += item.total_price));
     });
   }
-  // console.log(allProduct[0]);
+  console.log(totalPrice);
   const getCompany = () => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/companies`, {
@@ -133,31 +140,33 @@ const EditDeals = () => {
       })
       .then((res) => {
         const dealsOld = res.data.data;
-
         setValueDeals({
           deal_name: dealsOld.deal_name,
-          deal_size: dealsOld.deal_size,
           priority_uid: dealsOld.priority_uid,
           deal_status: dealsOld.deal_status,
           deal_category: dealsOld.deal_category_uid,
-          staging_uid: dealsOld.staging_uid,
           company_uid: dealsOld.company_uid,
           owner_user_uid: dealsOld.owner_user_uid,
+          deal_size: dealsOld.deal_size,
         });
         setHistory(dealsOld.history);
-        setStageOld(dealsOld.staging_uid);
         localStorage.setItem(
           "DataProduct",
           JSON.stringify(dealsOld?.detail_product)
         );
-
+        setStageOld(dealsOld?.staging);
         if (dealsOld?.contact_person) {
-          // console.log(dealsOld?.contact_person);
           localStorage.setItem(
             `contactPerson`,
             JSON.stringify(dealsOld?.contact_person)
           );
           setContactDetail(dealsOld?.contact_person);
+        }
+        if (dealsOld?.company) {
+          localStorage.setItem(
+            "companyStorage",
+            JSON.stringify(dealsOld?.company)
+          );
         }
       })
       .catch((error) => {
@@ -236,6 +245,22 @@ const EditDeals = () => {
     setResContact(e.map((opt) => opt.value));
   };
 
+  const allContact = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const keys = localStorage.key(i);
+    if (keys.startsWith("contactPerson")) {
+      const data = JSON.parse(localStorage.getItem(keys));
+      allContact.push(data);
+    }
+  }
+
+  let contactLocalStorage = null;
+  if (allContact[0]) {
+    contactLocalStorage = allContact[0]?.map((data) => data);
+  }
+  const uidRes = contactLocalStorage?.map((data) => data.contact_uid);
+  const uniqCont = new Set([...resContact, ...(uidRes || [])]);
+  const combineCont = Array.from(uniqCont);
   const selectContact = () => {
     const result = [];
     contact?.map((data) => {
@@ -254,6 +279,13 @@ const EditDeals = () => {
       [e.target.name]: e.target.value,
     });
   };
+  const [pricePro, setPricePro] = useState(0);
+  const handlePrice = (e) => {
+    setValueDeals({
+      ...valueDeals,
+      deal_size: e.target.value,
+    });
+  };
   useEffect(() => {
     getPipeline(token);
     getDealsValueOld(token, uid);
@@ -264,12 +296,15 @@ const EditDeals = () => {
     getContact(token);
     const clearDataProductLocalStorage = () => {
       localStorage.removeItem("DataProduct");
+      localStorage.removeItem("companyStorage");
+      localStorage.removeItem("contactPerson");
     };
     window.addEventListener("beforeunload", clearDataProductLocalStorage);
     return () => {
       window.removeEventListener("beforeunload", clearDataProductLocalStorage);
     };
   }, [token, uid]);
+
   const [dataProduct, setDataProduct] = useState([]);
   const handleDeleteProduct = (productUid) => {
     const upData = allProduct[0].filter((data) => data.uid !== productUid);
@@ -277,12 +312,44 @@ const EditDeals = () => {
     localStorage.setItem("DataProduct", JSON.stringify(upData));
   };
 
-  const [dataContact, setDataContact] = useState([]);
   const handleDeleteContact = (uid) => {
-    const upCont = allContact[0].filter((data) => data.uid !== uid);
-    setDataContact(upCont);
-    localStorage.setItem("contactPerson", JSON.stringify(upCont));
+    console.log(uid);
+    Swal.fire({
+      title: "Konfirmasi",
+      text: "Apa anda yakin ingin menghapus item product ini?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Ya, Hapus!",
+      cancelButtonText: "Batal",
+    }).then((res) => {
+      if (res.isConfirmed) {
+        const formData = new FormData();
+        formData.append("contact_person_uid[0]", uid);
+        axios
+          .post(
+            `${process.env.REACT_APP_BACKEND_URL}/deals/item/contact/delete`,
+            formData,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          )
+          .then(() => {
+            window.location.reload();
+          });
+      }
+    });
   };
+
+  const [dataCompany, setDataCompany] = useState([]);
+  const handleDeleteCompany = () => {
+    localStorage.removeItem("companyStorage");
+    setDataCompany([]);
+  };
+
   const customStyles = {
     headRow: {
       style: {
@@ -346,24 +413,29 @@ const EditDeals = () => {
     },
   ];
 
-  const allContact = [];
+  const companyStorage = [];
   for (let i = 0; i < localStorage.length; i++) {
     const keys = localStorage.key(i);
-    if (keys.startsWith("contactPerson")) {
+    if (keys.startsWith("companyStorage")) {
       const data = JSON.parse(localStorage.getItem(keys));
-      allContact.push(data);
+      companyStorage.push(data);
     }
   }
-  let contactLocalStorage = null;
-  if (allContact[0]) {
-    contactLocalStorage = allContact[0]?.map((data) => data);
-  }
-  console.log(contactLocalStorage);
   const dataHistory = [
     {
       name: "Created By",
       selector: (row) => row.created_by?.name,
       sortable: true,
+      width: "120px",
+    },
+    {
+      name: "Mention to",
+      selector: (row) =>
+        row.mention?.map((data) => data.mention_user?.name).join(", "),
+      sortable: true,
+      wrap: true,
+      format: (row) =>
+        row.mention?.map((data) => data.mention_user?.name).join(", ") || "-",
     },
     {
       name: "Note",
@@ -372,9 +444,10 @@ const EditDeals = () => {
           className="mt-2"
           style={{ whiteSpace: "normal", fontSize: "12px" }}
         >
-          <p>{row?.note}</p>
+          <p dangerouslySetInnerHTML={{ __html: row?.note }} />
         </div>
       ),
+      wrap: true,
       width: "200px",
     },
     {
@@ -399,12 +472,77 @@ const EditDeals = () => {
       width: "140px",
     },
   ];
+  const paginationComponentOptions = {
+    selectAllRowsItem: true,
+    selectAllRowsItemText: "ALL",
+  };
 
-  const [selectedPipeline, setSelectedPipeline] = useState(null);
   const handleCheckboxChange = (uid) => {
     setSelectedPipeline(uid === selectedPipeline ? null : uid);
   };
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append("deal_name", valueDeals.deal_name);
+    formData.append("deal_size", valueDeals.deal_size);
+    formData.append("priority", valueDeals.priority_uid);
+    formData.append("deal_status", valueDeals.deal_status);
+    formData.append("deal_category", valueDeals.deal_category);
+    formData.append("staging_uid", selectedPipeline);
+    formData.append("company_uid", valueDeals.company_uid);
+    formData.append("owner_user_uid", valueDeals.owner_user_uid);
+    mentionUsers.forEach((ment, index) => {
+      formData.append(`mention_user[${index}]`, ment);
+    });
+    combineCont.forEach((com, index) => {
+      formData.append(`contact_person[${index}]`, com);
+    });
+
+    allProduct[0].forEach((product, index) => {
+      formData.append(`products[${index}][product_uid]`, product.product_uid);
+      formData.append(`products[${index}][qty]`, product.qty);
+      formData.append(
+        `products[${index}][discount_type]`,
+        product.discount_type
+      );
+      formData.append(`products[${index}][discount]`, product.discount);
+      formData.append(`products[${index}][total_price]`, product.total_price);
+    });
+    formData.append("notes", valueDeals.notes ? valueDeals.notes : "");
+
+    formData.append("_method", "put");
+    for (const pair of formData.entries()) {
+      console.log(pair[0] + ": " + pair[1]);
+    }
+
+    axios
+      .post(`${process.env.REACT_APP_BACKEND_URL}/deals/${uid} `, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => {
+        Swal.fire({
+          title: res.data.message,
+          text: "Successfully updated deals",
+          icon: "success",
+        }).then((res) => {
+          if (res.isConfirmed) {
+            window.location.reload();
+          }
+        });
+      })
+      .catch((err) => {
+        console.log(err);
+        if (err.response) {
+          Swal.fire({
+            text: err.response.data.message,
+            icon: "warning",
+          });
+        }
+      });
+  };
   return (
     <body id="body">
       <Topbar />
@@ -423,9 +561,9 @@ const EditDeals = () => {
                       </Link>
                     </li>
                     <li className="breadcrumb-item">
-                      <Link to="/deals" className="text-decoration-none">
+                      <a href="/deals" className="text-decoration-none">
                         Deals
-                      </Link>
+                      </a>
                     </li>
                     <li className="breadcrumb-item active">Edit Deals</li>
                   </ol>
@@ -433,7 +571,30 @@ const EditDeals = () => {
               </div>
             </div>
           </div>
-          <div className="row">
+          <form className="row" onSubmit={handleSubmit}>
+            <div className="col-md-12">
+              <div className="float-end mt-2 mb-2">
+                <a href="/#" className="btn btn-primary me-2">
+                  Documents
+                </a>
+                <a
+                  href={`/deals/${uid}/accounting`}
+                  className="btn btn-info text-light me-2"
+                >
+                  Accounting
+                </a>
+                <button className="btn btn-primary me-2" type="submit">
+                  Save Changes
+                </button>
+                <a
+                  href="/company"
+                  className="btn btn-secondary text-decoration-none me-2"
+                >
+                  Cancel
+                </a>
+                <a className="btn btn-danger text-decoration-none">Delete</a>
+              </div>
+            </div>
             <div className="col-md-12">
               <Card>
                 <Card.Header>
@@ -443,10 +604,16 @@ const EditDeals = () => {
                   </h5>
                 </Card.Header>
                 <Card.Body>
+                  <div className="mb-3 ms-1">
+                    <span>
+                      Stage before in :
+                      <i className="fw-semibold fs-6 ms-2">{stageOld?.name}</i>
+                    </span>
+                  </div>
                   {pipeline.map((data) => (
                     <div className="form-check form-check-inline ms-3">
                       <input
-                        type="checkbox"
+                        type="radio"
                         className="form-check-input me-2"
                         value={data.uid}
                         checked={data.uid === selectedPipeline}
@@ -511,8 +678,9 @@ const EditDeals = () => {
                   >
                     <Form.Control
                       type="number"
-                      value={valueDeals.deal_size}
-                      onChange={handleChange}
+                      name="deal_size"
+                      value={valueDeals.deal_size || totalPrice}
+                      onChange={handlePrice}
                       placeholder="text"
                       required
                     />
@@ -520,7 +688,11 @@ const EditDeals = () => {
                   <FloatingLabel label="Deal Status" className="mb-3">
                     <Form.Control
                       type="text"
-                      value={valueDeals.deal_status}
+                      value={
+                        valueDeals.deal_status === "null"
+                          ? ""
+                          : valueDeals.deal_status
+                      }
                       onChange={handleChange}
                       name="deal_status"
                       placeholder="text"
@@ -560,7 +732,10 @@ const EditDeals = () => {
                         (e) => e.value === valueDeals.priority_uid
                       )}
                       onChange={(e) =>
-                        setValueDeals({ ...valueDeals, priority_uid: e.value })
+                        setValueDeals({
+                          ...valueDeals,
+                          priority_uid: e.value,
+                        })
                       }
                       required
                     />
@@ -597,16 +772,86 @@ const EditDeals = () => {
                 </Card.Header>
                 <Card.Body>
                   <div>
-                    <Select
-                      options={selectCompany()}
-                      value={selectCompany().find(
-                        (e) => e.value === valueDeals.company_uid
-                      )}
-                      onChange={(e) =>
-                        setValueDeals({ ...valueDeals, company_uid: e.value })
-                      }
-                      placeholder="Companies Select"
-                    />
+                    {companyStorage &&
+                    Array.isArray(companyStorage) &&
+                    companyStorage.length > 0 ? (
+                      <Card className="shadow p-2">
+                        <div className="row d-flex">
+                          <div className="col-md-10">
+                            <div className="d-flex">
+                              <img
+                                src={IconCompany}
+                                className="ms-1 me-3 mt-3"
+                                alt={IconCompany}
+                                style={{ width: "30px", height: "30px" }}
+                              />
+                              <Col md={10} sm={10}>
+                                <p
+                                  className="ms-1"
+                                  style={{
+                                    fontSize: "10px",
+                                    whiteSpace: "normal",
+                                  }}
+                                >
+                                  Name Company : <br />
+                                  <strong className="mt-1">
+                                    {companyStorage[0]?.name ?? "-"}
+                                  </strong>
+                                </p>
+                                <p
+                                  className="ms-1"
+                                  style={{
+                                    fontSize: "10px",
+                                    marginTop: "-8px",
+                                  }}
+                                >
+                                  Type : <br />
+                                  <strong className="mt-1">
+                                    {companyStorage[0]?.company_type?.name ??
+                                      "-"}
+                                  </strong>
+                                </p>
+                                <p
+                                  className="ms-1"
+                                  style={{
+                                    fontSize: "10px",
+                                    marginTop: "-8px",
+                                    whiteSpace: "normal",
+                                  }}
+                                >
+                                  No.Telp : <br />
+                                  <strong className="mt-1">
+                                    {companyStorage[0]?.phone[0]?.number ?? "-"}
+                                  </strong>
+                                </p>
+                              </Col>
+                              <Col md={2} sm={2} style={{ marginTop: "-12px" }}>
+                                <a
+                                  onClick={handleDeleteCompany}
+                                  className="ms-1"
+                                  style={{
+                                    cursor: "pointer",
+                                  }}
+                                >
+                                  <i className="bi bi-x fs-5 text-danger"></i>
+                                </a>
+                              </Col>
+                            </div>
+                          </div>
+                        </div>
+                      </Card>
+                    ) : (
+                      <Select
+                        options={selectCompany()}
+                        onChange={(e) =>
+                          setValueDeals({
+                            ...valueDeals,
+                            company_uid: e.value,
+                          })
+                        }
+                        placeholder="Companies Select"
+                      />
+                    )}
                   </div>
                   <div className="mt-3 text-center">
                     <a
@@ -629,90 +874,76 @@ const EditDeals = () => {
                 </Card.Header>
                 <Card.Body>
                   <div>
-                    {contactLocalStorage?.map(
-                      (data, index) => (
-                        console.log(data),
-                        (
-                          <Card className="shadow p-2">
-                            <div className="row">
-                              <>
-                                <div className="col-md-10" key={index}>
-                                  <div className="d-flex">
-                                    <img
-                                      src={IconPerson}
-                                      className="ms-1 me-3 mt-3"
-                                      alt={IconPerson}
-                                      style={{ width: "30px", height: "30px" }}
-                                    />
-                                    <div className="col-md-12">
-                                      <p
-                                        className="ms-1"
-                                        style={{
-                                          fontSize: "10px",
-                                          whiteSpace: "normal",
-                                        }}
-                                      >
-                                        Name :
-                                        <strong className="ms-2">
-                                          {data.contact?.name ?? null}
-                                        </strong>
-                                      </p>
-                                      <p
-                                        className="ms-1"
-                                        style={{
-                                          fontSize: "10px",
-                                          marginTop: "-8px",
-                                        }}
-                                      >
-                                        Email :
-                                        <strong className="ms-2">
-                                          {data.contact?.email ?? "-"}
-                                        </strong>
-                                      </p>
-                                      <p
-                                        className="ms-1"
-                                        style={{
-                                          fontSize: "10px",
-                                          marginTop: "-8px",
-                                          whiteSpace: "normal",
-                                        }}
-                                      >
-                                        No.Telp :
-                                        <strong className="ms-1">
-                                          {data.contact?.phone[0]?.number ??
-                                            "-"}
-                                        </strong>
-                                      </p>
-                                    </div>
-                                  </div>
-                                </div>
-                                <div className="col-md-2">
-                                  <button
-                                    type="button"
-                                    onClick={() =>
-                                      handleDeleteContact(data.uid)
-                                    }
-                                    className="btn btn-icon p-2 me-2"
+                    {contactLocalStorage?.map((data, index) => (
+                      <Card className="shadow p-2">
+                        <div className="row d-flex">
+                          <>
+                            <Col md={10} sm={10} key={index}>
+                              <div className="d-flex">
+                                <img
+                                  src={IconPerson}
+                                  className="ms-1 me-3 mt-3"
+                                  alt={IconPerson}
+                                  style={{ width: "30px", height: "30px" }}
+                                />
+                                <Col md={12} sm={12}>
+                                  <p
+                                    className="ms-1"
                                     style={{
-                                      marginTop: "-12px",
+                                      fontSize: "10px",
                                       whiteSpace: "normal",
                                     }}
                                   >
-                                    <i className="bi bi-x fs-5 text-danger"></i>
-                                  </button>
-                                </div>
-                              </>
-                            </div>
-                          </Card>
-                        )
-                      )
-                    )}
-
+                                    Name :
+                                    <strong className="ms-2">
+                                      {data.contact?.name ?? null}
+                                    </strong>
+                                  </p>
+                                  <p
+                                    className="ms-1"
+                                    style={{
+                                      fontSize: "10px",
+                                      marginTop: "-8px",
+                                    }}
+                                  >
+                                    Email :
+                                    <strong className="ms-2">
+                                      {data.contact?.email ?? "-"}
+                                    </strong>
+                                  </p>
+                                  <p
+                                    className="ms-1"
+                                    style={{
+                                      fontSize: "10px",
+                                      marginTop: "-8px",
+                                      whiteSpace: "normal",
+                                    }}
+                                  >
+                                    No.Telp :
+                                    <strong className="ms-1">
+                                      {data.contact?.phone[0]?.number ?? "-"}
+                                    </strong>
+                                  </p>
+                                </Col>
+                              </div>
+                            </Col>
+                            <Col md={2} sm={2} style={{ marginTop: "-8px" }}>
+                              <a
+                                onClick={() => handleDeleteContact(data.uid)}
+                                className="ms-1"
+                                style={{
+                                  cursor: "pointer",
+                                }}
+                              >
+                                <i className="bi bi-x fs-5 text-danger"></i>
+                              </a>
+                            </Col>
+                          </>
+                        </div>
+                      </Card>
+                    ))}
                     <Select
                       options={selectContact()}
-                      value={selectContact().find(
-                        (e) => e.value === valueDeals.contact_person
-                      )}
                       onChange={(e) => handleResContact(e)}
                       placeholder="Select Contact"
                       isMulti
@@ -790,10 +1021,9 @@ const EditDeals = () => {
                     className="p-2"
                     theme="snow"
                     name="notes"
-                    value={valueDeals.notes}
-                    // onChange={(value) =>
-                    //   handleInputDeals({ target: { name: "notes", value } })
-                    // }
+                    onChange={(value) =>
+                      handleChange({ target: { name: "notes", value } })
+                    }
                   />
                   <Form.Group as={Row} xs={2} md={4} lg={6} className="p-2">
                     <Form.Label column lg={4} className="fw-semibold fs-6">
@@ -801,9 +1031,9 @@ const EditDeals = () => {
                     </Form.Label>
                     <Col lg={6} style={{ marginLeft: "-5rem" }}>
                       <Select
-                      // options={ownerSelect()}
-                      // isMulti
-                      // onChange={(e) => mantionUsersUid(e)}
+                        options={selectOwner()}
+                        isMulti
+                        onChange={(e) => mantionUsersUid(e)}
                       />
                     </Col>
                   </Form.Group>
@@ -819,11 +1049,14 @@ const EditDeals = () => {
                     columns={dataHistory}
                     data={history}
                     customStyles={customStyles}
+                    defaultSortFieldId={1}
+                    pagination
+                    paginationComponentOptions={paginationComponentOptions}
                   />
                 </Card.Body>
               </Card>
             </div>
-          </div>
+          </form>
         </div>
       </Main>
     </body>
