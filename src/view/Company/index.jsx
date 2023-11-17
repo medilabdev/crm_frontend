@@ -463,7 +463,7 @@ const Company = () => {
       name: "Associated with",
       selector: (row) => (
         <div className="d-flex">
-          {row?.associate?.map((item, index) => (
+          {row?.associate?.slice(0, 2).map((item, index) => (
             <OverlayTrigger
               placement="top"
               overlay={

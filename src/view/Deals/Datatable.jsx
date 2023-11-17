@@ -2,9 +2,12 @@ import axios from "axios";
 import React from "react";
 import { useEffect } from "react";
 import { useState } from "react";
+import { OverlayTrigger, Tooltip } from "react-bootstrap";
 import DataTable from "react-data-table-component";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import IconCompany from "../../assets/img/condo.png";
+import IconPhone from "../../assets/img/telephone-call.png"
 
 const DataTableComponet = ({ data, selectUidDataTable }) => {
   console.log(data);
@@ -18,11 +21,11 @@ const DataTableComponet = ({ data, selectUidDataTable }) => {
         <div style={{ whiteSpace: "normal" }}>{row.deal_name}</div>
       ),
       sortable: true,
-      width: "150px",
+      width: "130px",
     },
     {
       name: "Stage",
-      selector: (row) => row.staging?.name,
+      selector: (row) =>row.staging?.name,
       sortable: true,
     },
     {
@@ -33,9 +36,60 @@ const DataTableComponet = ({ data, selectUidDataTable }) => {
     },
     {
       name: "Associated with",
+      selector: (row) => (
+        <div className="d-flex">
+      {
+  row.company ? (
+    <OverlayTrigger
+      placement="top"
+      overlay={<Tooltip>{row?.company?.name}</Tooltip>}
+    >
+      <div>
+        <img
+          className="ms-1"
+          src={IconCompany}
+          alt=""
+          style={{ width: "18px" }}
+          data-tip={row.company?.name}
+        />
+      </div>
+    </OverlayTrigger>
+  ) : null
+}
+{
+  row.contact_person ? (
+    row.contact_person.slice(0, 2).map((item, index) => (
+      <OverlayTrigger
+        key={index}
+        placement="top"
+        overlay={
+          <Tooltip
+            id={`tooltip-${item?.contact?.name}-${item?.contact?.phone?.[0]?.number}`}
+          >
+            {item?.contact?.name}
+            <br />
+            {item?.contact?.phone?.[0]?.number}
+          </Tooltip>
+        }
+      >
+        <div>
+          <img
+            className="ms-1"
+            src={IconPhone}
+            alt=""
+            style={{ width: "18px" }}
+          />
+        </div>
+      </OverlayTrigger>
+    ))
+  ) : null
+}
+        </div>
+      ),
       sortable: true,
       width: "150px",
     },
+    
     {
       name: "Owner/Created",
       selector: (row) => {
@@ -62,40 +116,7 @@ const DataTableComponet = ({ data, selectUidDataTable }) => {
         );
       },
       sortable: true,
-      width: "130px",
-    },
-    {
-      name: "Approval Status",
-      selector: (row) => {
-        return "-";
-      },
-      sortable: true,
       width: "150px",
-    },
-    {
-      name: "Updated at",
-      selector: (row) => {
-        const date = new Date(row.updated_at);
-        const formatDate = {
-          year: "numeric",
-          month: "long",
-          day: "2-digit",
-          hour: "2-digit",
-          minute: "2-digit",
-        };
-        const formatResult = new Intl.DateTimeFormat("en-US", formatDate);
-        const time = formatResult.format(date);
-        return (
-          <p
-            className="mt-2"
-            style={{ fontSize: "11px", whiteSpace: "normal" }}
-          >
-            {time}
-          </p>
-        );
-      },
-      sortable: true,
-      width: "120px",
     },
     {
       name: "Action",

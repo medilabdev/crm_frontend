@@ -42,6 +42,8 @@ import NeedsApproval from "../view/Deals/NeedApproval";
 import EditDeals from "../view/Deals/SingleDeals/EditDeals";
 import Accounting from "../view/Deals/Accounting";
 import Task from "../view/Task";
+import BulkChangeTask from "../view/Task/BulkChange";
+import UploadFileTask from "../view/Task/UploadFile";
 const Login = ({ children }) => {
   const token = localStorage.getItem("token");
   if (!token) {
@@ -305,6 +307,8 @@ function Router() {
             </Login>
           }
         />
+        <Route exact path="/task/bulk-change" element={<Login><BulkChangeTask /></Login>} />
+        <Route exact path="/task/upload-file" element={<Login><UploadFileTask /></Login>} />
         <Route
           exact
           path="/properties"

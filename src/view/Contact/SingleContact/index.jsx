@@ -243,21 +243,23 @@ const SingleContact = () => {
       // for (const pair of formData.entries()) {
       //   console.log(pair[0] + ": " + pair[1]);
       // }
-      const addContact = await axios.post(
-        `${process.env.REACT_APP_BACKEND_URL}/contacts`,
-        formData,
-        {
+      const addContact = await axios
+        .post(`${process.env.REACT_APP_BACKEND_URL}/contacts`, formData, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
-      );
-      Swal.fire({
-        title: addContact.data.message,
-        text: "Successfully add contact",
-        icon: "success",
-      });
-      window.location.href = "/contact";
+        })
+        .then((res) => {
+          Swal.fire({
+            title: addContact.data.message,
+            text: "Successfully add contact",
+            icon: "success",
+          }).then((res) => {
+            if (res.isConfirmed) {
+              window.location.href = "/contact";
+            }
+          });
+        });
     } catch (err) {
       if (err.response) {
         Swal.fire({

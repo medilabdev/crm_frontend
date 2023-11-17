@@ -8,6 +8,8 @@ import DataTable from "react-data-table-component";
 import { useState } from "react";
 import axios from "axios";
 import { useEffect } from "react";
+import CheckIcon from "../../../assets/img/check.png"
+import Swal from "sweetalert2";
 
 const NeedsApproval = () => {
   const token = localStorage.getItem("token");
@@ -32,6 +34,71 @@ const NeedsApproval = () => {
         }
       });
   };
+  console.log(search);
+  const handleApproval = (uid) => {
+    Swal.fire({
+      title: "Konfirmasi", 
+      text: "Apakah kamu yakin ingin approve deals ini",
+      icon: "question",
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Approve",
+      cancelButtonText: "Batal",
+    }).then((res) => {
+      if(res.isConfirmed) {
+     const formData = new FormData();
+     formData.append("temp_deal_uid[0]", uid)
+     formData.append("_method", "put")
+     axios.post(`${process.env.REACT_APP_BACKEND_URL}/deals/item/approval`, formData,{
+      headers:{
+        Authorization: `Bearer ${token}`
+      }
+     }).then((res) => {
+      Swal.fire({
+        title: res.data.message,
+        text: "Approval Successfully",
+        icon: "success"
+      }).then((res) => {
+        if(res.isConfirmed){
+          window.location.reload()
+        }
+      })
+     })
+      }
+    })
+  } 
+  const handleReject = (uid) => {
+    Swal.fire({
+      title: "Konfirmasi", 
+      text: "Apakah kamu yakin ingin reject deals ini",
+      icon: "question",
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Reject",
+      cancelButtonText: "Batal",
+    }).then((res) => {
+      if(res.isConfirmed) {
+     const formData = new FormData();
+     formData.append("temp_deal_uid[0]", uid)
+     formData.append("_method", "put")
+     axios.post(`${process.env.REACT_APP_BACKEND_URL}/deals/item/rejected`, formData,{
+      headers:{
+        Authorization: `Bearer ${token}`
+      }
+     }).then((res) => {
+      Swal.fire({
+        title: res.data.message,
+        text: "Reject Successfully",
+        icon: "success"
+      }).then((res) => {
+        if(res.isConfirmed){
+          window.location.reload()
+        }
+      })
+     })
+      }
+    })
+  } 
   const paginationComponentOptions = {
     selectAllRowsItem: true,
     selectAllRowsItemText: "ALL",
@@ -54,6 +121,7 @@ const NeedsApproval = () => {
     },
     {
       name: "Created By",
+      selector: (row) => row.created_by?.name,
       sortable: true,
     },
     {
@@ -68,22 +136,22 @@ const NeedsApproval = () => {
     },
     {
       name: "Priority",
-      //   selector: (row) => row.deal?.priorities?.name,
+        selector: (row) => row.priority?.name,  
       sortable: true,
     },
     {
       name: "Action",
       selector: (row) => (
         <div className="action-icon">
-          <button className="ms-2 icon-button" title="edit">
-            <i className="bi bi-check2"></i>
+          <button className="btn btn-primary" title="Approve" onClick={() => handleApproval(row.uid)}>
+            <i className="bi bi-check2" style={{ fontSize:"1.2rem" }}></i>
           </button>
-          <button className="icon-button" title="delete">
-            <i className="bi bi-trash-fill danger"></i>
+          <button className="ms-2 btn btn-danger" title="Reject" onClick={() => handleReject(row.uid)}>
+            <i className="bi bi-x"style={{ fontSize:"1.2rem" }}></i>
           </button>
         </div>
       ),
-      width: "140px",
+      width: "160px",
     },
   ];
 
