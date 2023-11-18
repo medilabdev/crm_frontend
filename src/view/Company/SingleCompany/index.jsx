@@ -42,6 +42,7 @@ const SingleCompany = () => {
   const [sourceCompany, setSourceCompany] = useState([]);
   const [parentCompany, setParentCompany] = useState([]);
   const [contact, setContact] = useState([]);
+  const [deals, setDeals] = useState([]);
   const animatedComponents = makeAnimated();
   const [showCanvas, setShowCanvas] = useState(false);
   const handleCloseCanvas = () => setShowCanvas(false);
@@ -54,6 +55,22 @@ const SingleCompany = () => {
   const [showAddContact, setShowAddContact] = useState(false);
   const handleCloseContact = () => setShowAddContact(false);
   const handleShowContact = () => setShowAddContact(true);
+
+  const getDeals = () => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/deals`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => setDeals(res.data.data))
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated.") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
   // console.log(inputCompany);
   const getContact = () => {
     axios
@@ -191,6 +208,11 @@ const SingleCompany = () => {
     setResultContact(select.map((option) => option.value));
   };
 
+  const [resultDeals, setResultDeals] = useState([]);
+  const handleSelDeals = (e) => {
+    setResultDeals(e.map((opt) => opt.value));
+  };
+
   const ownerSelect = () => {
     const result = [];
     ownerUser?.map((data) => {
@@ -199,6 +221,17 @@ const SingleCompany = () => {
         label: data.name,
       };
       result.push(select);
+    });
+    return result;
+  };
+  const dealsSelect = () => {
+    const result = [];
+    deals?.map((data) => {
+      const sel = {
+        value: data.uid,
+        label: data.deal_name,
+      };
+      result.push(sel);
     });
     return result;
   };
@@ -283,6 +316,7 @@ const SingleCompany = () => {
     getSourceCompany(token);
     getCompanyParent(token);
     getContact(token);
+    getDeals(token);
   }, [token]);
   return (
     <body id="body">
@@ -527,17 +561,15 @@ const SingleCompany = () => {
                   </h5>
                 </Card.Header>
                 <Card.Body>
-                  <FloatingLabel
-                    controlId="floatingInput"
-                    label="Search Deals"
+                  <Select
+                    options={dealsSelect()}
+                    isMulti
+                    onChange={(e) => handleSelDeals(e)}
+                    components={animatedComponents}
+                    placeholder="Select Deals"
                     className="mb-3"
-                  >
-                    <Form.Select>
-                      <option>Select Company</option>
-                      <option value="">Company 1</option>
-                      <option value="">Company 2</option>
-                    </Form.Select>
-                  </FloatingLabel>
+                  />
+
                   <div className="text-center">
                     <a
                       //   onClick={handleShowCanvasDeals}

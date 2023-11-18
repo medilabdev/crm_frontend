@@ -11,6 +11,7 @@
 --------------------------------------------------------------*/
 *{
   font-size: 0.85rem;
+  /* font-weight: 600; */
 } 
 :root {
   scroll-behavior: smooth;
@@ -18,7 +19,7 @@
 
 body {
   font-family: "Open Sans", sans-serif;
-  background: #91b1f2;
+  background: rgba(235, 237, 255, 0.5) !important;
   color: #444444;
 }
 
@@ -58,10 +59,10 @@ h6 {
 }
 
 .pagetitle h1 {
-  font-size: 24px;
+  font-size: 26px;
   margin-bottom: 0;
-  font-weight: 600;
-  color: #012970;
+  font-weight: bold;
+  color: #012a708d;
 }
 
 /*--------------------------------------------------------------
@@ -142,7 +143,9 @@ h6 {
 }
 
 .dropdown-menu .dropdown-item:hover {
-  background-color: #f6f9ff;
+  background-color: #bedeff;
+  border-radius: 4px;
+  font-weight: 600;
 }
 
 @media (min-width: 768px) {
@@ -376,8 +379,10 @@ h6 {
   z-index: 997;
   height: 60px;
   box-shadow: 0px 2px 20px rgba(1, 41, 112, 0.1);
-  background-color: #fff;
+  background-color: rgb(255, 255, 255);
   padding-left: 20px;
+  border-radius: 7px;
+  /* opacity: 0.7; */
   /* Toggle Sidebar Button */
   /* Search Bar */
 }
@@ -386,7 +391,7 @@ h6 {
   font-size: 32px;
   padding-left: 10px;
   cursor: pointer;
-  color: #012970;
+  color: #001d50;
 }
 
 .header .search-bar {
@@ -597,6 +602,7 @@ h6 {
   top: 60px;
   left: 0;
   bottom: 0;
+  font-weight: 600;
   width: 300px;
   z-index: 996;
   transition: all 0.3s;
@@ -605,7 +611,9 @@ h6 {
   scrollbar-width: thin;
   scrollbar-color: #aab7cf transparent;
   box-shadow: 0px 0px 20px rgba(1, 41, 112, 0.1);
-  background-color: #fff;
+  background-color: rgb(255, 255, 255);
+  border-end-end-radius: 14px;
+  border-start-end-radius: 14px;
 }
 
 @media (max-width: 1199px) {
@@ -663,7 +671,7 @@ h6 {
 }
 
 .sidebar-nav .nav-item {
-  margin-bottom: 5px;
+  margin-bottom: 10px;
 }
 
 .sidebar-nav .nav-heading {
@@ -675,23 +683,23 @@ h6 {
 }
 
 .sidebar-nav .nav-link {
+  margin-left: 14px;
   display: flex;
   align-items: center;
-  font-size: 15px;
-  font-weight: 600;
-  color: white;
-  border: 1px;
-  transition: 0.3;
-  background: #568bb3ae;
-  padding: 10px 15px;
-  border-radius: 4px;
+  color: white ;
+  border: none;
+  transition: 0.4;
+  background: #1b70f08d;
+  padding: 10px 8px;
+  border-radius: 12px;
 }
 
 .sidebar-nav .nav-link i {
-  font-size: 16px;
-  margin-right: 10px;
+  margin-right:15px ; 
   color: white;
+  font-size: 17px !important;
 }
+
 
 .sidebar-nav .nav-link.collapsed {
   color: #012970;
@@ -704,7 +712,8 @@ h6 {
 
 .sidebar-nav .nav-link:hover {
   color: white;
-  background: #568bb3ae;
+  background: #1b70f08d;
+ 
 }
 
 .sidebar-nav .nav-link:hover i {

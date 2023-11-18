@@ -22,6 +22,7 @@ const SingleDeals = () => {
   const [dealCategory, setDealCategory] = useState([]);
   const [companies, setCompanies] = useState([]);
   const [contact, setContact] = useState([]);
+  const [pipeline, setPipeline] = useState([]);
   // overlay add company
   const [showAddCampCanvas, setShowAddCampCanvas] = useState(false);
   const handleCloseAddCampCanvas = () => setShowAddCampCanvas(false);
@@ -36,7 +37,8 @@ const SingleDeals = () => {
   const handleCloseProduct = () => setShowAddProduct(false);
   const handleShowProduct = () => setShowAddProduct(true);
   const [allProductData, setAllProductData] = useState([]);
-
+  const [mentionUsers, setMentionUsers] = useState([]);
+  const [dealSize, setDealSize] = useState([]);
   const allData = [];
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
@@ -45,7 +47,17 @@ const SingleDeals = () => {
       allData.push(data);
     }
   }
-
+  let totalPrice = 0;
+  if (allData[0]) {
+    const totalPriceArray = allData.map((data) =>
+      data.map((item) => (totalPrice += item.total_price))
+    );
+  }
+  const [price, setPrice] = useState(0);
+  const handlePrice = (e) => {
+    const value = e.target.value;
+    setPrice(value);
+  };
   const [inputDeals, setInputDeals] = useState({
     deal_name: "",
     deal_size: "",
@@ -59,7 +71,6 @@ const SingleDeals = () => {
     gps: "",
     owner_user_uid: "",
   });
-
   const [inputContact, setInputContact] = useState([]);
   const handleInputDeals = (e) => {
     setInputDeals({
@@ -67,7 +78,10 @@ const SingleDeals = () => {
       [e.target.name]: e.target.value,
     });
   };
-
+  const [selectedPipeline, setSelectedPipeline] = useState(null);
+  const handleCheckboxChange = (uid) => {
+    setSelectedPipeline(uid === selectedPipeline ? null : uid);
+  };
   const handleInputOwner = (e) => {
     setInputDeals({
       ...inputDeals,
@@ -95,6 +109,9 @@ const SingleDeals = () => {
   };
   const handleContactUid = (e) => {
     setInputContact(e.map((opt) => opt.value));
+  };
+  const mantionUsersUid = (e) => {
+    setMentionUsers(e.map((opt) => opt.value));
   };
   // ambil data owner
   const getOwnerUser = () => {
@@ -176,6 +193,21 @@ const SingleDeals = () => {
         }
       });
   };
+  const getPipeline = () => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/staging-masters`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => setPipeline(res.data.data))
+      .catch((error) => {
+        if (error.response.data.message === "Unauthenticated") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
   // select owner
   const ownerSelect = () => {
     const result = [];
@@ -206,7 +238,7 @@ const SingleDeals = () => {
     dealCategory.map((data) => {
       const deCat = {
         value: data.uid,
-        label: data.name,
+        label: `${data.name} (${data.scale})`,
       };
       result.push(deCat);
     });
@@ -251,9 +283,37 @@ const SingleDeals = () => {
       name: "Name Product",
       selector: (row) => row.product_name,
       sortable: true,
+      width: "150px",
     },
     {
       id: 2,
+      name: "Quantity",
+      selector: (row) => row.qty,
+    },
+    {
+      id: 3,
+      name: "Total Price",
+      selector: (row) =>
+        `Rp. ${new Intl.NumberFormat().format(row.total_price)}`,
+      sortable: true,
+      width: "140px",
+    },
+    {
+      id: 4,
+      name: "Discount(%)",
+      selector: (row) => {
+        if (row.discount_type === "nominal") {
+          return `Rp. ${new Intl.NumberFormat().format(row.discount)}`;
+        } else if (row.discount_type === "percent") {
+          return `${row.discount} %`;
+        } else {
+          return "-";
+        }
+      },
+    },
+
+    {
+      id: 5,
       name: "Action",
       selector: (row) => (
         <button
@@ -283,12 +343,15 @@ const SingleDeals = () => {
       },
     },
   };
+
   useEffect(() => {
     getOwnerUser(token);
     getPriority(token);
     getDealCategory(token);
     getCompanies(token);
     getContact(token);
+    getPipeline(token);
+    setPrice(totalPrice);
 
     // jika windows di reload maka data product akan hilang
     const clearDataProductLocalStorage = () => {
@@ -298,21 +361,58 @@ const SingleDeals = () => {
     return () => {
       window.removeEventListener("beforeunload", clearDataProductLocalStorage);
     };
-  }, [token]);
-
-  const uidProduct = allData[0]?.map((data) => data.product_uid);
-  const qtyProduct = allData[0]?.map((data) => data.qty);
-  // const 
-  // console.log(qtyProduct);
+  }, [token, dealSize, totalPrice]);
+  // const
   const handleSubmitDeals = (e) => {
     e.preventDefault();
     try {
-      const formdata = new FormData();
+      const formData = new FormData();
       for (const uidContact of inputContact) {
-        formdata.append("contact_person[]", uidContact);
+        formData.append("contact_person[]", uidContact);
       }
-      // for(){
-        
+      mentionUsers.forEach((ment, index) => {
+        formData.append(`mention_user[${index}]`, ment);
+      });
+      formData.append("deal_name", inputDeals.deal_name);
+      formData.append("deal_size", price);
+      formData.append("deal_status", inputDeals.deal_status);
+      formData.append("priority", inputDeals.priority);
+      formData.append("deal_category", inputDeals.deal_category);
+      formData.append("staging_uid", selectedPipeline);
+      formData.append("owner_user_uid", inputDeals.owner_user_uid);
+      formData.append("company_uid", inputDeals.company_uid);
+      formData.append("notes", inputDeals.notes ? inputDeals.notes : "");
+      allData[0].forEach((product, index) => {
+        formData.append(`products[${index}][product_uid]`, product.product_uid);
+        formData.append(`products[${index}][qty]`, product.qty);
+        formData.append(
+          `products[${index}][discount_type]`,
+          product.discount_type
+        );
+        formData.append(`products[${index}][discount]`, product.discount);
+        formData.append(`products[${index}][total_price]`, product.total_price);
+      });
+      // for (const pair of formData.entries()) {
+      //   console.log(pair[0] + ": " + pair[1]);
+      // }
+      axios
+        .post(`${process.env.REACT_APP_BACKEND_URL}/deals`, formData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((res) => {
+          console.log(res);
+          Swal.fire({
+            title: res.data.message,
+            text: "Successfullly created deals",
+            icon: "success",
+          }).then((res) => {
+            if (res.isConfirmed) {
+              window.location.href = "/deals";
+            }
+          });
+        });
       // }
     } catch (err) {
       if (err.response) {
@@ -328,7 +428,6 @@ const SingleDeals = () => {
       }
     }
   };
-  console.log(inputDeals);
   return (
     <body id="body">
       <Topbar />
@@ -338,8 +437,21 @@ const SingleDeals = () => {
           <div className="row mt-2">
             <BreadcrumbSingleDeals />
           </div>
-          <form onSubmit="" className="row">
-            <div className="col-12">
+          <form className="row" onSubmit={handleSubmitDeals}>
+            <div className="col-md-12">
+              <div className="float-end mt-2 mb-2">
+                <button className="btn btn-primary me-2" type="submit">
+                  Save Changes
+                </button>
+                <a
+                  href="/company"
+                  className="btn btn-secondary text-decoration-none"
+                >
+                  Cancel
+                </a>
+              </div>
+            </div>
+            <div className="col-md-12">
               <Card>
                 <Card.Header>
                   <h5 className="mt-2">
@@ -348,21 +460,29 @@ const SingleDeals = () => {
                   </h5>
                 </Card.Header>
                 <Card.Body>
-                  <select
-                    className="form-select"
-                    name="staging"
-                    onChange={handleInputDeals}
-                  >
-                    <option value="">Select Pipeline</option>
-                    <option value="leads">Leads</option>
-                    <option value="qualifying">Qualifying</option>
-                    <option value="approaching">Approaching</option>
-                    <option value="negotiation">Negotiation</option>
-                    <option value="implementation">Implementation</option>
-                    <option value="payment">Payment</option>
-                    <option value="closed_won">Closed Won</option>
-                    <option value="closed_lost">Closed Lost</option>
-                  </select>
+                  {pipeline.map((data) => (
+                    <div className="form-check form-check-inline ms-3">
+                      <input
+                        type="radio"
+                        className="form-check-input me-2"
+                        value={data.uid}
+                        checked={data.uid === selectedPipeline}
+                        onChange={() => handleCheckboxChange(data.uid)}
+                        style={{
+                          width: "15px",
+                          height: "15px",
+                          borderColor: "#012970",
+                          boxShadow: "0 2 5px rgba(0, 0, 0, 0.3)",
+                        }}
+                      />
+                      <label
+                        className="form-check-label mt-1"
+                        style={{ fontWeight: 400, fontSize: "0.75rem" }}
+                      >
+                        {data.name}
+                      </label>
+                    </div>
+                  ))}
                 </Card.Body>
               </Card>
             </div>
@@ -394,12 +514,22 @@ const SingleDeals = () => {
                       required
                     />
                   </FloatingLabel>
-                  <FloatingLabel label="Deal Size" className="mb-3">
+                  <FloatingLabel
+                    label={
+                      <span>
+                        Deal Size
+                        <span style={{ color: "red" }} className="fs-6">
+                          *
+                        </span>
+                      </span>
+                    }
+                    className="mb-3"
+                  >
                     <Form.Control
                       type="number"
-                      name="deal_size"
                       placeholder="text"
-                      onChange={handleInputDeals}
+                      value={price}
+                      onChange={handlePrice}
                       required
                     />
                   </FloatingLabel>
@@ -425,7 +555,12 @@ const SingleDeals = () => {
                     />
                   </Form.Group>
                   <Form.Group className="mb-3">
-                    <Form.Label>Priority</Form.Label>
+                    <Form.Label>
+                      Priority
+                      <span style={{ color: "red" }} className="fs-6">
+                        *
+                      </span>
+                    </Form.Label>
                     <Select
                       options={prioritySelect()}
                       onChange={(e) => handleInputPriority(e)}
@@ -433,7 +568,12 @@ const SingleDeals = () => {
                     />
                   </Form.Group>
                   <Form.Group className="mb-3">
-                    <Form.Label>Deal Category</Form.Label>
+                    <Form.Label>
+                      Deal Category
+                      <span style={{ color: "red" }} className="fs-6">
+                        *
+                      </span>
+                    </Form.Label>
                     <Select
                       options={dealCategorySelect()}
                       onChange={(e) => handleInputDealCategory(e)}
@@ -509,6 +649,8 @@ const SingleDeals = () => {
                 onClose={handleCloseContact}
                 visible={showAddContact}
               />
+            </div>
+            <div className="col-md-8">
               <Card className="shadow">
                 <Card.Header>
                   <h5 className="mt-2">
@@ -523,6 +665,19 @@ const SingleDeals = () => {
                       columns={columns}
                       customStyles={customStyle}
                     />
+                  </div>
+                  <div className="row">
+                    <div className="mt-3 me-3">
+                      <span
+                        className="float-end"
+                        style={{ fontWeight: 400, fontSize: "0.80rem" }}
+                      >
+                        Total Price Product:
+                        <span className="ms-3 me-2" style={{ fontWeight: 600 }}>
+                          Rp. {new Intl.NumberFormat().format(totalPrice)}
+                        </span>
+                      </span>
+                    </div>
                   </div>
                   <div>
                     <div className="mt-3 text-center">
@@ -543,8 +698,6 @@ const SingleDeals = () => {
                 onClose={handleCloseProduct}
                 visible={showAddProduct}
               />
-            </div>
-            <div className="col-md-8">
               <Card className="shadow">
                 <Card.Header>
                   <h6 className="fw-bold mt-2">Notes</h6>
@@ -564,22 +717,15 @@ const SingleDeals = () => {
                       Mention Users :
                     </Form.Label>
                     <Col lg={6} style={{ marginLeft: "-5rem" }}>
-                      <Select options={ownerSelect()} isMulti />
+                      <Select
+                        options={ownerSelect()}
+                        isMulti
+                        onChange={(e) => mantionUsersUid(e)}
+                      />
                     </Col>
                   </Form.Group>
                 </Card.Body>
               </Card>
-              <div className="float-end">
-                <button className="btn btn-primary me-2" type="submit">
-                  Save Changes
-                </button>
-                <a
-                  href="/company"
-                  className="btn btn-secondary text-decoration-none"
-                >
-                  Cancel
-                </a>
-              </div>
             </div>
           </form>
         </div>

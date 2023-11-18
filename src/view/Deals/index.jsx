@@ -9,14 +9,15 @@ import Dummy from "./Dummy";
 import DataTableComponet from "./Datatable";
 import axios from "axios";
 import Select from "react-select";
+import Swal from "sweetalert2";
 
 const Deals = () => {
   const token = localStorage.getItem("token");
   const [isSideFilter, setIsSideFilter] = useState(false);
-  const [search, setSearch] = useState(Dummy);
+  const [search, setSearch] = useState([]);
   const [selectUid, setSelectUid] = useState([]);
   const [owner, setOwner] = useState([]);
-
+  const [deals, setDataDeals] = useState([]);
   const getOwnerUser = () => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
@@ -36,19 +37,93 @@ const Deals = () => {
     const select = e.selectedRows.map((row) => row.uid);
     setSelectUid(select);
   };
-  // console.log(selectUid);
+
+  const getDeals = () => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/deals`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => {
+        setDataDeals(res.data.data);
+        setSearch(res.data.data);
+      })
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated.") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
+
+  const handleDeleteSelect = async (e) => {
+    e.preventDefault();
+    const isResult = await Swal.fire({
+      title: "Apakah Anda Yakin",
+      text: "Anda tidak dapat mengembalikan data ini setelah menghapusnya!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Ya, Hapus!",
+      cancelButtonText: "Batal",
+    });
+    if (isResult.isConfirmed) {
+      try {
+        const formData = new FormData();
+        selectUid.map((data, indek) => {
+          formData.append(`deals_uid[${indek}]`, data);
+        });
+
+        for (const pair of formData.entries()) {
+          console.log(pair[0] + ": " + pair[1]);
+        }
+        axios
+          .post(
+            `${process.env.REACT_APP_BACKEND_URL}/deals/item/delete`,
+            formData,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          )
+          .then((res) => {
+            Swal.fire({
+              title: res.data.message,
+              text: "Successfully deleted",
+              icon: "success",
+            }).then((res) => {
+              if (res.isConfirmed) {
+                window.location.reload();
+              }
+            });
+          });
+      } catch (err) {
+        if (err.response.data.message === "Unauthenticated.") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+        if (err.message) {
+          Swal.fire({
+            text: err.response.data.message,
+            icon: "warning",
+          });
+        }
+      }
+    }
+  };
   const toggleSideFilter = () => {
     setIsSideFilter(!isSideFilter);
   };
-  const filterClass = isSideFilter ? "col-md-3 d-block" : "col-md-0 d-none";
+  const filterClass = isSideFilter
+    ? "col-md-3 d-block border-end"
+    : "col-md-0 d-none";
   const boardKanbanDatatable = isSideFilter ? "col-md-9" : "col-md-12";
   const IconFilter = isSideFilter ? "bi bi-x-lg" : "bi bi-funnel";
 
   function handleSearchDatatable(e) {
-    const newData = Dummy.filter((row) => {
-      return row.name_deals
-        .toLowerCase()
-        .includes(e.target.value.toLowerCase());
+    const newData = deals.filter((row) => {
+      return row.deal_name.toLowerCase().includes(e.target.value.toLowerCase());
     });
     setSearch(newData);
   }
@@ -67,7 +142,28 @@ const Deals = () => {
 
   useEffect(() => {
     getOwnerUser(token);
+    getDeals(token);
   }, [token]);
+
+  const uid = localStorage.getItem("uid");
+  const handleDealsMyOrPerson = (e) => {
+    const target = e.target.value;
+    let filter = [];
+    if (target === "all") {
+      setSearch(deals);
+    } else {
+      filter = deals.filter((row) => row.owner_user_uid === uid);
+      setSearch(filter);
+    }
+  };
+
+  const [searchMultiple, setSearchMultiple] = useState([]);
+  const handleSearchMultiple = (e) => {
+    setSearchMultiple({
+      ...searchMultiple,
+      [e.target.name]: e.target.value,
+    });
+  };
   return (
     <body id="body">
       <Topbar />
@@ -76,17 +172,19 @@ const Deals = () => {
         <div className="container">
           <div className="row">
             <div className="col">
-              <h1>Deals</h1>
-              <nav>
-                <ol className="breadcrumb mt-2">
-                  <li className="breadcrumb-item">
-                    <Link to="/" className="text-decoration-none">
-                      Dashboard
-                    </Link>
-                  </li>
-                  <li className="breadcrumb-item active">Deals</li>
-                </ol>
-              </nav>
+              <div className="pagetitle">
+                <h1>Deals</h1>
+                <nav>
+                  <ol className="breadcrumb mt-2">
+                    <li className="breadcrumb-item">
+                      <Link to="/" className="text-decoration-none">
+                        Dashboard
+                      </Link>
+                    </li>
+                    <li className="breadcrumb-item active">Deals</li>
+                  </ol>
+                </nav>
+              </div>
             </div>
           </div>
         </div>
@@ -142,12 +240,13 @@ const Deals = () => {
                   </li>
                 </ul>
               </div>
-              <button
+              <Link
+                to="/deals/need-approval"
                 className="btn btn-outline-primary ms-2"
                 style={{ fontSize: "0.85rem" }}
               >
                 Need Approval
-              </button>
+              </Link>
               <Link
                 to="/deals/bulk-change"
                 className="btn btn-outline-primary ms-2 text-decoration-none"
@@ -156,6 +255,7 @@ const Deals = () => {
                 Bulk Change
               </Link>
               <button
+                onClick={handleDeleteSelect}
                 className="btn btn-outline-danger ms-2"
                 style={{ fontSize: "0.85rem" }}
               >
@@ -179,13 +279,14 @@ const Deals = () => {
                 <div className="row">
                   <div className="col">
                     <select
-                      name=""
+                      name="select"
                       id=""
                       className="form-select"
                       style={{ fontSize: "0.85rem" }}
+                      onChange={handleDealsMyOrPerson}
                     >
-                      <option value="">All Contact</option>
-                      <option value="">My Contact</option>
+                      <option value="all">All Contact</option>
+                      <option value="my">My Contact</option>
                     </select>
                   </div>
                 </div>
@@ -195,10 +296,10 @@ const Deals = () => {
                       options={selectOwner()}
                       isMulti
                       placeholder="Select Owner"
-                      />
+                    />
                   </div>
                 </div>
-                <div className="row">
+                {/* <div className="row">
                   <div className="col">
                     <select
                       name=""
@@ -211,7 +312,7 @@ const Deals = () => {
                       <option value="">2</option>
                     </select>
                   </div>
-                </div>
+                </div> */}
                 <div className="row mt-2">
                   <div className="col">
                     <select
@@ -346,12 +447,13 @@ const Deals = () => {
                   >
                     Apply
                   </button>
-                  <button
+                  <Link
+                    to="/deals"
                     className="btn btn-secondary mt-2 ms-2"
                     style={{ fontSize: "0.85rem" }}
                   >
                     Cancel
-                  </button>
+                  </Link>
                 </form>
               </div>
             </div>
@@ -395,7 +497,7 @@ const Deals = () => {
                       className="form-select"
                       style={{ fontSize: "0.85rem" }}
                     >
-                      <option value="">Select Sales</option>
+                      <opti              on value="">Select Sales</opti>
                       <option value="">Sales Pipeline</option>
                     </select>
                   </div> */}

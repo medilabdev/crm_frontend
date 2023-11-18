@@ -64,17 +64,19 @@ const Documents = () => {
         <div className="container">
           <div className="row">
             <div className="col">
-              <h1>Documents</h1>
-              <nav>
-                <ol className="breadcrumb mt-2">
-                  <li className="breadcrumb-item">
-                    <Link to="/" className="text-decoration-none">
-                      Dashboard
-                    </Link>
-                  </li>
-                  <li className="breadcrumb-item active">Document</li>
-                </ol>
-              </nav>
+              <div className="pagetitle">
+                <h1>Documents</h1>
+                <nav>
+                  <ol className="breadcrumb mt-2">
+                    <li className="breadcrumb-item">
+                      <Link to="/" className="text-decoration-none">
+                        Dashboard
+                      </Link>
+                    </li>
+                    <li className="breadcrumb-item active">Document</li>
+                  </ol>
+                </nav>
+              </div>
             </div>
           </div>
           <div className="row">
@@ -107,7 +109,12 @@ const Documents = () => {
                       >
                         <div className="input-group">
                           <i class="bi bi-file-code fs-4 ms-2"></i>
-                          <h5 className="p-1 mt-1 ms-2">Short Code</h5>
+                          <h5
+                            className="p-1 mt-1 ms-2"
+                            style={{ fontWeight: 600 }}
+                          >
+                            Short Code
+                          </h5>
                         </div>
                       </Link>
                     </div>

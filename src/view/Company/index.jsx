@@ -16,6 +16,7 @@ import iconGedung from "../../../src/assets/img/office-building.png";
 import axios, { all } from "axios";
 import Swal from "sweetalert2";
 import Select from "react-select";
+import IconMoney from "../../assets/img/coin.png"
 
 const Company = () => {
   const uid = localStorage.getItem("uid");
@@ -25,7 +26,9 @@ const Company = () => {
   const toggleSideBarCard = () => {
     setIsSideBar(!isSideBar);
   };
-  const filterClass = isSideBar ? "col-md-3 d-block" : "col-sm-0 d-none";
+  const filterClass = isSideBar
+    ? "col-md-3 d-block border-end"
+    : "col-sm-0 d-none";
   const datatableClass = isSideBar ? "col-md-9" : "col-sm-12";
   const showTooltip = isSideBar ? (
     <Tooltip id="tooltip">Close Filter</Tooltip>
@@ -45,6 +48,8 @@ const Company = () => {
   const [resultSource, setResultSource] = useState([]);
   const [companyType, setCompanyType] = useState([]);
   const [associateContact, setAssocicateContact] = useState([]);
+  const [associateDeals, setAssociateDeals] = useState([]);
+  const [deals, setDeals] = useState([]);
   const [searchMultiple, setSearchMultiple] = useState({
     name: "",
     website_url: "",
@@ -74,6 +79,22 @@ const Company = () => {
     });
   };
 
+  const getDeals = (token) => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/deals`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => setDeals(res.data.data))
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
+
   const getAssociateContact = (token) => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/associate`, {
@@ -81,7 +102,10 @@ const Company = () => {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((res) => setAssocicateContact(res.data.data))
+      .then((res) => {
+        setAssocicateContact(res.data.data);
+        setAssociateDeals(res.data.data);
+      })
       .catch((err) => {
         if (err.response.data.message === "Unauthenticated") {
           localStorage.clear();
@@ -182,6 +206,35 @@ const Company = () => {
     const selectValue = e.map((data) => data.value);
     const allValue = selectValue.reduce((acc, value) => acc.concat(value), []);
     setAssContact(allValue);
+  };
+
+  const [resultDeals, setResultDeals] = useState([]);
+  const handleDeals = (e) => {
+    const selValue = e.map((data) => data.value);
+    const allValue = selValue.reduce((acc, value) => acc.concat(value), []);
+    setResultDeals(allValue);
+  };
+
+  const selectAssDeals = () => {
+    const result = [];
+    associateDeals?.map((data) => {
+      const dealName = data?.deals?.deal_name;
+      const key = `${dealName}-${data.deal_uid}`;
+      if (!result[key]) {
+        result[key] = {
+          label: dealName,
+          values: [],
+        };
+      }
+      result[key].values.push(data.company_uid);
+    });
+    const hasil = Object.values(result).map((data) => {
+      return {
+        label: data.label,
+        value: data.values,
+      };
+    });
+    return hasil;
   };
 
   const dataUser = () => {
@@ -300,6 +353,7 @@ const Company = () => {
   const handleSubmitSearch = () => {
     const filterdata = allCompany.filter((row) => {
       return (
+        (resultDeals.length === 0 || resultDeals.includes(row.uid)) &&
         (assContact.length === 0 || assContact.includes(row.uid)) &&
         (!searchMultiple.name ||
           row.name
@@ -385,6 +439,7 @@ const Company = () => {
     getSource(token);
     getAlltypeCompany(token);
     getAssociateContact(token);
+    getDeals(token);
   }, [token]);
   const columns = [
     {
@@ -395,29 +450,33 @@ const Company = () => {
           <div className="d-flex align-items-center">
             <img src={IconCompany} style={{ width: "20px" }} />
             <div className="mt-1">
-              <span className="fw-semibold">{row.name}</span>
+              <span className="fw-semibold" style={{  whiteSpace:"normal" }}>{row.name}</span>
             </div>
           </div>
         </div>
       ),
       left: true,
-      width: "200px",
+      width: "160px",
       sortable: true,
     },
     {
       id: 2,
       name: "Associated with",
       selector: (row) => (
+        console.log(row),
         <div className="d-flex">
-          {row?.associate?.map((item, index) => (
+          {row?.associate?.slice(0, 3).map((item, index) => (
             <OverlayTrigger
               placement="top"
               overlay={
                 <Tooltip
                   id={`tooltip-${item?.contact?.name}- ${item?.contact?.phone?.[0]?.number}`}
                 >
-                  {item?.contact?.name}
+                  
+                  {item?.contact?.name ? item?.contact?.name : null}
+                  {item?.deals?.deal_name ? item?.deals?.deal_name : null}
                   <br />
+                  {item?.deals?.deal_size ? `Rp. ${new Intl.NumberFormat().format(item?.deals?.deal_size)}` :null}
                   {item?.contact?.phone?.[0]?.number}
                 </Tooltip>
               }
@@ -430,6 +489,12 @@ const Company = () => {
                     style={{ width: "18px" }}
                     data-tip={item?.contact?.name}
                   />
+                ) : null}
+                {item?.deals ? (
+                  <img  className="ms-1"
+                  src={IconMoney}
+                  style={{ width: "18px" }}
+                  data-tip={item?.deals?.dealName} />
                 ) : null}
               </div>
             </OverlayTrigger>
@@ -469,7 +534,7 @@ const Company = () => {
         );
       },
       sortable: true,
-      width: "140px",
+      width: "120px",
     },
     {
       id: 5,
@@ -486,13 +551,13 @@ const Company = () => {
         const formatResult = new Intl.DateTimeFormat("en-US", formatOptions);
         const time = formatResult.format(date);
         return (
-          <p className="mt-2" style={{ fontSize: "11px" }}>
+          <p className="mt-2" style={{ fontSize: "11px", whiteSpace:"normal" }}>
             {time}
           </p>
         );
       },
       sortable: true,
-      width: "180px",
+      width: "120px",
     },
     {
       id: 6,
@@ -686,16 +751,14 @@ const Company = () => {
                           />
                         </div>
                         <div className="col mt-3">
-                          <select
-                            name=""
-                            id=""
-                            className="form-select"
-                            style={{ fontSize: "0.85rem" }}
-                          >
-                            <option value="">Select Deals</option>
-                            <option value="">1</option>
-                            <option value="">2</option>
-                          </select>
+                          <Select
+                            options={selectAssDeals()}
+                            isMulti
+                            closeMenuOnSelect={false}
+                            onChange={(e) => handleDeals(e)}
+                            placeholder="Select Deals..."
+                            className="mb-2"
+                          />
                         </div>
                         <div className="col mt-5">
                           <h6>

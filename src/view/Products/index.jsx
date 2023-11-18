@@ -17,17 +17,19 @@ const Products = () => {
         <div className="container">
           <div className="row">
             <div className="col">
-              <h1>Products</h1>
-              <nav>
-                <ol className="breadcrumb mt-2">
-                  <li className="breadcrumb-item">
-                    <a href="/" className="text-decoration-none">
-                      Dashboard
-                    </a>
-                  </li>
-                  <li className="breadcrumb-item active fw-bold">Products</li>
-                </ol>
-              </nav>
+              <div className="pagetitle">
+                <h1>Products</h1>
+                <nav>
+                  <ol className="breadcrumb mt-2">
+                    <li className="breadcrumb-item">
+                      <a href="/" className="text-decoration-none">
+                        Dashboard
+                      </a>
+                    </li>
+                    <li className="breadcrumb-item active fw-bold">Products</li>
+                  </ol>
+                </nav>
+              </div>
             </div>
           </div>
           <Card className="shadow">

@@ -32,6 +32,18 @@ import Deals from "../view/Deals";
 import SingleDeals from "../view/Deals/SingleDeals";
 import BulkChangeDeals from "../view/Deals/BulkChange";
 import EditPackageProduct from "../view/Products/EditPackageProduct";
+import Properties from "../view/Properties";
+import Position from "../view/Properties/Position";
+import Roles from "../view/Properties/Roles";
+import Source from "../view/Properties/Source";
+import CompanyType from "../view/Properties/CompanyType";
+import DealsCategory from "../view/Properties/DealsStage";
+import NeedsApproval from "../view/Deals/NeedApproval";
+import EditDeals from "../view/Deals/SingleDeals/EditDeals";
+import Accounting from "../view/Deals/Accounting";
+import Task from "../view/Task";
+import BulkChangeTask from "../view/Task/BulkChange";
+import UploadFileTask from "../view/Task/UploadFile";
 const Login = ({ children }) => {
   const token = localStorage.getItem("token");
   if (!token) {
@@ -256,6 +268,98 @@ function Router() {
           element={
             <Login>
               <BulkChangeDeals />
+            </Login>
+          }
+        />
+        <Route
+          exact
+          path="/deals/need-approval"
+          element={
+            <Login>
+              <NeedsApproval />
+            </Login>
+          }
+        />
+        <Route
+          exact
+          path="/deals/:uid/edit"
+          element={
+            <Login>
+              <EditDeals />
+            </Login>
+          }
+        />
+        <Route
+          exact
+          path="/deals/:uid/accounting"
+          element={
+            <Login>
+              <Accounting />
+            </Login>
+          }
+        />
+        <Route
+          exact
+          path="/task"
+          element={
+            <Login>
+              <Task />
+            </Login>
+          }
+        />
+        <Route exact path="/task/bulk-change" element={<Login><BulkChangeTask /></Login>} />
+        <Route exact path="/task/upload-file" element={<Login><UploadFileTask /></Login>} />
+        <Route
+          exact
+          path="/properties"
+          element={
+            <Login>
+              <Properties />
+            </Login>
+          }
+        />
+        <Route
+          exact
+          path="/properties/position"
+          element={
+            <Login>
+              <Position />
+            </Login>
+          }
+        />
+        <Route
+          exact
+          path="/properties/roles"
+          element={
+            <Login>
+              <Roles />
+            </Login>
+          }
+        />
+        <Route
+          exact
+          path="/properties/source"
+          element={
+            <Login>
+              <Source />
+            </Login>
+          }
+        />
+        <Route
+          exact
+          path="/properties/company-type"
+          element={
+            <Login>
+              <CompanyType />
+            </Login>
+          }
+        />
+        <Route
+          exact
+          path="/properties/deal-stage"
+          element={
+            <Login>
+              <DealsCategory />
             </Login>
           }
         />

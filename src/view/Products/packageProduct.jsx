@@ -144,8 +144,20 @@ const PackageProduct = () => {
   const columns = [
     {
       name: "Name Package",
-      selector: (row) => row.name,
+      selector: (row) => (
+        <p
+          className="mt-2"
+          style={{
+            whiteSpace: "normal",
+            fontWeight: "400",
+            fontSize: "0.80rem",
+          }}
+        >
+          {row.name}
+        </p>
+      ),
       sortable: true,
+      width: "150px",
     },
     {
       name: "Discount",
@@ -180,13 +192,16 @@ const PackageProduct = () => {
         const formatResult = new Intl.DateTimeFormat("en-US", formatDate);
         const time = formatResult.format(date);
         return (
-          <p className="mt-2" style={{ fontSize: "11px" }}>
+          <p
+            className="mt-2"
+            style={{ fontSize: "11px", whiteSpace: "normal" }}
+          >
             {time}
           </p>
         );
       },
       sortable: true,
-      width: "180px",
+      width: "150px",
     },
 
     {

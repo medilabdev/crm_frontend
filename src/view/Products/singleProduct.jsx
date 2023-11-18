@@ -62,7 +62,7 @@ const SingleProduct = () => {
             });
           });
       } catch (error) {
-        if (error.response.data.message === "Unauthenticated.") {
+        if (error.response.data.message === "Unauthenticated") {
           Swal.fire({
             title: error.response.data.message,
             text: "Tolong Login Kembali",
