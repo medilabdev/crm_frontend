@@ -1,16 +1,15 @@
-import axios from 'axios'
 import React, { useEffect, useState } from 'react'
 import { Form, Offcanvas } from 'react-bootstrap'
 import ReactQuill from 'react-quill'
 import Select from "react-select"
+import axios from 'axios'
 
-const AddTask = ({visible, onClose}) => {
-    const token = localStorage.getItem("token")
+const EditTask = ({visible, onClose, uid}) => {
+    const token= localStorage.getItem("token")
     const [contact, setContact] = useState([])
     const [company, setCompany] = useState([])
     const [deals, setDeals] = useState([])
     const [user, setUser] = useState([])
-
     const getContact = () => {
         axios.get(`${process.env.REACT_APP_BACKEND_URL}/contacts`, {
             headers:{
@@ -24,7 +23,7 @@ const AddTask = ({visible, onClose}) => {
             }
           });
     }
-
+    
     const getCompany = () => {
         axios.get(`${process.env.REACT_APP_BACKEND_URL}/companies`, {
             headers:{
@@ -38,6 +37,7 @@ const AddTask = ({visible, onClose}) => {
             }
           });
     }
+
     const getDeals = () => {
         axios.get(`${process.env.REACT_APP_BACKEND_URL}/deals`, {
             headers:{
@@ -77,18 +77,6 @@ const AddTask = ({visible, onClose}) => {
         return res
     }
 
-    const selectComp = () => {
-        const res = []
-        company?.map((data) => {
-            const theme ={
-                label:data.name,
-                value:data.uid
-            }
-            res.push(theme)
-        })
-        return res
-    }
-    console.log(selectComp());
     const selectDeals = () => {
         const res = []
         deals?.map((data) => {
@@ -100,6 +88,18 @@ const AddTask = ({visible, onClose}) => {
         })
         return res
     }
+    const selectComp = () => {
+        const res = []
+        company?.map((data) => {
+            const theme ={
+                label:data.name,
+                value:data.uid
+            }
+            res.push(theme)
+        })
+        return res
+    }
+
     const selectUser = () => {
         const res = []
         user?.map((data) => {
@@ -111,10 +111,8 @@ const AddTask = ({visible, onClose}) => {
         })
         return res
     }
-
-
     useEffect(() => {
-        if(visible){
+        if(visible && uid){
             getContact(token)
             getCompany(token)
             getDeals(token)
@@ -124,10 +122,10 @@ const AddTask = ({visible, onClose}) => {
   return (
     <Offcanvas show={visible} onHide={onClose} placement='end' style={{ width: '40rem', height: '45rem' }}>
         <Offcanvas.Header closeButton>
-            <Offcanvas.Title>Add Task</Offcanvas.Title>
+            <Offcanvas.Title>Edit Task</Offcanvas.Title>
         </Offcanvas.Header>
         <Offcanvas.Body>
-            <form onSubmit="">
+        <form onSubmit="">
                 <div className="container">
                     <div className="row">
                         <div className="col-md-7 border-end">
@@ -207,7 +205,7 @@ const AddTask = ({visible, onClose}) => {
           >
             Add Task
           </button>
-          <button className="btn btn-secondary mb-4 ms-2">
+          <button className="btn btn-secondary mb-4 ms-2" onClick={onClose}>
             Cancel
           </button>
                 </div>
@@ -217,4 +215,4 @@ const AddTask = ({visible, onClose}) => {
   )
 }
 
-export default AddTask
+export default EditTask

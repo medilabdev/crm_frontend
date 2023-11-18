@@ -9,6 +9,8 @@ import axios from "axios";
 import DatatableTask from "./DatatableTask";
 import Dummy from "./DummyData"
 import AddTask from "./Overlay/AddTask";
+import Swal from 'sweetalert2'
+
 const Task = () => {
   const token = localStorage.getItem("token")
   const [isSideFilter, setIsSideFilter] = useState(false)
@@ -146,7 +148,19 @@ const Task = () => {
     })
     setSearch(data)
   }
+  const handleDeleteSelect =async(e) => {
+    const isResult = await Swal.fire({
+      title: "Hapus Task!.. apakah kamu yakin?",
+      text: "Anda tidak dapat mengembalikan data ini setelah menghapusnya!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Ya, Hapus!",
+      cancelButtonText: "Batal",
+    })
+    if(isResult.isConfirmed){
 
+    }
+  } 
 
   return (
     <body id="body">
@@ -216,7 +230,7 @@ const Task = () => {
               </a>
               <button
                 className="btn btn-outline-danger ms-2"
-                style={{ fontSize: "0.85rem" }}
+                style={{ fontSize: "0.85rem" }} onClick={handleDeleteSelect}
               >
                 Delete
               </button>
