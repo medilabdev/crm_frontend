@@ -3,7 +3,7 @@ import Topbar from "../../../components/Template/Topbar";
 import Sidebar from "../../../components/Template/Sidebar";
 import Main from "../../../components/Template/Main";
 import Footer from "../../../components/Template/Footer";
-import { Button, Card, CardHeader, FloatingLabel, Form } from "react-bootstrap";
+import { Button, Card, CardHeader, Col, FloatingLabel, Form } from "react-bootstrap";
 import ReactQuill from "react-quill";
 import { useParams } from "react-router-dom";
 import axios from "axios";
@@ -14,6 +14,9 @@ import { Chrono } from "react-chrono";
 import OverlayAddDeals from "../../../components/Overlay/addDeals";
 import OverlayAddCompany from "../../../components/Overlay/addCompany";
 import DataTable from "react-data-table-component";
+import IconContact from "../../../assets/img/telephone-call.png";
+import IconDeals from "../../../assets/img/coin.png";
+import IconCompany from "../../../assets/img/condo.png"
 const EditCompany = () => {
   const { uid } = useParams();
   const token = localStorage.getItem("token");
@@ -34,7 +37,11 @@ const EditCompany = () => {
   const handleOpenCanvasCompany = () => setShowCanvasCompany(true);
   const [history, setHistory] = useState([])
   const [oldAssociate, setOldAssociate] = useState([])
-
+  const [oldParentCompany, setOldParentCompany] = useState([])
+  const [valueDeals, setValueDeals] = useState([])
+  const [valueComp, setValueComp] = useState([])
+  const [formParentComp, setFormParentComp] = useState(false)
+  // console.log(oldAssociate);
   const getDeals = () => {
     axios.get(`${process.env.REACT_APP_BACKEND_URL}/deals`, {
       headers:{
@@ -110,7 +117,7 @@ const EditCompany = () => {
         }
       });
   };
-
+  // console.log(oldAssociate);
   const getCompanyDetail = (uid, token) => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/companies/${uid}`, {
@@ -121,7 +128,7 @@ const EditCompany = () => {
       .then((res) => {
         const companyDetail = res.data.data;
         const telp_number = companyDetail?.phone?.map(
-          (phoneObj) => phoneObj.number
+          (phoneObj) => phoneObj
         );
         const oldAssociate = companyDetail?.associate?.map((data) => data)
         setOldAssociate(oldAssociate)
@@ -134,15 +141,32 @@ const EditCompany = () => {
           postal_code: companyDetail.postal_code,
           number_of_employee: companyDetail.number_of_employee,
           number_of_patient: companyDetail.number_of_patient,
-          parent_company_uid: companyDetail?.parent_company?.uid,
+          parent_company_uid: companyDetail?.parent_company_uid,
           owner_user_uid: companyDetail?.owner?.uid,
           company_source_uid: companyDetail?.company_source?.uid,
           company_type_uid: companyDetail?.company_type?.uid,
         });
         setTelephone(telp_number ? telp_number : []);
         setHistory(companyDetail.history);
+        setOldParentCompany(companyDetail)
+        if(companyDetail?.parent){
+          localStorage.setItem(
+            "parentComp",
+            JSON.stringify(companyDetail?.parent)
+          )
+        }
+
       });
   };
+
+  const parentCompanyLocalStorage = [];
+  for(let i  = 0; i < localStorage.length; i++){
+    const key = localStorage.key(i)
+    if(key.startsWith("parentComp")){
+      const data = JSON.parse(localStorage.getItem(key))
+      parentCompanyLocalStorage.push(data)
+    }
+  }
   const getOwnerUser = () => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
@@ -162,10 +186,37 @@ const EditCompany = () => {
     setTelephone([...telephone, ""]);
   };
 
-  const removeTelephone = (index) => {
-    const newTelephone = [...telephone];
-    newTelephone.splice(index, 1);
-    setTelephone(newTelephone);
+  const removeTelephone = (uid) => {
+    if(uid){
+      Swal.fire({
+        title: "Konfirmasi",
+        text: "Apa anda yakin ingin menghapus item ini?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Ya, Hapus!",
+        cancelButtonText: "Batal",
+      }).then((res) => {
+        if(res.isConfirmed){
+          const formData = new FormData();
+          formData.append("_method", "delete")
+          axios.post(`${process.env.REACT_APP_BACKEND_URL}/companies/delete/item/telp/${uid}`, formData,{
+            headers:{
+              Authorization:`Bearer ${token}`
+            }
+          }).then(() => {
+            window.location.reload()
+          })
+        }
+      })
+    }else{
+      setTelephone((prevState) => {
+        const telp = [...prevState];
+        telp.pop()
+        return telp;
+      })
+    }
   };
 
   const handleInputChange = (e) => {
@@ -185,7 +236,8 @@ const EditCompany = () => {
       };
       result.push(contact);
     });
-    return result;
+    const filterCont = result.filter((cont) => !oldAssociate.some((old) => old?.contact?.uid === cont.value))
+    return filterCont
   };
   
   const selectOwner = () => {
@@ -199,18 +251,17 @@ const EditCompany = () => {
     })
     return res
   }
-  // const selectComp = () => {
-  //   const res = [];
-  //   pare?.map((data) => {
-  //     const theme = {
-  //       value:data.uid,
-  //       label: data.name
-  //     }
-  //     res.push(theme)
-  //   })
-  //   const filterData = res.filter((comp) => !oldAssociate.some((old) => old?.company?.uid))
-  //   return filterData
-  // }
+  const selectComp = () => {
+    const res = [];
+    parentCompany?.map((data) => {
+      const theme = {
+        value:data.uid,
+        label: data.name
+      }
+      res.push(theme)
+    })
+    return res
+  }
   const selectDeals = () => {
     const rest = [];
     deals?.map((data) => {
@@ -223,6 +274,23 @@ const EditCompany = () => {
     const filterDeals = rest.filter((deals) => !oldAssociate.some((old) => old?.deals?.uid === deals.value))
     return filterDeals;
   }
+
+  const handleChangeTelp = (index, value) => {
+    const newTelp = [...telephone];
+    if(newTelp[index]){
+      newTelp[index] = {...newTelp[index], number: value}
+    }else{
+      newTelp[index] ={uid: "", number: value}
+    }
+    setTelephone(newTelp)
+  }
+  const handleDeals = (e) => {
+    setValueDeals(e.map((opt) => opt.value))
+  }
+  const handleComp = (e) => {
+    setValueComp(e.map((opt) => opt.value))
+  }
+
   useEffect(() => {
     getCompanyDetail(uid, token);
     getOwnerUser(token);
@@ -232,13 +300,13 @@ const EditCompany = () => {
     getContact(token);
     getDeals(token)
   }, [uid, token]);
-
-  // console.log(telephone);
+  console.log(telephone);
   const updateCompany = async (e) => {
     e.preventDefault();
     const formData = new FormData();
-    telephone.forEach((number) => {
-      formData.append("telp_number[]", number);
+    telephone?.forEach((number, index) => {
+      formData.append(`telp_number[${index}][uid]`, number.uid);
+      formData.append(`telp_number[${index}][number]`, number.number);
     });
     formData.append("name", editCompany.name || "");
     formData.append("website_url", editCompany.website_url || "");
@@ -248,11 +316,21 @@ const EditCompany = () => {
     formData.append("postal_code", editCompany.postal_code || "");
     formData.append("number_of_employee", editCompany.number_of_employee || "");
     formData.append("number_of_patient", editCompany.number_of_patient || "");
-    formData.append("parent_company_uid", editCompany.parent_company_uid || "");
+    formData.append("parent_company_uid", editCompany.parent_company_uid);
     formData.append("owner_user_uid", editCompany.owner_user_uid || "");
     formData.append("company_source_uid", editCompany.company_source_uid || "");
     formData.append("company_type_uid", editCompany.company_type_uid || "");
     formData.append("notes", editCompany.notes || "");
+    if(valueDeals){
+      valueDeals.forEach((deals, index) => {
+        formData.append(`deals_uid[${index}]`, deals)
+      })
+    }
+    if(valueComp){
+      valueComp.forEach((comp, index) => {
+        formData.append(`contact_uid[${index}]`, comp)
+      })
+    }
     formData.append("_method", "put");
     console.log("FormData Content:");
     for (const pair of formData.entries()) {
@@ -267,13 +345,17 @@ const EditCompany = () => {
             Authorization: `Bearer ${token}`,
           },
         }
-      );
-      Swal.fire({
-        title: update.data.message,
-        text: "Successfully add company",
-        icon: "success",
-      });
-      window.location.reload();
+      ).then((res) => {
+        Swal.fire({
+          title: res.data.message,
+          text: "Successfully updated contact", 
+          icon:"success"
+        }).then((res) => {
+          if(res.isConfirmed){
+            window.location.reload()
+          }
+        })
+      })
     } catch (err) {
       if (err.response) {
         Swal.fire({
@@ -350,6 +432,61 @@ const EditCompany = () => {
       },
     },
   };
+
+  const handleDeleteDeals = (uid) => {
+    Swal.fire({
+      title: "Konfirmasi",
+      text: "Apa anda yakin ingin menghapus item ini?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Ya, Hapus!",
+      cancelButtonText: "Batal",
+    }).then((res) => {
+      if(res.isConfirmed){
+      const formData = new FormData();
+      formData.append("associate_uid", uid)
+      axios.post(`${process.env.REACT_APP_BACKEND_URL}/companies/delete/item/deals`,formData,{
+        headers:{
+          Authorization: `Bearer ${token}`
+        }
+      }).then(() => {
+        window.location.reload()
+      })
+    }
+    })
+  }
+  const handleDeleteContact =(uid) => {
+    console.log(uid);
+    Swal.fire({
+      title: "Konfirmasi",
+      text: "Apa anda yakin ingin menghapus item ini?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Ya, Hapus!",
+      cancelButtonText: "Batal",
+    }).then((res) => {
+      if(res.isConfirmed){
+        const formData = new FormData();
+        formData.append("associate_uid", uid)
+        axios.post(`${process.env.REACT_APP_BACKEND_URL}/companies/delete/item/contact`, formData,{
+          headers:{
+            Authorization:`Bearer ${token}`
+          }
+        }).then(() => {
+          window.location.reload()
+        })
+      }
+    })
+  }
+  const deleteLocalStorageParent = () => {
+    localStorage.removeItem("parentComp");
+    setFormParentComp([])
+  }
+  // console.log(oldParentCompany.parent);
   return (
     <body id="body">
       <Topbar />
@@ -432,7 +569,9 @@ const EditCompany = () => {
                       />
                     </FloatingLabel>
                     <Form.Group className="mb-3">
-                      <Select options={selectOwner()} placeholder="Select Owner" />
+                      <Select options={selectOwner()} value={selectOwner().find((e) => e.value === editCompany.owner_user_uid)} onChange={(e) => setEditCompany({
+                        ...editCompany, owner_user_uid: e.value
+                      })}  placeholder="Select Owner" />
                     </Form.Group>
                     {telephone.map((tel, index) => (
                       <div key={index}>
@@ -444,25 +583,19 @@ const EditCompany = () => {
                           </Form.Label>
                           <Form.Control
                             type="number"
-                            value={tel}
-                            onChange={(e) => {
-                              const hp = e.target.value;
-                              const update = [...telephone];
-                              update[index] = hp;
-                              setTelephone(update);
-                            }}
+                            value={tel.number}
+                            onChange={(e) => handleChangeTelp(index, e.target.value)
+                            }
                           />
                         </Form.Group>
-                        {index > 0 && (
                           <Button
                             variant="danger"
-                            onClick={() => removeTelephone(index)}
+                            onClick={() => removeTelephone(tel.uid)}
                             style={{ fontSize: "0.65rem" }}
                             className="mb-1"
                           >
                             Remove
                           </Button>
-                        )}
                       </div>
                     ))}
                     <Button
@@ -605,8 +738,39 @@ const EditCompany = () => {
                     </h5>
                   </Card.Header>
                   <Card.Body>
+                    {oldAssociate?.map((data, index) => (
+                      data?.deals ?(
+                      <Card className="shadow p-2">
+                        <div className="row d-flex">
+                          <>
+                          <Col md={10} sm={10} key={index}>
+                            <div className="d-flex">
+                              <img src={IconDeals} alt={IconDeals} className="ms-1 me-3 mt-3" style={{ width:"30px", height:"30px" }} />
+                              <Col md={12} sm={12}>
+                              <p className="ms-1 mt-2 me-3" style={{
+                                      fontSize: "10px",
+                                      whiteSpace: "normal", 
+                                    }}> Name Deals : <strong className="ms-2">{data?.deals?.deal_name ?? null}</strong> </p>
+                                    <p className="ms-1" style={{
+                                      fontSize: "10px",
+                                      marginTop: "-8px",
+                                    }}>Stage : <strong className="ms-2">{data?.deals?.staging?.name}</strong></p>
+                                    <p className="ms-1" style={{ fontSize:"10PX", marginTop:"-8px" }}>Deal Size : <strong className="ms-2">Rp.{new Intl.NumberFormat().format(data?.deals?.deal_size)}</strong></p>
+                            </Col>
+                            </div>
+                          </Col>
+                          <Col md={2} sm={2} style={{ marginTop:"-8px" }}>
+                            <a onClick={() => handleDeleteDeals(data.uid)} className="ms-1" style={{ cursor:"pointer" }}>
+                            <i className="bi bi-x fs-5 text-danger"></i>
+                            </a>
+                          </Col>
+                          </>
+                        </div>
+                      </Card>
+                      ) : null 
+                    ))}
                     <Form.Group className="mb-3">
-                      <Select placeholder="Select Deals" isMulti options={selectDeals()} />
+                      <Select placeholder="Select Deals" isMulti options={selectDeals()} onChange={(e) => handleDeals(e)} closeMenuOnSelect={false} />
                     </Form.Group>
                     <div className="text-center">
                       <a
@@ -637,13 +801,41 @@ const EditCompany = () => {
                     </h5>
                   </Card.Header>
                   <Card.Body>
+                    {oldAssociate?.map((data, index) => (
+                      data.contact ? (
+                        <Card className="shadow p-2">
+                        <div className="row d-flex">
+                          <>
+                          <Col md={10} sm={10} key={index}>
+                            <div className="d-flex">
+                              <img src={IconContact} alt={IconContact} className="m-2" style={{ width:"30px", height:"30px" }} />
+                              <Col md={12} sm={12}>
+                                <p className="ms-1" style={{ fontSize:"10px", whiteSpace:"normal" }}>Name : <strong className="ms-2">{data?.contact?.name ?? "-"}</strong></p>
+                                <p className="ms-1" style={{ fontSize:"10px", whiteSpace:"normal" }}>No.Telp : <strong className="ms-2" style={{  fontSize: "10px", marginTop: "-8px", }}>{data?.contact?.phone[0]?.number ?? "-"}</strong></p>
+                                <p className="ms-1" style={{ fontSize:"10px", marginTop: "-8px" }}>Email : <strong className="ms-2">{data?.contact?.email ?? "-"}</strong></p>
+                                
+                              </Col>
+                            </div>
+                          </Col>
+                          <Col md={2} sm={2} style={{ marginTop: "-8px" }}>
+                            <a onClick={() => handleDeleteContact(data.uid)}  style={{ cursor:"pointer" }} className="ms-1">
+                            <i className="bi bi-x fs-5 text-danger"></i>
+                            </a>
+                          </Col>
+                          </>
+                        </div>
+                      </Card>
+                      ):null
+                     
+                    ))}
                     <FloatingLabel controlId="floatingInput" className="mb-3">
                       <Select
                         closeMenuOnSelect={false}
                         components={animatedComponents}
                         isMulti
                         options={contactSelect()}
-                        name="contact_uid[]"
+                        onChange={(e) => handleComp(e)}
+                        placeholder="Select Contact"
                       />
                     </FloatingLabel>
                     <div className="text-center">
@@ -673,15 +865,62 @@ const EditCompany = () => {
                     </h5>
                   </Card.Header>
                   <Card.Body>
-                    {/* <Form.Group className="mb-3">
+                    {parentCompanyLocalStorage && Array.isArray(parentCompanyLocalStorage) && parentCompanyLocalStorage.length > 0 ? (
+                    <Card className="shadow p-2">
+                      <div className="row d-flex">
+                        <div className="col-md-10">
+                          <div className="d-flex">
+                          <img src={IconCompany} className="ms-1 me-3 mt-3" alt={IconCompany}  style={{ width: "30px", height: "30px" }} />
+                          <Col md={10} sm={10}>
+                            <p className="ms-1" style={{ fontSize:"10px", whiteSpace:"normal" }}>
+                              Name Company : <br />
+                              <strong className="mt-1">
+                                {oldParentCompany.parent?.name}
+                              </strong>
+                            </p>
+                            <p className="ms-1"
+                                  style={{
+                                    fontSize: "10px",
+                                    marginTop: "-8px",
+                                  }}
+                                >
+                                  Type : <br />
+                              <strong className="mt-1">
+                                {oldParentCompany.parent?.company_type?.name}
+                              </strong>
+                            </p>
+                            <p
+                              className="ms-1"
+                                  style={{
+                                    fontSize: "10px",
+                                    marginTop: "-8px",
+                                    whiteSpace: "normal",
+                                  }}
+                                >
+                                  No.Telp : <br />
+                                  <strong className="mt-1">
+                                    {oldParentCompany?.phone[0]?.number ?? "-"}
+                                  </strong>
+                                </p>
+                          </Col>
+                          <Col md={2} sm={2}>
+                            <a onClick={deleteLocalStorageParent} className="ms-1" style={{ cursor:"pointer" }}>
+                            <i className="bi bi-x fs-5 text-danger"></i>
+                            </a>
+                          </Col>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>) : (   <Form.Group className="mb-3">
                       <Select options={selectComp()} onChange={(e) => {
-                          const parentUid = e.target.value;
+                          const parentUid = e.  value;
                           setEditCompany({
                             ...editCompany,
                             parent_company_uid: parentUid,
                           });
                         }} />
-                    </Form.Group> */}
+                    </Form.Group> )}
+                 
                     <div className="text-center">
                       <a
                         //   onClick={handleShowCanvasDeals}
