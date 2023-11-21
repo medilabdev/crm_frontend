@@ -3,7 +3,7 @@ import Topbar from "../../../components/Template/Topbar";
 import Sidebar from "../../../components/Template/Sidebar";
 import Main from "../../../components/Template/Main";
 import Footer from "../../../components/Template/Footer";
-import { Button, Card, FloatingLabel, Form } from "react-bootstrap";
+import { Button, Card, CardHeader, FloatingLabel, Form } from "react-bootstrap";
 import ReactQuill from "react-quill";
 import { useParams } from "react-router-dom";
 import axios from "axios";
@@ -13,6 +13,7 @@ import Swal from "sweetalert2";
 import { Chrono } from "react-chrono";
 import OverlayAddDeals from "../../../components/Overlay/addDeals";
 import OverlayAddCompany from "../../../components/Overlay/addCompany";
+import DataTable from "react-data-table-component";
 const EditCompany = () => {
   const { uid } = useParams();
   const token = localStorage.getItem("token");
@@ -23,6 +24,7 @@ const EditCompany = () => {
   const [sourceCompany, setSourceCompany] = useState([]);
   const [parentCompany, setParentCompany] = useState([]);
   const [contact, setContact] = useState([]);
+  const [deals, setDeals] = useState([])
   const animatedComponents = makeAnimated();
   const [showCanvasDeals, setShowCanvasDeals] = useState(false);
   const handleCloseCanvasDeals = () => setShowCanvasDeals(false);
@@ -30,37 +32,22 @@ const EditCompany = () => {
   const [showCanvasCompany, setShowCanvasCompany] = useState(false);
   const handleCloseCanvasCompany = () => setShowCanvasCompany(false);
   const handleOpenCanvasCompany = () => setShowCanvasCompany(true);
-  const [showCanvasContact, setShowCanvasContact] = useState(false);
-  const handleCloseCanvasContact = () => setShowCanvasContact(false);
-  const handleOpenCanvasContact = () => setShowCanvasContact(true);
-  const items = [
-    {
-      title: "January 2022",
-      cardTitle: "Event 1",
-      cardSubtitle: "Event 1 Subtitle",
-      cardDetailedText: "This is the first event on the timeline.",
-    },
-    {
-      title: "February 2022",
-      cardTitle: "Event 2",
-      cardSubtitle: "Event 2 Subtitle",
-      cardDetailedText: "This is the second event on the timeline.",
-    },
-    {
-      title: "March 2022",
-      cardTitle: "Event 3",
-      cardSubtitle: "Event 3 Subtitle",
-      cardDetailedText: "This is the third event on the timeline.",
-    },
-    {
-      title: "April 2022",
-      cardTitle: "Event 4",
-      cardSubtitle: "Event 3 Subtitle",
-      cardDetailedText: "This is the third event on the timeline.",
-    },
-  ];
+  const [history, setHistory] = useState([])
+  const [oldAssociate, setOldAssociate] = useState([])
 
-  console.log(editCompany);
+  const getDeals = () => {
+    axios.get(`${process.env.REACT_APP_BACKEND_URL}/deals`, {
+      headers:{
+        Authorization: `Bearer ${token}`
+      }
+    }).then((res) => setDeals(res.data.data))
+    .catch((err) => {
+      if (err.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+    });
+  }
   const getContact = () => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/contacts`, {
@@ -123,6 +110,7 @@ const EditCompany = () => {
         }
       });
   };
+
   const getCompanyDetail = (uid, token) => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/companies/${uid}`, {
@@ -135,6 +123,8 @@ const EditCompany = () => {
         const telp_number = companyDetail?.phone?.map(
           (phoneObj) => phoneObj.number
         );
+        const oldAssociate = companyDetail?.associate?.map((data) => data)
+        setOldAssociate(oldAssociate)
         setEditCompany({
           name: companyDetail.name,
           website_url: companyDetail.website_url,
@@ -150,6 +140,7 @@ const EditCompany = () => {
           company_type_uid: companyDetail?.company_type?.uid,
         });
         setTelephone(telp_number ? telp_number : []);
+        setHistory(companyDetail.history);
       });
   };
   const getOwnerUser = () => {
@@ -196,7 +187,42 @@ const EditCompany = () => {
     });
     return result;
   };
-
+  
+  const selectOwner = () => {
+    const res = [];
+    owner?.map((data) => {
+      const theme = {
+        value:data.uid,
+        label: data.name
+      }
+      res.push(theme)
+    })
+    return res
+  }
+  // const selectComp = () => {
+  //   const res = [];
+  //   pare?.map((data) => {
+  //     const theme = {
+  //       value:data.uid,
+  //       label: data.name
+  //     }
+  //     res.push(theme)
+  //   })
+  //   const filterData = res.filter((comp) => !oldAssociate.some((old) => old?.company?.uid))
+  //   return filterData
+  // }
+  const selectDeals = () => {
+    const rest = [];
+    deals?.map((data) => {
+      const theme ={
+        value: data.uid,
+        label: data.deal_name
+      }
+      rest.push(theme)
+    })
+    const filterDeals = rest.filter((deals) => !oldAssociate.some((old) => old?.deals?.uid === deals.value))
+    return filterDeals;
+  }
   useEffect(() => {
     getCompanyDetail(uid, token);
     getOwnerUser(token);
@@ -204,6 +230,7 @@ const EditCompany = () => {
     getSourceCompany(token);
     getCompanyParent(token);
     getContact(token);
+    getDeals(token)
   }, [uid, token]);
 
   // console.log(telephone);
@@ -261,6 +288,68 @@ const EditCompany = () => {
       }
     }
   };
+  const paginationComponentOptions = {
+    selectAllRowsItem: true,
+    selectAllRowsItemText: "ALL",
+  };
+
+  const columnHistory = [
+    {
+      name: "Created By",
+      selector: (row) => row.created_by?.name,
+      sortable: true,
+      width:'150px'
+    },
+    {
+      name: "Note", 
+      selector: (row) => (
+        <div className="mt-2" style={{ whiteSpace: "normal", fontSize: "12px" }}
+        >
+          <p dangerouslySetInnerHTML={{ __html: row?.note }} /></div>
+      ),
+      wrap: true,
+      width: "200px"
+    },
+    {
+      name: "Created at",
+      selector: (row) => {
+        const date = new Date(row?.created_at);
+        const formatDate = {
+          year: "numeric",
+          month: "long",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+        };
+        const formatResult = new Intl.DateTimeFormat("en-US", formatDate);
+        const time = formatResult.format(date);
+        return (
+          <div className="mt-2">
+            <p style={{ whiteSpace: "normal", fontSize: "10px" }}>{time}</p>
+          </div>
+        );
+      },
+      width: "140px",
+    },
+  ]
+
+  const customStyles = {
+    headRow: {
+      style: {
+        backgroundColor: "#427D9D",
+        color: "white",
+        marginTop: "12px",
+        borderRadius: "5px",
+      },
+    },
+    cells: {
+      style: {
+        fontSize: "4px",
+        fontWeight: "500",
+        marginTop: "4px",
+      },
+    },
+  };
   return (
     <body id="body">
       <Topbar />
@@ -291,6 +380,19 @@ const EditCompany = () => {
           </div>
           <form onSubmit={updateCompany}>
             <div className="row">
+              <div className="col-md-12">
+              <div className="float-end mb-3">
+                  <button className="btn btn-primary me-2" type="submit">
+                    Save Changes
+                  </button>
+                  <a
+                    href="/company"
+                    className="btn btn-secondary text-decoration-none"
+                  >
+                    Cancel
+                  </a>
+                </div>
+              </div>
               <div className="col-md-4">
                 {/* company */}
                 <Card className="shadow">
@@ -329,45 +431,17 @@ const EditCompany = () => {
                         placeholder="name@example.com"
                       />
                     </FloatingLabel>
-                    <FloatingLabel
-                      className="mb-3"
-                      controlId="floatingInput"
-                      label={
-                        <span>
-                          Owner
-                          <span style={{ color: "red" }} className="fs-6">
-                            *
-                          </span>
-                        </span>
-                      }
-                    >
-                      <Form.Select
-                        name="owner_user_uid"
-                        value={editCompany.owner_user_uid}
-                        onChange={handleInputChange}
-                        className="mb-3"
-                      >
-                        <option value="">Select Owner</option>
-                        {owner.map((user) => (
-                          <option key={user.uid} value={user.uid}>
-                            {user.name}
-                          </option>
-                        ))}
-                      </Form.Select>
-                    </FloatingLabel>
+                    <Form.Group className="mb-3">
+                      <Select options={selectOwner()} placeholder="Select Owner" />
+                    </Form.Group>
                     {telephone.map((tel, index) => (
                       <div key={index}>
-                        <FloatingLabel
-                          label={
-                            <>
-                              Telephone #{index + 1}{" "}
-                              <span style={{ color: "red" }} className="fs-6">
+                        <Form.Group className="mb-3">
+                          <Form.Label>
+                            Telephone #{index + 1} <span style={{ color: "red" }} className="fs-6">
                                 *
                               </span>
-                            </>
-                          }
-                          className="mb-2"
-                        >
+                          </Form.Label>
                           <Form.Control
                             type="number"
                             value={tel}
@@ -378,7 +452,7 @@ const EditCompany = () => {
                               setTelephone(update);
                             }}
                           />
-                        </FloatingLabel>
+                        </Form.Group>
                         {index > 0 && (
                           <Button
                             variant="danger"
@@ -531,17 +605,9 @@ const EditCompany = () => {
                     </h5>
                   </Card.Header>
                   <Card.Body>
-                    <FloatingLabel
-                      controlId="floatingInput"
-                      label="Search Deals"
-                      className="mb-3"
-                    >
-                      <Form.Select>
-                        <option>Select Company</option>
-                        <option value="">Company 1</option>
-                        <option value="">Company 2</option>
-                      </Form.Select>
-                    </FloatingLabel>
+                    <Form.Group className="mb-3">
+                      <Select placeholder="Select Deals" isMulti options={selectDeals()} />
+                    </Form.Group>
                     <div className="text-center">
                       <a
                         //   onClick={handleShowCanvasDeals}
@@ -607,30 +673,15 @@ const EditCompany = () => {
                     </h5>
                   </Card.Header>
                   <Card.Body>
-                    <FloatingLabel
-                      controlId="floatingInput"
-                      label="Parent Company"
-                      className="mb-3"
-                    >
-                      <Form.Select
-                        name="parent_company_uid"
-                        value={editCompany.parent_company_uid}
-                        onChange={(e) => {
+                    {/* <Form.Group className="mb-3">
+                      <Select options={selectComp()} onChange={(e) => {
                           const parentUid = e.target.value;
                           setEditCompany({
                             ...editCompany,
                             parent_company_uid: parentUid,
                           });
-                        }}
-                      >
-                        <option>Select Company</option>
-                        {parentCompany.map((parent) => (
-                          <option key={parent.uid} value={parent.uid}>
-                            {parent.name}
-                          </option>
-                        ))}
-                      </Form.Select>
-                    </FloatingLabel>
+                        }} />
+                    </Form.Group> */}
                     <div className="text-center">
                       <a
                         //   onClick={handleShowCanvasDeals}
@@ -669,30 +720,14 @@ const EditCompany = () => {
                   </Card.Body>
                 </Card>
 
-                <div className="float-end">
-                  <button className="btn btn-primary me-2" type="submit">
-                    Save Changes
-                  </button>
-                  <a
-                    href="/company"
-                    className="btn btn-secondary text-decoration-none"
-                  >
-                    Cancel
-                  </a>
-                </div>
-                <div>
-                  {/* <Chrono
-                    items={items}
-                    mode="VERTICAL"
-                    cardHeight={50}
-                    fontSizes={{
-                      cardSubtitle: "0.5rem",
-                      cardText: "0.8rem",
-                      cardTitle: "0.85rem",
-                      title: "0.85rem",
-                    }}
-                  /> */}
-                </div>
+                <Card className="shadow">
+                  <Card.Header>
+                  <h6 className="fw-bold mt-2">History</h6>
+                  </Card.Header>
+                  <Card.Body>
+                    <DataTable columns={columnHistory} data={history} customStyles={customStyles} pagination defaultSortFieldId={1} paginationComponentOptions={paginationComponentOptions} />
+                  </Card.Body>
+                  </Card>    
               </div>
             </div>
           </form>

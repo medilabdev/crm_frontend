@@ -463,7 +463,6 @@ const Company = () => {
       id: 2,
       name: "Associated with",
       selector: (row) => (
-        console.log(row),
         <div className="d-flex">
           {row?.associate?.slice(0, 3).map((item, index) => (
             <OverlayTrigger

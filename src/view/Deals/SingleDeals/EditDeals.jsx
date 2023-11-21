@@ -67,7 +67,6 @@ const EditDeals = () => {
       data.map((item) => (totalPrice += item.total_price));
     });
   }
-  console.log(totalPrice);
   const getCompany = () => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/companies`, {
@@ -279,7 +278,7 @@ const EditDeals = () => {
       [e.target.name]: e.target.value,
     });
   };
-  const [pricePro, setPricePro] = useState(0);
+
   const handlePrice = (e) => {
     setValueDeals({
       ...valueDeals,
@@ -313,10 +312,9 @@ const EditDeals = () => {
   };
 
   const handleDeleteContact = (uid) => {
-    console.log(uid);
     Swal.fire({
       title: "Konfirmasi",
-      text: "Apa anda yakin ingin menghapus item product ini?",
+      text: "Apa anda yakin ingin menghapus item ini?",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
