@@ -3,7 +3,14 @@ import Topbar from "../../../components/Template/Topbar";
 import Sidebar from "../../../components/Template/Sidebar";
 import Main from "../../../components/Template/Main";
 import Footer from "../../../components/Template/Footer";
-import { Button, Card, CardHeader, Col, FloatingLabel, Form } from "react-bootstrap";
+import {
+  Button,
+  Card,
+  CardHeader,
+  Col,
+  FloatingLabel,
+  Form,
+} from "react-bootstrap";
 import ReactQuill from "react-quill";
 import { useParams } from "react-router-dom";
 import axios from "axios";
@@ -16,7 +23,7 @@ import OverlayAddCompany from "../../../components/Overlay/addCompany";
 import DataTable from "react-data-table-component";
 import IconContact from "../../../assets/img/telephone-call.png";
 import IconDeals from "../../../assets/img/coin.png";
-import IconCompany from "../../../assets/img/condo.png"
+import IconCompany from "../../../assets/img/condo.png";
 const EditCompany = () => {
   const { uid } = useParams();
   const token = localStorage.getItem("token");
@@ -27,7 +34,7 @@ const EditCompany = () => {
   const [sourceCompany, setSourceCompany] = useState([]);
   const [parentCompany, setParentCompany] = useState([]);
   const [contact, setContact] = useState([]);
-  const [deals, setDeals] = useState([])
+  const [deals, setDeals] = useState([]);
   const animatedComponents = makeAnimated();
   const [showCanvasDeals, setShowCanvasDeals] = useState(false);
   const handleCloseCanvasDeals = () => setShowCanvasDeals(false);
@@ -35,26 +42,28 @@ const EditCompany = () => {
   const [showCanvasCompany, setShowCanvasCompany] = useState(false);
   const handleCloseCanvasCompany = () => setShowCanvasCompany(false);
   const handleOpenCanvasCompany = () => setShowCanvasCompany(true);
-  const [history, setHistory] = useState([])
-  const [oldAssociate, setOldAssociate] = useState([])
-  const [oldParentCompany, setOldParentCompany] = useState([])
-  const [valueDeals, setValueDeals] = useState([])
-  const [valueComp, setValueComp] = useState([])
-  const [formParentComp, setFormParentComp] = useState(false)
+  const [history, setHistory] = useState([]);
+  const [oldAssociate, setOldAssociate] = useState([]);
+  const [oldParentCompany, setOldParentCompany] = useState([]);
+  const [valueDeals, setValueDeals] = useState([]);
+  const [valueComp, setValueComp] = useState([]);
+  const [formParentComp, setFormParentComp] = useState(false);
   // console.log(oldAssociate);
   const getDeals = () => {
-    axios.get(`${process.env.REACT_APP_BACKEND_URL}/deals`, {
-      headers:{
-        Authorization: `Bearer ${token}`
-      }
-    }).then((res) => setDeals(res.data.data))
-    .catch((err) => {
-      if (err.response.data.message === "Unauthenticated.") {
-        localStorage.clear();
-        window.location.href = "/login";
-      }
-    });
-  }
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/deals`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => setDeals(res.data.data))
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated.") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
   const getContact = () => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/contacts`, {
@@ -127,11 +136,9 @@ const EditCompany = () => {
       })
       .then((res) => {
         const companyDetail = res.data.data;
-        const telp_number = companyDetail?.phone?.map(
-          (phoneObj) => phoneObj
-        );
-        const oldAssociate = companyDetail?.associate?.map((data) => data)
-        setOldAssociate(oldAssociate)
+        const telp_number = companyDetail?.phone?.map((phoneObj) => phoneObj);
+        const oldAssociate = companyDetail?.associate?.map((data) => data);
+        setOldAssociate(oldAssociate);
         setEditCompany({
           name: companyDetail.name,
           website_url: companyDetail.website_url,
@@ -141,30 +148,28 @@ const EditCompany = () => {
           postal_code: companyDetail.postal_code,
           number_of_employee: companyDetail.number_of_employee,
           number_of_patient: companyDetail.number_of_patient,
-          parent_company_uid: companyDetail?.parent_company_uid,
           owner_user_uid: companyDetail?.owner?.uid,
           company_source_uid: companyDetail?.company_source?.uid,
           company_type_uid: companyDetail?.company_type?.uid,
         });
         setTelephone(telp_number ? telp_number : []);
         setHistory(companyDetail.history);
-        setOldParentCompany(companyDetail)
+        setOldParentCompany(companyDetail);
         if(companyDetail?.parent){
           localStorage.setItem(
             "parentComp",
             JSON.stringify(companyDetail?.parent)
           )
         }
-
       });
   };
 
   const parentCompanyLocalStorage = [];
-  for(let i  = 0; i < localStorage.length; i++){
-    const key = localStorage.key(i)
-    if(key.startsWith("parentComp")){
-      const data = JSON.parse(localStorage.getItem(key))
-      parentCompanyLocalStorage.push(data)
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.startsWith("parentComp")) {
+      const data = JSON.parse(localStorage.getItem(key));
+      parentCompanyLocalStorage.push(data);
     }
   }
   const getOwnerUser = () => {
@@ -187,7 +192,7 @@ const EditCompany = () => {
   };
 
   const removeTelephone = (uid) => {
-    if(uid){
+    if (uid) {
       Swal.fire({
         title: "Konfirmasi",
         text: "Apa anda yakin ingin menghapus item ini?",
@@ -198,24 +203,30 @@ const EditCompany = () => {
         confirmButtonText: "Ya, Hapus!",
         cancelButtonText: "Batal",
       }).then((res) => {
-        if(res.isConfirmed){
+        if (res.isConfirmed) {
           const formData = new FormData();
-          formData.append("_method", "delete")
-          axios.post(`${process.env.REACT_APP_BACKEND_URL}/companies/delete/item/telp/${uid}`, formData,{
-            headers:{
-              Authorization:`Bearer ${token}`
-            }
-          }).then(() => {
-            window.location.reload()
-          })
+          formData.append("_method", "delete");
+          axios
+            .post(
+              `${process.env.REACT_APP_BACKEND_URL}/companies/delete/item/telp/${uid}`,
+              formData,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            )
+            .then(() => {
+              window.location.reload();
+            });
         }
-      })
-    }else{
+      });
+    } else {
       setTelephone((prevState) => {
         const telp = [...prevState];
-        telp.pop()
+        telp.pop();
         return telp;
-      })
+      });
     }
   };
 
@@ -236,61 +247,63 @@ const EditCompany = () => {
       };
       result.push(contact);
     });
-    const filterCont = result.filter((cont) => !oldAssociate.some((old) => old?.contact?.uid === cont.value))
-    return filterCont
+    const filterCont = result.filter(
+      (cont) => !oldAssociate.some((old) => old?.contact?.uid === cont.value)
+    );
+    return filterCont;
   };
-  
+
   const selectOwner = () => {
     const res = [];
     owner?.map((data) => {
       const theme = {
-        value:data.uid,
-        label: data.name
-      }
-      res.push(theme)
-    })
-    return res
-  }
+        value: data.uid,
+        label: data.name,
+      };
+      res.push(theme);
+    });
+    return res;
+  };
   const selectComp = () => {
-    const res = [];
-    parentCompany?.map((data) => {
-      const theme = {
-        value:data.uid,
-        label: data.name
-      }
-      res.push(theme)
-    })
-    return res
-  }
+    return parentCompany
+    .map((data) => ({
+      value: data?.uid,
+      label: data?.name,
+    }))
+    .filter((parent) => uid !== parent.value);
+  };
+
+
   const selectDeals = () => {
     const rest = [];
     deals?.map((data) => {
-      const theme ={
+      const theme = {
         value: data.uid,
-        label: data.deal_name
-      }
-      rest.push(theme)
-    })
-    const filterDeals = rest.filter((deals) => !oldAssociate.some((old) => old?.deals?.uid === deals.value))
+        label: data.deal_name,
+      };
+      rest.push(theme);
+    });
+    const filterDeals = rest.filter(
+      (deals) => !oldAssociate.some((old) => old?.deals?.uid === deals.value)
+    );
     return filterDeals;
-  }
+  };
 
   const handleChangeTelp = (index, value) => {
     const newTelp = [...telephone];
-    if(newTelp[index]){
-      newTelp[index] = {...newTelp[index], number: value}
-    }else{
-      newTelp[index] ={uid: "", number: value}
+    if (newTelp[index]) {
+      newTelp[index] = { ...newTelp[index], number: value };
+    } else {
+      newTelp[index] = { uid: "", number: value };
     }
-    setTelephone(newTelp)
-  }
+    setTelephone(newTelp);
+  };
   const handleDeals = (e) => {
-    setValueDeals(e.map((opt) => opt.value))
-  }
+    setValueDeals(e.map((opt) => opt.value));
+  };
   const handleComp = (e) => {
-    setValueComp(e.map((opt) => opt.value))
-  }
-
+    setValueComp(e.map((opt) => opt.value));
+  };
   useEffect(() => {
     getCompanyDetail(uid, token);
     getOwnerUser(token);
@@ -298,9 +311,15 @@ const EditCompany = () => {
     getSourceCompany(token);
     getCompanyParent(token);
     getContact(token);
-    getDeals(token)
+    getDeals(token);
+    const clearLocalStorage = () => {
+      localStorage.removeItem("parentComp");
+    };
+    window.addEventListener("beforeunload", clearLocalStorage);
+    return () => {
+      window.removeEventListener("beforeunload", clearLocalStorage);
+    };
   }, [uid, token]);
-  console.log(telephone);
   const updateCompany = async (e) => {
     e.preventDefault();
     const formData = new FormData();
@@ -316,20 +335,20 @@ const EditCompany = () => {
     formData.append("postal_code", editCompany.postal_code || "");
     formData.append("number_of_employee", editCompany.number_of_employee || "");
     formData.append("number_of_patient", editCompany.number_of_patient || "");
-    formData.append("parent_company_uid", editCompany.parent_company_uid);
+    formData.append("parent_company_uid", editCompany.parent_company_uid || "");
     formData.append("owner_user_uid", editCompany.owner_user_uid || "");
     formData.append("company_source_uid", editCompany.company_source_uid || "");
     formData.append("company_type_uid", editCompany.company_type_uid || "");
     formData.append("notes", editCompany.notes || "");
-    if(valueDeals){
+    if (valueDeals) {
       valueDeals.forEach((deals, index) => {
-        formData.append(`deals_uid[${index}]`, deals)
-      })
+        formData.append(`deals_uid[${index}]`, deals);
+      });
     }
-    if(valueComp){
+    if (valueComp) {
       valueComp.forEach((comp, index) => {
-        formData.append(`contact_uid[${index}]`, comp)
-      })
+        formData.append(`contact_uid[${index}]`, comp);
+      });
     }
     formData.append("_method", "put");
     console.log("FormData Content:");
@@ -337,25 +356,27 @@ const EditCompany = () => {
       console.log(pair[0] + ": " + pair[1]);
     }
     try {
-      const update = await axios.post(
-        `${process.env.REACT_APP_BACKEND_URL}/companies/${uid}`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      ).then((res) => {
-        Swal.fire({
-          title: res.data.message,
-          text: "Successfully updated contact", 
-          icon:"success"
-        }).then((res) => {
-          if(res.isConfirmed){
-            window.location.reload()
+      const update = await axios
+        .post(
+          `${process.env.REACT_APP_BACKEND_URL}/companies/${uid}`,
+          formData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           }
-        })
-      })
+        )
+        .then((res) => {
+          Swal.fire({
+            title: res.data.message,
+            text: "Successfully updated contact",
+            icon: "success",
+          }).then((res) => {
+            if (res.isConfirmed) {
+              window.location.reload();
+            }
+          });
+        });
     } catch (err) {
       if (err.response) {
         Swal.fire({
@@ -380,17 +401,20 @@ const EditCompany = () => {
       name: "Created By",
       selector: (row) => row.created_by?.name,
       sortable: true,
-      width:'150px'
+      width: "150px",
     },
     {
-      name: "Note", 
+      name: "Note",
       selector: (row) => (
-        <div className="mt-2" style={{ whiteSpace: "normal", fontSize: "12px" }}
+        <div
+          className="mt-2"
+          style={{ whiteSpace: "normal", fontSize: "12px" }}
         >
-          <p dangerouslySetInnerHTML={{ __html: row?.note }} /></div>
+          <p dangerouslySetInnerHTML={{ __html: row?.note }} />
+        </div>
       ),
       wrap: true,
-      width: "200px"
+      width: "200px",
     },
     {
       name: "Created at",
@@ -413,7 +437,7 @@ const EditCompany = () => {
       },
       width: "140px",
     },
-  ]
+  ];
 
   const customStyles = {
     headRow: {
@@ -444,21 +468,26 @@ const EditCompany = () => {
       confirmButtonText: "Ya, Hapus!",
       cancelButtonText: "Batal",
     }).then((res) => {
-      if(res.isConfirmed){
-      const formData = new FormData();
-      formData.append("associate_uid", uid)
-      axios.post(`${process.env.REACT_APP_BACKEND_URL}/companies/delete/item/deals`,formData,{
-        headers:{
-          Authorization: `Bearer ${token}`
-        }
-      }).then(() => {
-        window.location.reload()
-      })
-    }
-    })
-  }
-  const handleDeleteContact =(uid) => {
-    console.log(uid);
+      if (res.isConfirmed) {
+        const formData = new FormData();
+        formData.append("associate_uid", uid);
+        axios
+          .post(
+            `${process.env.REACT_APP_BACKEND_URL}/companies/delete/item/deals`,
+            formData,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          )
+          .then(() => {
+            window.location.reload();
+          });
+      }
+    });
+  };
+  const handleDeleteContact = (uid) => {
     Swal.fire({
       title: "Konfirmasi",
       text: "Apa anda yakin ingin menghapus item ini?",
@@ -469,23 +498,29 @@ const EditCompany = () => {
       confirmButtonText: "Ya, Hapus!",
       cancelButtonText: "Batal",
     }).then((res) => {
-      if(res.isConfirmed){
+      if (res.isConfirmed) {
         const formData = new FormData();
-        formData.append("associate_uid", uid)
-        axios.post(`${process.env.REACT_APP_BACKEND_URL}/companies/delete/item/contact`, formData,{
-          headers:{
-            Authorization:`Bearer ${token}`
-          }
-        }).then(() => {
-          window.location.reload()
-        })
+        formData.append("associate_uid", uid);
+        axios
+          .post(
+            `${process.env.REACT_APP_BACKEND_URL}/companies/delete/item/contact`,
+            formData,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          )
+          .then(() => {
+            window.location.reload();
+          });
       }
-    })
-  }
+    });
+  };
   const deleteLocalStorageParent = () => {
     localStorage.removeItem("parentComp");
-    setFormParentComp([])
-  }
+    setFormParentComp([]);
+  };
   // console.log(oldParentCompany.parent);
   return (
     <body id="body">
@@ -518,7 +553,7 @@ const EditCompany = () => {
           <form onSubmit={updateCompany}>
             <div className="row">
               <div className="col-md-12">
-              <div className="float-end mb-3">
+                <div className="float-end mb-3">
                   <button className="btn btn-primary me-2" type="submit">
                     Save Changes
                   </button>
@@ -569,33 +604,45 @@ const EditCompany = () => {
                       />
                     </FloatingLabel>
                     <Form.Group className="mb-3">
-                      <Select options={selectOwner()} value={selectOwner().find((e) => e.value === editCompany.owner_user_uid)} onChange={(e) => setEditCompany({
-                        ...editCompany, owner_user_uid: e.value
-                      })}  placeholder="Select Owner" />
+                      <Select
+                        options={selectOwner()}
+                        value={selectOwner().find(
+                          (e) => e.value === editCompany.owner_user_uid
+                        )}
+                        onChange={(e) =>
+                          setEditCompany({
+                            ...editCompany,
+                            owner_user_uid: e.value,
+                          })
+                        }
+                        placeholder="Select Owner"
+                      />
                     </Form.Group>
                     {telephone.map((tel, index) => (
                       <div key={index}>
                         <Form.Group className="mb-3">
                           <Form.Label>
-                            Telephone #{index + 1} <span style={{ color: "red" }} className="fs-6">
-                                *
-                              </span>
+                            Telephone #{index + 1}{" "}
+                            <span style={{ color: "red" }} className="fs-6">
+                              *
+                            </span>
                           </Form.Label>
                           <Form.Control
                             type="number"
                             value={tel.number}
-                            onChange={(e) => handleChangeTelp(index, e.target.value)
+                            onChange={(e) =>
+                              handleChangeTelp(index, e.target.value)
                             }
                           />
                         </Form.Group>
-                          <Button
-                            variant="danger"
-                            onClick={() => removeTelephone(tel.uid)}
-                            style={{ fontSize: "0.65rem" }}
-                            className="mb-1"
-                          >
-                            Remove
-                          </Button>
+                        <Button
+                          variant="danger"
+                          onClick={() => removeTelephone(tel.uid)}
+                          style={{ fontSize: "0.65rem" }}
+                          className="mb-1"
+                        >
+                          Remove
+                        </Button>
                       </div>
                     ))}
                     <Button
@@ -738,39 +785,85 @@ const EditCompany = () => {
                     </h5>
                   </Card.Header>
                   <Card.Body>
-                    {oldAssociate?.map((data, index) => (
-                      data?.deals ?(
-                      <Card className="shadow p-2">
-                        <div className="row d-flex">
-                          <>
-                          <Col md={10} sm={10} key={index}>
-                            <div className="d-flex">
-                              <img src={IconDeals} alt={IconDeals} className="ms-1 me-3 mt-3" style={{ width:"30px", height:"30px" }} />
-                              <Col md={12} sm={12}>
-                              <p className="ms-1 mt-2 me-3" style={{
-                                      fontSize: "10px",
-                                      whiteSpace: "normal", 
-                                    }}> Name Deals : <strong className="ms-2">{data?.deals?.deal_name ?? null}</strong> </p>
-                                    <p className="ms-1" style={{
-                                      fontSize: "10px",
-                                      marginTop: "-8px",
-                                    }}>Stage : <strong className="ms-2">{data?.deals?.staging?.name}</strong></p>
-                                    <p className="ms-1" style={{ fontSize:"10PX", marginTop:"-8px" }}>Deal Size : <strong className="ms-2">Rp.{new Intl.NumberFormat().format(data?.deals?.deal_size)}</strong></p>
-                            </Col>
-                            </div>
-                          </Col>
-                          <Col md={2} sm={2} style={{ marginTop:"-8px" }}>
-                            <a onClick={() => handleDeleteDeals(data.uid)} className="ms-1" style={{ cursor:"pointer" }}>
-                            <i className="bi bi-x fs-5 text-danger"></i>
-                            </a>
-                          </Col>
-                          </>
-                        </div>
-                      </Card>
-                      ) : null 
-                    ))}
+                    {oldAssociate?.map((data, index) =>
+                      data?.deals ? (
+                        <Card className="shadow p-2">
+                          <div className="row d-flex">
+                            <>
+                              <Col md={10} sm={10} key={index}>
+                                <div className="d-flex">
+                                  <img
+                                    src={IconDeals}
+                                    alt={IconDeals}
+                                    className="ms-1 me-3 mt-3"
+                                    style={{ width: "30px", height: "30px" }}
+                                  />
+                                  <Col md={12} sm={12}>
+                                    <p
+                                      className="ms-1 mt-2 me-3"
+                                      style={{
+                                        fontSize: "10px",
+                                        whiteSpace: "normal",
+                                      }}
+                                    >
+                                      {" "}
+                                      Name Deals :{" "}
+                                      <strong className="ms-2">
+                                        {data?.deals?.deal_name ?? null}
+                                      </strong>{" "}
+                                    </p>
+                                    <p
+                                      className="ms-1"
+                                      style={{
+                                        fontSize: "10px",
+                                        marginTop: "-8px",
+                                      }}
+                                    >
+                                      Stage :{" "}
+                                      <strong className="ms-2">
+                                        {data?.deals?.staging?.name}
+                                      </strong>
+                                    </p>
+                                    <p
+                                      className="ms-1"
+                                      style={{
+                                        fontSize: "10PX",
+                                        marginTop: "-8px",
+                                      }}
+                                    >
+                                      Deal Size :{" "}
+                                      <strong className="ms-2">
+                                        Rp.
+                                        {new Intl.NumberFormat().format(
+                                          data?.deals?.deal_size
+                                        )}
+                                      </strong>
+                                    </p>
+                                  </Col>
+                                </div>
+                              </Col>
+                              <Col md={2} sm={2} style={{ marginTop: "-8px" }}>
+                                <a
+                                  onClick={() => handleDeleteDeals(data.uid)}
+                                  className="ms-1"
+                                  style={{ cursor: "pointer" }}
+                                >
+                                  <i className="bi bi-x fs-5 text-danger"></i>
+                                </a>
+                              </Col>
+                            </>
+                          </div>
+                        </Card>
+                      ) : null
+                    )}
                     <Form.Group className="mb-3">
-                      <Select placeholder="Select Deals" isMulti options={selectDeals()} onChange={(e) => handleDeals(e)} closeMenuOnSelect={false} />
+                      <Select
+                        placeholder="Select Deals"
+                        isMulti
+                        options={selectDeals()}
+                        onChange={(e) => handleDeals(e)}
+                        closeMenuOnSelect={false}
+                      />
                     </Form.Group>
                     <div className="text-center">
                       <a
@@ -801,33 +894,79 @@ const EditCompany = () => {
                     </h5>
                   </Card.Header>
                   <Card.Body>
-                    {oldAssociate?.map((data, index) => (
+                    {oldAssociate?.map((data, index) =>
                       data.contact ? (
                         <Card className="shadow p-2">
-                        <div className="row d-flex">
-                          <>
-                          <Col md={10} sm={10} key={index}>
-                            <div className="d-flex">
-                              <img src={IconContact} alt={IconContact} className="m-2" style={{ width:"30px", height:"30px" }} />
-                              <Col md={12} sm={12}>
-                                <p className="ms-1" style={{ fontSize:"10px", whiteSpace:"normal" }}>Name : <strong className="ms-2">{data?.contact?.name ?? "-"}</strong></p>
-                                <p className="ms-1" style={{ fontSize:"10px", whiteSpace:"normal" }}>No.Telp : <strong className="ms-2" style={{  fontSize: "10px", marginTop: "-8px", }}>{data?.contact?.phone[0]?.number ?? "-"}</strong></p>
-                                <p className="ms-1" style={{ fontSize:"10px", marginTop: "-8px" }}>Email : <strong className="ms-2">{data?.contact?.email ?? "-"}</strong></p>
-                                
+                          <div className="row d-flex">
+                            <>
+                              <Col md={10} sm={10} key={index}>
+                                <div className="d-flex">
+                                  <img
+                                    src={IconContact}
+                                    alt={IconContact}
+                                    className="m-2"
+                                    style={{ width: "30px", height: "30px" }}
+                                  />
+                                  <Col md={12} sm={12}>
+                                    <p
+                                      className="ms-1"
+                                      style={{
+                                        fontSize: "10px",
+                                        whiteSpace: "normal",
+                                      }}
+                                    >
+                                      Name :{" "}
+                                      <strong className="ms-2">
+                                        {data?.contact?.name ?? "-"}
+                                      </strong>
+                                    </p>
+                                    <p
+                                      className="ms-1"
+                                      style={{
+                                        fontSize: "10px",
+                                        whiteSpace: "normal",
+                                      }}
+                                    >
+                                      No.Telp :{" "}
+                                      <strong
+                                        className="ms-2"
+                                        style={{
+                                          fontSize: "10px",
+                                          marginTop: "-8px",
+                                        }}
+                                      >
+                                        {data?.contact?.phone[0]?.number ?? "-"}
+                                      </strong>
+                                    </p>
+                                    <p
+                                      className="ms-1"
+                                      style={{
+                                        fontSize: "10px",
+                                        marginTop: "-8px",
+                                      }}
+                                    >
+                                      Email :{" "}
+                                      <strong className="ms-2">
+                                        {data?.contact?.email ?? "-"}
+                                      </strong>
+                                    </p>
+                                  </Col>
+                                </div>
                               </Col>
-                            </div>
-                          </Col>
-                          <Col md={2} sm={2} style={{ marginTop: "-8px" }}>
-                            <a onClick={() => handleDeleteContact(data.uid)}  style={{ cursor:"pointer" }} className="ms-1">
-                            <i className="bi bi-x fs-5 text-danger"></i>
-                            </a>
-                          </Col>
-                          </>
-                        </div>
-                      </Card>
-                      ):null
-                     
-                    ))}
+                              <Col md={2} sm={2} style={{ marginTop: "-8px" }}>
+                                <a
+                                  onClick={() => handleDeleteContact(data.uid)}
+                                  style={{ cursor: "pointer" }}
+                                  className="ms-1"
+                                >
+                                  <i className="bi bi-x fs-5 text-danger"></i>
+                                </a>
+                              </Col>
+                            </>
+                          </div>
+                        </Card>
+                      ) : null
+                    )}
                     <FloatingLabel controlId="floatingInput" className="mb-3">
                       <Select
                         closeMenuOnSelect={false}
@@ -899,7 +1038,8 @@ const EditCompany = () => {
                                 >
                                   No.Telp : <br />
                                   <strong className="mt-1">
-                                    {oldParentCompany?.phone[0]?.number ?? "-"}
+
+                                    {oldParentCompany?.phone[0]?.number || "-"}
                                   </strong>
                                 </p>
                           </Col>
@@ -920,7 +1060,7 @@ const EditCompany = () => {
                           });
                         }} />
                     </Form.Group> )}
-                 
+
                     <div className="text-center">
                       <a
                         //   onClick={handleShowCanvasDeals}
@@ -961,12 +1101,19 @@ const EditCompany = () => {
 
                 <Card className="shadow">
                   <Card.Header>
-                  <h6 className="fw-bold mt-2">History</h6>
+                    <h6 className="fw-bold mt-2">History</h6>
                   </Card.Header>
                   <Card.Body>
-                    <DataTable columns={columnHistory} data={history} customStyles={customStyles} pagination defaultSortFieldId={1} paginationComponentOptions={paginationComponentOptions} />
+                    <DataTable
+                      columns={columnHistory}
+                      data={history}
+                      customStyles={customStyles}
+                      pagination
+                      defaultSortFieldId={1}
+                      paginationComponentOptions={paginationComponentOptions}
+                    />
                   </Card.Body>
-                  </Card>    
+                </Card>
               </div>
             </div>
           </form>

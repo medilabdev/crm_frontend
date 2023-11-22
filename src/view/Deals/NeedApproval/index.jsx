@@ -43,6 +43,7 @@ const NeedsApproval = () => {
       icon: "question",
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#d33",
+      showCancelButton: true,
       confirmButtonText: "Approve",
       cancelButtonText: "Batal",
     }).then((res) => {
@@ -75,6 +76,7 @@ const NeedsApproval = () => {
       icon: "question",
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#d33",
+      showCancelButton: true,
       confirmButtonText: "Reject",
       cancelButtonText: "Batal",
     }).then((res) => {

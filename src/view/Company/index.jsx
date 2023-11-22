@@ -26,6 +26,7 @@ const Company = () => {
   const toggleSideBarCard = () => {
     setIsSideBar(!isSideBar);
   };
+
   const filterClass = isSideBar
     ? "col-md-3 d-block border-end"
     : "col-sm-0 d-none";
@@ -260,7 +261,6 @@ const Company = () => {
     });
     return result;
   };
-
   const dataSource = () => {
     const result = [];
     source?.map((data) => {
@@ -712,7 +712,6 @@ const Company = () => {
                             placeholder="Select Owner"
                             options={dataUser()}
                             isMulti
-                            closeMenuOnSelect={false}
                             onChange={(select) => handleSelectUser(select)}
                           />
                         </div>

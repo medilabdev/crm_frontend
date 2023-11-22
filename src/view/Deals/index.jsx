@@ -18,6 +18,23 @@ const Deals = () => {
   const [selectUid, setSelectUid] = useState([]);
   const [owner, setOwner] = useState([]);
   const [deals, setDataDeals] = useState([]);
+  const [searchMultiple, setSearchMultiple] = useState([]);
+  const [stage, setStage] = useState([])
+  const [searchOwner, setSearchOwner] = useState([])
+  const [searcStage, setSearchStage] = useState([])
+  const getStage = () => {
+    axios.get(`${process.env.REACT_APP_BACKEND_URL}/staging-masters`, {
+      headers:{
+        Authorization: `Bearer ${token}`
+      }
+    }).then((res) => setStage(res.data.data))
+    .catch((err) => {
+      if (err.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+    });
+  }
   const getOwnerUser = () => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
@@ -139,10 +156,22 @@ const Deals = () => {
     });
     return result;
   };
-
-  useEffect(() => {
+  const selectStage = () => {
+    const res = [];
+    stage?.map((data) => {
+      const resThem = {
+        value: data.uid,
+        label: data.name
+      }
+      res.push(resThem)
+    })
+    return res
+  }
+  console.log(stage);
+    useEffect(() => {
     getOwnerUser(token);
     getDeals(token);
+    getStage(token)
   }, [token]);
 
   const uid = localStorage.getItem("uid");
@@ -156,8 +185,12 @@ const Deals = () => {
       setSearch(filter);
     }
   };
-
-  const [searchMultiple, setSearchMultiple] = useState([]);
+  const handleSelectOwner = (e) => {
+    setSearchOwner(e.map((data) => data.value))
+  }
+  const handleSelectStage = (e) => {
+    setSearchStage(e.map((data) => data.value))
+  }
   const handleSearchMultiple = (e) => {
     setSearchMultiple({
       ...searchMultiple,
@@ -207,9 +240,9 @@ const Deals = () => {
                     </Link>
                   </li>
                   <li>
-                    <Link className="dropdown-item" to="">
+                    <a className="dropdown-item text-decoration-none" href="/deals/upload-deals">
                       Upload Deals
-                    </Link>
+                    </a>
                   </li>
                   {/* <li>
                     <Link className="dropdown-item" to="">
@@ -295,50 +328,14 @@ const Deals = () => {
                     <Select
                       options={selectOwner()}
                       isMulti
+                      onChange={(value)=> handleSelectOwner(value)}
                       placeholder="Select Owner"
                     />
                   </div>
                 </div>
-                {/* <div className="row">
-                  <div className="col">
-                    <select
-                      name=""
-                      id=""
-                      className="form-select"
-                      style={{ fontSize: "0.85rem" }}
-                    >
-                      <option value="">Team</option>
-                      <option value="">1</option>
-                      <option value="">2</option>
-                    </select>
-                  </div>
-                </div> */}
                 <div className="row mt-2">
                   <div className="col">
-                    <select
-                      name=""
-                      id=""
-                      className="form-select"
-                      style={{ fontSize: "0.85rem" }}
-                    >
-                      <option value="">Stage</option>
-                      <option value="">1</option>
-                      <option value="">2</option>
-                    </select>
-                  </div>
-                </div>
-                <div className="row mt-2">
-                  <div className="col">
-                    <select
-                      name=""
-                      id=""
-                      className="form-select"
-                      style={{ fontSize: "0.85rem" }}
-                    >
-                      <option value="">Status</option>
-                      <option value="">1</option>
-                      <option value="">2</option>
-                    </select>
+                    <Select options={selectStage()} onChange={(e) =>handleSelectStage(e)} isMulti placeholder="Select Stage" />
                   </div>
                 </div>
                 <div className="row mt-5">

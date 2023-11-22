@@ -282,7 +282,7 @@ const EditDeals = () => {
   const handlePrice = (e) => {
     setValueDeals({
       ...valueDeals,
-      deal_size: e.target.value,
+      [e.target.name]: e.target.value,
     });
   };
   useEffect(() => {
@@ -483,7 +483,7 @@ const EditDeals = () => {
     e.preventDefault();
     const formData = new FormData();
     formData.append("deal_name", valueDeals.deal_name);
-    formData.append("deal_size", valueDeals.deal_size);
+    formData.append("deal_size", valueDeals.deal_size || totalPrice);
     formData.append("priority", valueDeals.priority_uid);
     formData.append("deal_status", valueDeals.deal_status);
     formData.append("deal_category", valueDeals.deal_category);
@@ -919,7 +919,7 @@ const EditDeals = () => {
                                   >
                                     No.Telp :
                                     <strong className="ms-1">
-                                      {data.contact?.phone[0]?.number ?? "-"}
+                                      {data.contact?.phone[0]?.number || "-"}
                                     </strong>
                                   </p>
                                 </Col>
