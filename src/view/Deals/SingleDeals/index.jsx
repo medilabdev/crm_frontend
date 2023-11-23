@@ -402,7 +402,6 @@ const SingleDeals = () => {
           },
         })
         .then((res) => {
-          console.log(res);
           Swal.fire({
             title: res.data.message,
             text: "Successfullly created deals",

@@ -46,6 +46,7 @@ import BulkChangeTask from "../view/Task/BulkChange";
 import UploadFileTask from "../view/Task/UploadFile";
 import DetailNeedApproval from "../view/Deals/NeedApproval/Detail";
 import UploadDeals from "../view/Deals/SingleDeals/UploadDeals";
+import CategoryExpanse from "../view/Properties/CategoryExpanse";
 const Login = ({ children }) => {
   const token = localStorage.getItem("token");
   if (!token) {
@@ -309,7 +310,15 @@ function Router() {
             </Login>
           }
         />
-        <Route exact path="/deals/upload-deals" element={<Login><UploadDeals /></Login>} />
+        <Route
+          exact
+          path="/deals/upload-deals"
+          element={
+            <Login>
+              <UploadDeals />
+            </Login>
+          }
+        />
         <Route
           exact
           path="/task"
@@ -388,6 +397,15 @@ function Router() {
           element={
             <Login>
               <DealsCategory />
+            </Login>
+          }
+        />
+        <Route
+          exact
+          path="/properties/category-expanse"
+          element={
+            <Login>
+              <CategoryExpanse />
             </Login>
           }
         />
