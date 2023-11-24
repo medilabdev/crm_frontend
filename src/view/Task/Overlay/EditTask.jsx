@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Form, Offcanvas } from 'react-bootstrap'
+import { Form, Modal, Offcanvas } from 'react-bootstrap'
 import ReactQuill from 'react-quill'
 import Select from "react-select"
 import axios from 'axios'
@@ -10,6 +10,28 @@ const EditTask = ({visible, onClose, uid}) => {
     const [company, setCompany] = useState([])
     const [deals, setDeals] = useState([])
     const [user, setUser] = useState([])
+    const [oldTask, setOldTask] = useState([])
+
+    const getOldTask = (token, uid) => {
+        axios.get(`${process.env.REACT_APP_BACKEND_URL}/tasks/${uid}`, {
+            headers:{
+                Authorization:`Bearer ${token}`
+            }
+        }).then((res) => {
+            const valueOld = res.data.data;
+            setOldTask({
+                name: valueOld.task_name,
+                plan:valueOld.plan,
+                result: valueOld.result,
+            })
+        })
+        .catch((err) => {
+            if (err.response.data.message === "Unauthenticated.") {
+              localStorage.clear();
+              window.location.href = "/login";
+            }
+          });
+    }
     const getContact = () => {
         axios.get(`${process.env.REACT_APP_BACKEND_URL}/contacts`, {
             headers:{
@@ -113,18 +135,19 @@ const EditTask = ({visible, onClose, uid}) => {
     }
     useEffect(() => {
         if(visible && uid){
+            getOldTask(token, uid)
             getContact(token)
             getCompany(token)
             getDeals(token)
             getUsers(token)
         }
-    }, [token])
+    }, [token, uid])
   return (
-    <Offcanvas show={visible} onHide={onClose} placement='end' style={{ width: '40rem', height: '45rem' }}>
-        <Offcanvas.Header closeButton>
-            <Offcanvas.Title>Edit Task</Offcanvas.Title>
-        </Offcanvas.Header>
-        <Offcanvas.Body>
+    <Modal show={visible} onHide={onClose} size='lg'>
+        <Modal.Header closeButton>
+            <Modal.Title>Edit Task</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
         <form onSubmit="">
                 <div className="container">
                     <div className="row">
@@ -210,8 +233,8 @@ const EditTask = ({visible, onClose, uid}) => {
           </button>
                 </div>
             </form>
-        </Offcanvas.Body>
-    </Offcanvas>
+        </Modal.Body>
+    </Modal>
   )
 }
 

@@ -32,9 +32,8 @@ const Task = () => {
   const DataTableTask = isSideFilter ? "col-md-9" : "col-md-12";
   const IconFilter = isSideFilter ? "bi bi-x-lg" : "bi bi-funnel";
 
-
-  const getTask = () => {
-    axios.get(`${process.env.REACT_APP_BACKEND_URL}/task`, {
+  const getTask = () => { 
+    axios.get(`${process.env.REACT_APP_BACKEND_URL}/tasks`, {
       headers:{
         Authorization: `Bearer ${token}`
       }
@@ -44,7 +43,7 @@ const Task = () => {
     }
     )
     .catch((err) => {
-      if (err.response.data.message === "Unauthenticated.") {
+      if (err.response.data.message === "Unauthenticated") {
         localStorage.clear();
         window.location.href = "/login";
       }
@@ -57,7 +56,7 @@ const Task = () => {
       }
     }).then((res) => setOwner(res.data.data))
     .catch((err) => {
-      if (err.response.data.message === "Unauthenticated.") {
+      if (err.response.data.message === "Unauthenticated") {
         localStorage.clear();
         window.location.href = "/login";
       }
@@ -182,7 +181,6 @@ const Task = () => {
 
     }
   } 
-
   return (
     <body id="body">
       <Topbar />

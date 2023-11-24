@@ -14,8 +14,8 @@ import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import Select from "react-select";
-import IconCompany from "../../assets/img/condo.png"
-import IconMoney from "../../assets/img/coin.png"
+import IconCompany from "../../assets/img/condo.png";
+import IconMoney from "../../assets/img/coin.png";
 
 const Contact = () => {
   const token = localStorage.getItem("token");
@@ -253,7 +253,9 @@ const Contact = () => {
           <div className="d-flex align-items-center">
             <img src={IconImage} className="rounded-circle" />
             <div className="mt-3">
-              <span className="fw-semibold" style={{ whiteSpace:"normal" }}>{row.name}</span>
+              <span className="fw-semibold" style={{ whiteSpace: "normal" }}>
+                {row.name}
+              </span>
               <p
                 className="mt-1"
                 style={{
@@ -273,31 +275,46 @@ const Contact = () => {
       name: "Contact Info",
       selector: (row) => row?.phone?.[0]?.number,
       sortable: true,
-      width:"130px"
+      width: "130px",
     },
     {
       name: "Associated With",
       selector: (row) => (
         <div className="d-flex">
-          {console.log(row)}
-          {row?.associate?.slice(0,3).map((item, index) => (
-            <OverlayTrigger placement="top" overlay={<Tooltip id={`tooltip-${item?.company?.name}`}>
-              {item?.company?.name ? item?.company?.name : null}
-              {item?.deals?.deal_name ? item?.deals?.deal_name : null }
-              <br />
-              {item?.deals?.deal_size ? `Rp. ${new Intl.NumberFormat().format(item?.deals?.deal_size)}` :null}
-            </Tooltip>}>
-            <div>
-              {item?.company ? (
-                <img className="ms-1" src={IconCompany}  style={{ width: "18px" }} data-tip={item?.company?.name} />
-              ) : null}
-               {item?.deals ? (
-                  <img  className="ms-1"
-                  src={IconMoney}
-                  style={{ width: "18px" }}
-                  data-tip={item?.deals?.dealName} />
+          {row?.associate?.slice(0, 3).map((item, index) => (
+            <OverlayTrigger
+              placement="top"
+              overlay={
+                <Tooltip id={`tooltip-${item?.company?.name}`}>
+                  {item?.company?.name ? item?.company?.name : null}
+                  {item?.deals?.deal_name ? item?.deals?.deal_name : null}
+                  <br />
+                  {item?.deals?.deal_size
+                    ? `Rp. ${new Intl.NumberFormat().format(
+                        item?.deals?.deal_size
+                      )}`
+                    : null}
+                </Tooltip>
+              }
+            >
+              <div>
+                {item?.company ? (
+                  <img
+                    className="ms-1"
+                    src={IconCompany}
+                    style={{ width: "18px" }}
+                    data-tip={item?.company?.name}
+                  />
                 ) : null}
-            </div>
+                {item?.deals ? (
+                  <img
+                    className="ms-1"
+                    src={IconMoney}
+                    style={{ width: "18px" }}
+                    data-tip={item?.deals?.dealName}
+                  />
+                ) : null}
+              </div>
             </OverlayTrigger>
           ))}
         </div>

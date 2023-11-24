@@ -226,9 +226,9 @@ const Accounting = () => {
     inputExpanseReff.forEach((exRef, index) => {
       formData.append(`expense[${index}][description]`, exRef.reff_exp || "");
     });
-    for (const pair of formData.entries()) {
-      console.log(pair[0] + ": " + pair[1]);
-    }
+    // for (const pair of formData.entries()) {
+    //   console.log(pair[0] + ": " + pair[1]);
+    // }
     axios
       .post(
         `${process.env.REACT_APP_BACKEND_URL}/deals/payment/${uid}`,
