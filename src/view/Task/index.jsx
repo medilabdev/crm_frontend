@@ -161,7 +161,7 @@ const Task = () => {
     const select = e.selectedRows.map((row) => row.uid);
     setSelectUid(select)
   }
-  
+  console.log(selectUid);
   const handleFilter = (e) => {
     const data = task.filter((row) => {
       return row.task_name.toLowerCase().includes(e.target.value.toLowerCase())
@@ -178,7 +178,26 @@ const Task = () => {
       cancelButtonText: "Batal",
     })
     if(isResult.isConfirmed){
-
+      const formData = new FormData()
+      selectUid.forEach((uid, index) => {
+        formData.append(`task[${index}][uid]`, uid)
+      })
+      formData.append("_method", "delete")
+      axios.post(`${process.env.REACT_APP_BACKEND_URL}/tasks/item/delete`, formData,{
+        headers:{
+          Authorization: `Bearer ${token}`
+        }
+      }).then((res) => {
+        Swal.fire({
+          title:res.data.message,
+          text: "Delete Successfully",
+          icon: "success"
+        }).then((res) => {
+          if(res.isConfirmed){
+            window.location.reload()
+          }
+        })
+      })
     }
   } 
   return (

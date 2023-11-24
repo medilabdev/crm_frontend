@@ -6,6 +6,7 @@ import IconCompany from "../../assets/img/condo.png";
 import IconContact from "../../assets/img/telephone-call.png";
 import IconDeals from "../../assets/img/coin.png";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
+import axios from "axios";
 
 const DatatableTask = ({ data, selectUidDataTable }) => {
   const token = localStorage.getItem("token");
@@ -13,8 +14,7 @@ const DatatableTask = ({ data, selectUidDataTable }) => {
   const handleCloseEdit = () => {
     setEditTask(false);
   };
-  const handleDelete = async (e) => {
-    e.preventDefault();
+  const handleDelete = async (uid) => {
     const isResult = await Swal.fire({
       title: "Hapus Task!.. apakah kamu yakin?",
       text: "Anda tidak dapat mengembalikan data ini setelah menghapusnya!",
@@ -24,6 +24,24 @@ const DatatableTask = ({ data, selectUidDataTable }) => {
       cancelButtonText: "Batal",
     });
     if (isResult.isConfirmed) {
+      const formData = new FormData()
+      formData.append("task[0][uid]", uid)
+      formData.append("_method", "delete")
+      axios.post(`${process.env.REACT_APP_BACKEND_URL}/tasks/item/delete`, formData,{
+        headers:{
+          Authorization: `Bearer ${token}`
+        }
+      }).then((res) => {
+        Swal.fire({
+          title:res.data.message,
+          text: "Delete Successfully",
+          icon: "success"
+        }).then((res) => {
+          if(res.isConfirmed){
+            window.location.reload()
+          }
+        })
+      })
     }
   };
 
@@ -49,7 +67,6 @@ const DatatableTask = ({ data, selectUidDataTable }) => {
     {
       name: "Associated",
       selector: (row) => (
-        console.log(row),
         (
           <div className="d-flex">
             <OverlayTrigger
@@ -169,7 +186,7 @@ const DatatableTask = ({ data, selectUidDataTable }) => {
           </button>
           <button
             className="ms-2 icon-button"
-            onClick={handleDelete}
+            onClick={()=> handleDelete(row.uid)}
             title="Delete"
           >
             <i className="bi bi-trash-fill danger"></i>
