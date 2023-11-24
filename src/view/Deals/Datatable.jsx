@@ -10,7 +10,6 @@ import IconCompany from "../../assets/img/condo.png";
 import IconPhone from "../../assets/img/telephone-call.png"
 
 const DataTableComponet = ({ data, selectUidDataTable }) => {
-  console.log(data);
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
   const columns = [

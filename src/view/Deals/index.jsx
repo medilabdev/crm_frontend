@@ -18,6 +18,98 @@ const Deals = () => {
   const [selectUid, setSelectUid] = useState([]);
   const [owner, setOwner] = useState([]);
   const [deals, setDataDeals] = useState([]);
+  const [searchMultiple, setSearchMultiple] = useState([]);
+  const [stage, setStage] = useState([]);
+  const [priority, setPriority] = useState([]);
+  const [searchOwner, setSearchOwner] = useState([]);
+  const [searchStage, setSearchStage] = useState([]);
+  const [company, setCompany] = useState([]);
+  const [contact, setContact] = useState([]);
+  const [product, setProduct] = useState([]);
+  const [packageProduct, setPackageProduct] = useState([]);
+  const [searchCompany, setSearchCompany] = useState([]);
+  const [searchContact, setSearchContact] = useState([]);
+  const [searchProduct, setSearchProduct] = useState([]);
+  const [searchPackageProduct, setSearchPackageProduct] = useState([]);
+  const [searchPriority, setSearchPriority] = useState([]);
+  const getPackageProduct = () => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/packages-product`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => setPackageProduct(res.data.data))
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated.") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
+
+  const getProduct = () => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/products`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => setProduct(res.data.data))
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated.") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
+  const getContact = () => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/contacts`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => setContact(res.data.data))
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated.") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
+
+  const getCompany = () => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/companies`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => setCompany(res.data.data))
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated.") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
+
+  const getStage = () => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/staging-masters`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => setStage(res.data.data))
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated.") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
   const getOwnerUser = () => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
@@ -26,6 +118,21 @@ const Deals = () => {
         },
       })
       .then((res) => setOwner(res.data.data))
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated.") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
+  const getPriority = () => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/priorities`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => setPriority(res.data.data))
       .catch((err) => {
         if (err.response.data.message === "Unauthenticated.") {
           localStorage.clear();
@@ -140,9 +247,87 @@ const Deals = () => {
     return result;
   };
 
+  const selectStage = () => {
+    const res = [];
+    stage?.map((data) => {
+      const resThem = {
+        value: data.uid,
+        label: data.name,
+      };
+      res.push(resThem);
+    });
+    return res;
+  };
+
+  const selectPriority = () => {
+    const res = [];
+    priority?.map((data) => {
+      const theme = {
+        value: data.uid,
+        label: data.name,
+      };
+      res.push(theme);
+    });
+    return res;
+  };
+
+  const selectCompany = () => {
+    const res = [];
+    company?.map((data) => {
+      const theme = {
+        value: data.uid,
+        label: data.name,
+      };
+      res.push(theme);
+    });
+    return res;
+  };
+
+  const selectContact = () => {
+    const res = [];
+    contact?.map((data) => {
+      const theme = {
+        value: data.uid,
+        label: data.name,
+      };
+      res.push(theme);
+    });
+    return res;
+  };
+
+  const selectProduct = () => {
+    const res = [];
+    product?.map((data) => {
+      const theme = {
+        value: data.uid,
+        label: data.name,
+      };
+      res.push(theme);
+    });
+    return res;
+  };
+
+  const selectPackageProduct = () => {
+    const res = [];
+    packageProduct?.map((data) => {
+      const theme = {
+        value: data.uid,
+        label: data.name,
+      };
+      res.push(theme);
+    });
+    return res;
+  };
+
   useEffect(() => {
     getOwnerUser(token);
     getDeals(token);
+    getStage(token);
+    getPriority(token);
+    getCompany(token);
+    getContact(token);
+    getProduct(token);
+    getPackageProduct(token);
   }, [token]);
 
   const uid = localStorage.getItem("uid");
@@ -156,14 +341,57 @@ const Deals = () => {
       setSearch(filter);
     }
   };
+  const handleSelectOwner = (e) => {
+    setSearchOwner(e.map((data) => data.value));
+  };
+  const handleSelectStage = (e) => {
+    setSearchStage(e.map((data) => data.value));
+  };
+  const handleSelectCompany = (e) => {
+    const valComp = e.map((data) => data.value)
+    const result = valComp.reduce((acc, value) => acc.concat(value), [])
+    setSearchCompany(result);
+  };
 
-  const [searchMultiple, setSearchMultiple] = useState([]);
+  const handleSelectContact = (e) => {
+    const valCont = e.map((data) => data.value)
+    const result = valCont.reduce((acc, value) => acc.concat(value), [])
+    setSearchContact(result);
+  };
+  const handleSelectProduct = (e) => {
+    const valCont = e.map((data) => data.value)
+    const result = valCont.reduce((acc, value) => acc.concat(value), [])
+    setSearchProduct(result);
+  };
+  const handleSelectPackageProduct = (e) => {
+    setSearchPackageProduct(e.map((data) => data.value));
+  };
+  const handleSelectPriority = (e) => {
+    setSearchPriority(e.map((data) => data.value));
+  };
   const handleSearchMultiple = (e) => {
     setSearchMultiple({
       ...searchMultiple,
       [e.target.name]: e.target.value,
     });
   };
+  console.log(searchProduct);
+  const handleSubmitSearchMultiple = () => {
+    const filterData = deals.filter((row) => {
+      return (
+        (!searchMultiple.deal_name || row.deal_name?.toLowerCase().includes(searchMultiple?.deal_name?.toLowerCase())) && 
+        (!searchMultiple.deal_size || row.deal_size?.toString().includes(searchMultiple.deal_size.toString())) && 
+        (!searchMultiple.created_at || row.created_at?.includes(searchMultiple?.created_at)) &&
+        (!searchMultiple.updated_at || row.updated_at?.includes(searchMultiple?.updated_at)) && 
+        (searchOwner.length === 0 || searchOwner.includes(row.owner_user_uid))&&
+        (searchStage.length === 0 || searchStage.includes(row.staging_uid))&&
+        (searchCompany.length === 0 || searchCompany.includes(row.uid))
+        
+      )
+    })
+    setSearch(filterData)
+  };
+
   return (
     <body id="body">
       <Topbar />
@@ -207,9 +435,12 @@ const Deals = () => {
                     </Link>
                   </li>
                   <li>
-                    <Link className="dropdown-item" to="">
+                    <a
+                      className="dropdown-item text-decoration-none"
+                      href="/deals/upload-deals"
+                    >
                       Upload Deals
-                    </Link>
+                    </a>
                   </li>
                   {/* <li>
                     <Link className="dropdown-item" to="">
@@ -267,150 +498,126 @@ const Deals = () => {
         <Card className="shadow">
           <div className="row">
             <div id="filter" className={`${filterClass}`}>
-              <div className="container">
-                <div className="row mt-3">
-                  <div className="col">
-                    <h6>
-                      <i class="bi bi-funnel ml"></i>
-                      <span className="fw-semibold ms-2">Filter</span>
-                    </h6>
+              <form onSubmit={handleSubmitSearchMultiple}>
+                <div className="container">
+                  <div className="row mt-3">
+                    <div className="col">
+                      <h6>
+                        <i class="bi bi-funnel ml"></i>
+                        <span className="fw-semibold ms-2 fs-6">Filter</span>
+                      </h6>
+                    </div>
                   </div>
-                </div>
-                <div className="row">
-                  <div className="col">
-                    <select
-                      name="select"
-                      id=""
-                      className="form-select"
-                      style={{ fontSize: "0.85rem" }}
-                      onChange={handleDealsMyOrPerson}
-                    >
-                      <option value="all">All Contact</option>
-                      <option value="my">My Contact</option>
-                    </select>
+
+                  <div className="row">
+                    <div className="col">
+                      <select
+                        name="select"
+                        id=""
+                        className="form-select"
+                        style={{ fontSize: "0.85rem" }}
+                        onChange={handleDealsMyOrPerson}
+                      >
+                        <option value="all">All Contact</option>
+                        <option value="my">My Contact</option>
+                      </select>
+                    </div>
                   </div>
-                </div>
-                <div className="row mt-2">
-                  <div className="col mb-2">
-                    <Select
-                      options={selectOwner()}
-                      isMulti
-                      placeholder="Select Owner"
-                    />
+                  <div className="row mt-2">
+                    <div className="col mb-2">
+                      <Select
+                        options={selectOwner()}
+                        isMulti
+                        onChange={(value) => handleSelectOwner(value)}
+                        placeholder="Select Owner"
+                      />
+                    </div>
                   </div>
-                </div>
-                {/* <div className="row">
-                  <div className="col">
-                    <select
-                      name=""
-                      id=""
-                      className="form-select"
-                      style={{ fontSize: "0.85rem" }}
-                    >
-                      <option value="">Team</option>
-                      <option value="">1</option>
-                      <option value="">2</option>
-                    </select>
+                  <div className="row mt-2">
+                    <div className="col">
+                      <Select
+                        options={selectStage()}
+                        onChange={(e) => handleSelectStage(e)}
+                        isMulti
+                        placeholder="Select Stage"
+                      />
+                    </div>
                   </div>
-                </div> */}
-                <div className="row mt-2">
-                  <div className="col">
-                    <select
-                      name=""
-                      id=""
-                      className="form-select"
-                      style={{ fontSize: "0.85rem" }}
-                    >
-                      <option value="">Stage</option>
-                      <option value="">1</option>
-                      <option value="">2</option>
-                    </select>
+                  <div className="row mt-5">
+                    <div className="col">
+                      <h6>
+                        <i className="bi bi-link-45deg"></i>
+                        <span className="fw-semibold ms-2 fs-6">
+                          Associated
+                        </span>
+                      </h6>
+                    </div>
+                    <div className="mb-2">
+                      <Select
+                        options={selectCompany()}
+                        onChange={(e) => handleSelectCompany(e)}
+                        isMulti
+                        placeholder="Select Company"
+                      />
+                    </div>
+                    <div className="mb-2">
+                      <Select
+                        options={selectContact()}
+                        onChange={(e) => handleSelectContact(e)}
+                        isMulti
+                        placeholder="Select Contact"
+                      />
+                    </div>
+                    {/* <div className="mb-2">
+                      <Select
+                        options={selectProduct()}
+                        onChange={(e) => handleSelectProduct(e)}
+                        isMulti
+                        placeholder="Select Product"
+                      />
+                    </div>
+                    <div className="mb-2">
+                      <Select
+                        options={selectPackageProduct()}
+                        onChange={(e) => handleSelectPackageProduct(e)}
+                        isMulti
+                        placeholder="Select Package Product"
+                      />
+                    </div> */}
                   </div>
-                </div>
-                <div className="row mt-2">
-                  <div className="col">
-                    <select
-                      name=""
-                      id=""
-                      className="form-select"
-                      style={{ fontSize: "0.85rem" }}
-                    >
-                      <option value="">Status</option>
-                      <option value="">1</option>
-                      <option value="">2</option>
-                    </select>
+                  <div className="row mt-5">
+                    <div className="col">
+                      <h6>
+                        <i class="bi bi-currency-dollar"></i>
+                        <span className="fw-semibold ms-2 fs-6">Deals</span>
+                      </h6>
+                    </div>
                   </div>
-                </div>
-                <div className="row mt-5">
-                  <div className="col">
-                    <h6>
-                      <i class="bi bi-currency-dollar"></i>
-                      <span className="fw-semibold ms-2">Deals</span>
-                    </h6>
-                  </div>
-                </div>
-                <form action="">
                   <div className="mb-1">
                     <input
                       type="text"
                       className="form-control"
-                      name="name"
+                      name="deal_name"
+                      onChange={handleSearchMultiple}
                       placeholder="Deals Name"
                       style={{ fontSize: "0.85rem" }}
                     />
                   </div>
                   <div className="mb-1">
-                    <select
-                      name=""
-                      id=""
-                      className="form-select"
-                      style={{ fontSize: "0.85rem" }}
-                    >
-                      <option value="">Source</option>
-                      <option value="">1</option>
-                      <option value="">2</option>
-                    </select>
-                  </div>
-                  <div className="mb-1">
-                    <input
-                      type="text"
-                      className="form-control"
-                      name="job_title"
-                      placeholder="Job Title"
-                      style={{ fontSize: "0.85rem" }}
-                    />
-                  </div>
-                  <div className="mb-1">
-                    <select
-                      name="source"
-                      id=""
-                      className="form-select"
-                      style={{ fontSize: "0.85rem" }}
-                    >
-                      <option disabled selected>
-                        Source
-                      </option>
-                      <option value="event">Event</option>
-                      <option value="referal">Referal</option>
-                      <option value="database">Database</option>
-                      <option value="others">Others</option>
-                    </select>
-                  </div>
-                  <div className="mb-1">
-                    <input
-                      type="text"
-                      className="form-control"
-                      name="address"
-                      placeholder="Address"
-                      style={{ fontSize: "0.85rem" }}
+                    <Select
+                      options={selectPriority()}
+                      onChange={(e) => handleSelectPriority(e)}
+                      isMulti
+                      placeholder="Select Priority"
                     />
                   </div>
                   <div className="mb-1">
                     <input
-                      type="text"
+                      type="number"
                       className="form-control"
-                      name="city"
-                      placeholder="City"
+                      name="deal_size"
+                      placeholder="Deal Size"
+                      onChange={handleSearchMultiple}
                       style={{ fontSize: "0.85rem" }}
                     />
                   </div>
@@ -418,45 +625,40 @@ const Deals = () => {
                     <label htmlFor="date">Created</label>
                     <input
                       type="date"
-                      name="date"
+                      name="created_at"
                       className="form-control"
+                      onChange={handleSearchMultiple}
                       style={{ fontSize: "0.85rem" }}
                     />
                   </div>
                   <div className="mb-1">
+                    <label htmlFor="date">Updated</label>
                     <input
-                      type="text"
+                      type="date"
+                      name="updated_at"
                       className="form-control"
-                      name="notes"
-                      placeholder="Notes"
-                      style={{ fontSize: "0.85rem" }}
-                    />
-                  </div>
-                  <div className="mb-1">
-                    <input
-                      type="text"
-                      className="form-control"
-                      name="remarks"
-                      placeholder="Remarks (Other Source)"
+                      onChange={handleSearchMultiple}
                       style={{ fontSize: "0.85rem" }}
                     />
                   </div>
                   <button
+                    type="button" onClick={handleSubmitSearchMultiple}
                     className="btn btn-primary mt-2"
                     style={{ fontSize: "0.85rem" }}
                   >
                     Apply
                   </button>
-                  <Link
-                    to="/deals"
+                  <a
+                    href="/deals"
                     className="btn btn-secondary mt-2 ms-2"
                     style={{ fontSize: "0.85rem" }}
                   >
                     Cancel
-                  </Link>
-                </form>
-              </div>
+                  </a>
+                </div>
+              </form>
             </div>
+
             <div className={`${boardKanbanDatatable}`}>
               <div className="row">
                 <div className="col d-flex">

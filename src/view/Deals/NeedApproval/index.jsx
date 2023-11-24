@@ -2,7 +2,7 @@ import React from "react";
 import Topbar from "../../../components/Template/Topbar";
 import Sidebar from "../../../components/Template/Sidebar";
 import Main from "../../../components/Template/Main";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Card } from "react-bootstrap";
 import DataTable from "react-data-table-component";
 import { useState } from "react";
@@ -15,6 +15,7 @@ const NeedsApproval = () => {
   const token = localStorage.getItem("token");
   const [needApproval, setNeedApproval] = useState([]);
   const [search, setSearch] = useState([]);
+  const navigate = useNavigate()
   //   console.log(needApproval);
   const getNeedApproval = () => {
     axios
@@ -34,7 +35,7 @@ const NeedsApproval = () => {
         }
       });
   };
-  console.log(search);
+
   const handleApproval = (uid) => {
     Swal.fire({
       title: "Konfirmasi", 
@@ -42,6 +43,7 @@ const NeedsApproval = () => {
       icon: "question",
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#d33",
+      showCancelButton: true,
       confirmButtonText: "Approve",
       cancelButtonText: "Batal",
     }).then((res) => {
@@ -74,6 +76,7 @@ const NeedsApproval = () => {
       icon: "question",
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#d33",
+      showCancelButton: true,
       confirmButtonText: "Reject",
       cancelButtonText: "Batal",
     }).then((res) => {
@@ -142,6 +145,7 @@ const NeedsApproval = () => {
     {
       name: "Action",
       selector: (row) => (
+        console.log(row),
         <div className="action-icon">
           <button className="btn btn-primary" title="Approve" onClick={() => handleApproval(row.uid)}>
             <i className="bi bi-check2" style={{ fontSize:"1.2rem" }}></i>
@@ -149,9 +153,10 @@ const NeedsApproval = () => {
           <button className="ms-2 btn btn-danger" title="Reject" onClick={() => handleReject(row.uid)}>
             <i className="bi bi-x"style={{ fontSize:"1.2rem" }}></i>
           </button>
+          <button className="ms-2 btn btn-info text-white" title="Detail" onClick={()=> navigate(`/deals/detail/${row.uid}/need-approval`)} ><i class="bi bi-arrow-right-circle-fill" style={{ fontSize:"1.2rem" }}></i></button>
         </div>
       ),
-      width: "160px",
+      width: "200px",
     },
   ];
 

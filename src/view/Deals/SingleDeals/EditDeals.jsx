@@ -67,7 +67,6 @@ const EditDeals = () => {
       data.map((item) => (totalPrice += item.total_price));
     });
   }
-  console.log(totalPrice);
   const getCompany = () => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/companies`, {
@@ -279,11 +278,11 @@ const EditDeals = () => {
       [e.target.name]: e.target.value,
     });
   };
-  const [pricePro, setPricePro] = useState(0);
+
   const handlePrice = (e) => {
     setValueDeals({
       ...valueDeals,
-      deal_size: e.target.value,
+      [e.target.name]: e.target.value,
     });
   };
   useEffect(() => {
@@ -313,10 +312,9 @@ const EditDeals = () => {
   };
 
   const handleDeleteContact = (uid) => {
-    console.log(uid);
     Swal.fire({
       title: "Konfirmasi",
-      text: "Apa anda yakin ingin menghapus item product ini?",
+      text: "Apa anda yakin ingin menghapus item ini?",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
@@ -485,7 +483,7 @@ const EditDeals = () => {
     e.preventDefault();
     const formData = new FormData();
     formData.append("deal_name", valueDeals.deal_name);
-    formData.append("deal_size", valueDeals.deal_size);
+    formData.append("deal_size", valueDeals.deal_size || totalPrice);
     formData.append("priority", valueDeals.priority_uid);
     formData.append("deal_status", valueDeals.deal_status);
     formData.append("deal_category", valueDeals.deal_category);
@@ -921,7 +919,7 @@ const EditDeals = () => {
                                   >
                                     No.Telp :
                                     <strong className="ms-1">
-                                      {data.contact?.phone[0]?.number ?? "-"}
+                                      {data.contact?.phone[0]?.number || "-"}
                                     </strong>
                                   </p>
                                 </Col>

@@ -2,36 +2,38 @@ import React from "react";
 import Topbar from "../../../components/Template/Topbar";
 import Sidebar from "../../../components/Template/Sidebar";
 import Main from "../../../components/Template/Main";
-import { Link } from "react-router-dom";
 import { Card } from "react-bootstrap";
+import { Link } from "react-router-dom";
 import DataTable from "react-data-table-component";
-import { useState } from "react";
 import axios from "axios";
-import { useEffect } from "react";
 import Swal from "sweetalert2";
+import { useState } from "react";
+import { useEffect } from "react";
 import OverlayAdd from "./OverlayAdd";
 import OverlayEdit from "./OverlayEdit";
 
-const DealsCategory = () => {
+const CategoryExpanse = () => {
   const token = localStorage.getItem("token");
-  const [deaCat, setDeaCat] = useState([]);
+  const [expCat, setExpCat] = useState([]);
   const [search, setSearch] = useState([]);
-  const [addDeaCat, setAddDeaCat] = useState(false);
-  const handleOpenAdd = () => setAddDeaCat(true);
-  const handleCloseAdd = () => setAddDeaCat(false);
-  const [editDeaCat, setEditDeaCat] = useState(false);
+  const [addCat, setAddCat] = useState(false);
+  const handleOpenAdd = () => setAddCat(true);
+  const handleCloseAdd = () => setAddCat(false);
+  const [editExpCat, setEditExpCat] = useState(false);
+
   const handleCloseEdit = () => {
-    setEditDeaCat(false);
+    setEditExpCat(false);
   };
-  const getDeaCat = () => {
+
+  const getExCat = () => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/staging-masters`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/expense-categories`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
       .then((res) => {
-        setDeaCat(res.data.data);
+        setExpCat(res.data.data);
         setSearch(res.data.data);
       })
       .catch((err) => {
@@ -43,19 +45,18 @@ const DealsCategory = () => {
   };
 
   useEffect(() => {
-    getDeaCat(token);
+    getExCat(token);
   }, [token]);
 
   const handleFilter = (e) => {
-    const newData = deaCat.filter((row) => {
+    const dataEx = expCat.filter((row) => {
       return row.name.toLowerCase().includes(e.target.value.toLowerCase());
     });
-    setSearch(newData);
+    setSearch(dataEx);
   };
-  const handleDeleteCategory = (uid) => {
+  const handleDelete = (uid) => {
     const formData = new FormData();
-    formData.append("staging_uid[]", uid);
-    formData.append("_method", "delete");
+    formData.append("expenses_category[0][uid]", uid);
     Swal.fire({
       title: "Konfirmasi",
       text: "Apakah kamu yakin ingin menghapus ini?",
@@ -69,10 +70,12 @@ const DealsCategory = () => {
       if (res.isConfirmed) {
         axios
           .post(
-            `${process.env.REACT_APP_BACKEND_URL}/staging-masters/item/delete`,
+            `${process.env.REACT_APP_BACKEND_URL}/expense-categories/item/delete`,
             formData,
             {
-              headers: { Authorization: `Bearer ${token}` },
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
             }
           )
           .then((res) => {
@@ -104,43 +107,29 @@ const DealsCategory = () => {
       }
     });
   };
-
-  const columnsDatatable = [
+  const columns = [
     {
       id: 1,
-      name: "Name Source",
+      name: "Name",
       selector: (row) => row.name,
       sortable: true,
     },
     {
       id: 2,
-      name: "Expired Day",
-      selector: (row) => row.start_exp_day,
-      sortable: true,
-    },
-    {
-      id: 3,
-      name: "Percent Weight (%)",
-      selector: (row) => row.percent_weight,
-      sortable: true,
-      width: "150px",
-    },
-    {
-      id: 4,
       name: "Action",
       selector: (row) => (
         <div>
           <button
             title="Edit"
             className="icon-button"
-            onClick={() => setEditDeaCat(row.uid)}
+            onClick={() => setEditExpCat(row.uid)}
           >
             <i className="bi bi-pen"></i>
           </button>
           <button
             title="Delete"
             className="icon-button"
-            onClick={() => handleDeleteCategory(row.uid)}
+            onClick={() => handleDelete(row.uid)}
           >
             <i className="bi bi-trash-fill"></i>
           </button>
@@ -148,6 +137,26 @@ const DealsCategory = () => {
       ),
     },
   ];
+  const customStyle = {
+    headRow: {
+      style: {
+        background: "rgba(66, 125, 157, 0.9)",
+        color: "white",
+        fontWeight: "600",
+        marginTop: "12px",
+        borderRadius: "5px",
+      },
+    },
+    cells: {
+      style: {
+        fontWeight: "500",
+      },
+    },
+  };
+  const paginationComponentOptions = {
+    selectAllRowsItem: true,
+    selectAllRowsItemText: "ALL",
+  };
   return (
     <body id="body">
       <Topbar />
@@ -210,7 +219,7 @@ const DealsCategory = () => {
                         to="/properties/source"
                         className="text-decoration-none text-black fw-semibold border-bottom documents "
                       >
-                        <div className="input-group ">
+                        <div className="input-group">
                           <i class="bi bi-building-fill-up fs-4 ms-2"></i>
                           <h5 className="mt-2 ms-2">Source</h5>
                         </div>
@@ -228,7 +237,7 @@ const DealsCategory = () => {
                         to="/properties/deal-stage"
                         className="text-decoration-none text-black fw-semibold border-bottom documents "
                       >
-                        <div className="input-group active-side">
+                        <div className="input-group ">
                           <i class="bi bi-coin fs-4 ms-2"></i>
                           <h5 className="mt-2 ms-2">Deal Stage</h5>
                         </div>
@@ -237,7 +246,7 @@ const DealsCategory = () => {
                         to="/properties/category-expanse"
                         className="text-decoration-none text-black fw-semibold border-bottom documents "
                       >
-                        <div className="input-group ">
+                        <div className="input-group active-side">
                           <i class="bi bi-c-circle fs-4 ms-2"></i>
                           <h5 className="mt-2 ms-2">Category Expense</h5>
                         </div>
@@ -251,14 +260,7 @@ const DealsCategory = () => {
                         style={{ fontSize: "0.85rem" }}
                         onClick={handleOpenAdd}
                       >
-                        Add DealStage
-                      </button>
-                      <button
-                        className="btn btn-danger mt-5 ms-4"
-                        style={{ fontSize: "0.85rem" }}
-                        // onClick={handleSubmitDeleteSelect}
-                      >
-                        Delete DealStage
+                        Add Expanse Category
                       </button>
                     </div>
                     <div className="float-end col-5 me-3">
@@ -276,7 +278,7 @@ const DealsCategory = () => {
                         </div>
                         <input
                           type="text"
-                          placeholder="Search Source..."
+                          placeholder="Search Type..."
                           className="form-control"
                           onChange={handleFilter}
                           style={{ fontSize: "0.85rem" }}
@@ -285,20 +287,17 @@ const DealsCategory = () => {
                     </div>
                     <div className="p-2">
                       <DataTable
-                        className="mt-2"
-                        data={search}
-                        columns={columnsDatatable}
                         pagination
-                        selectableRows
+                        columns={columns}
+                        data={search}
+                        customStyles={customStyle}
+                        paginationComponentOptions={paginationComponentOptions}
                       />
-                      <OverlayAdd
-                        visible={addDeaCat}
-                        onClose={handleCloseAdd}
-                      />
+                      <OverlayAdd visible={addCat} onClose={handleCloseAdd} />
                       <OverlayEdit
-                        visible={editDeaCat !== false}
+                        visible={editExpCat !== false}
                         onClose={handleCloseEdit}
-                        uid={editDeaCat}
+                        uid={editExpCat}
                       />
                     </div>
                   </div>
@@ -312,4 +311,4 @@ const DealsCategory = () => {
   );
 };
 
-export default DealsCategory;
+export default CategoryExpanse;

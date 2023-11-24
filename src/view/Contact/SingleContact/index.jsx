@@ -178,7 +178,7 @@ const SingleContact = () => {
   const handleDeals = (e) => {
     setResultDeals(e.map((opt) => opt.value));
   };
-
+  console.log(resultDeals);
   const handleSourceSelect = (e) => {
     setInputContact({
       ...inputContact,
@@ -220,14 +220,13 @@ const SingleContact = () => {
   const handleSelectParentComp = (e) => {
     setCompParent(e.map((opt) => opt.value));
   };
-  console.log(compParent);
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const formData = new FormData();
-      for (const compUid of compParent) {
-        formData.append("company_uid[]", compUid);
-      }
+      compParent.forEach((comp, index) => {
+        formData.append(`company_uid[${index}]`, comp);
+      })
       formData.append("name", inputContact.name);
       formData.append("birthday", inputContact.birthday);
       formData.append("email", inputContact.email);
@@ -238,7 +237,12 @@ const SingleContact = () => {
       formData.append("remarks", inputContact.remarks);
       formData.append("source_uid", inputContact.source_uid);
       formData.append("owner_user_uid", inputContact.owner_user_uid);
-      formData.append("phone_number[]", inputContact.phone_number);
+      for(const phone of inputContact?.phone_number){
+        formData.append(`phone_number[]`, phone);
+      }
+      resultDeals.forEach((deals, index) => {
+        formData.append(`deals_uid[${index}]`, deals)
+      })
       // console.log("FormData Content:");
       // for (const pair of formData.entries()) {
       //   console.log(pair[0] + ": " + pair[1]);
@@ -251,7 +255,7 @@ const SingleContact = () => {
         })
         .then((res) => {
           Swal.fire({
-            title: addContact.data.message,
+            title: res.data.message,
             text: "Successfully add contact",
             icon: "success",
           }).then((res) => {

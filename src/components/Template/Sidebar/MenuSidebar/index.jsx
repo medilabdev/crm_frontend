@@ -17,13 +17,13 @@ const MenuSidebar = ({ type, name, icon, url, isActive }) => {
       {type !== "collapse" ? (
         <>
           <li className={`nav-item mt-1  ${isActive ? "active" : "d-none"} `}>
-            <Link
-              to={url}
+            <a
+              href={url}
               className={`nav-link ${urlActive ? "" : "collapsed"}`}
             >
               <i className={icon} style={{ fontSize: "0.95rem" }} />
               <span style={{ fontSize: "0.95rem" }}>{name}</span>
-            </Link>
+            </a>
           </li>
         </>
       ) : (
