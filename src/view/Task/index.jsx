@@ -18,7 +18,8 @@ const Task = () => {
   const [company, setCompany] = useState([])
   const [contact, setContact] = useState([])
   const [deals, setDeals] = useState([])
-  const [search, setSearch] = useState(Dummy)
+  const [task, setTask] = useState([])
+  const [search, setSearch] = useState([])
   const [selectUid, setSelectUid] = useState([]);
   const [addTask, setAddTask] = useState(false)
   const handleCloseOverlay = () => setAddTask(false)
@@ -31,6 +32,24 @@ const Task = () => {
   const DataTableTask = isSideFilter ? "col-md-9" : "col-md-12";
   const IconFilter = isSideFilter ? "bi bi-x-lg" : "bi bi-funnel";
 
+
+  const getTask = () => {
+    axios.get(`${process.env.REACT_APP_BACKEND_URL}/task`, {
+      headers:{
+        Authorization: `Bearer ${token}`
+      }
+    }).then((res) => {
+      setTask(res.data.data)
+      setSearch(res.data.data)
+    }
+    )
+    .catch((err) => {
+      if (err.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+    })
+  }
   const getOwner = (token) => {
     axios.get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
       headers: {
@@ -130,7 +149,9 @@ const Task = () => {
     })
     return res
   }
+
   useEffect(() => {
+    getTask(token)
     getOwner(token)
     getCompany(token)
     getContact(token)
@@ -143,7 +164,7 @@ const Task = () => {
   }
   
   const handleFilter = (e) => {
-    const data = Dummy.filter((row) => {
+    const data = task.filter((row) => {
       return row.task_name.toLowerCase().includes(e.target.value.toLowerCase())
     })
     setSearch(data)
