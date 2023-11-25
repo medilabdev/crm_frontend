@@ -354,10 +354,10 @@ const AddTask = ({ visible, onClose }) => {
                     )}
                   </div>
                 ))}
-                <button
+                <button type="button"
                   className="btn btn-icon text-primary fw-semibold"
                   onClick={addFormAttachment}
-                  style={{ fontSize: "0.75rem" }}
+                  style={{ fontSize: "0.75rem", cursor:"pointer" }} 
                 >
                   <i class="bi bi-plus"></i> Add Attachment
                 </button>
