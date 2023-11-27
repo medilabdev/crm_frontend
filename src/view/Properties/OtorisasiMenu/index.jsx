@@ -8,6 +8,7 @@ import DataTable from "react-data-table-component";
 import axios from "axios";
 import Swal from "sweetalert2";
 import OverlayAdd from "./OverlayAdd";
+import OverlayEdit from "./OverlayEdit";
 
 const OtorisasiMenu = () => {
   const token = localStorage.getItem("token");
@@ -16,9 +17,14 @@ const OtorisasiMenu = () => {
   const [addMenu, setAddMenu] = useState(false);
   const handleCloseAdd = () => setAddMenu(false);
   const handleOpenAdd = () => setAddMenu(true);
-  const getMenu = () => {
+  const [editMenu, setEditMenu] = useState(false);
+
+  const handleCloseEdit = () => {
+    setEditMenu(false);
+  };
+  const getMenu = (token) => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/user-menus`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/user-menus?limit=100`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -36,7 +42,7 @@ const OtorisasiMenu = () => {
   };
 
   useEffect(() => {
-    getMenu();
+    getMenu(token);
   }, [token]);
   const handleFilter = (e) => {
     const newData = menu.filter((row) => {
@@ -69,47 +75,44 @@ const OtorisasiMenu = () => {
 
   const columns = [
     {
-      id: 1,
       name: "Menu",
       selector: (row) => row.name,
       sortable: true,
     },
     {
-      id: 2,
       name: "Type",
       selector: (row) => row.type,
       sortable: true,
     },
     {
-      id: 3,
       name: "Key",
       selector: (row) => row.key,
       sortable: true,
     },
     {
-      id: 4,
       name: "Route",
       selector: (row) => row.route,
       sortable: true,
     },
     {
-      id: 5,
       name: "Icon",
       selector: (row) => row.icon,
       sortable: true,
     },
     {
-      id: 6,
       name: "Active",
-      selector: (row) => row.is_active,
+      selector: (row) => (row.is_active === 1 ? "Active" : "Non Active"),
       sortable: true,
     },
     {
-      id: 2,
       name: "Action",
       selector: (row) => (
         <div>
-          <button title="Edit" className="icon-button">
+          <button
+            title="Edit"
+            className="icon-button"
+            onClick={() => setEditMenu(row.id)}
+          >
             <i className="bi bi-pen"></i>
           </button>
           <button
@@ -129,7 +132,7 @@ const OtorisasiMenu = () => {
                 if (res.isConfirmed) {
                   axios
                     .delete(
-                      `${process.env.REACT_APP_BACKEND_URL}/user-menus/${row.uid}`,
+                      `${process.env.REACT_APP_BACKEND_URL}/user-menus/${row.id}`,
                       {
                         headers: { Authorization: `Bearer ${token}` },
                       }
@@ -319,9 +322,15 @@ const OtorisasiMenu = () => {
                         columns={columns}
                         data={search}
                         pagination
-                        selectableRows
+                        paginationComponentOptions={paginationComponentOptions}
+                        customStyles={customStyle}
                       />
                       <OverlayAdd visible={addMenu} onClose={handleCloseAdd} />
+                      <OverlayEdit
+                        onClose={handleCloseEdit}
+                        visible={editMenu !== false}
+                        uid={editMenu}
+                      />
                     </div>
                   </div>
                 </div>
