@@ -251,6 +251,15 @@ const CategoryExpanse = () => {
                           <h5 className="mt-2 ms-2">Category Expense</h5>
                         </div>
                       </Link>
+                      <Link
+                        to="/properties/menu-management"
+                        className="text-decoration-none text-black fw-semibold border-bottom documents "
+                      >
+                        <div className="input-group">
+                          <i class="bi bi-c-circle fs-4 ms-2"></i>
+                          <h5 className="mt-2 ms-2">Menu Management</h5>
+                        </div>
+                      </Link>
                     </div>
                   </div>
                   <div className="col-md-9">

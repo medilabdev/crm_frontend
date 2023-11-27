@@ -375,7 +375,6 @@ const Deals = () => {
       [e.target.name]: e.target.value,
     });
   };
-  console.log(searchProduct);
   const handleSubmitSearchMultiple = () => {
     const filterData = deals.filter((row) => {
       return (

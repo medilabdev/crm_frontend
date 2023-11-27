@@ -65,6 +65,11 @@ const DatatableTask = ({ data, selectUidDataTable }) => {
       sortable: true,
     },
     {
+      name: "Owner", 
+      selector: (row) => row.owner?.name,
+      sortable: true
+    },
+    {
       name: "Associated",
       selector: (row) => (
         (
@@ -131,29 +136,9 @@ const DatatableTask = ({ data, selectUidDataTable }) => {
       sortable: true,
     },
     {
-      name: "Created Date",
+      name: "Created/Updated",
       selector: (row) => {
-        const updt = new Date(row.created_at);
-        const format = {
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-          hour: "2-digit",
-          minute: "2-digit",
-        };
-        const formattter = new Intl.DateTimeFormat("en-US", format);
-        const created = formattter.format(updt);
-        return (
-          <div className="mt-1" style={{ whiteSpace: "normal" }}>
-            {created}
-          </div>
-        );
-      },
-      width: "120px",
-    },
-    {
-      name: "Updated Date",
-      selector: (row) => {
+        const create = new Date(row.created_at);
         const updt = new Date(row.updated_at);
         const format = {
           year: "numeric",
@@ -163,15 +148,15 @@ const DatatableTask = ({ data, selectUidDataTable }) => {
           minute: "2-digit",
         };
         const formattter = new Intl.DateTimeFormat("en-US", format);
+        const created = formattter.format(create);
         const updated = formattter.format(updt);
         return (
-          <div className="mt-1" style={{ whiteSpace: "normal" }}>
-            {updated}
+          <div className="mt-1" style={{ whiteSpace: "normal", fontSize:"10px" }}>
+            {created} <br /> {updated}
           </div>
         );
       },
-      sortable: true,
-      width: "120px",
+      width: "130px",
     },
     {
       name: "Action",

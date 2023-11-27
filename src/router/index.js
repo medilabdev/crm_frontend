@@ -47,6 +47,7 @@ import UploadFileTask from "../view/Task/UploadFile";
 import DetailNeedApproval from "../view/Deals/NeedApproval/Detail";
 import UploadDeals from "../view/Deals/SingleDeals/UploadDeals";
 import CategoryExpanse from "../view/Properties/CategoryExpanse";
+import OtorisasiMenu from "../view/Properties/OtorisasiMenu";
 const Login = ({ children }) => {
   const token = localStorage.getItem("token");
   if (!token) {
@@ -406,6 +407,15 @@ function Router() {
           element={
             <Login>
               <CategoryExpanse />
+            </Login>
+          }
+        />
+        <Route
+          exact
+          path="/properties/menu-management"
+          element={
+            <Login>
+              <OtorisasiMenu />
             </Login>
           }
         />

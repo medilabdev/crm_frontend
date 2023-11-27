@@ -66,10 +66,10 @@ const EditTask = ({ visible, onClose, uid }) => {
           status_uid: valueOld.status_uid,
           priority_uid: valueOld.priority_uid,
           owner_user_uid: valueOld.owner_user_uid,
+          status_uid: valueOld.status_uid,
         });
         const image = valueOld.attachment?.map((data) => data);
         setImageOld(image);
-        
       })
       .catch((err) => {
         if (err.response.data.message === "Unauthenticated.") {
@@ -273,33 +273,75 @@ const EditTask = ({ visible, onClose, uid }) => {
     formData.append("contact_uid", oldTask.contact_uid);
     formData.append("company_uid", oldTask.company_uid);
     formData.append("deals_uid", oldTask.deals_uid);
-    formData.append("date_email_reminder", oldTask.reminder);
+    formData.append("date_email_reminder", oldTask.date_email_reminder);
+    formData.append("owner_user_uid", oldTask.owner_user_uid);
+    formData.append("priority_uid", oldTask.priority_uid);
+    formData.append("status_uid", oldTask.status_uid);
+    formData.append("gps_location", oldTask.gps_location || "");
     inputAttachment.forEach((data, index) => {
-      formData.append(`attachment[${index}][image]`, data || "")
-    })
-    axios.post(`${process.env.REACT_APP_BACKEND_URL}/tasks/${uid}`, formData,{
-      headers:{
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data",
-      }
-    })
-    .then((res) => {
-      Swal.fire({
-        title: res.data.message,
-        text: "Successfullly created deals",
-        icon: "success",
-      }).then((res) => {
-        if (res.isConfirmed) {
-          window.location.reload();
-        }
-      });
-    })
-    .catch((err) => {
-      Swal.fire({
-        title: err.response.data.message,
-        icon: "warning",
-      });
+      formData.append(`attachment[${index}][image]`, data || "");
     });
+    formData.append("_method", "put");
+    for (const pair of formData.entries()) {
+      console.log(pair[0] + ": " + pair[1]);
+    }
+    axios
+      .post(`${process.env.REACT_APP_BACKEND_URL}/tasks/${uid}`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      })
+      .then((res) => {
+        Swal.fire({
+          title: res.data.message,
+          text: "Successfullly created deals",
+          icon: "success",
+        }).then((res) => {
+          if (res.isConfirmed) {
+            window.location.reload();
+          }
+        });
+      })
+      .catch((err) => {
+        Swal.fire({
+          title: err.response.data.message,
+          icon: "warning",
+        });
+      });
+  };
+
+  const handleDeleteImage = (uidImage) => {
+    console.log(uidImage);
+    const formData = new FormData();
+    formData.append("_method", "delete");
+    axios
+      .post(
+        `${process.env.REACT_APP_BACKEND_URL}/tasks/item/attachment/${uidImage}`,
+        formData,
+        {
+          headers:{
+            Authorization: `Bearer ${token}`
+          }
+        }
+      )
+      .then((res) => {
+        Swal.fire({
+          title: res.data.message,
+          text: "updated successfully",
+          icon: "success",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.reload();
+          }
+        });
+      })
+      .catch((err) => {
+        Swal.fire({
+          title: err.response.data.message,
+          icon: "warning",
+        });
+      });
   };
   return (
     <Modal show={visible} onHide={onClose} size="lg">
@@ -362,6 +404,18 @@ const EditTask = ({ visible, onClose, uid }) => {
                               style={{ width: "100px" }}
                             />
                           </a>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteImage(data.uid)}
+                            className="ms-2 mt-1 text-decoration-none badge bg-danger"
+                            style={{
+                              cursor: "pointer",
+                              border: "none",
+                              width: "50px",
+                            }}
+                          >
+                            Delete
+                          </button>
                         </div>
                       ))
                     : null}
@@ -381,7 +435,7 @@ const EditTask = ({ visible, onClose, uid }) => {
                       </Form.Group>
                       {addImg.length > 1 && (
                         <div className="float-end">
-                          <button
+                          <a
                             className="badge bg-danger mt-2 mb-2"
                             onClick={() => removeFormAttachment(index)}
                             style={{
@@ -391,7 +445,7 @@ const EditTask = ({ visible, onClose, uid }) => {
                             }}
                           >
                             Remove
-                          </button>
+                          </a>
                         </div>
                       )}
                     </div>
@@ -449,9 +503,9 @@ const EditTask = ({ visible, onClose, uid }) => {
                   <input
                     type="date"
                     className="form-control"
-                    name="reminder"
+                    name="date_email_reminder"
                     value={oldTask.date_email_reminder}
-                    // onChange={handleInput}
+                    onChange={handleInput}
                   />
                 </Form.Group>
                 <Form.Group className="mb-2">

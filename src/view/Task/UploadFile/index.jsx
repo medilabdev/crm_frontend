@@ -8,8 +8,56 @@ import Swal from "sweetalert2";
 import axios from "axios";
 import { Link } from "react-router-dom";
 
-
 const UploadFileTask = () => {
+  const token = localStorage.getItem("token");
+  const [uploadExcel, setUploadExcel] = useState({
+    upload: null,
+  });
+  const handleChange = (e) => {
+    const file = e.target.files[0];
+    setUploadExcel({
+      ...uploadExcel,
+      upload: file,
+    });
+  };
+
+  const handleUploadExcel = async (e) => {
+    e.preventDefault();
+    try {
+      const formData = new FormData();
+      formData.append("upload", uploadExcel.upload);
+      axios
+        .post(
+          `${process.env.REACT_APP_BACKEND_URL}/tasks/upload/excel`,
+          formData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        )
+        .then((res) => {
+          Swal.fire({
+            title: res.data.message,
+            text: "Successfully deleted",
+            icon: "success",
+          }).then((res) => {
+            if (res.isConfirmed) {
+              window.location.href = "/task";
+            }
+          });
+        })
+        .catch((err) => {
+          Swal.fire({
+            title: err.response.data.message,
+            icon: "warning",
+          });
+        });
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <body id="body">
       <Topbar />
@@ -70,7 +118,7 @@ const UploadFileTask = () => {
                       The number of uploads affects the upload duration.
                     </span>
                   </div>
-                  <form action="">
+                  <form onSubmit={handleUploadExcel}>
                     <div className="mt-3 mb-3 ms-2 col-10">
                       <label className="mb-2 fs-6">Upload File</label>
                       <input
@@ -78,7 +126,7 @@ const UploadFileTask = () => {
                         className="form-control"
                         accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
                         name="upload"
-                       
+                        onChange={handleChange}
                       ></input>
                     </div>
                     <div className="mb-4">
@@ -97,10 +145,7 @@ const UploadFileTask = () => {
                   <h6 className="fw-semibold">Add Single Task</h6>
                   <p>Enter a contact in the following form field</p>
                 </div>
-                <a
-                  href="/task"
-                  className="btn btn-outline-primary ms-3 mb-5"
-                >
+                <a href="/task" className="btn btn-outline-primary ms-3 mb-5">
                   Continue
                 </a>
               </div>
@@ -110,7 +155,7 @@ const UploadFileTask = () => {
         <Footer />
       </Main>
     </body>
-  )
-}
+  );
+};
 
-export default UploadFileTask
+export default UploadFileTask;

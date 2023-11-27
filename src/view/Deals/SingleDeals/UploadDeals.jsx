@@ -25,7 +25,6 @@ const UploadDeals = () => {
     try {
       const formData = new FormData();
       formData.append("upload", uploadExcel.upload);
-      console.log(formData);
       axios
         .post(
           `${process.env.REACT_APP_BACKEND_URL}/deals/upload/excel`,
