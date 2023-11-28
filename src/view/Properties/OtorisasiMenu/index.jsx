@@ -1,42 +1,36 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Topbar from "../../../components/Template/Topbar";
 import Sidebar from "../../../components/Template/Sidebar";
 import Main from "../../../components/Template/Main";
 import { Link } from "react-router-dom";
 import { Card } from "react-bootstrap";
 import DataTable from "react-data-table-component";
-import { useState } from "react";
 import axios from "axios";
-import { useEffect } from "react";
 import Swal from "sweetalert2";
 import OverlayAdd from "./OverlayAdd";
 import OverlayEdit from "./OverlayEdit";
 
-const Position = () => {
+const OtorisasiMenu = () => {
   const token = localStorage.getItem("token");
-  const [position, setPosition] = useState([]);
+  const [menu, setMenu] = useState([]);
   const [search, setSearch] = useState([]);
-  const [selectUid, setSelectUid] = useState([]);
-  const [addPost, setAddPost] = useState(false);
-  const handleCloseAdd = () => setAddPost(false);
-  const handleOpenAdd = () => setAddPost(true);
-  const [editPost, setEditPost] = useState(false);
+  const [addMenu, setAddMenu] = useState(false);
+  const handleCloseAdd = () => setAddMenu(false);
+  const handleOpenAdd = () => setAddMenu(true);
+  const [editMenu, setEditMenu] = useState(false);
+
   const handleCloseEdit = () => {
-    setEditPost(false);
+    setEditMenu(false);
   };
-  const selUid = (e) => {
-    const selectRow = e.selectedRows.map((row) => row.uid);
-    setSelectUid(selectRow);
-  };
-  const getPosition = () => {
+  const getMenu = (token) => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/positions`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/user-menus?limit=100`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
       .then((res) => {
-        setPosition(res.data.data);
+        setMenu(res.data.data);
         setSearch(res.data.data);
       })
       .catch((err) => {
@@ -46,19 +40,22 @@ const Position = () => {
         }
       });
   };
+
+  useEffect(() => {
+    getMenu(token);
+  }, [token]);
   const handleFilter = (e) => {
-    const newData = position.filter((row) => {
+    const newData = menu.filter((row) => {
       return row.name.toLowerCase().includes(e.target.value.toLowerCase());
     });
     setSearch(newData);
   };
-  useEffect(() => {
-    getPosition(token);
-  }, [token]);
+
   const paginationComponentOptions = {
     selectAllRowsItem: true,
     selectAllRowsItemText: "ALL",
   };
+
   const customStyle = {
     headRow: {
       style: {
@@ -75,22 +72,46 @@ const Position = () => {
       },
     },
   };
+
   const columns = [
     {
-      id: 1,
-      name: "Name Position",
+      name: "Menu",
       selector: (row) => row.name,
       sortable: true,
     },
     {
-      id: 2,
+      name: "Type",
+      selector: (row) => row.type,
+      sortable: true,
+    },
+    {
+      name: "Key",
+      selector: (row) => row.key,
+      sortable: true,
+    },
+    {
+      name: "Route",
+      selector: (row) => row.route,
+      sortable: true,
+    },
+    {
+      name: "Icon",
+      selector: (row) => row.icon,
+      sortable: true,
+    },
+    {
+      name: "Active",
+      selector: (row) => (row.is_active === 1 ? "Active" : "Non Active"),
+      sortable: true,
+    },
+    {
       name: "Action",
       selector: (row) => (
         <div>
           <button
             title="Edit"
             className="icon-button"
-            onClick={() => setEditPost(row.uid)}
+            onClick={() => setEditMenu(row.id)}
           >
             <i className="bi bi-pen"></i>
           </button>
@@ -100,7 +121,7 @@ const Position = () => {
             onClick={() => {
               Swal.fire({
                 title: "Konfirmasi",
-                text: "Apakah kamy yakin ingin menghapus positions ini?",
+                text: "Apakah kamy yakin ingin menghapus ini?",
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#3085d6",
@@ -111,7 +132,7 @@ const Position = () => {
                 if (res.isConfirmed) {
                   axios
                     .delete(
-                      `${process.env.REACT_APP_BACKEND_URL}/positions/${row.uid}`,
+                      `${process.env.REACT_APP_BACKEND_URL}/user-menus/${row.id}`,
                       {
                         headers: { Authorization: `Bearer ${token}` },
                       }
@@ -187,7 +208,7 @@ const Position = () => {
                         to="/properties"
                         className="text-decoration-none text-black fw-semibold border-bottom documents "
                       >
-                        <div className="input-group">
+                        <div className="input-group ">
                           <i class="bi bi-people-fill fs-4 ms-2"></i>
                           <h5 className="mt-2 ms-2">Teams</h5>
                         </div>
@@ -196,7 +217,7 @@ const Position = () => {
                         to="/properties/position"
                         className="text-decoration-none text-black fw-semibold border-bottom documents "
                       >
-                        <div className="input-group active-side">
+                        <div className="input-group">
                           <i class="bi bi-diagram-3 fs-4 ms-2 "></i>
                           <h5 className="mt-2 ms-2">Position</h5>
                         </div>
@@ -206,7 +227,7 @@ const Position = () => {
                         className="text-decoration-none text-black fw-semibold border-bottom documents "
                       >
                         <div className="input-group">
-                          <i class="bi bi-person-badge-fill fs-4 ms-2"></i>
+                          <i class="bi bi-person-badge-fill fs-4 ms-2 "></i>
                           <h5 className="mt-2 ms-2">Roles</h5>
                         </div>
                       </Link>
@@ -214,7 +235,7 @@ const Position = () => {
                         to="/properties/source"
                         className="text-decoration-none text-black fw-semibold border-bottom documents "
                       >
-                        <div className="input-group">
+                        <div className="input-group ">
                           <i class="bi bi-building-fill-up fs-4 ms-2"></i>
                           <h5 className="mt-2 ms-2">Source</h5>
                         </div>
@@ -250,7 +271,7 @@ const Position = () => {
                         to="/properties/menu-management"
                         className="text-decoration-none text-black fw-semibold border-bottom documents "
                       >
-                        <div className="input-group">
+                        <div className="input-group active-side">
                           <i class="bi bi-c-circle fs-4 ms-2"></i>
                           <h5 className="mt-2 ms-2">Menu Management</h5>
                         </div>
@@ -264,14 +285,14 @@ const Position = () => {
                         style={{ fontSize: "0.85rem" }}
                         onClick={handleOpenAdd}
                       >
-                        Add Position
+                        Add Menu
                       </button>
                       <button
                         className="btn btn-danger mt-5 ms-4"
                         style={{ fontSize: "0.85rem" }}
                         // onClick={handleSubmitDeleteSelect}
                       >
-                        Delete Position
+                        Delete Menu
                       </button>
                     </div>
                     <div className="float-end col-5 me-3">
@@ -289,7 +310,7 @@ const Position = () => {
                         </div>
                         <input
                           type="text"
-                          placeholder="Search Position..."
+                          placeholder="Search Menu..."
                           className="form-control"
                           onChange={handleFilter}
                           style={{ fontSize: "0.85rem" }}
@@ -298,19 +319,17 @@ const Position = () => {
                     </div>
                     <div className="p-2">
                       <DataTable
-                        pagination
-                        data={search}
                         columns={columns}
-                        selectableRows
-                        customStyles={customStyle}
+                        data={search}
+                        pagination
                         paginationComponentOptions={paginationComponentOptions}
-                        onSelectedRowsChange={selUid}
+                        customStyles={customStyle}
                       />
-                      <OverlayAdd visible={addPost} onClose={handleCloseAdd} />
+                      <OverlayAdd visible={addMenu} onClose={handleCloseAdd} />
                       <OverlayEdit
                         onClose={handleCloseEdit}
-                        visible={editPost !== false}
-                        uid={editPost}
+                        visible={editMenu !== false}
+                        uid={editMenu}
                       />
                     </div>
                   </div>
@@ -324,4 +343,4 @@ const Position = () => {
   );
 };
 
-export default Position;
+export default OtorisasiMenu;

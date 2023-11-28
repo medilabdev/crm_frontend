@@ -18,6 +18,8 @@ const Accounting = () => {
   const [expanse, setExpanse] = useState([{ id: 1 }]);
   const [dataPayment, setDataPayment] = useState([]);
   const [dataExpanse, setDataExpanse] = useState([]);
+
+
   const addPaymentForm = () => {
     setPayment([...payment, { id: payment.length + 1 }]);
   };
@@ -66,6 +68,7 @@ const Accounting = () => {
     expAmo[index] = { ...expAmo[index], [name]: value };
     setInputExpanseAmount(expAmo);
   };
+
   const handleInputPaymentDate = (e, index) => {
     const dateValue = e.target.value;
     setInputPaymentDate((prevDates) => {
@@ -226,9 +229,9 @@ const Accounting = () => {
     inputExpanseReff.forEach((exRef, index) => {
       formData.append(`expense[${index}][description]`, exRef.reff_exp || "");
     });
-    for (const pair of formData.entries()) {
-      console.log(pair[0] + ": " + pair[1]);
-    }
+    // for (const pair of formData.entries()) {
+    //   console.log(pair[0] + ": " + pair[1]);
+    // }
     axios
       .post(
         `${process.env.REACT_APP_BACKEND_URL}/deals/payment/${uid}`,
@@ -394,13 +397,13 @@ const Accounting = () => {
       name: "Action",
       selector: (row) => (
         <div>
-          <button
+          <a
             title="delete"
-            className="icon-button"
+            className="icon-button text-danger" style={{ cursor:"pointer" }}
             onClick={() => handleDeletePayment(row.uid)}
           >
             <i className="bi bi-trash-fill"></i>
-          </button>
+          </a>
         </div>
       ),
     },
@@ -431,13 +434,13 @@ const Accounting = () => {
       name: "Action",
       selector: (row) => (
         <div>
-          <button
+          <a
             title="delete"
-            className="icon-button"
-            onClick={() => handleDeleteExpense(row.uid)}
+            className="icon-button text-danger"
+            onClick={() => handleDeleteExpense(row.uid)} style={{ cursor:"pointer" }}
           >
             <i className="bi bi-trash-fill"></i>
-          </button>
+          </a>
         </div>
       ),
     },
@@ -555,12 +558,12 @@ const Accounting = () => {
                           )}
                         </>
                       ))}
-                      <button
+                      <a
                         className="btn btn-primary ms-2 mb-4"
                         onClick={addPaymentForm}
                       >
                         Add Payment
-                      </button>
+                      </a>
                     </Card.Body>
                   </Card>
               </div>
@@ -647,12 +650,12 @@ const Accounting = () => {
                         )}
                       </>
                     ))}
-                    <button
+                    <a
                       className="btn btn-primary mb-4 ms-2"
                       onClick={addExpanseForm}
                     >
                       Add Expanse
-                    </button>
+                    </a>
                   </Card.Body>
                 </Card>
               </div>
