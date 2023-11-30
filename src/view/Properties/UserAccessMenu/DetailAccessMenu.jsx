@@ -1,65 +1,38 @@
-import React from "react";
+import React, { useState } from "react";
 import Topbar from "../../../components/Template/Topbar";
 import Sidebar from "../../../components/Template/Sidebar";
 import Main from "../../../components/Template/Main";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { Card } from "react-bootstrap";
 import DataTable from "react-data-table-component";
-import { useState } from "react";
 import axios from "axios";
 import { useEffect } from "react";
-import Swal from "sweetalert2";
-import OverlayAdd from "./OverlayAdd";
-import OverlayEdit from "./OverlayEdit";
 
-const Position = () => {
+const DetailAccessMenu = () => {
   const token = localStorage.getItem("token");
-  const [position, setPosition] = useState([]);
+  const [detail, setDetail] = useState([]);
   const [search, setSearch] = useState([]);
-  const [selectUid, setSelectUid] = useState([]);
-  const [addPost, setAddPost] = useState(false);
-  const handleCloseAdd = () => setAddPost(false);
-  const handleOpenAdd = () => setAddPost(true);
-  const [editPost, setEditPost] = useState(false);
-  const handleCloseEdit = () => {
-    setEditPost(false);
-  };
-  const selUid = (e) => {
-    const selectRow = e.selectedRows.map((row) => row.uid);
-    setSelectUid(selectRow);
-  };
-  const getPosition = () => {
+  const uid = useParams();
+  const getDetailAccess = (token, uid) => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/positions`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => {
-        setPosition(res.data.data);
-        setSearch(res.data.data);
-      })
-      .catch((err) => {
-        if (err.response.data.message === "Unauthenticated") {
-          localStorage.clear();
-          window.location.href = "/login";
+      .get(
+        `${process.env.REACT_APP_BACKEND_URL}/user-access-menus/role/${uid}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
+      )
+      .then((res) => {
+        const detailData = res.data.data;
+        console.log(detailData);
+        setDetail(detailData);
+        setSearch(detailData);
       });
   };
-  const handleFilter = (e) => {
-    const newData = position.filter((row) => {
-      return row.name.toLowerCase().includes(e.target.value.toLowerCase());
-    });
-    setSearch(newData);
-  };
-  useEffect(() => {
-    getPosition(token);
-  }, [token]);
-  const paginationComponentOptions = {
-    selectAllRowsItem: true,
-    selectAllRowsItemText: "ALL",
-  };
-  const customStyle = {
+
+  const columns = [{}];
+  const customStyles = {
     headRow: {
       style: {
         background: "rgba(66, 125, 157, 0.9)",
@@ -75,83 +48,20 @@ const Position = () => {
       },
     },
   };
-  const columns = [
-    {
-      id: 1,
-      name: "Name Position",
-      selector: (row) => row.name,
-      sortable: true,
-    },
-    {
-      id: 2,
-      name: "Action",
-      selector: (row) => (
-        <div>
-          <button
-            title="Edit"
-            className="icon-button"
-            onClick={() => setEditPost(row.uid)}
-          >
-            <i className="bi bi-pen"></i>
-          </button>
-          <button
-            title="Delete"
-            className="icon-button"
-            onClick={() => {
-              Swal.fire({
-                title: "Konfirmasi",
-                text: "Apakah kamy yakin ingin menghapus positions ini?",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#3085d6",
-                cancelButtonColor: "#d33",
-                confirmButtonText: "Ya, Hapus!",
-                cancelButtonText: "Batal",
-              }).then((res) => {
-                if (res.isConfirmed) {
-                  axios
-                    .delete(
-                      `${process.env.REACT_APP_BACKEND_URL}/positions/${row.uid}`,
-                      {
-                        headers: { Authorization: `Bearer ${token}` },
-                      }
-                    )
-                    .then((res) => {
-                      Swal.fire({
-                        title: res.data.message,
-                        text: "Successfully delete item position",
-                        icon: "success",
-                      }).then((res) => {
-                        if (res.isConfirmed) {
-                          window.location.reload();
-                        }
-                      });
-                    })
-                    .catch((err) => {
-                      if (err.response.data.message === "Delete failed!") {
-                        Swal.fire({
-                          title: "Delete Failed",
-                          text: "Tidak dapat menghapus, data master ini terkait dengan data lainnya",
-                          icon: "warning",
-                        });
-                      }
-                    });
-                } else {
-                  Swal.fire({
-                    title: "Cancelled",
-                    text: "The item was not deleted.",
-                    icon: "error",
-                  });
-                }
-              });
-            }}
-          >
-            <i className="bi bi-trash-fill"></i>
-          </button>
-        </div>
-      ),
-    },
-  ];
+  const paginationComponentOptions = {
+    selectAllRowsItem: true,
+    selectAllRowsItemText: "ALL",
+  };
+
+  function handleFilter(e) {
+    const DataFilter = detail.filter((row) => {
+      return row.name.toLowerCase().includes(e.target.value.toLowerCase());
+    });
+    setSearch(DataFilter);
+  }
+  useEffect(() => {
+    getDetailAccess(token, uid);
+  }, [token, uid]);
   return (
     <body id="body">
       <Topbar />
@@ -161,7 +71,7 @@ const Position = () => {
           <div className="row">
             <div className="col">
               <div className="pagetitle">
-                <h1>Properties</h1>
+                <h1>Detail Access Menu</h1>
                 <nav>
                   <ol className="breadcrumb mt-2">
                     <li className="breadcrumb-item">
@@ -169,8 +79,16 @@ const Position = () => {
                         Dashboard
                       </Link>
                     </li>
+                    <li className="breadcrumb-item">
+                      <Link
+                        to="/properties/user-access-menu"
+                        className="text-decoration-none"
+                      >
+                        Properties
+                      </Link>
+                    </li>
                     <li className="breadcrumb-item active fw-bold">
-                      Properties
+                      Detail Access Menu
                     </li>
                   </ol>
                 </nav>
@@ -181,7 +99,7 @@ const Position = () => {
             <Card className="shadow">
               <div className="container">
                 <div className="row">
-                  <div className="col-md-3 p-2 border-end">
+                  <div className="col-md-3 p-2">
                     <div className="d-flex flex-column border rounded shadow mt-4">
                       <Link
                         to="/properties"
@@ -196,7 +114,7 @@ const Position = () => {
                         to="/properties/position"
                         className="text-decoration-none text-black fw-semibold border-bottom documents "
                       >
-                        <div className="input-group active-side">
+                        <div className="input-group">
                           <i class="bi bi-diagram-3 fs-4 ms-2 "></i>
                           <h5 className="mt-2 ms-2">Position</h5>
                         </div>
@@ -206,7 +124,7 @@ const Position = () => {
                         className="text-decoration-none text-black fw-semibold border-bottom documents "
                       >
                         <div className="input-group">
-                          <i class="bi bi-person-badge-fill fs-4 ms-2"></i>
+                          <i class="bi bi-person-badge-fill fs-4 ms-2 "></i>
                           <h5 className="mt-2 ms-2">Roles</h5>
                         </div>
                       </Link>
@@ -259,7 +177,7 @@ const Position = () => {
                         to="/properties/user-access-menu"
                         className="text-decoration-none text-black fw-semibold border-bottom documents "
                       >
-                        <div className="input-group">
+                        <div className="input-group active-side">
                           <i class="bi bi-c-circle fs-4 ms-2"></i>
                           <h5 className="mt-2 ms-2">User Access Menu</h5>
                         </div>
@@ -271,16 +189,9 @@ const Position = () => {
                       <button
                         className="btn btn-primary mt-5 ms-4"
                         style={{ fontSize: "0.85rem" }}
-                        onClick={handleOpenAdd}
+                        // onClick={handleOpenAdd}
                       >
-                        Add Position
-                      </button>
-                      <button
-                        className="btn btn-danger mt-5 ms-4"
-                        style={{ fontSize: "0.85rem" }}
-                        // onClick={handleSubmitDeleteSelect}
-                      >
-                        Delete Position
+                        Add Access
                       </button>
                     </div>
                     <div className="float-end col-5 me-3">
@@ -298,7 +209,7 @@ const Position = () => {
                         </div>
                         <input
                           type="text"
-                          placeholder="Search Position..."
+                          placeholder="Search.."
                           className="form-control"
                           onChange={handleFilter}
                           style={{ fontSize: "0.85rem" }}
@@ -307,19 +218,12 @@ const Position = () => {
                     </div>
                     <div className="p-2">
                       <DataTable
+                        className="mt-2"
                         pagination
+                        customStyles={customStyles}
+                        paginationComponentOptions={paginationComponentOptions}
                         data={search}
                         columns={columns}
-                        selectableRows
-                        customStyles={customStyle}
-                        paginationComponentOptions={paginationComponentOptions}
-                        onSelectedRowsChange={selUid}
-                      />
-                      <OverlayAdd visible={addPost} onClose={handleCloseAdd} />
-                      <OverlayEdit
-                        onClose={handleCloseEdit}
-                        visible={editPost !== false}
-                        uid={editPost}
                       />
                     </div>
                   </div>
@@ -333,4 +237,4 @@ const Position = () => {
   );
 };
 
-export default Position;
+export default DetailAccessMenu;

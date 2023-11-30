@@ -47,7 +47,7 @@ const Contact = () => {
   const [user, setUser] = useState([]);
   const [source, setSource] = useState([]);
   const [associateCompany, setAssociateCompany] = useState([]);
-  const [deals, setDeals] = useState([]);
+  // const [deals, setDeals] = useState([]);
 
   const [searchMultiple, setSearchMultiple] = useState({
     name: "",
@@ -78,25 +78,24 @@ const Contact = () => {
       });
   };
 
-  const getDeals = (token) => {
-    axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/deals`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => setDeals(res.data.data))
-      .catch((err) => {
-        if (err.response.data.message === "Unauthenticated") {
-          localStorage.clear();
-          window.location.href = "/login";
-        }
-      });
-  };
-
+  // const getDeals = (token) => {
+  //   axios
+  //     .get(`${process.env.REACT_APP_BACKEND_URL}/deals`, {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //     })
+  //     .then((res) => setDeals(res.data.data))
+  //     .catch((err) => {
+  //       if (err.response.data.message === "Unauthenticated") {
+  //         localStorage.clear();
+  //         window.location.href = "/login";
+  //       }
+  //     });
+  // };
   const getAssociateCompany = (token) => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/associate`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/associate?limit=100000`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -127,7 +126,7 @@ const Contact = () => {
 
   const getContactAll = (url, token, state) => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/${url}`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/${url}?limit=10000`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -174,14 +173,35 @@ const Contact = () => {
   };
   // console.log(resultDeals);
   const selectDeals = () => {
-    const result = [];
-    deals?.map((data) => {
-      const selRes = {
-        value: data.uid,
-        label: data.deal_name,
-      };
-      result.push(selRes);
+    if (
+      !associateCompany ||
+      !associateCompany[0]?.deals ||
+      associateCompany[0]?.deals.length === 0
+    ) {
+      return [{ label: "No Data Available", value: [] }];
+    }
+
+    const uniqueAssDeals = {};
+    associateCompany.forEach((data) => {
+      const dealsName = data?.deals?.deal_name;
+      const key = `${dealsName}-${data.deals_uid}`;
+
+      if (!uniqueAssDeals[key]) {
+        uniqueAssDeals[key] = {
+          label: dealsName,
+          values: [],
+        };
+      }
+      uniqueAssDeals[key].values.push(data.contact_uid);
     });
+
+    const result = Object.values(uniqueAssDeals).map((item) => {
+      return {
+        label: item.label,
+        value: item.values,
+      };
+    });
+
     return result;
   };
 
@@ -197,7 +217,7 @@ const Contact = () => {
           values: [],
         };
       }
-      uniqueAssCompany[key].values.push(data.contact_uid);
+      uniqueAssCompany[key].values.push(data.company_uid);
     });
 
     const result = Object.values(uniqueAssCompany).map((item) => {
@@ -236,13 +256,17 @@ const Contact = () => {
     });
     return result;
   };
-
+  const [pending, setPending] = useState(true);
   useEffect(() => {
     getContactAll("contacts", TokenAuth, setContact);
     getAllUser(TokenAuth);
     getSource(TokenAuth);
     getAssociateCompany(TokenAuth);
-    getDeals(TokenAuth);
+
+    const timeOut = setTimeout(() => {
+      setPending(false);
+    }, 3500);
+    return () => clearTimeout(timeOut);
   }, [TokenAuth]);
 
   const columns = [
@@ -273,9 +297,11 @@ const Contact = () => {
     },
     {
       name: "Contact Info",
-      selector: (row) => row?.phone?.[0]?.number,
+      selector: (row) => (
+        <p style={{ fontSize: "0.85rem" }}>{row?.phone?.[0]?.number}</p>
+      ),
       sortable: true,
-      width: "130px",
+      width: "150px",
     },
     {
       name: "Associated With",
@@ -329,7 +355,7 @@ const Contact = () => {
         const updatedAt = new Date(row.updated_at);
         const formatOptions = {
           year: "numeric",
-          month: "2-digit",
+          month: "long",
           day: "2-digit",
           hour: "2-digit",
           minute: "2-digit",
@@ -339,9 +365,22 @@ const Contact = () => {
         const updatedDateTime = formatter.format(updatedAt);
 
         return (
-          <div className="mt-2">
-            <p className="mt-1">{createdDateTime}</p>
-            <p style={{ marginTop: "-12px" }}>{updatedDateTime}</p>
+          <div className="mt-1">
+            <p
+              className="mt-1"
+              style={{ fontSize: "0.85rem", whiteSpace: "normal" }}
+            >
+              {createdDateTime}
+            </p>
+            <p
+              style={{
+                marginTop: "-12px",
+                fontSize: "0.85rem",
+                whiteSpace: "normal",
+              }}
+            >
+              {updatedDateTime}
+            </p>
           </div>
         );
       },
@@ -369,7 +408,6 @@ const Contact = () => {
         </OverlayTrigger>
       ),
       sortable: true,
-      center: true,
     },
     {
       name: "Action",
@@ -815,6 +853,7 @@ const Contact = () => {
                   paginationComponentOptions={paginationComponentOptions}
                   selectableRows
                   onSelectedRowsChange={selectUidDataTable}
+                  progressPending={pending}
                 />
               </div>
             </div>

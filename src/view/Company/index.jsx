@@ -16,7 +16,7 @@ import iconGedung from "../../../src/assets/img/office-building.png";
 import axios, { all } from "axios";
 import Swal from "sweetalert2";
 import Select from "react-select";
-import IconMoney from "../../assets/img/coin.png"
+import IconMoney from "../../assets/img/coin.png";
 
 const Company = () => {
   const uid = localStorage.getItem("uid");
@@ -82,7 +82,7 @@ const Company = () => {
 
   const getDeals = (token) => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/deals`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/deals?limit=10000`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -98,7 +98,7 @@ const Company = () => {
 
   const getAssociateContact = (token) => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/associate`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/associate?limit=10000`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -116,7 +116,7 @@ const Company = () => {
   };
   const getAllCompany = () => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/companies`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/companies?limit=10000`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -191,7 +191,7 @@ const Company = () => {
           values: [],
         };
       }
-      uniqueAssCont[key].values.push(data.company_uid);
+      uniqueAssCont[key].values.push(data.contact_uid);
     });
     const result = Object.values(uniqueAssCont).map((data) => {
       return {
@@ -217,6 +217,13 @@ const Company = () => {
   };
 
   const selectAssDeals = () => {
+    if (
+      !associateDeals ||
+      !associateDeals[0]?.deals ||
+      associateDeals[0]?.deals.length === 0
+    ) {
+      return [{ label: "No Data Available", value: [] }];
+    }
     const result = [];
     associateDeals?.map((data) => {
       const dealName = data?.deals?.deal_name;
@@ -349,7 +356,6 @@ const Company = () => {
       setSearch(filterData);
     }
   };
-
   const handleSubmitSearch = () => {
     const filterdata = allCompany.filter((row) => {
       return (
@@ -391,7 +397,6 @@ const Company = () => {
     });
     setSearch(filterdata);
   };
-
   const handleSubmitDeleteSelect = async (e) => {
     e.preventDefault();
     const result = await Swal.fire({
@@ -433,6 +438,8 @@ const Company = () => {
       }
     }
   };
+
+  const [pending, setPending] = useState(true);
   useEffect(() => {
     getAllCompany(token);
     getOwnerUser(token);
@@ -440,6 +447,11 @@ const Company = () => {
     getAlltypeCompany(token);
     getAssociateContact(token);
     getDeals(token);
+
+    const timout = setTimeout(() => {
+      setPending(false);
+    }, 2000);
+    return () => clearTimeout(timout);
   }, [token]);
   const columns = [
     {
@@ -450,7 +462,9 @@ const Company = () => {
           <div className="d-flex align-items-center">
             <img src={IconCompany} style={{ width: "20px" }} />
             <div className="mt-1">
-              <span className="fw-semibold" style={{  whiteSpace:"normal" }}>{row.name}</span>
+              <span className="fw-semibold" style={{ whiteSpace: "normal" }}>
+                {row.name}
+              </span>
             </div>
           </div>
         </div>
@@ -471,11 +485,14 @@ const Company = () => {
                 <Tooltip
                   id={`tooltip-${item?.contact?.name}- ${item?.contact?.phone?.[0]?.number}`}
                 >
-                  
                   {item?.contact?.name ? item?.contact?.name : null}
                   {item?.deals?.deal_name ? item?.deals?.deal_name : null}
                   <br />
-                  {item?.deals?.deal_size ? `Rp. ${new Intl.NumberFormat().format(item?.deals?.deal_size)}` :null}
+                  {item?.deals?.deal_size
+                    ? `Rp. ${new Intl.NumberFormat().format(
+                        item?.deals?.deal_size
+                      )}`
+                    : null}
                   {item?.contact?.phone?.[0]?.number}
                 </Tooltip>
               }
@@ -490,10 +507,12 @@ const Company = () => {
                   />
                 ) : null}
                 {item?.deals ? (
-                  <img  className="ms-1"
-                  src={IconMoney}
-                  style={{ width: "18px" }}
-                  data-tip={item?.deals?.dealName} />
+                  <img
+                    className="ms-1"
+                    src={IconMoney}
+                    style={{ width: "18px" }}
+                    data-tip={item?.deals?.dealName}
+                  />
                 ) : null}
               </div>
             </OverlayTrigger>
@@ -525,8 +544,10 @@ const Company = () => {
         const time = formate.format(date);
         return (
           <div className="mt-2">
-            <span className="fw-semibold">{row?.owner?.name}</span>
-            <p className="mt-1" style={{ fontSize: "10px" }}>
+            <span className="fw-semibold" style={{ whiteSpace: "normal" }}>
+              {row?.owner?.name}
+            </span>
+            <p className="mt-1" style={{ fontSize: "9.8px" }}>
               {time}
             </p>
           </div>
@@ -550,7 +571,10 @@ const Company = () => {
         const formatResult = new Intl.DateTimeFormat("en-US", formatOptions);
         const time = formatResult.format(date);
         return (
-          <p className="mt-2" style={{ fontSize: "11px", whiteSpace:"normal" }}>
+          <p
+            className="mt-2"
+            style={{ fontSize: "11px", whiteSpace: "normal" }}
+          >
             {time}
           </p>
         );
@@ -913,6 +937,7 @@ const Company = () => {
                     paginationComponentOptions={paginationComponentOptions}
                     selectableRows
                     onSelectedRowsChange={selectUid}
+                    progressPending={pending}
                   />
                 </div>
               </div>

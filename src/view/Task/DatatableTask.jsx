@@ -8,7 +8,7 @@ import IconDeals from "../../assets/img/coin.png";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
 import axios from "axios";
 
-const DatatableTask = ({ data, selectUidDataTable }) => {
+const DatatableTask = ({ data, selectUidDataTable, pending }) => {
   const token = localStorage.getItem("token");
   const [editTask, setEditTask] = useState(false);
   const handleCloseEdit = () => {
@@ -24,24 +24,30 @@ const DatatableTask = ({ data, selectUidDataTable }) => {
       cancelButtonText: "Batal",
     });
     if (isResult.isConfirmed) {
-      const formData = new FormData()
-      formData.append("task[0][uid]", uid)
-      formData.append("_method", "delete")
-      axios.post(`${process.env.REACT_APP_BACKEND_URL}/tasks/item/delete`, formData,{
-        headers:{
-          Authorization: `Bearer ${token}`
-        }
-      }).then((res) => {
-        Swal.fire({
-          title:res.data.message,
-          text: "Delete Successfully",
-          icon: "success"
-        }).then((res) => {
-          if(res.isConfirmed){
-            window.location.reload()
+      const formData = new FormData();
+      formData.append("task[0][uid]", uid);
+      formData.append("_method", "delete");
+      axios
+        .post(
+          `${process.env.REACT_APP_BACKEND_URL}/tasks/item/delete`,
+          formData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           }
-        })
-      })
+        )
+        .then((res) => {
+          Swal.fire({
+            title: res.data.message,
+            text: "Delete Successfully",
+            icon: "success",
+          }).then((res) => {
+            if (res.isConfirmed) {
+              window.location.reload();
+            }
+          });
+        });
     }
   };
 
@@ -65,73 +71,85 @@ const DatatableTask = ({ data, selectUidDataTable }) => {
       sortable: true,
     },
     {
-      name: "Owner", 
-      selector: (row) => row.owner?.name,
-      sortable: true
+      name: "Owner",
+      selector: (row) => (
+        <p
+          style={{
+            whiteSpace: "normal",
+            fontSize: "0.75rem",
+            marginTop: "5px",
+          }}
+        >
+          {row.owner?.name}
+        </p>
+      ),
+      sortable: true,
     },
     {
       name: "Associated",
       selector: (row) => (
-        (
-          <div className="d-flex">
-            <OverlayTrigger
-              placement="top"
-              overlay={<Tooltip>{row?.company?.name ?? null}</Tooltip>}
-            >
-              <div>
-                {row?.company ? (
-                  <img
-                    src={IconCompany}
-                    style={{ width: "18px" }}
-                    data-tip={row?.company?.name}
-                    data-entity="company"
-                  />
-                ) : null}
-              </div>
-            </OverlayTrigger>
-            <OverlayTrigger
-              placement="top"
-              overlay={
-                <Tooltip>
-                  {row?.contact?.name ?? null}
-                  <br />
-                  {row?.contact.phone[0]?.number}
-                </Tooltip>
-              }
-            >
-              <div>
-                {row?.company ? (
-                  <img
-                    className="ms-2"
-                    src={IconContact}
-                    style={{ width: "18px" }}
-                    data-tip={row?.contact?.name}
-                  />
-                ) : null}
-              </div>
-            </OverlayTrigger>
-            <OverlayTrigger
-              placement="top"
-              overlay={
-                <Tooltip>
-                  {row?.deal?.deal_name ?? null}
-                 <br />
-                  {row?.deal?.deal_size ? `Rp. ${new Intl.NumberFormat().format(row?.deal?.deal_size)}` : null}
-                </Tooltip>
-              }
-            >
-              <div>
-                {row?.company ? (
-                  <img
-                    className="ms-2"
-                    src={IconDeals}
-                    style={{ width: "18px" }}
-                  />
-                ) : null}
-              </div>
-            </OverlayTrigger>
-          </div>
-        )
+        <div className="d-flex">
+          <OverlayTrigger
+            placement="top"
+            overlay={<Tooltip>{row?.company?.name ?? null}</Tooltip>}
+          >
+            <div>
+              {row?.company ? (
+                <img
+                  src={IconCompany}
+                  style={{ width: "18px" }}
+                  data-tip={row?.company?.name}
+                  data-entity="company"
+                />
+              ) : null}
+            </div>
+          </OverlayTrigger>
+          <OverlayTrigger
+            placement="top"
+            overlay={
+              <Tooltip>
+                {row?.contact?.name ?? null}
+                <br />
+                {row?.contact.phone[0]?.number}
+              </Tooltip>
+            }
+          >
+            <div>
+              {row?.company ? (
+                <img
+                  className="ms-2"
+                  src={IconContact}
+                  style={{ width: "18px" }}
+                  data-tip={row?.contact?.name}
+                />
+              ) : null}
+            </div>
+          </OverlayTrigger>
+          <OverlayTrigger
+            placement="top"
+            overlay={
+              <Tooltip>
+                {row?.deal?.deal_name ?? null}
+                <br />
+                {row?.deal?.deal_size
+                  ? `Rp. ${new Intl.NumberFormat().format(
+                      row?.deal?.deal_size
+                    )}`
+                  : null}
+              </Tooltip>
+            }
+          >
+            <div>
+              {row?.company ? (
+                <img
+                  className="ms-2"
+                  src={IconDeals}
+                  style={{ width: "18px" }}
+                />
+              ) : null}
+            </div>
+          </OverlayTrigger>
+        </div>
       ),
       sortable: true,
     },
@@ -151,7 +169,10 @@ const DatatableTask = ({ data, selectUidDataTable }) => {
         const created = formattter.format(create);
         const updated = formattter.format(updt);
         return (
-          <div className="mt-1" style={{ whiteSpace: "normal", fontSize:"10px" }}>
+          <div
+            className="mt-1"
+            style={{ whiteSpace: "normal", fontSize: "10px" }}
+          >
             {created} <br /> {updated}
           </div>
         );
@@ -171,13 +192,14 @@ const DatatableTask = ({ data, selectUidDataTable }) => {
           </button>
           <button
             className="ms-2 icon-button"
-            onClick={()=> handleDelete(row.uid)}
+            onClick={() => handleDelete(row.uid)}
             title="Delete"
           >
             <i className="bi bi-trash-fill danger"></i>
           </button>
         </div>
       ),
+      width: "150px",
     },
   ];
   return (
@@ -190,6 +212,7 @@ const DatatableTask = ({ data, selectUidDataTable }) => {
         paginationComponentOptions={paginationComponentOptions}
         selectableRows
         onSelectedRowsChange={selectUidDataTable}
+        progressPending={pending}
       />
       <EditTask
         onClose={handleCloseEdit}

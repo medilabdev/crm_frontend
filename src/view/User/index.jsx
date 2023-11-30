@@ -119,12 +119,19 @@ const User = () => {
         }
       });
   };
+
+  const [pending, setPending] = useState(true)
   useEffect(() => {
     getData("users", token, setGetDataUser);
     getAllRoles(token);
     getPrimaryTeam(token);
     getAllUser(token);
     getAllPosition(token);
+
+    const timeOut = setTimeout(() => {
+      setPending(false)
+    }, 3500)
+    return () => clearTimeout(timeOut)
   }, [token]);
 
   // show redirect
@@ -278,6 +285,7 @@ const User = () => {
               pagination
               paginationComponentOptions={paginationComponentOptions}
               className="mt-2"
+              progressPending={pending}
             />
             <AddUser
               onClose={handleCloseModal}

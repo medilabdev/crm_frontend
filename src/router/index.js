@@ -48,6 +48,8 @@ import DetailNeedApproval from "../view/Deals/NeedApproval/Detail";
 import UploadDeals from "../view/Deals/SingleDeals/UploadDeals";
 import CategoryExpanse from "../view/Properties/CategoryExpanse";
 import OtorisasiMenu from "../view/Properties/OtorisasiMenu";
+import UserAccessMenu from "../view/Properties/UserAccessMenu";
+import DetailAccessMenu from "../view/Properties/UserAccessMenu/DetailAccessMenu";
 const Login = ({ children }) => {
   const token = localStorage.getItem("token");
   if (!token) {
@@ -65,7 +67,6 @@ function Router() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Auth />} />
-
         <Route
           exact
           path="/"
@@ -75,7 +76,6 @@ function Router() {
             </Login>
           }
         />
-
         <Route
           exact
           path="/users"
@@ -85,7 +85,6 @@ function Router() {
             </Login>
           }
         />
-
         <Route
           exact
           path="/users/:uid"
@@ -95,7 +94,6 @@ function Router() {
             </Login>
           }
         />
-
         <Route
           exact
           path="/contact"
@@ -105,7 +103,6 @@ function Router() {
             </Login>
           }
         />
-
         <Route
           exact
           path="/single-contact"
@@ -115,7 +112,6 @@ function Router() {
             </Login>
           }
         />
-
         <Route
           exact
           path="/contact/bulk-change"
@@ -143,7 +139,6 @@ function Router() {
             </Login>
           }
         />
-
         <Route
           exact
           path="/company"
@@ -153,7 +148,6 @@ function Router() {
             </Login>
           }
         />
-
         <Route
           exact
           path="/company/single-company"
@@ -163,7 +157,6 @@ function Router() {
             </Login>
           }
         />
-
         <Route
           exact
           path="/company/upload-file"
@@ -173,7 +166,6 @@ function Router() {
             </Login>
           }
         />
-
         <Route
           path="/company/bulkchange"
           element={
@@ -209,7 +201,6 @@ function Router() {
             </Login>
           }
         />
-
         <Route
           exact
           path="/products"
@@ -237,7 +228,6 @@ function Router() {
             </Login>
           }
         />
-
         <Route
           exact
           path="/templates"
@@ -247,7 +237,6 @@ function Router() {
             </Login>
           }
         />
-
         <Route
           exact
           path="/short-code"
@@ -416,6 +405,24 @@ function Router() {
           element={
             <Login>
               <OtorisasiMenu />
+            </Login>
+          }
+        />
+        <Route
+          exact
+          path="/properties/user-access-menu"
+          element={
+            <Login>
+              <UserAccessMenu />
+            </Login>
+          }
+        />
+        <Route
+          exact
+          path="/access-menu/:uid/detail"
+          element={
+            <Login>
+              <DetailAccessMenu />
             </Login>
           }
         />
