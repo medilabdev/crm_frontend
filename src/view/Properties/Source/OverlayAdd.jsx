@@ -50,7 +50,7 @@ const OverlayAdd = ({ visible, onClose }) => {
       </Offcanvas.Header>
       <Offcanvas.Body>
         <form onSubmit={handleSubmit}>
-          <Form className="mb-2">
+          <Form.Group className="mb-2">
             <Form.Label>
               Name Source <span className="text-danger fs-5">*</span>
             </Form.Label>
@@ -60,7 +60,7 @@ const OverlayAdd = ({ visible, onClose }) => {
               onChange={handleInput}
               required
             />
-          </Form>
+          </Form.Group>
           <div className="mt-5">
             <button className="btn btn-primary" type="submit">
               Save

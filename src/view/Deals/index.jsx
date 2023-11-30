@@ -147,7 +147,7 @@ const Deals = () => {
 
   const getDeals = () => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/deals`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/deals?limit=10000`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -318,7 +318,7 @@ const Deals = () => {
     });
     return res;
   };
-
+  const [pending, setPending] = useState(true)
   useEffect(() => {
     getOwnerUser(token);
     getDeals(token);
@@ -328,7 +328,12 @@ const Deals = () => {
     getContact(token);
     getProduct(token);
     getPackageProduct(token);
-  }, [token]);
+
+    const timeOut = setTimeout(() => {
+      setPending(false)
+    }, 3500)
+    return () => clearTimeout(timeOut);
+   }, [token]);
 
   const uid = localStorage.getItem("uid");
   const handleDealsMyOrPerson = (e) => {
@@ -709,6 +714,7 @@ const Deals = () => {
                   <DataTableComponet
                     data={search}
                     selectUidDataTable={selectUidDataTable}
+                    pending={pending}
                   />
                 </div>
               </div>

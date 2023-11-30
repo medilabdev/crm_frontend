@@ -107,26 +107,32 @@ const DealsCategory = () => {
 
   const columnsDatatable = [
     {
-      id: 1,
       name: "Name Source",
       selector: (row) => row.name,
       sortable: true,
     },
     {
-      id: 2,
       name: "Expired Day",
       selector: (row) => row.start_exp_day,
       sortable: true,
     },
     {
-      id: 3,
+      name: "Number",
+      selector: (row) => row.numbering,
+      sortable: true,
+    },
+    {
       name: "Percent Weight (%)",
       selector: (row) => row.percent_weight,
       sortable: true,
       width: "150px",
     },
     {
-      id: 4,
+      name: "Need Approval",
+      selector: (row) => row.need_approval === "yes" ? "Yes" : "No",
+      sortable: true
+    },
+    {
       name: "Action",
       selector: (row) => (
         <div>
@@ -148,6 +154,7 @@ const DealsCategory = () => {
       ),
     },
   ];
+
   return (
     <body id="body">
       <Topbar />
@@ -251,6 +258,15 @@ const DealsCategory = () => {
                           <h5 className="mt-2 ms-2">Menu Management</h5>
                         </div>
                       </Link>
+                      <Link
+                        to="/properties/user-access-menu"
+                        className="text-decoration-none text-black fw-semibold border-bottom documents "
+                      >
+                        <div className="input-group">
+                          <i class="bi bi-c-circle fs-4 ms-2"></i>
+                          <h5 className="mt-2 ms-2">User Access Menu</h5>
+                        </div>
+                      </Link>
                     </div>
                   </div>
                   <div className="col-md-9">
@@ -261,13 +277,6 @@ const DealsCategory = () => {
                         onClick={handleOpenAdd}
                       >
                         Add DealStage
-                      </button>
-                      <button
-                        className="btn btn-danger mt-5 ms-4"
-                        style={{ fontSize: "0.85rem" }}
-                        // onClick={handleSubmitDeleteSelect}
-                      >
-                        Delete DealStage
                       </button>
                     </div>
                     <div className="float-end col-5 me-3">

@@ -9,7 +9,7 @@ import Swal from "sweetalert2";
 import IconCompany from "../../assets/img/condo.png";
 import IconPhone from "../../assets/img/telephone-call.png"
 
-const DataTableComponet = ({ data, selectUidDataTable }) => {
+const DataTableComponet = ({ data, selectUidDataTable, pending }) => {
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
   const columns = [
@@ -201,6 +201,7 @@ const DataTableComponet = ({ data, selectUidDataTable }) => {
         paginationComponentOptions={paginationComponentOptions}
         selectableRows
         onSelectedRowsChange={selectUidDataTable}
+        progressPending={pending}
       />
     </div>
   );

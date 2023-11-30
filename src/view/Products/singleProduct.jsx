@@ -102,8 +102,14 @@ const SingleProduct = () => {
     selectAllRowsItem: true,
     selectAllRowsItemText: "ALL",
   };
+
+  const [pending, setPending] = useState(true)
   useEffect(() => {
     getProduct(token);
+    const timeOut = setTimeout(() => {
+      setPending(false)
+    }, 2500)
+    return () => clearTimeout(timeOut)
   }, [token]);
 
   const columns = [
@@ -216,6 +222,7 @@ const SingleProduct = () => {
           selectableRows
           paginationComponentOptions={paginationComponentOptions}
           onSelectedRowsChange={selectUidDataTable}
+          progressPending={pending}
         />
         <DeleteSingle
           onClose={handleDeleteSingle}

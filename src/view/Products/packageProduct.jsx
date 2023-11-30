@@ -137,8 +137,15 @@ const PackageProduct = () => {
     selectAllRowsItem: true,
     selectAllRowsItemText: "ALL",
   };
+
+  const [pending, setPending] = useState(true)
   useEffect(() => {
     getPackageProduct(token);
+
+    const timeOut = setTimeout(() => {
+      setPending(false)
+    }, 2500)
+    return () => clearTimeout(timeOut)
   }, [token]);
 
   const columns = [
@@ -291,6 +298,7 @@ const PackageProduct = () => {
           expandableRows
           expandableRowsComponent={ExpandableRowComponent}
           paginationComponentOptions={paginationComponentOptions}
+          progressPending={pending}
           // customStyles={customStyle}
         />
         <AddPackageProduct

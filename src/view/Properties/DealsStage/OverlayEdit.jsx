@@ -7,6 +7,16 @@ import Swal from "sweetalert2";
 const OverlayEdit = ({ visible, uid, onClose }) => {
   const token = localStorage.getItem("token");
   const [input, setInput] = useState({});
+  const [needApproval, setNeedApproval] = useState("");
+
+  const handleNeed = (e) => {
+    const value = e.target.value;
+    if (needApproval === value) {
+      setNeedApproval("");
+    } else {
+      setNeedApproval(value);
+    }
+  };
   const handleInput = (e) => {
     setInput({
       ...input,
@@ -26,6 +36,7 @@ const OverlayEdit = ({ visible, uid, onClose }) => {
           name: oldData.name,
           start_exp_day: oldData.start_exp_day,
           percent_weight: oldData.percent_weight,
+          numbering: oldData.numbering,
         });
       })
       .catch((error) => {
@@ -40,13 +51,15 @@ const OverlayEdit = ({ visible, uid, onClose }) => {
       getDetail(token, uid);
     }
   }, [token, uid]);
-  // console.log(input);
+  
   const handleSubmit = (e) => {
     e.preventDefault();
     const formData = new FormData();
     formData.append("name", input.name);
     formData.append("start_exp_day", input.start_exp_day);
     formData.append("percent_weight", input.percent_weight);
+    formData.append("numbering", input.numbering);
+    formData.append("need_approval", needApproval);
     formData.append("_method", "put");
     axios
       .post(
@@ -98,6 +111,37 @@ const OverlayEdit = ({ visible, uid, onClose }) => {
               value={input.name}
               onChange={handleInput}
               required
+            />
+          </Form.Group>
+          <Form.Group className="mb-2">
+            <Form.Label>
+              Number <span className="text-danger fs-5">*</span>
+            </Form.Label>
+            <Form.Control
+              type="number"
+              name="numbering"
+              value={input.numbering}
+              onChange={handleInput}
+              required
+            />
+          </Form.Group>
+          <Form.Group className="mb-2">
+            <Form.Label>
+              Need Approval <span className="text-danger fs-5">*</span>
+            </Form.Label>
+            <Form.Check
+              type="checkbox"
+              value="yes"
+              label="Yes"
+              checked={needApproval === "yes"}
+              onChange={handleNeed}
+            />
+            <Form.Check
+              type="checkbox"
+              value="no"
+              label="No"
+              checked={needApproval === "no"}
+              onChange={handleNeed}
             />
           </Form.Group>
           <Form.Group className="mb-2">

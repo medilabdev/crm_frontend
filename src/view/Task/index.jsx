@@ -35,7 +35,7 @@ const Task = () => {
 
   const getTask = () => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/tasks`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/tasks?limit=100000`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -188,6 +188,7 @@ const Task = () => {
     return res;
   };
 
+  const [pending, setPending] = useState(true)
   useEffect(() => {
     getTask(token);
     getOwner(token);
@@ -195,6 +196,11 @@ const Task = () => {
     getContact(token);
     getDeals(token);
     getStatus(token);
+
+    const timeOut = setTimeout(() => {
+      setPending(false)
+    }, 4000)
+    return () => clearTimeout(timeOut)
   }, [token]);
 
   const selectUidDataTable = (e) => {
@@ -566,6 +572,7 @@ const Task = () => {
                     <DatatableTask
                       data={search}
                       selectUidDataTable={selectUidDataTable}
+                      pending={pending}
                     />
                     <AddTask visible={addTask} onClose={handleCloseOverlay} />
                   </div>
