@@ -402,10 +402,6 @@ const OverlayAddCompany = ({ visible, onClose }) => {
               value={inputCompany.number_of_patient}
             />
           </Form.Group>
-          <Form.Group className="mb-3" controlId="formBasicEmail">
-            <Form.Label>Deals</Form.Label>
-            <Select />
-          </Form.Group>
           <Form.Group className="mb-4" controlId="formBasicEmail">
             <Form.Label>Parent Company</Form.Label>
             <Select options={selectCompany()} onChange={handleParentComp} />

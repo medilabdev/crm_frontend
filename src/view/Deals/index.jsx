@@ -710,7 +710,7 @@ const Deals = () => {
                 </div>
               </div>
               <div className="row">
-                <div className="col">
+                <div className="col mt-3">
                   <DataTableComponet
                     data={search}
                     selectUidDataTable={selectUidDataTable}

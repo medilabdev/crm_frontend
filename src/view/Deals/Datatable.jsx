@@ -7,7 +7,7 @@ import DataTable from "react-data-table-component";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import IconCompany from "../../assets/img/condo.png";
-import IconPhone from "../../assets/img/telephone-call.png"
+import IconPhone from "../../assets/img/telephone-call.png";
 
 const DataTableComponet = ({ data, selectUidDataTable, pending }) => {
   const token = localStorage.getItem("token");
@@ -24,7 +24,22 @@ const DataTableComponet = ({ data, selectUidDataTable, pending }) => {
     },
     {
       name: "Stage",
-      selector: (row) =>row.staging?.name,
+      selector: (row) => (
+        <div>
+          <p
+            className={`btn ${
+              row.staging?.name === "Closed Won"
+                ? "btn-success"
+                : row.staging?.name === "Closed Lost"
+                  ? "btn-danger"
+                  : "btn-primary"
+            }`}
+            style={{ fontSize: "0.65rem" }}
+          >
+            {row.staging?.name}
+          </p>
+        </div>
+      ),
       sortable: true,
     },
     {
@@ -37,58 +52,54 @@ const DataTableComponet = ({ data, selectUidDataTable, pending }) => {
       name: "Associated with",
       selector: (row) => (
         <div className="d-flex">
-      {
-  row.company ? (
-    <OverlayTrigger
-      placement="top"
-      overlay={<Tooltip>{row?.company?.name}</Tooltip>}
-    >
-      <div>
-        <img
-          className="ms-1"
-          src={IconCompany}
-          alt=""
-          style={{ width: "18px" }}
-          data-tip={row.company?.name}
-        />
-      </div>
-    </OverlayTrigger>
-  ) : null
-}
-{
-  row.contact_person ? (
-    row.contact_person.slice(0, 2).map((item, index) => (
-      <OverlayTrigger
-        key={index}
-        placement="top"
-        overlay={
-          <Tooltip
-            id={`tooltip-${item?.contact?.name}-${item?.contact?.phone?.[0]?.number}`}
-          >
-            {item?.contact?.name}
-            <br />
-            {item?.contact?.phone?.[0]?.number}
-          </Tooltip>
-        }
-      >
-        <div>
-          <img
-            className="ms-1"
-            src={IconPhone}
-            alt=""
-            style={{ width: "18px" }}
-          />
-        </div>
-      </OverlayTrigger>
-    ))
-  ) : null
-}
+          {row.company ? (
+            <OverlayTrigger
+              placement="top"
+              overlay={<Tooltip>{row?.company?.name}</Tooltip>}
+            >
+              <div>
+                <img
+                  className="ms-1"
+                  src={IconCompany}
+                  alt=""
+                  style={{ width: "18px" }}
+                  data-tip={row.company?.name}
+                />
+              </div>
+            </OverlayTrigger>
+          ) : null}
+          {row.contact_person
+            ? row.contact_person.slice(0, 2).map((item, index) => (
+                <OverlayTrigger
+                  key={index}
+                  placement="top"
+                  overlay={
+                    <Tooltip
+                      id={`tooltip-${item?.contact?.name}-${item?.contact?.phone?.[0]?.number}`}
+                    >
+                      {item?.contact?.name}
+                      <br />
+                      {item?.contact?.phone?.[0]?.number}
+                    </Tooltip>
+                  }
+                >
+                  <div>
+                    <img
+                      className="ms-1"
+                      src={IconPhone}
+                      alt=""
+                      style={{ width: "18px" }}
+                    />
+                  </div>
+                </OverlayTrigger>
+              ))
+            : null}
         </div>
       ),
       sortable: true,
       width: "150px",
     },
-    
+
     {
       name: "Owner/Created",
       selector: (row) => {

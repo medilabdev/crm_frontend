@@ -66,12 +66,12 @@ function Topbar() {
           href="\"
           className="logo d-flex align-items-center text-decoration-none"
         >
-          <img src={Image} style={{ width: "22px", marginLeft: "1rem" }} />
+          <img src={Image} style={{ width: "25px", marginLeft: "1rem" }} />
           <span
             className="title"
-            style={{ fontSize: "23px", marginLeft: "5px" }}
+            style={{ fontSize: "18px", marginLeft: "5px" }}
           >
-            CRM
+            HARRISA CRM
           </span>
         </a>
         <i
