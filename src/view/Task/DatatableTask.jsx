@@ -7,12 +7,18 @@ import IconContact from "../../assets/img/telephone-call.png";
 import IconDeals from "../../assets/img/coin.png";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
 import axios from "axios";
+import EditStatus from "./Overlay/EditStatus";
 
 const DatatableTask = ({ data, selectUidDataTable, pending }) => {
   const token = localStorage.getItem("token");
   const [editTask, setEditTask] = useState(false);
   const handleCloseEdit = () => {
     setEditTask(false);
+  };
+
+  const [editStatus, setEditStatus] = useState(false);
+  const handleCloseEditStatus = () => {
+    setEditStatus(false);
   };
   const handleDelete = async (uid) => {
     const isResult = await Swal.fire({
@@ -67,8 +73,31 @@ const DatatableTask = ({ data, selectUidDataTable, pending }) => {
     },
     {
       name: "Status",
-      selector: (row) => row.status?.name,
+      selector: (row) => (
+        <div>
+          <button
+            className={`btn ${
+              row?.status?.name === "Completed"
+                ? "btn-success"
+                : row?.status?.name === "Waiting"
+                  ? "btn-primary"
+                  : row?.status?.name === "In Progress"
+                    ? "btn-info"
+                    : "btn-secondary"
+            }`}
+            style={{ fontSize: "0.65rem" }}
+            onClick={() => setEditStatus(row.uid)}
+          >
+            {row?.status?.name}
+            <i
+              className="bi bi-pen edit ms-3"
+              style={{ fontSize: "0.75rem", border: "5px" }}
+            ></i>
+          </button>
+        </div>
+      ),
       sortable: true,
+      width:"150px"
     },
     {
       name: "Owner",
@@ -218,6 +247,11 @@ const DatatableTask = ({ data, selectUidDataTable, pending }) => {
         onClose={handleCloseEdit}
         visible={editTask !== false}
         uid={editTask}
+      />
+      <EditStatus
+        onClose={handleCloseEditStatus}
+        visible={editStatus !== false}
+        uid={editStatus}
       />
     </div>
   );
