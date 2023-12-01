@@ -1,92 +1,51 @@
 import React, { useEffect, useState } from "react";
 import MenuSidebar from "../../Template/Sidebar/MenuSidebar";
+import axios from "axios";
 
 function Sidebar() {
   const [openSubMenu, setOpenSubMenu] = useState(null);
+  const token = localStorage.getItem("token");
+  const role = localStorage.getItem("role");
+  const [accessUser, setAccessUser] = useState([]);
+
+  const getAccess = () => {
+    axios
+      .get(
+        `${process.env.REACT_APP_BACKEND_URL}/user-access-menus/role/${role}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+      .then((res) => setAccessUser(res.data.data))
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
   useEffect(() => {
+    getAccess();
     return () => {
       setOpenSubMenu(null);
     };
-  }, []);
+  }, [token]);
+  
   return (
     <>
       <aside id="sidebar" className="sidebar shadow-">
         <ul className="sidebar-nav" id="sidebar-nav">
-          <MenuSidebar
-            type="nonCollapse"
-            name="Dashboard"
-            icon="bi bi-grid"
-            url="/"
-            isActive={1}
-          />
-
-          <MenuSidebar
-            typeMenu="nonCollapse"
-            name="Contact"
-            url="/contact"
-            icon="bi bi-person-rolodex"
-            isActive={1}
-          />
-          <MenuSidebar
-            type="nonCollapse"
-            name="Company"
-            url="/company"
-            icon="bi bi-building"
-            isActive={1}
-          />
-          <MenuSidebar
-            type="nonCollapse"
-            name="Products"
-            url="/products"
-            icon="bi bi-archive-fill"
-            isActive={1}
-          />
-          {/* <MenuSidebar
-            type="collapse"
-            name="Report Template"
-            icon="bi bi-clipboard-data-fill"
-            url="/report-template"
-            isActive={1}
-            dataBsTarget="#components-nav"
-            openSubMenu={openSubMenu}
-            setOpenSubMenu={setOpenSubMenu}
-          /> */}
-          <MenuSidebar
-            typeMenu="nonCollapse"
-            name="Documents"
-            url="/documents"
-            icon="bi bi-file-earmark-text-fill"
-            isActive={1}
-          />
-          <MenuSidebar
-            typeMenu="nonCollapse"
-            name="Deals"
-            url="/deals"
-            icon="bi bi-tags"
-            isActive={1}
-          />
+          {accessUser.map((data) => (
             <MenuSidebar
-            typeMenu="nonCollapse"
-            name="Task"
-            url="/task"
-            icon="bi bi-list-task"
-            isActive={1}
-          />
-          <MenuSidebar
-            typeMenu="nonCollapse"
-            name="Users"
-            url="/users"
-            icon="bi bi-person-fill"
-            isActive={1}
-          />
-
-          <MenuSidebar
-            typeMenu="nonCollapse"
-            name="Properties"
-            url="/properties"
-            icon="bi bi-gear-fill"
-            isActive={1}
-          />
+              type={data?.menu?.type}
+              name={data?.menu?.name}
+              icon={data?.menu?.icon}
+              url={data?.menu?.route}
+              isActive={data?.menu?.is_active}
+            />
+          ))}
         </ul>
       </aside>
     </>

@@ -83,6 +83,7 @@ const Task = () => {
         }
       });
   };
+
   const getCompany = (token) => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/companies`, {
@@ -207,7 +208,6 @@ const Task = () => {
     const select = e.selectedRows.map((row) => row.uid);
     setSelectUid(select);
   };
-  console.log(selectUid);
   const handleFilter = (e) => {
     const data = task.filter((row) => {
       return row.task_name.toLowerCase().includes(e.target.value.toLowerCase());
