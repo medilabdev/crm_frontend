@@ -9,6 +9,7 @@ import { DoughnutChart } from "./Doughnut";
 import { Card } from "react-bootstrap";
 import { ChartVertikal } from "./ChartVertikal";
 import { ChartLineDoang } from "./ChartLineDoang";
+import { ChartWinLose } from "./ChartWinLose";
 
 function Dashboard() {
   return (
@@ -55,6 +56,11 @@ function Dashboard() {
             <div className="col-md-6">
               <Card className="shadow">
                 <ChartLineDoang />
+              </Card>
+            </div>
+            <div className="col-md-6">
+              <Card className="shadow">
+                <ChartWinLose />
               </Card>
             </div>
           </div>

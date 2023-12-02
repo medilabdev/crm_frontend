@@ -71,7 +71,7 @@ function Topbar() {
             className="title"
             style={{ fontSize: "18px", marginLeft: "5px" }}
           >
-            HARRISA CRM
+            HARISSA CRM
           </span>
         </a>
         <i
@@ -219,7 +219,6 @@ function Topbar() {
             <ul className="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
               <li className="dropdown-header">
                 <h6>{name}</h6>
-                <span>Web Designer</span>
               </li>
               <li>
                 <hr className="dropdown-divider" />
@@ -233,10 +232,10 @@ function Topbar() {
                   <span>My Profile</span>
                 </a>
               </li>
-              <li>
+              {/* <li>
                 <hr className="dropdown-divider" />
-              </li>
-              <li>
+              </li> */}
+              {/* <li>
                 <a
                   className="dropdown-item d-flex align-items-center"
                   href="users-profile.html"
@@ -244,8 +243,8 @@ function Topbar() {
                   <i className="bi bi-gear" />
                   <span>Account Settings</span>
                 </a>
-              </li>
-              <li>
+              </li> */}
+              {/* <li>
                 <hr className="dropdown-divider" />
               </li>
               <li>
@@ -256,7 +255,7 @@ function Topbar() {
                   <i className="bi bi-question-circle" />
                   <span>Need Help?</span>
                 </a>
-              </li>
+              </li> */}
               <li>
                 <hr className="dropdown-divider" />
               </li>
