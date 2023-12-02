@@ -4,15 +4,14 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import Swal from "sweetalert2";
 
-const EditProfil = ({ roles, position, primaryTeam, users }) => {
+const EditProfil = ({ roles, position, primaryTeam, users, uidLocal }) => {
   const { uid } = useParams();
   const token = localStorage.getItem("token");
-
   const [editUser, setEditUser] = useState({});
   const [oldImage, setOldImage] = useState({});
   const getDataUser = (uid, token) => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/users/${uid}`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/users/${uid ? uid : uidLocal}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -84,10 +83,12 @@ const EditProfil = ({ roles, position, primaryTeam, users }) => {
     formData.append("position_uid", editUser.position_uid || "");
     formData.append("reff_uid", editUser.reff_uid || "");
     formData.append("_method", "put");
-    console.log(formData);
+      //  for (const pair of formData.entries()) {
+      //   console.log(pair[0] + ": " + pair[1]);
+      // }
     try {
       const updateUser = await axios.post(
-        `${process.env.REACT_APP_BACKEND_URL}/users/${uid}`,
+        `${process.env.REACT_APP_BACKEND_URL}/users/${uid ? uid : uidLocal}`,
         formData,
         {
           headers: {
@@ -95,13 +96,17 @@ const EditProfil = ({ roles, position, primaryTeam, users }) => {
             Authorization: `Bearer ${token}`,
           },
         }
-      );
-      Swal.fire({
-        title: updateUser.data.message,
-        text: "Updated Successfully",
-        icon: "success",
-      });
-      window.location.reload();
+      ).then((res) => {
+        Swal.fire({
+          title: res.data.message,
+          text: "Successfullly created deals",
+          icon: "success",
+        }).then((res) => {
+          if (res.isConfirmed) {
+            window.location.reload();
+          }
+        });
+      })
     } catch (error) {
       // console.log(error);
       if (error.response) {

@@ -26,24 +26,29 @@ const FileUploadCompany = () => {
     try {
       const formData = new FormData();
       formData.append("upload", uploadExcel.upload);
-      const upload = await axios.post(
-        `${process.env.REACT_APP_BACKEND_URL}/companies/upload/excel`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${tokenAuth}`,
-          },
-        }
-      );
-      Swal.fire({
-        title: upload.data.message,
-        text: "Successfully upload excel",
-        icon: "success",
-      });
-      window.location.href = "/company";
+      const upload = await axios
+        .post(
+          `${process.env.REACT_APP_BACKEND_URL}/companies/upload/excel`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+              Authorization: `Bearer ${tokenAuth}`,
+            },
+          }
+        )
+        .then((res) => {
+          Swal.fire({
+            title: res.data.message,
+            text: "Successfullly created deals",
+            icon: "success",
+          }).then((res) => {
+            if (res.isConfirmed) {
+              window.location.reload();
+            }
+          });
+        });
     } catch (err) {
-      console.log(err);
       if (err.response) {
         Swal.fire({
           text: err.response.data.message,

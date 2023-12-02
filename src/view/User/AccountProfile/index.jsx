@@ -2,36 +2,33 @@ import React, { useEffect, useState } from "react";
 import Topbar from "../../../components/Template/Topbar";
 import Sidebar from "../../../components/Template/Sidebar";
 import Main from "../../../components/Template/Main";
-import { Col, Row, Container, Card, Form } from "react-bootstrap";
+import { Card, Col, Row } from "react-bootstrap";
 import IconImage from "../../../assets/img/man.png";
-import "../show/style.css";
-import Footer from "../../../components/Template/Footer";
-import Profil from "./profil";
-import EditProfil from "./editProfil";
-import ChangePassword from "./changePassword";
 import axios from "axios";
-import { useNavigate, useParams } from "react-router-dom";
+import "../show/style.css";
+import Profil from "../show/profil";
+import EditProfil from "../show/editProfil";
+import ChangePassword from "../show/changePassword";
 
-const ShowUser = () => {
-  const { uid } = useParams();
-  const [userDetail, setUserDetail] = useState({});
-  const tokenAuth = localStorage.getItem("token");
-  const [roles, setRoles] = useState([]);
-  const [position, setPosition] = useState([{}]);
+const AccountUser = () => {
+  const name = localStorage.getItem("name");
+  const uid = localStorage.getItem("uid");
+  const token = localStorage.getItem("token");
+  const [user, setUser] = useState([]);
+  const [role, setRole] = useState([]);
+  const [users, setUsers] = useState([])
   const [primaryTeam, setPrimaryTeam] = useState([]);
-  const [users, setUsers] = useState([]);
+  const [position, setPosition] = useState([]);
 
-  const getDataUserDetail = (uid, state, token) => {
+
+  const getAllPrimaryTeam = (token) => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/users/${uid}`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/teams`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((response) => {
-        // console.log(response?.data?.data);
-        state(response?.data?.data);
-      })
+      .then((response) => setPrimaryTeam(response.data.data))
       .catch((error) => {
         if (error.response.data.message === "Unauthenticated") {
           localStorage.clear();
@@ -39,25 +36,6 @@ const ShowUser = () => {
         }
       });
   };
-
-  // get all data roles
-  const getAllDataRole = (token) => {
-    axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/roles`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((response) => setRoles(response.data.data))
-      .catch((error) => {
-        if (error.response.data.message === "Unauthenticated") {
-          localStorage.clear();
-          window.location.href = "/login";
-        }
-      });
-  };
-
-  // get all data position
   const getAllPosition = (token) => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/positions`, {
@@ -74,24 +52,6 @@ const ShowUser = () => {
       });
   };
 
-  // get all data primary team
-  const getAllPrimaryTeam = (token) => {
-    axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/teams`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((response) => setPrimaryTeam(response.data.data))
-      .catch((error) => {
-        if (error.response.data.message === "Unauthenticated") {
-          localStorage.clear();
-          window.location.href = "/login";
-        }
-      });
-  };
-
-  // get all user
   const getAllUsers = (token) => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
@@ -108,55 +68,79 @@ const ShowUser = () => {
       });
   };
 
-  useEffect(() => {
-    getAllPosition(tokenAuth);
-    getAllDataRole(tokenAuth);
-    getAllPrimaryTeam(tokenAuth);
-    getAllUsers(tokenAuth);
-    getDataUserDetail(uid, setUserDetail, tokenAuth);
-  }, [uid, tokenAuth]);
 
-  // console.log(userDetail);
+  const getRoles = () => {
+    axios
+    .get(`${process.env.REACT_APP_BACKEND_URL}/roles`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    .then((response) => setRole(response.data.data))
+    .catch((error) => {
+      if (error.response.data.message === "Unauthenticated") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+    });
+  }
+
+  const getDataUser = () => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/users/${uid}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => setUser(res.data.data))
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
+  useEffect(() => {
+    getDataUser();
+    getRoles()
+    getAllUsers()
+    getAllPosition(token)
+    getAllPrimaryTeam(token)
+  }, [token, uid]);
   return (
     <body id="body">
       <Topbar />
       <Sidebar />
       <Main>
         <div className="pagetitle">
-          <h1>Personal Account</h1>
+          <h1>Personal Account {name}</h1>
           <nav>
             <ol className="breadcrumb mt-2">
               <li className="breadcrumb-item">
                 <a href="/" className="text-decoration-none">
-                  Home
-                </a>
-              </li>
-              <li className="breadcrumb-item">
-                <a href="/users" className="text-decoration-none">
-                  Users
+                  Dashboard
                 </a>
               </li>
               <li className="breadcrumb-item active">Personal Account</li>
             </ol>
           </nav>
         </div>
-
         <section className="section profile">
           <Row>
             <Col xl={4}>
               <Card className="shadow">
                 <Card.Body className="profile-card pt-4 d-flex flex-column align-items-center">
                   <img
-                    src={userDetail.image ? userDetail.image : IconImage}
-                    alt={userDetail.image}
+                    src={user.image ? user.image : IconImage}
+                    alt={user.image}
                     className="rounded-circle img-icon"
                     style={{
                       width: "26rem",
                       height: "8.9rem",
                     }}
                   />
-                  <h2>{userDetail?.name}</h2>
-                  <h6 className="mt-2 mb-2">{userDetail?.position?.name}</h6>
+                  <h2>{user?.name}</h2>
+                  <h6 className="mt-2 mb-2">{user?.position?.name}</h6>
                 </Card.Body>
               </Card>
             </Col>
@@ -194,24 +178,18 @@ const ShowUser = () => {
                     </li>
                   </ul>
                   <div className="tab-content pt-2">
-                    <Profil detail={userDetail} />
-                    <EditProfil
-                      roles={roles}
-                      position={position}
-                      primaryTeam={primaryTeam}
-                      users={users}
-                    />
-                    <ChangePassword />
+                    <Profil detail={user} />
+                    <EditProfil roles={role} users={users} position={position} primaryTeam={primaryTeam} uidLocal={uid} />
+                    <ChangePassword uidLocal={uid} />
                   </div>
                 </Card.Body>
               </Card>
             </Col>
           </Row>
         </section>
-        <Footer />
       </Main>
     </body>
   );
 };
 
-export default ShowUser;
+export default AccountUser;

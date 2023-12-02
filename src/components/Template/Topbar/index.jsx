@@ -226,7 +226,7 @@ function Topbar() {
               <li>
                 <a
                   className="dropdown-item d-flex align-items-center"
-                  href="users-profile.html"
+                  href="/account-profile"
                 >
                   <i className="bi bi-person" />
                   <span>My Profile</span>

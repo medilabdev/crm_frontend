@@ -23,7 +23,7 @@ const Profil = ({ detail }) => {
           Email
         </Col>
         <Col lg={9} md={8}>
-          {detail.email}
+          {detail?.email}
         </Col>
       </Row>
       <Row className="ms-2">
@@ -31,7 +31,7 @@ const Profil = ({ detail }) => {
           No.Telp
         </Col>
         <Col lg={9} md={8}>
-          {detail.telp_number}
+          {detail?.telp_number}
         </Col>
       </Row>
       <Row className="ms-2">
@@ -39,7 +39,7 @@ const Profil = ({ detail }) => {
           Company Name
         </Col>
         <Col lg={9} md={8}>
-          {detail.company_name ? detail.company_name : "-"}
+          {detail?.company_name ? detail?.company_name : "-"}
         </Col>
       </Row>
       <Row className="ms-2">

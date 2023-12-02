@@ -35,13 +35,17 @@ const UploadFileContact = () => {
             Authorization: `Bearer ${tokenAuth}`,
           },
         }
-      );
-      Swal.fire({
-        title: upload.data.message,
-        text: "Successfully upload excel",
-        icon: "success",
-      });
-      window.location.reload();
+      ).then((res) => {
+        Swal.fire({
+          title: res.data.message,
+          text: "Successfullly created deals",
+          icon: "success",
+        }).then((res) => {
+          if(res.isConfirmed){
+            window.location.reload()
+          }
+        })
+      })
     } catch (err) {
       // console.log(err);
       if (err.response) {

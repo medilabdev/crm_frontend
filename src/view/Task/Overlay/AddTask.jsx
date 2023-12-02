@@ -251,9 +251,7 @@ const AddTask = ({ visible, onClose }) => {
     imageAttachment.forEach((data, index) => {
       formData.append(`attachment[${index}][image]`, data || "");
     });
-    // for (const pair of formData.entries()) {
-    //   console.log(pair[0] + ": " + pair[1]);
-    // }
+  
     axios
       .post(`${process.env.REACT_APP_BACKEND_URL}/tasks`, formData, {
         headers: {

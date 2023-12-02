@@ -50,6 +50,8 @@ import CategoryExpanse from "../view/Properties/CategoryExpanse";
 import OtorisasiMenu from "../view/Properties/OtorisasiMenu";
 import UserAccessMenu from "../view/Properties/UserAccessMenu";
 import DetailAccessMenu from "../view/Properties/UserAccessMenu/DetailAccessMenu";
+import AccountProfil from "../view/User/AccountProfile";
+
 const Login = ({ children }) => {
   const token = localStorage.getItem("token");
   if (!token) {
@@ -423,6 +425,15 @@ function Router() {
           element={
             <Login>
               <DetailAccessMenu />
+            </Login>
+          }
+        />
+        <Route
+          exact
+          path="/account-profile"
+          element={
+            <Login>
+              <AccountProfil />
             </Login>
           }
         />
