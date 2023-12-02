@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import Swal from "sweetalert2";
 
-const ChangePassword = () => {
+const ChangePassword = ({uidLocal}) => {
   const { uid } = useParams();
   const token = localStorage.getItem("token");
   const [inputPass, setInputPass] = useState({
@@ -29,20 +29,24 @@ const ChangePassword = () => {
     }
     try {
       const changePass = await axios.put(
-        `${process.env.REACT_APP_BACKEND_URL}/users/${uid}/change-password`,
+        `${process.env.REACT_APP_BACKEND_URL}/users/${uid ? uid : uidLocal}/change-password`,
         inputPass,
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
-      );
-      // console.log(changePass);
-      Swal.fire({
-        text: "Successfully updated password",
-        icon: "success",
-      });
-      window.location.reload();
+      ).then((res) => {
+        Swal.fire({
+          title: res.data.message,
+          text: "Successfullly created deals",
+          icon: "success",
+        }).then((res) => {
+          if (res.isConfirmed) {
+            window.location.reload();
+          }
+        });
+      })
     } catch (err) {
       Swal.fire({
         text: "Password and Confirm Password not same",

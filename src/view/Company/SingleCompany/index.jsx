@@ -571,7 +571,7 @@ const SingleCompany = () => {
                   />
 
                   <div className="text-center">
-                    <a
+                    {/* <a
                       //   onClick={handleShowCanvasDeals}
                       className="text-primary text-decoration-none fw-semibold"
                       style={{ cursor: "pointer" }}
@@ -579,7 +579,7 @@ const SingleCompany = () => {
                     >
                       <i class="bi bi-plus-lg" style={{ fontSize: "15px" }}></i>
                       <span className="fs-6"> Create Another Deal</span>
-                    </a>
+                    </a> */}
                   </div>
                 </Card.Body>
               </Card>

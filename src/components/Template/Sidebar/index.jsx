@@ -8,7 +8,7 @@ function Sidebar() {
   const role = localStorage.getItem("role");
   const [accessUser, setAccessUser] = useState([]);
 
-  const getAccess = () => {
+  const getAccess = (token, role) => {
     axios
       .get(
         `${process.env.REACT_APP_BACKEND_URL}/user-access-menus/role/${role}`,
@@ -27,11 +27,11 @@ function Sidebar() {
       });
   };
   useEffect(() => {
-    getAccess();
+    getAccess(token, role);
     return () => {
       setOpenSubMenu(null);
     };
-  }, [token]);
+  }, [token, role]);
   
   return (
     <>

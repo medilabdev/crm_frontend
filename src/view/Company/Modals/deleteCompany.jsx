@@ -9,7 +9,7 @@ const DeleteCompany = ({ visible, onClose, uid }) => {
   const deleteCompany = async () => {
     try {
       const formData = new FormData();
-      formData.append("company_uid[]", arrUid);
+      formData.append("company_uid[0]", arrUid);
       await axios.post(
         `${process.env.REACT_APP_BACKEND_URL}/companies/delete/item`,
         formData,
@@ -18,17 +18,24 @@ const DeleteCompany = ({ visible, onClose, uid }) => {
             Authorization: `Bearer ${token}`,
           },
         }
-      );
-      Swal.fire({
-        title: "Successfully delete company",
-        text: "Successfully delete company",
-        icon: "success",
-      });
-      onClose();
-      window.location.reload();
+      ).then((res) => {
+        Swal.fire({
+          title: "Successfully delete company",
+          text: "Successfully delete company",
+          icon: "success",
+        }).then((res) => {
+          if(res.isConfirmed){
+            window.location.reload();
+          }
+        })
+      })
     } catch (err) {
-      console.log(err);
-      console.error("gagal menghapus company");
+      Swal.fire({
+        title: err.response.data.message,
+        text: "Gagal menghapus company",
+        icon:"warning"
+      })
+      onClose();
     }
   };
   return (

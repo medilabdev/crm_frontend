@@ -549,7 +549,7 @@ const SingleContact = () => {
                     placeholder="Select Deals"
                     className="mb-3"
                   />
-                  <div className="text-center">
+                  {/* <div className="text-center">
                     <a
                       onClick={handleShowCanvasDeals}
                       className="text-primary text-decoration-none fw-semibold"
@@ -558,7 +558,7 @@ const SingleContact = () => {
                       <i class="bi bi-plus-lg" style={{ fontSize: "15px" }}></i>
                       <span className="fs-6"> Create Another Deal</span>
                     </a>
-                  </div>
+                  </div> */}
                 </Card.Body>
               </Card>
               <OverlayAddDeals
