@@ -82,7 +82,7 @@ const SingleProduct = () => {
   };
   const getProduct = () => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/products?limit=10000`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/products?limit=1000`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

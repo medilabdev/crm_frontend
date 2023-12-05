@@ -2,7 +2,6 @@ import React from "react";
 import Topbar from "../../../components/Template/Topbar";
 import Sidebar from "../../../components/Template/Sidebar";
 import Main from "../../../components/Template/Main";
-
 import BreadcrumbSingleDeals from "../Component/BreadcrumbSingleDeals";
 import { Card, Col, FloatingLabel, Form, Row } from "react-bootstrap";
 import { useState } from "react";
@@ -15,6 +14,7 @@ import OverlayAddContact from "../../../components/Overlay/addContact";
 import AddProductOverlay from "../../../components/Overlay/addProduct";
 import DataTable from "react-data-table-component";
 import Swal from "sweetalert2";
+
 const SingleDeals = () => {
   const token = localStorage.getItem("token");
   const [owner, setOwner] = useState([]);
