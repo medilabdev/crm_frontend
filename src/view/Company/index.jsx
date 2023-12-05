@@ -96,7 +96,7 @@ const Company = () => {
       });
   };
 
-  const getAssociateContact = (token) => {
+  const getAssociateContact = () => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/associate?limit=10000`, {
         headers: {
@@ -441,12 +441,12 @@ const Company = () => {
 
   const [pending, setPending] = useState(true);
   useEffect(() => {
-    getAllCompany(token);
-    getOwnerUser(token);
-    getSource(token);
-    getAlltypeCompany(token);
-    getAssociateContact(token);
-    getDeals(token);
+    getAllCompany();
+    getOwnerUser();
+    getSource();
+    getAlltypeCompany();
+    getAssociateContact();
+    getDeals();
 
     const timout = setTimeout(() => {
       setPending(false);

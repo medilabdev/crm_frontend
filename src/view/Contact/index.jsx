@@ -174,8 +174,8 @@ const Contact = () => {
   // console.log(resultDeals);
   const selectDeals = () => {
     if (
-      !associateCompany ||
-      !associateCompany[0]?.deals ||
+      !associateCompany &&
+      !associateCompany[0]?.deals &&
       associateCompany[0]?.deals.length === 0
     ) {
       return [{ label: "No Data Available", value: [] }];
@@ -226,7 +226,6 @@ const Contact = () => {
         value: item.values,
       };
     });
-
     return result;
   };
 
@@ -256,7 +255,9 @@ const Contact = () => {
     });
     return result;
   };
+
   const [pending, setPending] = useState(true);
+
   useEffect(() => {
     getContactAll("contacts", TokenAuth, setContact);
     getAllUser(TokenAuth);

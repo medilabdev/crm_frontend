@@ -30,7 +30,7 @@ function Dashboard() {
               </div>
             </div>
           </div>
-          <div className="row">
+          {/* <div className="row">
             <div>
               <Card className="shadow">
                 <LineChart />
@@ -63,7 +63,7 @@ function Dashboard() {
                 <ChartWinLose />
               </Card>
             </div>
-          </div>
+          </div> */}
         </div>
         <Footer />
       </Main>

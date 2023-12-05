@@ -311,12 +311,12 @@ const SingleCompany = () => {
   };
 
   useEffect(() => {
-    getOwnerUser(token);
-    getCompanyType(token);
-    getSourceCompany(token);
-    getCompanyParent(token);
-    getContact(token);
-    getDeals(token);
+    getOwnerUser();
+    getCompanyType();
+    getSourceCompany();
+    getCompanyParent();
+    getContact();
+    getDeals();
   }, [token]);
   return (
     <body id="body">

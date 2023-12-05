@@ -192,6 +192,7 @@ const EditContact = () => {
     })
     return res
   }
+  
   const selectCompany = () => {
     const res = [];
     company?.map((data) => {
@@ -206,6 +207,7 @@ const EditContact = () => {
     );
     return filteredCompanies
   }
+
   const selectDeals = () => {
     const res = [];
     deals?.map((data) => {
@@ -226,9 +228,11 @@ const EditContact = () => {
       [e.target.name]: e.target.value
     })
   }
+
   const handleCompany = (e) => {
     setValueComp(e.map((opt) => opt.value));
  };
+
  const handleDeals = (e) => {
   setValueDeals(e.map((opt) => opt.value))
  }
@@ -240,6 +244,7 @@ const EditContact = () => {
     getCompany(token)
     getDeals(token)
   }, [uid, token]);
+
   const historyColumns =[
     {
       name: "Created By",
@@ -300,7 +305,7 @@ const EditContact = () => {
     selectAllRowsItem: true,
     selectAllRowsItemText: "ALL",
   };
-  console.log(editContact);
+
   const handleSubmit = (e) => {
     e.preventDefault()
     const formData = new FormData()
@@ -403,6 +408,7 @@ const EditContact = () => {
       }
     })
   }
+
   return (
     <body id="body">
       <Topbar />
@@ -652,7 +658,7 @@ const EditContact = () => {
                    
                     <Select options={selectDeals()} isMulti placeholder="Select Deals" onChange={(e) => handleDeals(e)} closeMenuOnSelect={false} />
                   </Form.Group>
-                  <div className="text-center">
+                  {/* <div className="text-center">
                     <a
                       className="text-primary text-decoration-none fw-semibold"
                       style={{ cursor: "pointer" }}
@@ -660,7 +666,7 @@ const EditContact = () => {
                       <i class="bi bi-plus-lg" style={{ fontSize: "15px" }}></i>
                       <span className="fs-6"> Create Another Deal</span>
                     </a>
-                  </div>
+                  </div> */}
                 </Card.Body>
               </Card>
               {/* Companies */}

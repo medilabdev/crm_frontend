@@ -286,13 +286,13 @@ const EditDeals = () => {
     });
   };
   useEffect(() => {
-    getPipeline(token);
+    getPipeline();
     getDealsValueOld(token, uid);
-    getOwner(token);
-    getPriority(token);
-    getDealsCategory(token);
-    getCompany(token);
-    getContact(token);
+    getOwner();
+    getPriority();
+    getDealsCategory();
+    getCompany();
+    getContact();
     const clearDataProductLocalStorage = () => {
       localStorage.removeItem("DataProduct");
       localStorage.removeItem("companyStorage");

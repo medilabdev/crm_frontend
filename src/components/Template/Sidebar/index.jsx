@@ -3,11 +3,9 @@ import MenuSidebar from "../../Template/Sidebar/MenuSidebar";
 import axios from "axios";
 
 function Sidebar() {
-  const [openSubMenu, setOpenSubMenu] = useState(null);
   const token = localStorage.getItem("token");
   const role = localStorage.getItem("role");
   const [accessUser, setAccessUser] = useState([]);
-
   const getAccess = (token, role) => {
     axios
       .get(
@@ -28,9 +26,6 @@ function Sidebar() {
   };
   useEffect(() => {
     getAccess(token, role);
-    return () => {
-      setOpenSubMenu(null);
-    };
   }, [token, role]);
   
   return (
