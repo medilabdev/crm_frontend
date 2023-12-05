@@ -95,7 +95,7 @@ const Contact = () => {
   // };
   const getAssociateCompany = (token) => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/associate?limit=100000`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/associate?limit=1000`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -126,7 +126,7 @@ const Contact = () => {
 
   const getContactAll = (url, token, state) => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/${url}?limit=10000`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/${url}?limit=1000`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
