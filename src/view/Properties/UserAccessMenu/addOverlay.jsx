@@ -13,7 +13,7 @@ const AddOverlay = ({ visible, onClose }) => {
   const [menu, setMenu] = useState([])
 
   const getMenu = () => {
-    axios.get(`${process.env.REACT_APP_BACKEND_URL}/user-menus?limit=20`,{
+    axios.get(`${process.env.REACT_APP_BACKEND_URL}/user-menus?limit=15`,{
         headers:{
             Authorization:`Bearer ${token}`
         }
