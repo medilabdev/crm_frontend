@@ -35,7 +35,7 @@ const Task = () => {
 
   const getTask = () => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/tasks?limit=1000`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/tasks`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

@@ -24,7 +24,7 @@ const OtorisasiMenu = () => {
   };
   const getMenu = (token) => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/user-menus?limit=100`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/user-menus`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
