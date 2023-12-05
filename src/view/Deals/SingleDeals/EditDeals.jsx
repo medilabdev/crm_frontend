@@ -285,6 +285,7 @@ const EditDeals = () => {
       [e.target.name]: e.target.value,
     });
   };
+  
   useEffect(() => {
     getPipeline();
     getDealsValueOld(token, uid);

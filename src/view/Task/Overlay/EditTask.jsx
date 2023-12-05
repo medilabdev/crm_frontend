@@ -45,7 +45,7 @@ const EditTask = ({ visible, onClose, uid }) => {
         }
       });
   };
-  const getOldTask = (token, uid) => {
+  const getOldTask = () => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/tasks/${uid}`, {
         headers: {
@@ -54,7 +54,6 @@ const EditTask = ({ visible, onClose, uid }) => {
       })
       .then((res) => {
         const valueOld = res.data.data;
-        console.log(valueOld);
         setOldTask({
           name: valueOld.task_name,
           plan: valueOld.plan,
@@ -204,13 +203,13 @@ const EditTask = ({ visible, onClose, uid }) => {
 
   useEffect(() => {
     if (visible && uid) {
-      getOldTask(token, uid);
-      getContact(token);
-      getCompany(token);
-      getDeals(token);
-      getUsers(token);
-      getStatus(token);
-      getPriority(token);
+      getOldTask();
+      getContact();
+      getCompany();
+      getDeals();
+      getUsers();
+      getStatus();
+      getPriority();
     }
   }, [token, uid]);
 
@@ -316,7 +315,6 @@ const EditTask = ({ visible, onClose, uid }) => {
   };
 
   const handleDeleteImage = (uidImage) => {
-    console.log(uidImage);
     const formData = new FormData();
     formData.append("_method", "delete");
     axios
