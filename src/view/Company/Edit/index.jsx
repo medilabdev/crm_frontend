@@ -306,12 +306,12 @@ const EditCompany = () => {
   };
   useEffect(() => {
     getCompanyDetail(uid, token);
-    getOwnerUser(token);
-    getTypeCompany(token);
-    getSourceCompany(token);
-    getCompanyParent(token);
-    getContact(token);
-    getDeals(token);
+    getOwnerUser();
+    getTypeCompany();
+    getSourceCompany();
+    getCompanyParent();
+    getContact();
+    getDeals();
     const clearLocalStorage = () => {
       localStorage.removeItem("parentComp");
     };

@@ -232,6 +232,7 @@ const EditTask = ({ visible, onClose, uid }) => {
       contact: e.value,
     });
   };
+  
   const handleInputDeals = (e) => {
     setOldTask({
       ...oldTask,
@@ -250,12 +251,14 @@ const EditTask = ({ visible, onClose, uid }) => {
       priority_uid: e.target.value,
     });
   };
+
   const handleInputStatus = (e) => {
     setOldTask({
       ...oldTask,
       status_uid: e.target.value,
     });
   };
+
   const handleFileAttachment = (e, index) => {
     const selectFile = e.target.files[0];
     setInputAttachment((val) => {
@@ -264,13 +267,14 @@ const EditTask = ({ visible, onClose, uid }) => {
       return dataFile;
     });
   };
+  
   const handleSubmit = (e) => {
     e.preventDefault();
     const formData = new FormData();
     formData.append("task_name", oldTask.name);
     formData.append("plan", oldTask.plan);
     formData.append("result", oldTask.result);
-    formData.append("contact_uid", oldTask.contact_uid);
+    formData.append("contact_uid", oldTask.contact);
     formData.append("company_uid", oldTask.company_uid);
     formData.append("deals_uid", oldTask.deals_uid);
     formData.append("date_email_reminder", oldTask.date_email_reminder);
@@ -282,9 +286,9 @@ const EditTask = ({ visible, onClose, uid }) => {
       formData.append(`attachment[${index}][image]`, data || "");
     });
     formData.append("_method", "put");
-    for (const pair of formData.entries()) {
-      console.log(pair[0] + ": " + pair[1]);
-    }
+    // for (const pair of formData.entries()) {
+    //   console.log(pair[0] + ": " + pair[1]);
+    // }
     axios
       .post(`${process.env.REACT_APP_BACKEND_URL}/tasks/${uid}`, formData, {
         headers: {

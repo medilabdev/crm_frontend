@@ -80,8 +80,8 @@ const BulkChangeCompany = () => {
   };
   // console.log(permission);
   useEffect(() => {
-    getCompanyTransfer(token);
-    getAllUser(token);
+    getCompanyTransfer();
+    getAllUser();
   }, [token]);
 
   const [resultBulkCompany, setResultBulkCompany] = useState([]);
