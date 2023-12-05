@@ -6,8 +6,10 @@ function Sidebar() {
   const token = localStorage.getItem("token");
   const role = localStorage.getItem("role");
   const [accessUser, setAccessUser] = useState([]);
-  const getAccess = (token, role) => {
-    axios
+
+  const getAccess = async () => {
+    try{
+      const response = await axios
       .get(
         `${process.env.REACT_APP_BACKEND_URL}/user-access-menus/role/${role}`,
         {
@@ -16,16 +18,20 @@ function Sidebar() {
           },
         }
       )
-      .then((res) => setAccessUser(res.data.data))
-      .catch((err) => {
-        if (err.response.data.message === "Unauthenticated") {
-          localStorage.clear();
-          window.location.href = "/login";
-        }
-      });
+       setAccessUser(response.data.data)
+    }catch(error){
+      if (
+        error.response.data.message === "Unauthenticated"
+      ) {
+        localStorage.clear();
+        window.location.href = "/login";
+      } else {
+        console.error("Error fetching status:", error);
+      }
+    }
   };
   useEffect(() => {
-    getAccess(token, role);
+    getAccess();
   }, [token, role]);
   
   return (

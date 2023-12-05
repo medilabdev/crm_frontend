@@ -10,26 +10,31 @@ const EditStatus = ({ visible, uid, onClose }) => {
   const [status, setStatus] = useState([]);
   const [input, setInput] = useState({});
 
-  const getStatus = () => {
-    axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/statuses`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => {
-        setStatus(res.data.data);
-      })
-      .catch((err) => {
-        if (err.response.data.message === "Unauthenticated.") {
-          localStorage.clear();
-          window.location.href = "/login";
+  const getStatus = async () => {
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}/statuses`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-      });
+      );
+      setStatus(response.data.data);
+    } catch (error) {
+      if (
+        error.response.data.message === "Unauthenticated"
+      ) {
+        localStorage.clear();
+        window.location.href = "/login";
+      } else {
+        console.error("Error fetching status:", error);
+      }
+    }
   };
 
   useEffect(() => {
-      getStatus(token);
+    getStatus();
   }, [token]);
 
   const handleInput = (e) => {
