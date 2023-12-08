@@ -41,7 +41,7 @@ const SingleContact = () => {
   const [deals, setDeals] = useState([]);
   const getDeals = () => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/deals`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/deals?limit=10`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -57,7 +57,7 @@ const SingleContact = () => {
 
   const getCompany = () => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/companies`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/companies?limit=10`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

@@ -58,7 +58,7 @@ const SingleCompany = () => {
 
   const getDeals = () => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/deals`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/deals?page=1&limit=10`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -74,7 +74,7 @@ const SingleCompany = () => {
   // console.log(inputCompany);
   const getContact = () => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/contacts`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/contacts?page=1&limit=10`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

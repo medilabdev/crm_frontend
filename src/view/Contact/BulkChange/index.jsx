@@ -25,7 +25,7 @@ const BulkChange = () => {
 
   const getContactTransfer = () => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/contacts`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/contacts?limit=10`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

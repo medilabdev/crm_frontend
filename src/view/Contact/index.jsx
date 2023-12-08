@@ -43,7 +43,7 @@ const Contact = () => {
   const [deleteContact, setDeleteContact] = useState(false);
   const handleDeleteContact = () => setDeleteContact(false);
   const [contact, setContact] = useState([]);
-  const [search, setSearch] = useState(contact);
+  const [search, setSearch] = useState("");
   const [user, setUser] = useState([]);
   const [source, setSource] = useState([]);
   const [associateCompany, setAssociateCompany] = useState([]);
@@ -61,6 +61,11 @@ const Contact = () => {
   const navigate = useNavigate();
   const TokenAuth = localStorage.getItem("token");
   const uid = localStorage.getItem("uid");
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+  });
+  const [totalRows, setTotalRows] = useState(0);
 
   const getSource = (token) => {
     axios
@@ -108,6 +113,7 @@ const Contact = () => {
         }
       });
   };
+
   const getAllUser = (token) => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
@@ -117,27 +123,30 @@ const Contact = () => {
       })
       .then((res) => setUser(res.data.data))
       .catch((err) => {
-        if (err.response.data.message === "Unauthenticated.") {
+        if (err.response.data.message === "Unauthenticated") {
           localStorage.clear();
           window.location.href = "/login";
         }
       });
   };
 
-  const getContactAll = (url, token, state) => {
+  const getContactAll = (token, state) => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/${url}`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/contacts`, {
         headers: {
           Authorization: `Bearer ${token}`,
+        },
+        params: {
+          page: pagination.page,
+          limit: pagination.limit,
         },
       })
       .then((res) => {
         state(res.data.data);
-        setSearch(res.data.data);
-        // setSearchMultiple(res.data.data);
+        setTotalRows(res.data.pagination.totalData);
       })
       .catch((err) => {
-        if (err.response.data.message === "Unauthenticated.") {
+        if (err.response.data.message === "Unauthenticated") {
           localStorage.clear();
           window.location.href = "/login";
         }
@@ -258,17 +267,58 @@ const Contact = () => {
 
   const [pending, setPending] = useState(true);
 
+  const searchContacts = (term) => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/contacts`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: {
+          search: term,
+        },
+      })
+      .then((res) => {
+        setContact(res.data.data);
+        setTotalRows(res.data.pagination.totalData);
+      })
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
+
   useEffect(() => {
-    getContactAll("contacts", TokenAuth, setContact);
+    if (search) {
+      setPagination((prev) => ({ ...prev, page: 1 }));
+      searchContacts(search);
+    } else {
+      getContactAll(TokenAuth, setContact);
+    }
+
     getAllUser(TokenAuth);
     getSource(TokenAuth);
     getAssociateCompany(TokenAuth);
 
     const timeOut = setTimeout(() => {
       setPending(false);
-    }, 3500);
+    }, 2500);
+
     return () => clearTimeout(timeOut);
-  }, [TokenAuth]);
+  }, [TokenAuth, search, pagination.page, pagination.limit]);
+
+  const handleChangePage = (page) => {
+    setPagination((e) => ({ ...e, page }));
+  };
+  const handlePagePerChange = (pageSize, page) => {
+    setPagination((prev) => ({ ...prev, pageSize, page }));
+  };
+
+  const handleFilter = (e) => {
+    const value = e.target.value.toLowerCase();
+    setSearch(value);
+  };
 
   const columns = [
     {
@@ -434,13 +484,6 @@ const Contact = () => {
     },
   ];
 
-  function handleFilter(event) {
-    const newData = contact.filter((row) => {
-      return row.name.toLowerCase().includes(event.target.value.toLowerCase());
-    });
-    setSearch(newData);
-  }
-
   const handleContactMyOrPerson = (e) => {
     const target = e.target.value;
     let filterData = [];
@@ -488,11 +531,6 @@ const Contact = () => {
     setSearch(filteredData);
   };
 
-  const paginationComponentOptions = {
-    selectAllRowsItem: true,
-    selectAllRowsItemText: "ALL",
-  };
-
   const selectUidDataTable = (state) => {
     const select = state.selectedRows.map((row) => row.uid);
     setSelectedUid(select);
@@ -528,7 +566,7 @@ const Contact = () => {
         });
         window.location.reload();
       } catch (error) {
-        if (error.response.data.message === "Unauthenticated.") {
+        if (error.response.data.message === "Unauthenticated") {
           Swal.fire({
             title: error.response.data.message,
             text: "Tolong Login Kembali",
@@ -848,13 +886,20 @@ const Contact = () => {
                 </div>
                 <DataTable
                   columns={columns}
-                  data={search}
+                  data={contact}
                   defaultSortFieldId={1}
                   pagination
-                  paginationComponentOptions={paginationComponentOptions}
+                  paginationServer
                   selectableRows
                   onSelectedRowsChange={selectUidDataTable}
+                  paginationPerPage={pagination.limit}
+                  onChangePage={handleChangePage}
+                  onChangeRowsPerPage={handlePagePerChange}
                   progressPending={pending}
+                  paginationTotalRows={totalRows}
+                  paginationComponentOptions={{
+                    noRowsPerPage: true,
+                  }}
                 />
               </div>
             </div>

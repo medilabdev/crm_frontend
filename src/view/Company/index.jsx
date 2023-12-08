@@ -82,7 +82,7 @@ const Company = () => {
 
   const getDeals = (token) => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/deals`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/deals?limit=10`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -98,7 +98,7 @@ const Company = () => {
 
   const getAssociateContact = () => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/associate`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/associate?limit=10`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -116,7 +116,7 @@ const Company = () => {
   };
   const getAllCompany = () => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/companies`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/companies?page=1&limit=10`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

@@ -30,7 +30,7 @@ const BulkChangeTask = () => {
 
   const getTask = () => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/tasks`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/tasks?limit=10`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

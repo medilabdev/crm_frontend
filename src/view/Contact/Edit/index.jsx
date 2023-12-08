@@ -28,8 +28,9 @@ const EditContact = () => {
   const [showForm, setShowForm] = useState(false);
   const { uid } = useParams();
   const token = localStorage.getItem("token");
+
   const getDeals =(token) => {
-    axios.get(`${process.env.REACT_APP_BACKEND_URL}/deals`, {
+    axios.get(`${process.env.REACT_APP_BACKEND_URL}/deals?limit=10`, {
       headers:{
         Authorization:`Bearer ${token}`
       }
@@ -42,7 +43,7 @@ const EditContact = () => {
     });
   }
   const getCompany = (token) => {
-    axios.get(`${process.env.REACT_APP_BACKEND_URL}/companies`, {
+    axios.get(`${process.env.REACT_APP_BACKEND_URL}/companies?limit=10`, {
       headers:{
         Authorization: `Bearer ${token}`
       }
