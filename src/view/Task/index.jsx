@@ -32,10 +32,16 @@ const Task = () => {
     : "col-md-0 d-none";
   const DataTableTask = isSideFilter ? "col-md-9" : "col-md-12";
   const IconFilter = isSideFilter ? "bi bi-x-lg" : "bi bi-funnel";
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemPerPage = 10;
 
   const getTask = () => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/tasks`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/tasks?page=1&limit=10`, {
+        // params:{
+        //   page: currentPage,
+        //   perPage: itemPerPage,
+        // },
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -86,7 +92,7 @@ const Task = () => {
 
   const getCompany = (token) => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/companies`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/companies?limit=10`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -101,7 +107,7 @@ const Task = () => {
   };
   const getContact = (token) => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/contacts`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/contacts?limit=10`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -116,7 +122,7 @@ const Task = () => {
   };
   const getDeals = (token) => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/deals`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/deals?limit=10`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -307,10 +313,20 @@ const Task = () => {
     });
     setSearch(filter);
   };
+
+  const paginationComponentOptions = {
+    selectAllRowsItem: true,
+    selectAllRowsItemText: "ALL",
+    onTableChange: (action, tableState) => {
+      const {page} = tableState;
+      setCurrentPage(page + 1)
+    }
+  };
+
   return (
     <body id="body">
       <Topbar />
-      <Sidebar />
+      <Sidebar /> 
       <Main>
         <div className="container">
           <div className="row">
@@ -573,6 +589,7 @@ const Task = () => {
                       data={search}
                       selectUidDataTable={selectUidDataTable}
                       pending={pending}
+                      paginationOptions={paginationComponentOptions}
                     />
                     <AddTask visible={addTask} onClose={handleCloseOverlay} />
                   </div>

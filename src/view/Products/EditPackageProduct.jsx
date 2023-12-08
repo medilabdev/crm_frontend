@@ -77,7 +77,7 @@ const EditPackageProduct = () => {
   };
   const getProduct = () => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/products`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/products?limit=10`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

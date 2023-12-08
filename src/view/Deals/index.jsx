@@ -50,7 +50,7 @@ const Deals = () => {
 
   const getProduct = () => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/products`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/products?limit=10`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -65,7 +65,7 @@ const Deals = () => {
   };
   const getContact = () => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/contacts`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/contacts?limit=10`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -81,7 +81,7 @@ const Deals = () => {
 
   const getCompany = () => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/companies`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/companies?limit=10`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -147,7 +147,7 @@ const Deals = () => {
 
   const getDeals = () => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/deals`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/deals?page=1&limit=10`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

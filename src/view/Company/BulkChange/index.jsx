@@ -20,7 +20,7 @@ const BulkChangeCompany = () => {
 
   const getCompanyTransfer = () => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/companies`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/companies?limit=10`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
