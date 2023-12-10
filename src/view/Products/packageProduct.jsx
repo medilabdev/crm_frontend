@@ -25,10 +25,12 @@ const PackageProduct = () => {
     const select = e.selectedRows.map((row) => row.uid);
     setSelectUid(select);
   };
-  // const handleCloseEditPackage = () => {
-  //   setEditPackageProduct(false);
-  // };
-  // console.log(selectUid);
+
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+  });
+  const [totalRows, setTotalRows] = useState(0);
   const handleSelectedDeleted = async (e) => {
     e.preventDefault();
     const isResult = await Swal.fire({
@@ -84,25 +86,56 @@ const PackageProduct = () => {
       }
     }
   };
+
   const getPackageProduct = () => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/packages-product`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
+        params: {
+          page: pagination.page,
+          limit: pagination.limit,
+        },
       })
       .then((res) => {
         const packageData = res.data.data;
         setPackageProduct(packageData);
-        setSearch(packageData);
+        setTotalRows(res.data.pagination.totalData);
 
         packageData.map((packageLoop, index) => {
           setRowProduct(packageLoop?.package_detail_with_product);
         });
       })
-      .catch((err) => console.error(err));
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
   };
 
+  const searchPackageProduct = (term) => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/packages-product`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: {
+          search: term,
+        },
+      })
+      .then((res) => {
+        setPackageProduct(res.data.data);
+        setTotalRows(res.data.pagination.totalData);
+      })
+      .catch((err) => {
+        if (err.response.data.message === "Unauthenticated") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+  };
   const ExpandableRowComponent = ({ data }) => {
     const productNames = data.package_detail_with_product?.map(
       (product) => product?.product
@@ -128,25 +161,28 @@ const PackageProduct = () => {
       </div>
     );
   };
+ 
   rowProduct.map((data) => {
     const productName = data;
     return <ExpandableRowComponent data={productName} />;
   });
 
-  const paginationComponentOptions = {
-    selectAllRowsItem: true,
-    selectAllRowsItemText: "ALL",
-  };
 
-  const [pending, setPending] = useState(true)
+
+  const [pending, setPending] = useState(true);
   useEffect(() => {
-    getPackageProduct(token);
+    if (search) {
+      setPagination((prev) => ({ ...prev, page: 1 }));
+      searchPackageProduct(search);
+    } else {
+      getPackageProduct(token);
+    }
 
     const timeOut = setTimeout(() => {
-      setPending(false)
-    }, 2500)
-    return () => clearTimeout(timeOut)
-  }, [token]);
+      setPending(false);
+    }, 2500);
+    return () => clearTimeout(timeOut);
+  }, [token, search, pagination.page, pagination.limit]);
 
   const columns = [
     {
@@ -234,12 +270,15 @@ const PackageProduct = () => {
       sortable: true,
     },
   ];
-
+  const handleChangePage = (page) => {
+    setPagination((prev) => ({...prev, page}))
+  }
+  const handlePagePerPage = (pageSize, page) => {
+    setPagination((prev) => ({...prev, pageSize, page}))
+  }
   function searchPackage(e) {
-    const packageData = packageProduct.filter((row) => {
-      return row.name.toLowerCase().includes(e.target.value.toLowerCase());
-    });
-    setSearch(packageData);
+    const value = e.target.value.toLowerCase();
+    setSearch(value);
   }
 
   // const customStyle = {
@@ -291,13 +330,19 @@ const PackageProduct = () => {
           className="mt-4 rounded"
           defaultSortFieldId={1}
           columns={columns}
-          data={search}
+          data={packageProduct}
           pagination
+          paginationServer
           selectableRows
           onSelectedRowsChange={selectUidDatatable}
           expandableRows
           expandableRowsComponent={ExpandableRowComponent}
-          paginationComponentOptions={paginationComponentOptions}
+          paginationComponentOptions={{
+            noRowsPerPage: true,
+          }}
+          onChangePage={handleChangePage}
+          onChangeRowsPerPage={handlePagePerPage}
+          paginationTotalRows={totalRows}
           progressPending={pending}
           // customStyles={customStyle}
         />

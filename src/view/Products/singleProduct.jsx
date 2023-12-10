@@ -80,16 +80,27 @@ const SingleProduct = () => {
       }
     }
   };
+
+  const [pagination, setPagination] = useState ({
+    page: 1, 
+    limit: 10
+  })
+  
+  const [totalRows, setTotalRows] = useState(0)
   const getProduct = () => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/products?limit=10`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/products`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
+        params: {
+          page: pagination.page,
+          limit: pagination.limit
+        }
       })
       .then((res) => {
         setProduct(res.data.data);
-        setSearch(res.data.data);
+        setTotalRows(res.data.pagination.totalData)
       })
       .catch((err) => {
         if (err.response.data.message === "Unauthenticated.") {
@@ -98,20 +109,48 @@ const SingleProduct = () => {
         }
       });
   };
-  const paginationComponentOptions = {
-    selectAllRowsItem: true,
-    selectAllRowsItemText: "ALL",
-  };
+
+  const searchProduct = (term) => {
+    axios.get(`${process.env.REACT_APP_BACKEND_URL}/products`, {
+      headers: {
+        Authorization : `Bearer ${token}`
+      },
+      params: {
+        search: term
+      }
+    })
+    .then((res) => {
+      setProduct(res.data.data)
+      setTotalRows(res.data.pagination.totalData)
+    })
+    .catch((err) => {
+      if (err.response.data.message === "Unauthenticated") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+    });
+  }
 
   const [pending, setPending] = useState(true)
   useEffect(() => {
-    getProduct(token);
+    if(search){
+      setPagination((prev) => ({ ...prev, page: 1}))
+      searchProduct(search)
+    }else{
+      getProduct(token);
+    }
     const timeOut = setTimeout(() => {
       setPending(false)
     }, 2500)
     return () => clearTimeout(timeOut)
-  }, [token]);
+  }, [token, search, pagination.limit, pagination.page]);
 
+  const handleChangePage = (page) => {
+    setPagination((prev) => ({...prev, page}))
+  }
+  const handlePagePerPage = (pageSize, page) => {
+    setPagination((prev) => ({...prev, pageSize, page}))
+  }
   const columns = [
     {
       id: 1,
@@ -172,10 +211,8 @@ const SingleProduct = () => {
   ];
 
   function SearchFilter(e) {
-    const newData = product.filter((row) => {
-      return row.name.toLowerCase().includes(e.target.value.toLowerCase());
-    });
-    setSearch(newData);
+    const value = e.target.value.toLowerCase()
+    setSearch(value)
   }
   return (
     <div className="tab-content pt-2">
@@ -217,10 +254,17 @@ const SingleProduct = () => {
           className="mt-3"
           defaultSortFieldId={1}
           columns={columns}
-          data={search}
+          data={product}
           pagination
+          paginationServer
           selectableRows
-          paginationComponentOptions={paginationComponentOptions}
+          paginationComponentOptions={{
+            noRowsPerPage: true,
+          }}
+          onChangePage={handleChangePage}
+          paginationPerPage={pagination.limit}
+          onChangeRowsPerPage={handlePagePerPage}
+          paginationTotalRows={totalRows}
           onSelectedRowsChange={selectUidDataTable}
           progressPending={pending}
         />

@@ -311,6 +311,7 @@ const Contact = () => {
   const handleChangePage = (page) => {
     setPagination((e) => ({ ...e, page }));
   };
+  
   const handlePagePerChange = (pageSize, page) => {
     setPagination((prev) => ({ ...prev, pageSize, page }));
   };

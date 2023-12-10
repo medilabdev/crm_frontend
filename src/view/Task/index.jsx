@@ -32,23 +32,27 @@ const Task = () => {
     : "col-md-0 d-none";
   const DataTableTask = isSideFilter ? "col-md-9" : "col-md-12";
   const IconFilter = isSideFilter ? "bi bi-x-lg" : "bi bi-funnel";
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemPerPage = 10;
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+  });
 
+  const [totalRows, setTotalRows] = useState(0);
   const getTask = () => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/tasks?page=1&limit=10`, {
-        // params:{
-        //   page: currentPage,
-        //   perPage: itemPerPage,
-        // },
+      .get(`${process.env.REACT_APP_BACKEND_URL}/tasks`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
+        params: {
+          page: pagination.page,
+          limit: pagination.limit
+        }
       })
       .then((res) => {
+        console.log(res.data.data);
         setTask(res.data.data);
-        setSearch(res.data.data);
+        setTotalRows(res.data.pagination.totalData);
       })
       .catch((err) => {
         if (err.response.data.message === "Unauthenticated") {
@@ -58,6 +62,27 @@ const Task = () => {
       });
   };
 
+
+  const searchTask =(term) => {
+    axios.get(`${process.env.REACT_APP_BACKEND_URL}/tasks`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      },
+      params: {
+        search : term
+      }
+    })
+    .then((res) => {
+      setTask(res.data.data);
+      setTotalRows(res.data.pagination.totalData);
+    })
+    .catch((err) => {
+      if (err.response.data.message === "Unauthenticated") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+    });
+  }
   const getStatus = (token) => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/statuses`, {
@@ -196,8 +221,14 @@ const Task = () => {
   };
 
   const [pending, setPending] = useState(true)
+ 
   useEffect(() => {
-    getTask(token);
+    if(search){
+      setPagination((prev) => ({ ...prev, page: 1}))
+      searchTask(search)
+    }else{
+      getTask()
+    }
     getOwner(token);
     getCompany(token);
     getContact(token);
@@ -208,18 +239,13 @@ const Task = () => {
       setPending(false)
     }, 4000)
     return () => clearTimeout(timeOut)
-  }, [token]);
+  }, [token, search, pagination.page, pagination.limit]);
 
   const selectUidDataTable = (e) => {
     const select = e.selectedRows.map((row) => row.uid);
     setSelectUid(select);
   };
-  const handleFilter = (e) => {
-    const data = task.filter((row) => {
-      return row.task_name.toLowerCase().includes(e.target.value.toLowerCase());
-    });
-    setSearch(data);
-  };
+
   const handleDeleteSelect = async (e) => {
     const isResult = await Swal.fire({
       title: "Hapus Task!.. apakah kamu yakin?",
@@ -311,16 +337,19 @@ const Task = () => {
         (!searchInput.task_name || row.task_name?.toLowerCase().includes(searchInput?.task_name?.toLowerCase()))
       );
     });
-    setSearch(filter);
+    // setSearch(filter);
   };
 
-  const paginationComponentOptions = {
-    selectAllRowsItem: true,
-    selectAllRowsItemText: "ALL",
-    onTableChange: (action, tableState) => {
-      const {page} = tableState;
-      setCurrentPage(page + 1)
-    }
+  const handleChangePage = (page) => {
+    setPagination((e) => ({ ...e, page }));
+  };
+  const handlePagePerChange = (pageSize, page) => {
+    setPagination((prev) => ({ ...prev, pageSize, page }));
+  };
+
+  const handleFilter = (e) => {
+    const value = e.target.value.toLowerCase();
+    setSearch(value);
   };
 
   return (
@@ -586,10 +615,13 @@ const Task = () => {
                 <div className="row">
                   <div className="col">
                     <DatatableTask
-                      data={search}
+                      data={task}
                       selectUidDataTable={selectUidDataTable}
                       pending={pending}
-                      paginationOptions={paginationComponentOptions}
+                      handleChangePage={handleChangePage}
+                      handlePagePerChange ={handlePagePerChange}
+                      PaginationLimit={pagination.limit}
+                      totalRows={totalRows}
                     />
                     <AddTask visible={addTask} onClose={handleCloseOverlay} />
                   </div>

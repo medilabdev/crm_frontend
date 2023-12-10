@@ -10,7 +10,7 @@ import DataTableComponet from "./Datatable";
 import axios from "axios";
 import Select from "react-select";
 import Swal from "sweetalert2";
-
+import {getPackageProduct} from "../../context/UseContext";
 const Deals = () => {
   const token = localStorage.getItem("token");
   const [isSideFilter, setIsSideFilter] = useState(false);
@@ -32,21 +32,60 @@ const Deals = () => {
   const [searchProduct, setSearchProduct] = useState([]);
   const [searchPackageProduct, setSearchPackageProduct] = useState([]);
   const [searchPriority, setSearchPriority] = useState([]);
-  const getPackageProduct = () => {
-    axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/packages-product`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => setPackageProduct(res.data.data))
-      .catch((err) => {
-        if (err.response.data.message === "Unauthenticated.") {
-          localStorage.clear();
-          window.location.href = "/login";
-        }
-      });
-  };
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10
+  })
+  const [totalRows, setTotalRows] = useState(0)
+
+  useEffect(() => {
+    getOwnerUser(token);
+    if(search){
+      setPagination((prev) => ({ ...prev, page: 1}))
+      searchDeals(search)
+    }else{
+      getDeals()
+    }
+    getStage(token);
+    getPriority(token);
+    getCompany(token);
+    getContact(token);
+    getProduct(token);
+    // 
+    fetch()   
+    // getPackageProduct(token);
+    
+    const timeOut = setTimeout(() => {
+      setPending(false)
+    }, 3500)
+    return () => clearTimeout(timeOut);
+   }, [token, search, pagination.page, pagination.limit]);
+
+   
+
+   const fetch = async()=>{
+    let ret = await getPackageProduct(token).then((e)=>{
+      setPackageProduct(e)
+    })
+    return ret
+   }
+
+  // console.log(pagination);
+  // const getPackageProduct = () => {
+  //   axios
+  //     .get(`${process.env.REACT_APP_BACKEND_URL}/packages-product`, {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //     })
+  //     .then((res) => setPackageProduct(res.data.data))
+  //     .catch((err) => {
+  //       if (err.response.data.message === "Unauthenticated.") {
+  //         localStorage.clear();
+  //         window.location.href = "/login";
+  //       }
+  //     });
+  // };
 
   const getProduct = () => {
     axios
@@ -110,6 +149,7 @@ const Deals = () => {
         }
       });
   };
+
   const getOwnerUser = () => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
@@ -125,6 +165,7 @@ const Deals = () => {
         }
       });
   };
+
   const getPriority = () => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/priorities`, {
@@ -140,6 +181,7 @@ const Deals = () => {
         }
       });
   };
+
   const selectUidDataTable = (e) => {
     const select = e.selectedRows.map((row) => row.uid);
     setSelectUid(select);
@@ -147,14 +189,18 @@ const Deals = () => {
 
   const getDeals = () => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/deals?page=1&limit=10`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/deals`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
+        params:{
+          page: pagination.page,
+          limit: pagination.limit
+        }
       })
       .then((res) => {
         setDataDeals(res.data.data);
-        setSearch(res.data.data);
+        setTotalRows(res.data.pagination.totalData);
       })
       .catch((err) => {
         if (err.response.data.message === "Unauthenticated.") {
@@ -163,7 +209,6 @@ const Deals = () => {
         }
       });
   };
-
   const handleDeleteSelect = async (e) => {
     e.preventDefault();
     const isResult = await Swal.fire({
@@ -228,12 +273,10 @@ const Deals = () => {
   const boardKanbanDatatable = isSideFilter ? "col-md-9" : "col-md-12";
   const IconFilter = isSideFilter ? "bi bi-x-lg" : "bi bi-funnel";
 
-  function handleSearchDatatable(e) {
-    const newData = deals.filter((row) => {
-      return row.deal_name.toLowerCase().includes(e.target.value.toLowerCase());
-    });
-    setSearch(newData);
-  }
+  const handleSearchDatatable = (e) => {
+    const value = e.target.value.toLowerCase();
+    setSearch(value);
+  };
 
   const selectOwner = () => {
     const result = [];
@@ -318,22 +361,31 @@ const Deals = () => {
     });
     return res;
   };
-  const [pending, setPending] = useState(true)
-  useEffect(() => {
-    getOwnerUser(token);
-    getDeals(token);
-    getStage(token);
-    getPriority(token);
-    getCompany(token);
-    getContact(token);
-    getProduct(token);
-    getPackageProduct(token);
 
-    const timeOut = setTimeout(() => {
-      setPending(false)
-    }, 3500)
-    return () => clearTimeout(timeOut);
-   }, [token]);
+  const searchDeals = (term) => {
+    axios.get(`${process.env.REACT_APP_BACKEND_URL}/deals`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      },
+      params: {
+        search: term
+      }
+    })
+    .then((res) => {
+      setDataDeals(res.data.data)
+      setTotalRows(res.data.pagination.totalData)
+    })
+    .catch((err) => {
+      if (err.response.data.message === "Unauthenticated") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+    });
+
+  }
+  const [pending, setPending] = useState(true)
+
+
 
   const uid = localStorage.getItem("uid");
   const handleDealsMyOrPerson = (e) => {
@@ -363,6 +415,7 @@ const Deals = () => {
     const result = valCont.reduce((acc, value) => acc.concat(value), [])
     setSearchContact(result);
   };
+  
   const handleSelectProduct = (e) => {
     const valCont = e.map((data) => data.value)
     const result = valCont.reduce((acc, value) => acc.concat(value), [])
@@ -380,6 +433,16 @@ const Deals = () => {
       [e.target.name]: e.target.value,
     });
   };
+
+  const handleChangePage = (page) => {
+    setPagination((e) => ({ ...e, page}))
+  } 
+  // console.log(pagination);
+  
+  const handlePagePerChange = (pageSize, page) => {
+    setPagination((prev) => ({...prev, pageSize, page}))
+  }
+
   const handleSubmitSearchMultiple = () => {
     const filterData = deals.filter((row) => {
       return (
@@ -393,7 +456,7 @@ const Deals = () => {
         
       )
     })
-    setSearch(filterData)
+    // setSearch(filterData)
   };
 
   return (
@@ -708,13 +771,18 @@ const Deals = () => {
                     </select>
                   </div> */}
                 </div>
+                {console.log(pagination)}
               </div>
               <div className="row">
                 <div className="col mt-3">
                   <DataTableComponet
-                    data={search}
+                    data={deals}
                     selectUidDataTable={selectUidDataTable}
                     pending={pending}
+                    paginationPerPage={pagination.limit}
+                    paginationTotalRows={totalRows}
+                    handleChangePage={handleChangePage}
+                    handlePagePerChange={handlePagePerChange}
                   />
                 </div>
               </div>

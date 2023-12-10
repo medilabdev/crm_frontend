@@ -9,7 +9,7 @@ import { OverlayTrigger, Tooltip } from "react-bootstrap";
 import axios from "axios";
 import EditStatus from "./Overlay/EditStatus";
 
-const DatatableTask = ({ data, selectUidDataTable, pending, paginationOptions }) => {
+const DatatableTask = ({ data, selectUidDataTable, pending, handleChangePage, handlePagePerChange, PaginationLimit, totalRows }) => {
   const token = localStorage.getItem("token");
   const [editTask, setEditTask] = useState(false);
   const handleCloseEdit = () => {
@@ -235,7 +235,14 @@ const DatatableTask = ({ data, selectUidDataTable, pending, paginationOptions })
         data={data}
         defaultSortFieldId={1}
         pagination
-        paginationComponentOptions={paginationOptions}
+        paginationComponentOptions={{
+          noRowsPerPage: true
+        }}
+        paginationServer
+        onChangePage={handleChangePage}
+        paginationPerPage={PaginationLimit}
+        onChangeRowsPerPage={handlePagePerChange}
+        paginationTotalRows={totalRows}
         selectableRows
         onSelectedRowsChange={selectUidDataTable}
         progressPending={pending}
