@@ -9,7 +9,7 @@ import Swal from "sweetalert2";
 import IconCompany from "../../assets/img/condo.png";
 import IconPhone from "../../assets/img/telephone-call.png";
 
-const DataTableComponet = ({ data, selectUidDataTable, pending }) => {
+const DataTableComponet = ({ data, selectUidDataTable, pending, paginationPerPage, paginationTotalRows, handleChangePage, handlePagePerChange  }) => {
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
   const columns = [
@@ -197,11 +197,6 @@ const DataTableComponet = ({ data, selectUidDataTable, pending }) => {
       width: "120px",
     },
   ];
-  const paginationComponentOptions = {
-    selectAllRowsItem: true,
-    selectAllRowsItemText: "ALL",
-  };
-
   return (
     <div>
       <DataTable
@@ -209,10 +204,17 @@ const DataTableComponet = ({ data, selectUidDataTable, pending }) => {
         data={data}
         defaultSortFieldId={1}
         pagination
-        paginationComponentOptions={paginationComponentOptions}
+        paginationServer
+        paginationPerPage={paginationPerPage}
+        paginationComponentOptions={{
+          noRowsPerPage : true
+        }}
         selectableRows
         onSelectedRowsChange={selectUidDataTable}
         progressPending={pending}
+        paginationTotalRows={paginationTotalRows}
+        onChangePage={handleChangePage}
+        onChangeRowsPerPage={handlePagePerChange}
       />
     </div>
   );

@@ -26,7 +26,7 @@ const Company = () => {
   const toggleSideBarCard = () => {
     setIsSideBar(!isSideBar);
   };
-
+  
   const filterClass = isSideBar
     ? "col-md-3 d-block border-end"
     : "col-sm-0 d-none";
@@ -61,6 +61,13 @@ const Company = () => {
     number_of_patient: "",
     parent_company_uid: "",
   });
+
+  const [pagination, setPagination] = useState({
+    page:1,
+    limit: 10
+  })
+  const [totalRows, setTotalRows] = useState(0)
+
   const handleSelectSearchCompany = (e) => {
     setSearchMultiple({
       ...searchMultiple,
@@ -114,16 +121,21 @@ const Company = () => {
         }
       });
   };
+
   const getAllCompany = () => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/companies?page=1&limit=10`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/companies`, {
         headers: {
           Authorization: `Bearer ${token}`,
+        },
+        params: {
+          page: pagination.page,
+          limit: pagination.limit
         },
       })
       .then((res) => {
         setAllCompany(res.data.data);
-        setSearch(res.data.data);
+        setTotalRows(res.data.pagination.totalData);
       })
       .catch((err) => {
         if (err.response.data.message === "Unauthenticated.") {
@@ -132,6 +144,8 @@ const Company = () => {
         }
       });
   };
+
+
   const getAlltypeCompany = () => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/companies-type`, {
@@ -286,17 +300,6 @@ const Company = () => {
     setResultSource(e.map((data) => data.value));
   };
 
-  function handleSearch(e) {
-    const newData = allCompany.filter((row) => {
-      return row.name.toLowerCase().includes(e.target.value.toLowerCase());
-    });
-    setSearch(newData);
-  }
-
-  const paginationComponentOptions = {
-    selectAllRowsItem: true,
-    selectAllRowsItemText: "ALL",
-  };
 
   const ParentCompany = () => {
     const result = [];
@@ -439,9 +442,34 @@ const Company = () => {
     }
   };
 
+  const searchCompany = (term) => {
+    axios.get(`${process.env.REACT_APP_BACKEND_URL}/companies`, {
+      headers:{
+        Authorization :`Bearer ${token}`
+      },
+      params:{
+        search: term
+      }
+    })
+    .then((res) => {
+      setAllCompany(res.data.data)
+      setTotalRows(res.data.pagination.totalData)
+    })
+    .catch((err) => {
+      if (err.response.data.message === "Unauthenticated") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+    });
+  }
   const [pending, setPending] = useState(true);
   useEffect(() => {
-    getAllCompany();
+    if(search){
+      setPagination((prev) => ({...prev, page: 1}))
+      searchCompany(search)
+    }else{
+      getAllCompany();
+    }
     getOwnerUser();
     getSource();
     getAlltypeCompany();
@@ -452,7 +480,21 @@ const Company = () => {
       setPending(false);
     }, 2000);
     return () => clearTimeout(timout);
-  }, [token]);
+  }, [token, search, pagination.page, pagination.limit]);
+
+  const handleChangePage = (page) => {
+    setPagination((e) => ({ ...e, page}))
+  }
+  
+  const handlePagePerChange = (pageSize, page) => {
+    setPagination((prev) => ({...prev, pageSize, page}))
+  }
+
+  function handleSearch(e) {
+    const value = e.target.value.toLowerCase()
+    setSearch(value)
+  }
+
   const columns = [
     {
       id: 1,
@@ -931,10 +973,17 @@ const Company = () => {
                   </div>
                   <DataTable
                     columns={columns}
-                    data={search}
+                    data={allCompany}
                     defaultSortFieldId={1}
                     pagination
-                    paginationComponentOptions={paginationComponentOptions}
+                    paginationServer
+                    paginationComponentOptions={{
+                      noRowsPerPage : true
+                    }}
+                    paginationPerPage={pagination.limit}
+                    onChangePage={handleChangePage}
+                    onChangeRowsPerPage={handlePagePerChange}
+                    paginationTotalRows={totalRows}
                     selectableRows
                     onSelectedRowsChange={selectUid}
                     progressPending={pending}
