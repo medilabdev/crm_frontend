@@ -11,6 +11,8 @@ import axios from "axios";
 import Select from "react-select";
 import Swal from "sweetalert2";
 import {getPackageProduct} from "../../context/UseContext";
+import { debounce } from 'lodash';
+
 const Deals = () => {
   const token = localStorage.getItem("token");
   const [isSideFilter, setIsSideFilter] = useState(false);
@@ -38,23 +40,31 @@ const Deals = () => {
   })
   const [totalRows, setTotalRows] = useState(0)
 
-  useEffect(() => {
-    getOwnerUser(token);
-    if(search){
-      setPagination((prev) => ({ ...prev, page: 1}))
-      searchDeals(search)
-    }else{
-      getDeals()
+  const fetchData = async () => {
+    try {
+      setPending(true)
+      if(search){
+        setPagination((prev) => ({ ...prev, page: 1}))
+        await searchDeals(search)
+      }else{
+        await getDeals()
+      }
+      await getOwnerUser()
+      await getStage();
+      await getPriority();
+      await getCompany();
+      await getContact()
+      await getProduct()
+      await getPackage()
+    } catch (error) {
+      console.error('error in fetch data', error);
+    }finally{
+      setPending(false)
     }
-    getStage(token);
-    getPriority(token);
-    getCompany(token);
-    getContact(token);
-    getProduct(token);
-    // 
-    fetch()   
-    // getPackageProduct(token);
-    
+  }
+
+  useEffect(() => {
+    fetchData()
     const timeOut = setTimeout(() => {
       setPending(false)
     }, 3500)
@@ -63,7 +73,7 @@ const Deals = () => {
 
    
 
-   const fetch = async()=>{
+   const getPackage = async()=>{
     let ret = await getPackageProduct(token).then((e)=>{
       setPackageProduct(e)
     })
@@ -102,6 +112,7 @@ const Deals = () => {
         }
       });
   };
+  
   const getContact = () => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/contacts?limit=10`, {
@@ -187,28 +198,32 @@ const Deals = () => {
     setSelectUid(select);
   };
 
-  const getDeals = () => {
-    axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/deals`, {
+  const getDeals = async () => {
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/deals`, {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token}`
         },
-        params:{
+        params: {
           page: pagination.page,
           limit: pagination.limit
         }
       })
-      .then((res) => {
-        setDataDeals(res.data.data);
-        setTotalRows(res.data.pagination.totalData);
-      })
-      .catch((err) => {
-        if (err.response.data.message === "Unauthenticated.") {
-          localStorage.clear();
-          window.location.href = "/login";
-        }
-      });
+      setDataDeals(response.data.data)
+      setTotalRows(response.data.pagination.totalData)
+    } catch (error) {
+      if (error.response && error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      if(error.response && error.response.status === 429){
+        const delay = Math.pow(2, pagination.page - 1) * 2000;
+        await new Promise(resolve => setTimeout(resolve, delay))
+        await getDeals()
+      }
+    }
   };
+
   const handleDeleteSelect = async (e) => {
     e.preventDefault();
     const isResult = await Swal.fire({
@@ -226,9 +241,9 @@ const Deals = () => {
           formData.append(`deals_uid[${indek}]`, data);
         });
 
-        for (const pair of formData.entries()) {
-          console.log(pair[0] + ": " + pair[1]);
-        }
+        // for (const pair of formData.entries()) {
+        //   console.log(pair[0] + ": " + pair[1]);
+        // }
         axios
           .post(
             `${process.env.REACT_APP_BACKEND_URL}/deals/item/delete`,
@@ -273,9 +288,13 @@ const Deals = () => {
   const boardKanbanDatatable = isSideFilter ? "col-md-9" : "col-md-12";
   const IconFilter = isSideFilter ? "bi bi-x-lg" : "bi bi-funnel";
 
+  const debouncedHandleFilter = debounce((value) => {
+    setSearch(value.toLowerCase())
+  }, 1000)
+
   const handleSearchDatatable = (e) => {
     const value = e.target.value.toLowerCase();
-    setSearch(value);
+    debouncedHandleFilter(value);
   };
 
   const selectOwner = () => {
@@ -362,27 +381,35 @@ const Deals = () => {
     return res;
   };
 
-  const searchDeals = (term) => {
-    axios.get(`${process.env.REACT_APP_BACKEND_URL}/deals`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      },
-      params: {
-        search: term
-      }
-    })
-    .then((res) => {
-      setDataDeals(res.data.data)
-      setTotalRows(res.data.pagination.totalData)
-    })
-    .catch((err) => {
-      if (err.response.data.message === "Unauthenticated") {
+  const searchDeals = async (term) => {
+    try {
+       const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/deals`, {
+        headers: {
+          Authorization : `Bearer ${token}`
+        },
+        params: {
+          search: term
+        }
+       })
+       setDataDeals(response.data.data)
+       setTotalRows(response.data.pagination.totalData)
+    } catch (error) {
+      if (error.response && error.response.data.message === "Unauthenticated") {
         localStorage.clear();
         window.location.href = "/login";
       }
-    });
-
+      if(error.response && error.response.status === 429){
+        const delay = Math.pow(2, pagination.page - 1) * 2000;
+        await new Promise(resolve => setTimeout(resolve, delay))
+        await searchDeals(term)
+      }
+      if(error.response && error.response.data.message === 404){
+        await setDataDeals([])
+        await setTotalRows(0)
+      }
+    }
   }
+
   const [pending, setPending] = useState(true)
 
 
@@ -437,7 +464,6 @@ const Deals = () => {
   const handleChangePage = (page) => {
     setPagination((e) => ({ ...e, page}))
   } 
-  // console.log(pagination);
   
   const handlePagePerChange = (pageSize, page) => {
     setPagination((prev) => ({...prev, pageSize, page}))
@@ -771,7 +797,6 @@ const Deals = () => {
                     </select>
                   </div> */}
                 </div>
-                {console.log(pagination)}
               </div>
               <div className="row">
                 <div className="col mt-3">

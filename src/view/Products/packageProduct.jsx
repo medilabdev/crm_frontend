@@ -7,6 +7,8 @@ import Swal from "sweetalert2";
 import DeletePackage from "./Modals/deletePackage";
 import { Table } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import { debounce } from 'lodash';
+
 const PackageProduct = () => {
   const token = localStorage.getItem("token");
   const [packageProduct, setPackageProduct] = useState([]);
@@ -87,55 +89,65 @@ const PackageProduct = () => {
     }
   };
 
-  const getPackageProduct = () => {
-    axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/packages-product`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+  const getPackageProduct = async() => {
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/packages-product`, {
+        headers:{
+          Authorization : `Bearer ${token}`
         },
         params: {
           page: pagination.page,
-          limit: pagination.limit,
-        },
-      })
-      .then((res) => {
-        const packageData = res.data.data;
-        setPackageProduct(packageData);
-        setTotalRows(res.data.pagination.totalData);
-
-        packageData.map((packageLoop, index) => {
-          setRowProduct(packageLoop?.package_detail_with_product);
-        });
-      })
-      .catch((err) => {
-        if (err.response.data.message === "Unauthenticated") {
-          localStorage.clear();
-          window.location.href = "/login";
+          limit: pagination.limit
         }
-      });
+      })
+      const packageProduct = response.data.data
+      setPackageProduct(response.data.data)
+      setTotalRows(response.data.pagination.totalData)
+      packageProduct.map((packageLoop) => {
+        setRowProduct(packageLoop?.package_detail_with_product)
+      })
+    } catch (error) {
+      if (error.response && error.response.data.message === "Unauthenticated") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      if(error.response && error.response.status === 429){
+        const delay = Math.pow(2, pagination.page - 1) * 2000;
+        await new Promise(resolve => setTimeout(resolve, delay))
+        await getPackageProduct()
+      }
+    }
   };
 
-  const searchPackageProduct = (term) => {
-    axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/packages-product`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+  const searchPackageProduct = async (term) => {
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/packages-product`, {
+        headers:{
+          Authorization: `Bearer ${token}`
         },
-        params: {
-          search: term,
-        },
-      })
-      .then((res) => {
-        setPackageProduct(res.data.data);
-        setTotalRows(res.data.pagination.totalData);
-      })
-      .catch((err) => {
-        if (err.response.data.message === "Unauthenticated") {
-          localStorage.clear();
-          window.location.href = "/login";
+        params:{
+          search: term
         }
-      });
+      })
+      setPackageProduct(response.data.data)
+      setTotalRows(response.data.pagination.totalData)
+    } catch (error) {
+      if (error.response.data.message === "Unauthenticated") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      if(error.response && error.response.status === 429){
+        const delay = Math.pow(2, pagination.page - 1) * 2000;
+        await new Promise(resolve => setTimeout(resolve, delay))
+        await searchPackage()
+      }
+      if(error.response && error.response.status === 404){
+        await setPackageProduct([])
+        await setTotalRows(0)
+      }
+    }
   };
+
   const ExpandableRowComponent = ({ data }) => {
     const productNames = data.package_detail_with_product?.map(
       (product) => product?.product
@@ -167,17 +179,26 @@ const PackageProduct = () => {
     return <ExpandableRowComponent data={productName} />;
   });
 
-
-
-  const [pending, setPending] = useState(true);
-  useEffect(() => {
-    if (search) {
+const fetchData = async() => {
+  try{
+    setPending(true)
+    if(search){
       setPagination((prev) => ({ ...prev, page: 1 }));
       searchPackageProduct(search);
-    } else {
+    }else{
       getPackageProduct(token);
     }
+  }catch(error){
+    console.error('error in fetch data ', error);
+  }finally{
+    setPending(false)
+  }
+}
 
+  const [pending, setPending] = useState(true);
+  
+  useEffect(() => {
+    fetchData()
     const timeOut = setTimeout(() => {
       setPending(false);
     }, 2500);
@@ -276,9 +297,14 @@ const PackageProduct = () => {
   const handlePagePerPage = (pageSize, page) => {
     setPagination((prev) => ({...prev, pageSize, page}))
   }
+
+  const debouncedHandleFilter = debounce((value) => {
+    setSearch(value.toLowerCase())
+  }, 1000)
+
   function searchPackage(e) {
     const value = e.target.value.toLowerCase();
-    setSearch(value);
+    debouncedHandleFilter(value);
   }
 
   // const customStyle = {

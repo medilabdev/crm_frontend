@@ -10,6 +10,7 @@ import DatatableTask from "./DatatableTask";
 import Dummy from "./DummyData";
 import AddTask from "./Overlay/AddTask";
 import Swal from "sweetalert2";
+import { debounce } from 'lodash';
 
 const Task = () => {
   const token = localStorage.getItem("token");
@@ -38,51 +39,63 @@ const Task = () => {
   });
 
   const [totalRows, setTotalRows] = useState(0);
-  const getTask = () => {
-    axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/tasks`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+
+  const getTask = async() => {
+    try { 
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/tasks`, {
+        headers:{
+          Authorization :`Bearer ${token}`
         },
         params: {
           page: pagination.page,
           limit: pagination.limit
         }
       })
-      .then((res) => {
-        console.log(res.data.data);
-        setTask(res.data.data);
-        setTotalRows(res.data.pagination.totalData);
-      })
-      .catch((err) => {
-        if (err.response.data.message === "Unauthenticated") {
-          localStorage.clear();
-          window.location.href = "/login";
-        }
-      });
-  };
-
-
-  const searchTask =(term) => {
-    axios.get(`${process.env.REACT_APP_BACKEND_URL}/tasks`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      },
-      params: {
-        search : term
-      }
-    })
-    .then((res) => {
-      setTask(res.data.data);
-      setTotalRows(res.data.pagination.totalData);
-    })
-    .catch((err) => {
-      if (err.response.data.message === "Unauthenticated") {
+      setTask(response.data.data)
+      setTotalRows(response.data.pagination.totalData)
+    } catch (error) {
+      if (error.response && error.response.data.message === "Unauthenticated") {
         localStorage.clear();
         window.location.href = "/login";
       }
-    });
+      if(error.response && error.response.status === 429){
+        const delay = Math.pow(2, pagination.page - 1) * 2000;
+        await new Promise(resolve => setTimeout(resolve, delay))
+        await getTask()
+      }
+    }
+  };
+
+
+  const searchTask = async (term) => {
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/tasks`, {
+        headers:{
+          Authorization:`Bearer ${token}`
+        },
+        params:{
+          search: term
+        }
+      })
+      setTask(response.data.data)
+      setTotalRows(response.data.pagination.totalData)
+    } catch (error) {
+      if (error.response && error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      if(error.response && error.response.status === 429){
+        const delay = Math.pow(2, pagination.page - 1) * 2000
+        await new Promise(resolve => setTimeout(resolve, delay))
+        await searchTask(term)
+      }
+      if(error.response && error.response.data.message === 404){
+        await setTask([])
+        await setTotalRows(0)
+      }
+    }
   }
+
   const getStatus = (token) => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/statuses`, {
@@ -117,7 +130,7 @@ const Task = () => {
 
   const getCompany = (token) => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/companies?limit=10`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/companies`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -132,7 +145,7 @@ const Task = () => {
   };
   const getContact = (token) => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/contacts?limit=10`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/contacts`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -147,7 +160,7 @@ const Task = () => {
   };
   const getDeals = (token) => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/deals?limit=10`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/deals`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -221,20 +234,31 @@ const Task = () => {
   };
 
   const [pending, setPending] = useState(true)
- 
-  useEffect(() => {
-    if(search){
-      setPagination((prev) => ({ ...prev, page: 1}))
-      searchTask(search)
-    }else{
-      getTask()
+  
+  const fetchData = async () => {
+    try {
+      setPending(true)
+      if(search){
+        setPagination((prev) => ({ ...prev, page: 1}))
+        await searchTask(search)
+      }else{
+        await getTask()
+      }
+      await getOwner(token)
+      await getCompany(token)
+      await getContact(token)
+      await getDeals(token)
+      await getStatus(token)
+    } catch (error) {
+      console.error('error in fetch data', error);
+    }finally{
+      setPending(false)
     }
-    getOwner(token);
-    getCompany(token);
-    getContact(token);
-    getDeals(token);
-    getStatus(token);
+  }
 
+
+  useEffect(() => {
+    fetchData()
     const timeOut = setTimeout(() => {
       setPending(false)
     }, 4000)
@@ -347,9 +371,13 @@ const Task = () => {
     setPagination((prev) => ({ ...prev, pageSize, page }));
   };
 
+  const dobounceHandleFilter = debounce((value) => {
+    setSearch(value.toLowerCase())
+  }, 1000)
+
   const handleFilter = (e) => {
     const value = e.target.value.toLowerCase();
-    setSearch(value);
+    dobounceHandleFilter(value);
   };
 
   return (
