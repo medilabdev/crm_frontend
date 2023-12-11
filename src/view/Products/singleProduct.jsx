@@ -5,6 +5,7 @@ import OverlayAddProducts from "./Overlay/addProduct";
 import DeleteSingle from "./Modals/delete";
 import Swal from "sweetalert2";
 import OverlayEditProduct from "./Overlay/editProduct";
+import { debounce } from 'lodash';
 
 const SingleProduct = () => {
   const token = localStorage.getItem("token");
@@ -87,58 +88,82 @@ const SingleProduct = () => {
   })
   
   const [totalRows, setTotalRows] = useState(0)
-  const getProduct = () => {
-    axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/products`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+
+  const getProduct = async () => {
+    try {
+      const response =await axios.get(`${process.env.REACT_APP_BACKEND_URL}/products`, {
+        headers:{
+          Authorization:`Bearer ${token}`
         },
-        params: {
-          page: pagination.page,
+        params:{
+          page:pagination.page,
           limit: pagination.limit
         }
       })
-      .then((res) => {
-        setProduct(res.data.data);
-        setTotalRows(res.data.pagination.totalData)
-      })
-      .catch((err) => {
-        if (err.response.data.message === "Unauthenticated.") {
-          localStorage.clear();
-          window.location.href = "/login";
-        }
-      });
-  };
-
-  const searchProduct = (term) => {
-    axios.get(`${process.env.REACT_APP_BACKEND_URL}/products`, {
-      headers: {
-        Authorization : `Bearer ${token}`
-      },
-      params: {
-        search: term
-      }
-    })
-    .then((res) => {
-      setProduct(res.data.data)
-      setTotalRows(res.data.pagination.totalData)
-    })
-    .catch((err) => {
-      if (err.response.data.message === "Unauthenticated") {
+      setProduct(response.data.data);
+      setTotalRows(response.data.pagination.totalData)
+    } catch (error) {
+      if (error.response && error.response.data.message === "Unauthenticated") {
         localStorage.clear();
         window.location.href = "/login";
       }
-    });
+      if(error.response && error.response.status === 429){
+        const delay = Math.pow(2, pagination.page - 1) * 2000;
+        await new Promise(resolve => setTimeout(resolve, delay))
+        await getProduct()
+      }
+    }
+  };
+
+  const searchProduct = async (term) => {
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/products`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        params: {
+          search: term
+        }
+      })
+      setProduct(response.data.data)
+      setTotalRows(response.data.pagination.totalData)
+    } catch (error) {
+      if (error.response.data.message === "Unauthenticated") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      if(error.response && error.response.status === 429){
+        const delay = Math.pow(2, pagination.page - 1) * 2000;
+        await new Promise(resolve => setTimeout(resolve, delay))
+        await searchProduct()
+      }
+      if(error.response && error.response.status === 404){
+        await setProduct([])
+        await setTotalRows(0)
+      }
+    }
   }
 
   const [pending, setPending] = useState(true)
-  useEffect(() => {
-    if(search){
-      setPagination((prev) => ({ ...prev, page: 1}))
-      searchProduct(search)
-    }else{
-      getProduct(token);
+  
+  const fetchData = async () => {
+    try{
+      setPending(true)
+      if(search){
+        setPagination((prev) => ({ ...prev, page: 1}))
+        searchProduct(search)
+      }else{
+        getProduct();
+      }
+    }catch(error){
+      console.error('error in fetch data ', error);
+    }finally{
+      setPending(false)
     }
+  }
+
+  useEffect(() => {
+    fetchData()
     const timeOut = setTimeout(() => {
       setPending(false)
     }, 2500)
@@ -210,10 +235,15 @@ const SingleProduct = () => {
     },
   ];
 
+  const debouncedHandleFilter = debounce((value) => {
+    setSearch(value.toLowerCase())
+  }, 1000)
+
   function SearchFilter(e) {
     const value = e.target.value.toLowerCase()
-    setSearch(value)
+    debouncedHandleFilter(value)
   }
+  
   return (
     <div className="tab-content pt-2">
       <div className="tab-pane fade show active product" id="product">

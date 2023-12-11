@@ -9,7 +9,6 @@ export  const getPackageProduct =async (token) => {
         },
       })
       .then(async(res)  =>{
-        console.log('res',res.data.data)
         const data = await res.data.data
         return data
       } )

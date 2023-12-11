@@ -16,6 +16,7 @@ import Swal from "sweetalert2";
 import Select from "react-select";
 import IconCompany from "../../assets/img/condo.png";
 import IconMoney from "../../assets/img/coin.png";
+import { debounce } from 'lodash';
 
 const Contact = () => {
   const token = localStorage.getItem("token");
@@ -80,6 +81,9 @@ const Contact = () => {
           localStorage.clear();
           window.location.href = "/login";
         }
+        if(err.response && err.response.status === 429){
+          const delay = Math.pow(2,)
+        }
       });
   };
 
@@ -130,9 +134,9 @@ const Contact = () => {
       });
   };
 
-  const getContactAll = (token, state) => {
-    axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/contacts`, {
+  const getContactAll = async (token, state) => {
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/contacts`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -140,19 +144,25 @@ const Contact = () => {
           page: pagination.page,
           limit: pagination.limit,
         },
-      })
-      .then((res) => {
-        state(res.data.data);
-        setTotalRows(res.data.pagination.totalData);
-      })
-      .catch((err) => {
-        if (err.response.data.message === "Unauthenticated") {
-          localStorage.clear();
-          window.location.href = "/login";
-        }
       });
+  
+      state(response.data.data);
+      setTotalRows(response.data.pagination.totalData);
+    } catch (error) {
+      if (error.response && error.response.data.message === "Unauthenticated") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      if (error.response && error.response.status === 429) {
+        const delay = Math.pow(2, pagination.page - 1) * 2000;
+        await new Promise(resolve => setTimeout(resolve, delay));
+        await getContactAll(token, state, pagination, setTotalRows);
+      }
+    }
   };
+  
   const [selectedUser, setSelectedUser] = useState([]);
+
   const handleSelectUser = (e) => {
     setSelectedUser(e.map((opt) => opt.value));
   };
@@ -267,46 +277,68 @@ const Contact = () => {
 
   const [pending, setPending] = useState(true);
 
-  const searchContacts = (term) => {
-    axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/contacts`, {
+  const searchContacts = async (term) => {
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/contacts`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
         params: {
           search: term,
         },
-      })
-      .then((res) => {
-        setContact(res.data.data);
-        setTotalRows(res.data.pagination.totalData);
-      })
-      .catch((err) => {
-        if (err.response.data.message === "Unauthenticated") {
-          localStorage.clear();
-          window.location.href = "/login";
-        }
       });
+  
+      setContact(response.data.data);
+      setTotalRows(response.data.pagination.totalData);
+    } catch (error) {
+      if (error.response && error.response.status === 429) {
+        const delay = Math.pow(2, pagination.page - 1) * 2000;
+        await new Promise(resolve => setTimeout(resolve, delay));  
+        await searchContacts(term);
+      } else if (error.response && error.response.data.message === "Unauthenticated") {
+        localStorage.clear();
+        window.location.href = "/login";
+      } else if(error.response && error.response.status === 404) {
+        await setContact([])
+        await setTotalRows(0)
+      } else{
+        // console.error('Error in searchContacts:', error);
+      }
+    }
+  };
+  
+  const fetchData = async () => {
+    try {
+      setPending(true);
+
+      if (search) {
+        setPagination((prev) => ({ ...prev, page: 1 }));
+        await searchContacts(search);
+      } else {
+        await getContactAll(TokenAuth, setContact, pagination, setTotalRows);
+      }
+
+      await getAllUser(TokenAuth);
+      await getSource(TokenAuth);
+      await getAssociateCompany(TokenAuth);
+    } catch (error) {
+      console.error('Error in fetchData:', error);
+    } finally {
+      setPending(false);
+    }
   };
 
-  useEffect(() => {
-    if (search) {
-      setPagination((prev) => ({ ...prev, page: 1 }));
-      searchContacts(search);
-    } else {
-      getContactAll(TokenAuth, setContact);
-    }
+useEffect(() => {
+  fetchData();
 
-    getAllUser(TokenAuth);
-    getSource(TokenAuth);
-    getAssociateCompany(TokenAuth);
+  const timeoutId = setTimeout(() => {
+    setPending(false);
+  }, 2500);
 
-    const timeOut = setTimeout(() => {
-      setPending(false);
-    }, 2500);
-
-    return () => clearTimeout(timeOut);
-  }, [TokenAuth, search, pagination.page, pagination.limit]);
+  return () => {
+    clearTimeout(timeoutId);
+  };
+}, [TokenAuth, search, pagination.page, pagination.limit]);
 
   const handleChangePage = (page) => {
     setPagination((e) => ({ ...e, page }));
@@ -316,9 +348,13 @@ const Contact = () => {
     setPagination((prev) => ({ ...prev, pageSize, page }));
   };
 
+  const debouncedHandleFilter = debounce((value) => {
+    setSearch(value.toLowerCase());
+  }, 1000);
+
   const handleFilter = (e) => {
     const value = e.target.value.toLowerCase();
-    setSearch(value);
+    debouncedHandleFilter(value);
   };
 
   const columns = [

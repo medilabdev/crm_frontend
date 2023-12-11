@@ -17,6 +17,7 @@ import axios, { all } from "axios";
 import Swal from "sweetalert2";
 import Select from "react-select";
 import IconMoney from "../../assets/img/coin.png";
+import { debounce } from 'lodash';
 
 const Company = () => {
   const uid = localStorage.getItem("uid");
@@ -122,27 +123,30 @@ const Company = () => {
       });
   };
 
-  const getAllCompany = () => {
-    axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/companies`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        params: {
-          page: pagination.page,
-          limit: pagination.limit
-        },
-      })
-      .then((res) => {
-        setAllCompany(res.data.data);
-        setTotalRows(res.data.pagination.totalData);
-      })
-      .catch((err) => {
-        if (err.response.data.message === "Unauthenticated.") {
-          localStorage.clear();
-          window.location.href = "/login";
-        }
-      });
+  const getAllCompany = async () => {
+    try {
+        const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/companies`, {
+          headers: {
+            Authorization : `Bearer ${token}`
+          },
+          params: {
+            page: pagination.page,
+            limit: pagination.limit
+          },
+        })
+        setAllCompany(response.data.data)
+        setTotalRows(response.data.pagination.totalData)
+    } catch (error) {
+      if (error.response && error.response.data.message === "Unauthenticated") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      if(error.response && error.response.status === 429){
+        const delay = Math.pow(2, pagination.page - 1) * 2000;
+        await new Promise(resolve => setTimeout(resolve, delay))
+        await getAllCompany()
+      }
+    }
   };
 
 
@@ -400,6 +404,7 @@ const Company = () => {
     });
     setSearch(filterdata);
   };
+  
   const handleSubmitDeleteSelect = async (e) => {
     e.preventDefault();
     const result = await Swal.fire({
@@ -442,40 +447,59 @@ const Company = () => {
     }
   };
 
-  const searchCompany = (term) => {
-    axios.get(`${process.env.REACT_APP_BACKEND_URL}/companies`, {
-      headers:{
-        Authorization :`Bearer ${token}`
-      },
-      params:{
-        search: term
-      }
-    })
-    .then((res) => {
-      setAllCompany(res.data.data)
-      setTotalRows(res.data.pagination.totalData)
-    })
-    .catch((err) => {
-      if (err.response.data.message === "Unauthenticated") {
+  const searchCompany = async (term) => {
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/companies`, {
+        headers:{
+          Authorization :`Bearer ${token}`
+        },
+        params:{
+          search: term
+        }
+      })
+      setAllCompany(response.data.data)
+      setTotalRows(response.data.pagination.totalData)
+    } catch (error) {
+      if (error.response && error.response.data.message === "Unauthenticated") {
         localStorage.clear();
         window.location.href = "/login";
       }
-    });
+      if(error.response && error.response.status === 429){
+        const delay = Math.pow(2, pagination.page - 1) * 2000;
+        await new Promise(resolve => setTimeout(resolve, delay))
+        await searchCompany(term)
+      }
+      if(error.response && error.response.data.message === 404){
+        await setAllCompany([])
+        await setTotalRows(0)
+      }
+    }
   }
   const [pending, setPending] = useState(true);
-  useEffect(() => {
-    if(search){
-      setPagination((prev) => ({...prev, page: 1}))
-      searchCompany(search)
-    }else{
-      getAllCompany();
+ 
+  const fetchData = async () => {
+    try{
+      setPending(true);
+      if(search){
+        setPagination((prev) => ({...prev, page: 1}))
+       await searchCompany(search)
+      }else{
+        await getAllCompany()
+      }
+      await getOwnerUser();
+      await getSource();
+      await getAlltypeCompany();
+      await getAssociateContact();
+      await getDeals();
+    }catch(error) {
+      console.error('error in fetch data', error);
+    }finally{
+      setPending(false)
     }
-    getOwnerUser();
-    getSource();
-    getAlltypeCompany();
-    getAssociateContact();
-    getDeals();
+  }
 
+  useEffect(() => {
+    fetchData()
     const timout = setTimeout(() => {
       setPending(false);
     }, 2000);
@@ -490,9 +514,13 @@ const Company = () => {
     setPagination((prev) => ({...prev, pageSize, page}))
   }
 
+  const debouncedHandleFilter = debounce((value) => {
+    setSearch(value.toLowerCase())
+  }, 1000)
+  
   function handleSearch(e) {
     const value = e.target.value.toLowerCase()
-    setSearch(value)
+    debouncedHandleFilter(value)
   }
 
   const columns = [
