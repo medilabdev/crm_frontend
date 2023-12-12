@@ -89,7 +89,7 @@ const PackageProduct = () => {
     }
   };
 
-  const getPackageProduct = async() => {
+  const getPackageProduct = async(token, term, retryCount = 0 ) => {
     try {
       const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/packages-product`, {
         headers:{
@@ -97,7 +97,8 @@ const PackageProduct = () => {
         },
         params: {
           page: pagination.page,
-          limit: pagination.limit
+          limit: pagination.limit,
+          search: term
         }
       })
       const packageProduct = response.data.data
@@ -111,42 +112,18 @@ const PackageProduct = () => {
         localStorage.clear();
         window.location.href = "/login";
       }
-      if(error.response && error.response.status === 429){
-        const delay = Math.pow(2, pagination.page - 1) * 2000;
+      if(error.response && error.response.status === 429 && retryCount < 3){
+        const delay = Math.pow(2, retryCount) * 2000;
         await new Promise(resolve => setTimeout(resolve, delay))
-        await getPackageProduct()
+        await getPackageProduct(retryCount + 1)
+      }
+      if(error.response && error.response.status === 404){
+        setPackageProduct([])
+        setTotalRows(0)
       }
     }
   };
 
-  const searchPackageProduct = async (term) => {
-    try {
-      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/packages-product`, {
-        headers:{
-          Authorization: `Bearer ${token}`
-        },
-        params:{
-          search: term
-        }
-      })
-      setPackageProduct(response.data.data)
-      setTotalRows(response.data.pagination.totalData)
-    } catch (error) {
-      if (error.response.data.message === "Unauthenticated") {
-        localStorage.clear();
-        window.location.href = "/login";
-      }
-      if(error.response && error.response.status === 429){
-        const delay = Math.pow(2, pagination.page - 1) * 2000;
-        await new Promise(resolve => setTimeout(resolve, delay))
-        await searchPackage()
-      }
-      if(error.response && error.response.status === 404){
-        await setPackageProduct([])
-        await setTotalRows(0)
-      }
-    }
-  };
 
   const ExpandableRowComponent = ({ data }) => {
     const productNames = data.package_detail_with_product?.map(
@@ -182,12 +159,7 @@ const PackageProduct = () => {
 const fetchData = async() => {
   try{
     setPending(true)
-    if(search){
-      setPagination((prev) => ({ ...prev, page: 1 }));
-      searchPackageProduct(search);
-    }else{
-      getPackageProduct(token);
-    }
+      getPackageProduct(token, search);
   }catch(error){
     console.error('error in fetch data ', error);
   }finally{

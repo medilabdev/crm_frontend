@@ -68,7 +68,7 @@ const Company = () => {
     limit: 10,
   });
   const [totalRows, setTotalRows] = useState(0);
-
+  const MAX_RETRIES = 3;
   const handleSelectSearchCompany = (e) => {
     setSearchMultiple({
       ...searchMultiple,
@@ -89,7 +89,7 @@ const Company = () => {
   };
 
 
-  const getAssociateContact = () => {
+  const getAssociateContact = (retryCount = 0) => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/associate`, {
         headers: {
@@ -100,46 +100,52 @@ const Company = () => {
         setAssocicateContact(res.data.data);
         setAssociateDeals(res.data.data);
       })
-      .catch((err) => {
+      .catch(async(err) => {
         if (err.response.data.message === "Unauthenticated") {
           localStorage.clear();
           window.location.href = "/login";
         }
+        if(err.response.status === 429 && retryCount < MAX_RETRIES){
+          const delay = Math.pow(2, retryCount) * 1000;
+          await new Promise((resolve) => setTimeout(resolve, delay))
+          await setAssociateDeals()
+          await setAssociateDeals()
+        }
       });
   };
 
-  const getAllCompany = async (token) => {
-    try {
-      const response = await axios.get(
-        `${process.env.REACT_APP_BACKEND_URL}/companies`,{
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          params: {
-            page: pagination.page,
-            limit: pagination.limit,
-          },
-        });
-      setAllCompany(response.data.data);
-      setTotalRows(response.data.pagination.totalData);
-    } catch (error) {
-      if (error.response && error.response.data.message === "Unauthenticated") {
-        localStorage.clear();
-        window.location.href = "/login";
-      } 
-      if (error.response && error.response.status === 429) {
-        const delay = Math.pow(2, pagination.page - 1) * 2000;
-        await new Promise((resolve) => setTimeout(resolve, delay));
-        await getAllCompany(token, pagination, setTotalRows);
-      }
-      if (error.response && error.response.status === 404) {
-        await setAllCompany([]);
-        await setTotalRows(0);
-      }
+  const getAllCompany = async (token, term, retryCount = 0) => {
+  try {
+    const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/companies`, {
+      headers:{
+        Authorization: `Bearer ${token}`
+      },
+      params: {
+        page: pagination.page,
+        limit: pagination.limit,
+        search: term
+      },
+    })
+    setAllCompany(response.data.data)
+    setTotalRows(response.data.pagination.totalData)
+  } catch (error) {
+    if (error.response && error.response.data.message === "Unauthenticated") {
+      localStorage.clear();
+      window.location.href = "/login";
     }
+    if (error.response && error.response.status === 429 && retryCount < MAX_RETRIES ) {
+      const delay = Math.pow(2, retryCount) * 2000;
+      await new Promise((resolve) => setTimeout(resolve, delay));
+      await getAllCompany(token, term, retryCount + 1);
+    }
+    if(error.response && error.response.status === 404){
+      await setAllCompany([])
+      await setTotalRows(0)
+    }
+  }
   };
 
-  const getAlltypeCompany = () => {
+  const getAlltypeCompany = (retryCount = 0) => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/companies-type`, {
         headers: {
@@ -149,15 +155,20 @@ const Company = () => {
       .then((res) => {
         setCompanyType(res.data.data);
       })
-      .catch((err) => {
+      .catch(async(err) => {
         if (err.response.data.message === "Unauthenticated.") {
           localStorage.clear();
           window.location.href = "/login";
         }
+        if(err.response && err.response.status === 429 && retryCount < MAX_RETRIES){
+          const delay = Math.pow(2, retryCount) * 1000;
+          await new Promise((resolve) => setTimeout(resolve, delay))
+          await setCompanyType()
+        }
       });
   };
 
-  const getSource = () => {
+  const getSource = (retryCount = 0) => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/companies-source`, {
         headers: {
@@ -165,15 +176,20 @@ const Company = () => {
         },
       })
       .then((res) => setSource(res.data.data))
-      .catch((err) => {
+      .catch(async (err) => {
         if (err.response.data.message === "Unauthenticated") {
           localStorage.clear();
           window.location.href = "/login";
         }
+        if(err.response && err.response.status === 429 && retryCount < MAX_RETRIES){
+          const delay = Math.pow(2, retryCount) * 1000;
+          await new Promise((resolve) => setTimeout(resolve, delay))
+          await setSource()
+        }
       });
   };
   
-  const getOwnerUser = () => {
+  const getOwnerUser = (retryCount = 0) => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
         headers: {
@@ -181,10 +197,15 @@ const Company = () => {
         },
       })
       .then((res) => setOwner(res.data.data))
-      .catch((err) => {
+      .catch(async(err) => {
         if (err.response.data.message === "Unauthenticated.") {
           localStorage.clear();
           window.location.href = "/login";
+        }
+        if(err.response && err.response.status === 429 && retryCount < MAX_RETRIES){
+          const delay = Math.pow(2, 0) * 1000;
+          await new Promise((resolve) => setTimeout(resolve, delay))
+          await setOwner()
         }
       });
   };
@@ -437,48 +458,13 @@ const Company = () => {
     }
   };
 
-  const searchCompany = async (term) => {
-    try {
-      const response = await axios.get(
-        `${process.env.REACT_APP_BACKEND_URL}/companies`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          params: {
-            search: term,
-          },
-        }
-      );
-      setAllCompany(response.data.data);
-      setTotalRows(response.data.pagination.totalData);
-    } catch (error) {
-      if (error.response && error.response.data.message === "Unauthenticated") {
-        localStorage.clear();
-        window.location.href = "/login";
-      }
-      if (error.response && error.response.status === 429) {
-        const delay = Math.pow(2, pagination.page - 1) * 2000;
-        await new Promise((resolve) => setTimeout(resolve, delay));
-        await searchCompany(term);
-      }
-      if (error.response && error.response.status === 404) {
-        await setAllCompany([]);
-        await setTotalRows(0);
-      }
-    }
-  };
+ 
   const [pending, setPending] = useState(true);
 
   const fetchData = async () => {
     try {
       setPending(true);
-      if (search) {
-        setPagination((prev) => ({ ...prev, page: 1 }));
-        await searchCompany(search);
-      } else {
-        await getAllCompany(token, pagination, setTotalRows);
-      }
+      await getAllCompany(token, search);
       await getOwnerUser();
       await getSource();
       await getAlltypeCompany();
@@ -499,8 +485,7 @@ const Company = () => {
       clearTimeout(timout);
     }
   }, [token, search, pagination.page, pagination.limit]);
-  console.log(pagination);
-
+  // console.log(pagination);
   const handleChangePage = (page) => {
     setPagination((prev) => ({ ...prev, page }));
   };
@@ -1010,13 +995,13 @@ const Company = () => {
                     defaultSortFieldId={1}
                     pagination
                     paginationServer
+                    selectableRows
+                    onSelectedRowsChange={selectUid}
                     paginationPerPage={pagination.limit}
                     onChangePage={handleChangePage}
                     onChangeRowsPerPage={handlePagePerChange}
-                    paginationTotalRows={totalRows}
-                    selectableRows
-                    onSelectedRowsChange={selectUid}
                     progressPending={pending}
+                    paginationTotalRows={totalRows}
                     paginationComponentOptions={{
                       noRowsPerPage: true,
                     }}

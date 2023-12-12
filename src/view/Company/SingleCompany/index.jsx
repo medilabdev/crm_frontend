@@ -55,8 +55,9 @@ const SingleCompany = () => {
   const [showAddContact, setShowAddContact] = useState(false);
   const handleCloseContact = () => setShowAddContact(false);
   const handleShowContact = () => setShowAddContact(true);
+  const MAX_RETRIES = 3;
 
-  const getDeals = async (term) => {
+  const getDeals = async (term, retryCount = 0) => {
     try {
       const respon = await axios.get(
         `${process.env.REACT_APP_BACKEND_URL}/deals/form/select`,
@@ -75,15 +76,15 @@ const SingleCompany = () => {
       if (error.respon && error.respon.status === 404) {
         await setDeals([]);
       }
-      if (error.respon && error.respon.status === 429) {
-        const delay = Math.pow(2, 0) * 1000;
+      if (error.respon && error.respon.status === 429 && retryCount < MAX_RETRIES) {
+        const delay = Math.pow(2, retryCount) * 1000;
         await new Promise((resolve) => setTimeout(resolve, delay));
         await getDeals(term);
       }
     }
   };
 
-  const getContact = async (term) => {
+  const getContact = async (term, retryCount = 0) => {
     try {
       const respon = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/contacts/form/select`, {
         headers:{
@@ -99,15 +100,15 @@ const SingleCompany = () => {
       if (error.respon && error.respon.status === 404) {
         await setContact([]);
       }
-      if (error.respon && error.respon.status === 429) {
-        const delay = Math.pow(2, 0) * 1000;
+      if (error.respon && error.respon.status === 429 && retryCount < MAX_RETRIES) {
+        const delay = Math.pow(2, retryCount) * 1000;
         await new Promise((resolve) => setTimeout(resolve, delay));
         await getContact(term);
       }
     }
   };
 
-  const getCompanyParent = async(term) => {
+  const getCompanyParent = async(term, retryCount = 0) => {
     try {
       const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/companies/form/select`,{
         headers: {
@@ -123,8 +124,8 @@ const SingleCompany = () => {
       if (error.response && error.respon.status === 404) {
         await setParentCompany([]);
       }
-      if (error.respon && error.respon.status === 429) {
-        const delay = Math.pow(2, 0) * 1000;
+      if (error.respon && error.respon.status === 429 && retryCount < MAX_RETRIES) {
+        const delay = Math.pow(2, retryCount) * 1000;
         await new Promise((resolve) => setTimeout(resolve, delay));
         await getCompanyParent(term);
       }

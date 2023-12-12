@@ -28,7 +28,7 @@ const BulkChangeTask = () => {
     });
   }
 
-  const getTask = () => {
+  const getTask = (retryCount = 0) => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/tasks/form/select`, {
         headers: {
@@ -36,10 +36,15 @@ const BulkChangeTask = () => {
         },
       })
       .then((res) => setTask(res.data.data))
-      .catch((err) => {
+      .catch(async (err) => {
         if (err.response.data.message === "Unauthenticated.") {
           localStorage.clear();
           window.location.href = "/login";
+        }
+        if(err.response && err.response.status === 429 && retryCount < 3){
+          const delay = Math.pow(2, retryCount) * 2000;
+          await new Promise((resolve) => setTimeout(resolve, delay))
+          await getTask(retryCount + 1)
         }
       });
   };

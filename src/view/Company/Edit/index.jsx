@@ -49,7 +49,7 @@ const EditCompany = () => {
   const [valueComp, setValueComp] = useState([]);
   const [formParentComp, setFormParentComp] = useState(false);
   // console.log(oldAssociate);
-  const getDeals = () => {
+  const getDeals = (retryCount = 0) => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/deals/form/select`, {
         headers: {
@@ -65,14 +65,14 @@ const EditCompany = () => {
         if(err.response && err.response.status === 404){
           setDeals([])
         }
-        if(err.response && err.response.status === 429){
-          const delay = Math.pow(2, 0) * 1000;
+        if(err.response && err.response.status === 429 && retryCount < 3){
+          const delay = Math.pow(2, retryCount) * 1000;
           await new Promise((resolve) => setTimeout(resolve, delay))
-          await getDeals()
+          await getDeals(retryCount + 1)
         }
       });
   };
-  const getContact = () => {
+  const getContact = (retryCount = 0) => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/contacts/form/select`, {
         headers: {
@@ -88,15 +88,15 @@ const EditCompany = () => {
         if(err.response && err.response.status === 404){
           setContact([])
         }
-        if(err.response && err.response.status === 429){
-          const delay = Math.pow(2, 0) * 1000;
+        if(err.response && err.response.status === 429 && retryCount < 3){
+          const delay = Math.pow(2, retryCount) * 1000;
           await new Promise((resolve) => setTimeout(resolve, delay))
-          await getContact()
+          await getContact(retryCount + 1)
         }
       });
   };
 
-  const getCompanyParent = () => {
+  const getCompanyParent = (retryCount = 0) => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/companies/form/select`, {
         headers: {
@@ -112,14 +112,14 @@ const EditCompany = () => {
         if(err.response && err.response.status === 404){
           setParentCompany([])
         }
-        if(err.response && err.response.status === 429){
-          const delay = Math.pow(2, 0) * 1000;
+        if(err.response && err.response.status === 429 && retryCount < 3){
+          const delay = Math.pow(2, retryCount) * 1000;
           await new Promise((resolve) => setTimeout(resolve, delay))
-          await getCompanyParent()
+          await getCompanyParent(retryCount + 1)
         }
       });
   };
-  const getSourceCompany = () => {
+  const getSourceCompany = (retryCount = 0) => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/companies-source`, {
         headers: {
@@ -127,15 +127,20 @@ const EditCompany = () => {
         },
       })
       .then((res) => setSourceCompany(res.data.data))
-      .catch((err) => {
+      .catch(async (err) => {
         if (err.response.data.message === "Unauthenticated.") {
           localStorage.clear();
           window.location.href = "/login";
         }
+        if(err.response && err.response.status === 429 && retryCount < 3){
+          const delay = Math.pow(2, retryCount) * 1000;
+          await new Promise((resolve) => setTimeout(resolve, delay))
+          await getSourceCompany(retryCount + 1)
+        }
       });
   };
 
-  const getTypeCompany = () => {
+  const getTypeCompany = (retryCount = 0) => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/companies-type`, {
         headers: {
@@ -143,10 +148,15 @@ const EditCompany = () => {
         },
       })
       .then((res) => setTypeCompany(res.data.data))
-      .catch((err) => {
+      .catch(async (err) => {
         if (err.response.data.message === "Unauthenticated.") {
           localStorage.clear();
           window.location.href = "/login";
+        }
+        if(err.response && err.response.status === 429 && retryCount < 3){
+          const delay = Math.pow(2, retryCount) * 1000;
+          await new Promise((resolve) => setTimeout(resolve, delay))
+          await getTypeCompany(retryCount + 1)
         }
       });
   };
@@ -196,7 +206,7 @@ const EditCompany = () => {
       parentCompanyLocalStorage.push(data);
     }
   }
-  const getOwnerUser = () => {
+  const getOwnerUser = (retryCount = 0) => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
         headers: {
@@ -204,10 +214,15 @@ const EditCompany = () => {
         },
       })
       .then((res) => setOwner(res.data.data))
-      .catch((err) => {
+      .catch(async (err) => {
         if (err.response.data.message === "Unauthenticated.") {
           localStorage.clear();
           window.location.href = "/login";
+        }
+        if(err.response && err.response.status === 429 && retryCount < 3){
+          const delay = Math.pow(2, retryCount) * 1000;
+          await new Promise((resolve) => setTimeout(resolve, delay))
+          await getOwnerUser(retryCount + 1)
         }
       });
   };

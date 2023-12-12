@@ -30,7 +30,7 @@ const EditTask = ({ visible, onClose, uid }) => {
     setInputAttachment(removeFileAttachment);
   };
 
-  const getPriority = () => {
+  const getPriority = (retryCount = 0) => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/priorities`, {
         headers: {
@@ -38,10 +38,15 @@ const EditTask = ({ visible, onClose, uid }) => {
         },
       })
       .then((res) => setPriority(res.data.data))
-      .catch((err) => {
+      .catch(async(err) => {
         if (err.response.data.message === "Unauthenticated.") {
           localStorage.clear();
           window.location.href = "/login";
+        }
+        if(err.response && err.response.status === 429 && retryCount < 3){
+          const delay = Math.pow(2, retryCount) * 2000;
+          await new Promise((resolve) => setTimeout(resolve, delay))
+          await getPriority(retryCount + 1)
         }
       });
   };
@@ -77,7 +82,7 @@ const EditTask = ({ visible, onClose, uid }) => {
         }
       });
   };
-  const getContact = () => {
+  const getContact = (retryCount = 0) => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/contacts/form/select`, {
         headers: {
@@ -85,14 +90,19 @@ const EditTask = ({ visible, onClose, uid }) => {
         },
       })
       .then((res) => setContact(res.data.data))
-      .catch((err) => {
+      .catch(async(err) => {
         if (err.response.data.message === "Unauthenticated.") {
           localStorage.clear();
           window.location.href = "/login";
         }
+        if(err.response && err.response.status === 429 && retryCount < 3){
+          const delay = Math.pow(2, retryCount) * 2000;
+          await new Promise((resolve) => setTimeout(resolve, delay))
+          await getContact(retryCount + 1)
+        }
       });
   };
-  const getStatus = () => {
+  const getStatus = (retryCount = 0) => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/statuses`, {
         headers: {
@@ -100,14 +110,19 @@ const EditTask = ({ visible, onClose, uid }) => {
         },
       })
       .then((res) => setStatus(res.data.data))
-      .catch((err) => {
+      .catch(async(err) => {
         if (err.response.data.message === "Unauthenticated.") {
           localStorage.clear();
           window.location.href = "/login";
         }
+        if(err.response && err.response.status === 429 && retryCount < 3){
+          const delay = Math.pow(2, retryCount) * 2000;
+          await new Promise((resolve) => setTimeout(resolve, delay));
+          await getStatus(retryCount + 1)
+        }
       });
   };
-  const getCompany = () => {
+  const getCompany = (retryCount = 0) => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/companies/form/select`, {
         headers: {
@@ -115,15 +130,20 @@ const EditTask = ({ visible, onClose, uid }) => {
         },
       })
       .then((res) => setCompany(res.data.data))
-      .catch((err) => {
+      .catch(async(err) => {
         if (err.response.data.message === "Unauthenticated.") {
           localStorage.clear();
           window.location.href = "/login";
         }
+        if(err.response && err.response.status === 429 && retryCount < 3){
+          const delay = Math.pow(2, retryCount) * 2000;
+          await new Promise((resolve) => setTimeout(resolve, delay));
+          await getCompany(retryCount + 1)
+        }
       });
   };
 
-  const getDeals = () => {
+  const getDeals = (retryCount = 0) => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/deals/form/select`, {
         headers: {
@@ -131,14 +151,19 @@ const EditTask = ({ visible, onClose, uid }) => {
         },
       })
       .then((res) => setDeals(res.data.data))
-      .catch((err) => {
+      .catch(async(err) => {
         if (err.response.data.message === "Unauthenticated.") {
           localStorage.clear();
           window.location.href = "/login";
         }
+        if(err.response && err.response.status === 429 && retryCount < 3){
+          const delay = Math.pow(2, retryCount) * 2000;
+          await new Promise((resolve) => setTimeout(resolve, delay));
+          await getDeals(retryCount + 1)
+        }
       });
   };
-  const getUsers = () => {
+  const getUsers = (retryCount = 0) => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
         headers: {
@@ -146,10 +171,15 @@ const EditTask = ({ visible, onClose, uid }) => {
         },
       })
       .then((res) => setUser(res.data.data))
-      .catch((err) => {
+      .catch(async(err) => {
         if (err.response.data.message === "Unauthenticated.") {
           localStorage.clear();
           window.location.href = "/login";
+        }
+        if(err.response && err.response.status === 429 && retryCount < 3){
+          const delay = Math.pow(2, retryCount) * 2000;
+          await new Promise((resolve) => setTimeout(resolve, delay));
+          await getUsers(retryCount + 1)
         }
       });
   };

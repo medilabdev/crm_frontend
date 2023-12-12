@@ -18,7 +18,7 @@ const BulkChangeCompany = () => {
   });
   const animatedComponents = makeAnimated();
 
-  const getCompanyTransfer = () => {
+  const getCompanyTransfer = (retryCount = 0) => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/companies/form/select`, {
         headers: {
@@ -34,14 +34,14 @@ const BulkChangeCompany = () => {
         if(err.response && err.response.status === 404){
           setBulkCompany([])
         }
-        if(err.response && err.response.status === 429){
-          const delay = Math.pow(2, 0) * 1000;
+        if(err.response && err.response.status === 429 && retryCount < 3){
+          const delay = Math.pow(2, retryCount) * 1000;
           await new Promise((resolve) => setTimeout(resolve, delay))
-          await getCompanyTransfer()
+          await getCompanyTransfer(retryCount + 1)
         }
       });
   };
-  const getAllUser = () => {
+  const getAllUser = (retryCount = 0) => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
         headers: {
@@ -49,10 +49,15 @@ const BulkChangeCompany = () => {
         },
       })
       .then((res) => setUser(res.data.data))
-      .catch((err) => {
+      .catch(async (err) => {
         if (err.response.data.message === "Unauthenticated.") {
           localStorage.clear();
           window.location.href = "/login";
+        }
+        if(err.response && err.response.status === 429 && retryCount < 3){
+          const delay = Math.pow(2, retryCount) * 1000;
+          await new Promise((resolve) => setTimeout(resolve, delay))
+          await getAllUser(retryCount + 1)
         }
       });
   };
