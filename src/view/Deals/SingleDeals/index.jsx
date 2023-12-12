@@ -164,7 +164,7 @@ const SingleDeals = () => {
   // Ambil data company
   const getCompanies = () => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/companies?limit=10`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/companies/form/select`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -180,7 +180,7 @@ const SingleDeals = () => {
   // ambil data contact
   const getContact = () => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/contacts?limit=10`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/contacts/form/select`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

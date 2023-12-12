@@ -39,7 +39,7 @@ const EditDeals = () => {
   };
   const getContact = () => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/contacts?limit=10`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/contacts/form/select`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -69,7 +69,7 @@ const EditDeals = () => {
   }
   const getCompany = () => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/companies?limit=10`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/companies/form/select`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -183,7 +183,7 @@ const EditDeals = () => {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((res) => setPipeline(res.data.data))
+      .then((res) => setPipeline(res?.data?.data))
       .catch((error) => {
         if (error.response.data.message === "Unauthenticated.") {
           localStorage.clear();
@@ -371,7 +371,7 @@ const EditDeals = () => {
     {
       name: "Name Product",
       selector: (row) =>
-        row.product?.name ? row.product?.name : row.product_name,
+        row.product?.name ?? row.product_name,
       sortable: true,
       width: "150px",
     },
@@ -591,7 +591,7 @@ const EditDeals = () => {
                 >
                   Cancel
                 </a>
-                <a className="btn btn-danger text-decoration-none">Delete</a>
+                {/* <a className="btn btn-danger text-decoration-none">Delete</a> */}
               </div>
             </div>
             <div className="col-md-12">
@@ -820,7 +820,7 @@ const EditDeals = () => {
                                 >
                                   No.Telp : <br />
                                   <strong className="mt-1">
-                                    {companyStorage[0]?.phone[0]?.number ?? "-"}
+                                    {companyStorage[0]?.phone?.[0]?.number ?? "-"}
                                   </strong>
                                 </p>
                               </Col>
@@ -920,7 +920,7 @@ const EditDeals = () => {
                                   >
                                     No.Telp :
                                     <strong className="ms-1">
-                                      {data.contact?.phone[0]?.number || "-"}
+                                      {data.contact?.phone?.[0]?.number || "-"}
                                     </strong>
                                   </p>
                                 </Col>

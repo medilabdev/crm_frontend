@@ -115,7 +115,7 @@ const Deals = () => {
   
   const getContact = () => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/contacts?limit=10`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/contacts/form/select`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -131,7 +131,7 @@ const Deals = () => {
 
   const getCompany = () => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/companies?limit=10`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/companies/form/select`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

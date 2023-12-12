@@ -30,7 +30,7 @@ const EditContact = () => {
   const token = localStorage.getItem("token");
 
   const getDeals =(token) => {
-    axios.get(`${process.env.REACT_APP_BACKEND_URL}/deals?limit=10`, {
+    axios.get(`${process.env.REACT_APP_BACKEND_URL}/deals/form/select`, {
       headers:{
         Authorization:`Bearer ${token}`
       }
@@ -43,7 +43,7 @@ const EditContact = () => {
     });
   }
   const getCompany = (token) => {
-    axios.get(`${process.env.REACT_APP_BACKEND_URL}/companies?limit=10`, {
+    axios.get(`${process.env.REACT_APP_BACKEND_URL}/companies/form/select`, {
       headers:{
         Authorization: `Bearer ${token}`
       }

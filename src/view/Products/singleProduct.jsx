@@ -146,8 +146,8 @@ const SingleProduct = () => {
 
   const [pending, setPending] = useState(true)
   
-  const fetchData = async () => {
-    try{
+    console.log(pagination);
+  useEffect(() => {
       setPending(true)
       if(search){
         setPagination((prev) => ({ ...prev, page: 1}))
@@ -155,20 +155,12 @@ const SingleProduct = () => {
       }else{
         getProduct();
       }
-    }catch(error){
-      console.error('error in fetch data ', error);
-    }finally{
       setPending(false)
-    }
-  }
-
-  useEffect(() => {
-    fetchData()
     const timeOut = setTimeout(() => {
       setPending(false)
     }, 2500)
     return () => clearTimeout(timeOut)
-  }, [token, search, pagination.limit, pagination.page]);
+  }, [token, search]);
 
   const handleChangePage = (page) => {
     setPagination((prev) => ({...prev, page}))

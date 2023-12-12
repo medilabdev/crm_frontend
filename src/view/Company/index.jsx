@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import Topbar from "../../components/Template/Topbar";
 import Sidebar from "../../components/Template/Sidebar";
 import Main from "../../components/Template/Main";
@@ -17,7 +17,7 @@ import axios, { all } from "axios";
 import Swal from "sweetalert2";
 import Select from "react-select";
 import IconMoney from "../../assets/img/coin.png";
-import { debounce } from 'lodash';
+import { debounce } from "lodash";
 
 const Company = () => {
   const uid = localStorage.getItem("uid");
@@ -27,7 +27,7 @@ const Company = () => {
   const toggleSideBarCard = () => {
     setIsSideBar(!isSideBar);
   };
-  
+
   const filterClass = isSideBar
     ? "col-md-3 d-block border-end"
     : "col-sm-0 d-none";
@@ -64,10 +64,10 @@ const Company = () => {
   });
 
   const [pagination, setPagination] = useState({
-    page:1,
-    limit: 10
-  })
-  const [totalRows, setTotalRows] = useState(0)
+    page: 1,
+    limit: 10,
+  });
+  const [totalRows, setTotalRows] = useState(0);
 
   const handleSelectSearchCompany = (e) => {
     setSearchMultiple({
@@ -88,25 +88,10 @@ const Company = () => {
     });
   };
 
-  const getDeals = (token) => {
-    axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/deals?limit=10`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => setDeals(res.data.data))
-      .catch((err) => {
-        if (err.response.data.message === "Unauthenticated") {
-          localStorage.clear();
-          window.location.href = "/login";
-        }
-      });
-  };
 
   const getAssociateContact = () => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/associate?limit=10`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/associate`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -123,32 +108,36 @@ const Company = () => {
       });
   };
 
-  const getAllCompany = async () => {
+  const getAllCompany = async (token) => {
     try {
-        const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/companies`, {
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}/companies`,{
           headers: {
-            Authorization : `Bearer ${token}`
+            Authorization: `Bearer ${token}`,
           },
           params: {
             page: pagination.page,
-            limit: pagination.limit
+            limit: pagination.limit,
           },
-        })
-        setAllCompany(response.data.data)
-        setTotalRows(response.data.pagination.totalData)
+        });
+      setAllCompany(response.data.data);
+      setTotalRows(response.data.pagination.totalData);
     } catch (error) {
       if (error.response && error.response.data.message === "Unauthenticated") {
         localStorage.clear();
         window.location.href = "/login";
-      }
-      if(error.response && error.response.status === 429){
+      } 
+      if (error.response && error.response.status === 429) {
         const delay = Math.pow(2, pagination.page - 1) * 2000;
-        await new Promise(resolve => setTimeout(resolve, delay))
-        await getAllCompany()
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        await getAllCompany(token, pagination, setTotalRows);
+      }
+      if (error.response && error.response.status === 404) {
+        await setAllCompany([]);
+        await setTotalRows(0);
       }
     }
   };
-
 
   const getAlltypeCompany = () => {
     axios
@@ -167,6 +156,7 @@ const Company = () => {
         }
       });
   };
+
   const getSource = () => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/companies-source`, {
@@ -182,6 +172,7 @@ const Company = () => {
         }
       });
   };
+  
   const getOwnerUser = () => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
@@ -304,7 +295,6 @@ const Company = () => {
     setResultSource(e.map((data) => data.value));
   };
 
-
   const ParentCompany = () => {
     const result = [];
     allCompany?.map((data) => {
@@ -404,7 +394,7 @@ const Company = () => {
     });
     setSearch(filterdata);
   };
-  
+
   const handleSubmitDeleteSelect = async (e) => {
     e.preventDefault();
     const result = await Swal.fire({
@@ -449,95 +439,99 @@ const Company = () => {
 
   const searchCompany = async (term) => {
     try {
-      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/companies`, {
-        headers:{
-          Authorization :`Bearer ${token}`
-        },
-        params:{
-          search: term
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}/companies`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          params: {
+            search: term,
+          },
         }
-      })
-      setAllCompany(response.data.data)
-      setTotalRows(response.data.pagination.totalData)
+      );
+      setAllCompany(response.data.data);
+      setTotalRows(response.data.pagination.totalData);
     } catch (error) {
       if (error.response && error.response.data.message === "Unauthenticated") {
         localStorage.clear();
         window.location.href = "/login";
       }
-      if(error.response && error.response.status === 429){
+      if (error.response && error.response.status === 429) {
         const delay = Math.pow(2, pagination.page - 1) * 2000;
-        await new Promise(resolve => setTimeout(resolve, delay))
-        await searchCompany(term)
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        await searchCompany(term);
       }
-      if(error.response && error.response.data.message === 404){
-        await setAllCompany([])
-        await setTotalRows(0)
+      if (error.response && error.response.status === 404) {
+        await setAllCompany([]);
+        await setTotalRows(0);
       }
     }
-  }
+  };
   const [pending, setPending] = useState(true);
- 
+
   const fetchData = async () => {
-    try{
+    try {
       setPending(true);
-      if(search){
-        setPagination((prev) => ({...prev, page: 1}))
-       await searchCompany(search)
-      }else{
-        await getAllCompany()
+      if (search) {
+        setPagination((prev) => ({ ...prev, page: 1 }));
+        await searchCompany(search);
+      } else {
+        await getAllCompany(token, pagination, setTotalRows);
       }
       await getOwnerUser();
       await getSource();
       await getAlltypeCompany();
       await getAssociateContact();
-      await getDeals();
-    }catch(error) {
-      console.error('error in fetch data', error);
-    }finally{
-      setPending(false)
+    } catch (error) {
+      console.error("error in fetch data", error);
+    } finally {
+      setPending(false);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchData()
+    fetchData();
     const timout = setTimeout(() => {
       setPending(false);
     }, 2000);
-    return () => clearTimeout(timout);
+    return () => {
+      clearTimeout(timout);
+    }
   }, [token, search, pagination.page, pagination.limit]);
+  console.log(pagination);
 
   const handleChangePage = (page) => {
-    setPagination((e) => ({ ...e, page}))
-  }
-  
+    setPagination((prev) => ({ ...prev, page }));
+  };
+
   const handlePagePerChange = (pageSize, page) => {
-    setPagination((prev) => ({...prev, pageSize, page}))
-  }
+    setPagination((prev) => ({ ...prev, pageSize, page }));
+  };
 
   const debouncedHandleFilter = debounce((value) => {
-    setSearch(value.toLowerCase())
-  }, 1000)
-  
-  function handleSearch(e) {
-    const value = e.target.value.toLowerCase()
-    debouncedHandleFilter(value)
-  }
+    setSearch(value.toLowerCase());
+  }, 1000);
 
+  function handleSearch(e) {
+    const value = e.target.value.toLowerCase();
+    debouncedHandleFilter(value);
+  }
   const columns = [
     {
       id: 1,
       name: "Company Name",
       selector: (row) => (
-        <div className="image-name">
+        <a href={`/company/${row.uid}/edit`} className="image-name text-decoration-none">
           <div className="d-flex align-items-center">
             <img src={IconCompany} style={{ width: "20px" }} />
             <div className="mt-1">
-              <span className="fw-semibold" style={{ whiteSpace: "normal" }}>
+              <span className="fw-semibold" style={{ whiteSpace: "normal", color: "black" }}>
                 {row.name}
               </span>
             </div>
           </div>
-        </div>
+        </a>
       ),
       left: true,
       width: "160px",
@@ -549,33 +543,43 @@ const Company = () => {
       selector: (row) => (
         <div className="d-flex">
           {row?.associate?.slice(0, 3).map((item, index) => (
-            <OverlayTrigger
-              placement="top"
-              overlay={
-                <Tooltip
-                  id={`tooltip-${item?.contact?.name}- ${item?.contact?.phone?.[0]?.number}`}
-                >
-                  {item?.contact?.name ? item?.contact?.name : null}
-                  {item?.deals?.deal_name ? item?.deals?.deal_name : null}
-                  <br />
-                  {item?.deals?.deal_size
-                    ? `Rp. ${new Intl.NumberFormat().format(
-                        item?.deals?.deal_size
-                      )}`
-                    : null}
-                  {item?.contact?.phone?.[0]?.number}
-                </Tooltip>
-              }
-            >
-              <div>
-                {item?.contact ? (
-                  <img
-                    className="ms-1"
-                    src={phone}
-                    style={{ width: "18px" }}
-                    data-tip={item?.contact?.name}
-                  />
-                ) : null}
+            <div key={index} className="d-flex">
+              <OverlayTrigger
+                placement="top"
+                overlay={
+                  <Tooltip>
+                    {item?.contact?.name ?? null}
+                    <br />
+                    {item?.contact?.phone?.[0]?.number}
+                  </Tooltip>
+                }
+              >
+                <div>
+                  {item?.contact ? (
+                    <img
+                      className="ms-1"
+                      src={phone}
+                      style={{ width: "18px" }}
+                      data-tip={item?.contact?.name}
+                    />
+                  ) : null}
+                </div>
+              </OverlayTrigger>
+              <OverlayTrigger
+                placement="top"
+                overlay={
+                  <Tooltip>
+                    {item?.deals?.deal_name ?? null}
+                    <br />
+                    {item?.deals?.deal_size
+                      ? `Rp. ${new Intl.NumberFormat().format(
+                          item?.deals?.deal_size
+                        )}`
+                      : null}
+                  </Tooltip>
+                }
+              >
+                <div>
                 {item?.deals ? (
                   <img
                     className="ms-1"
@@ -584,8 +588,9 @@ const Company = () => {
                     data-tip={item?.deals?.dealName}
                   />
                 ) : null}
-              </div>
-            </OverlayTrigger>
+                </div>
+              </OverlayTrigger>
+            </div>
           ))}
         </div>
       ),
@@ -596,7 +601,7 @@ const Company = () => {
       id: 3,
       name: "Type",
       selector: (row) => (
-        <div className="badge bg-secondary">{row?.company_type?.name}</div>
+        <div className="badge bg-primary">{row?.company_type?.name}</div>
       ),
       sortable: true,
     },
@@ -1005,9 +1010,6 @@ const Company = () => {
                     defaultSortFieldId={1}
                     pagination
                     paginationServer
-                    paginationComponentOptions={{
-                      noRowsPerPage : true
-                    }}
                     paginationPerPage={pagination.limit}
                     onChangePage={handleChangePage}
                     onChangeRowsPerPage={handlePagePerChange}
@@ -1015,6 +1017,9 @@ const Company = () => {
                     selectableRows
                     onSelectedRowsChange={selectUid}
                     progressPending={pending}
+                    paginationComponentOptions={{
+                      noRowsPerPage: true,
+                    }}
                   />
                 </div>
               </div>

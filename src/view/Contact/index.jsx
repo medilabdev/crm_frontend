@@ -87,21 +87,7 @@ const Contact = () => {
       });
   };
 
-  // const getDeals = (token) => {
-  //   axios
-  //     .get(`${process.env.REACT_APP_BACKEND_URL}/deals`, {
-  //       headers: {
-  //         Authorization: `Bearer ${token}`,
-  //       },
-  //     })
-  //     .then((res) => setDeals(res.data.data))
-  //     .catch((err) => {
-  //       if (err.response.data.message === "Unauthenticated") {
-  //         localStorage.clear();
-  //         window.location.href = "/login";
-  //       }
-  //     });
-  // };
+ 
   const getAssociateCompany = (token) => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/associate`, {
@@ -145,7 +131,6 @@ const Contact = () => {
           limit: pagination.limit,
         },
       });
-  
       state(response.data.data);
       setTotalRows(response.data.pagination.totalData);
     } catch (error) {
@@ -330,7 +315,6 @@ const Contact = () => {
 
 useEffect(() => {
   fetchData();
-
   const timeoutId = setTimeout(() => {
     setPending(false);
   }, 2500);
@@ -361,27 +345,28 @@ useEffect(() => {
     {
       name: "Name",
       selector: (row) => (
-        <div className="image-name">
+        <a href={`/contact/${row.uid}/edit`} className="image-name text-decoration-none ">
           <div className="d-flex align-items-center">
             <img src={IconImage} className="rounded-circle" />
             <div className="mt-3">
-              <span className="fw-semibold" style={{ whiteSpace: "normal" }}>
+              <span className="fw-semibold" style={{ whiteSpace: "normal", color:'black' }}>
                 {row.name}
               </span>
               <p
                 className="mt-1"
                 style={{
                   fontSize: "11px",
+                  color:"#163020"
                 }}
               >
                 {row.position}
               </p>
             </div>
           </div>
-        </div>
+        </a>
       ),
       left: true,
-      width: "150px",
+      width: "160px",
     },
     {
       name: "Contact Info",
@@ -396,18 +381,13 @@ useEffect(() => {
       selector: (row) => (
         <div className="d-flex">
           {row?.associate?.slice(0, 3).map((item, index) => (
+            <div key={index} className="d-flex">
             <OverlayTrigger
               placement="top"
               overlay={
-                <Tooltip id={`tooltip-${item?.company?.name}`}>
+                <Tooltip>
                   {item?.company?.name ? item?.company?.name : null}
-                  {item?.deals?.deal_name ? item?.deals?.deal_name : null}
-                  <br />
-                  {item?.deals?.deal_size
-                    ? `Rp. ${new Intl.NumberFormat().format(
-                        item?.deals?.deal_size
-                      )}`
-                    : null}
+             
                 </Tooltip>
               }
             >
@@ -420,7 +400,20 @@ useEffect(() => {
                     data-tip={item?.company?.name}
                   />
                 ) : null}
-                {item?.deals ? (
+              
+              </div>
+            </OverlayTrigger>
+            <OverlayTrigger placement="top" overlay={<Tooltip>
+              {item?.deals?.deal_name ?? null}
+                  <br />
+                  {item?.deals?.deal_size
+                    ? `Rp. ${new Intl.NumberFormat().format(
+                        item?.deals?.deal_size
+                      )}`
+                    : null}
+            </Tooltip>}>
+                  <div>
+                  {item?.deals ? (
                   <img
                     className="ms-1"
                     src={IconMoney}
@@ -428,8 +421,9 @@ useEffect(() => {
                     data-tip={item?.deals?.dealName}
                   />
                 ) : null}
-              </div>
+                  </div>
             </OverlayTrigger>
+            </div>
           ))}
         </div>
       ),

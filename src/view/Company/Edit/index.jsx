@@ -51,47 +51,71 @@ const EditCompany = () => {
   // console.log(oldAssociate);
   const getDeals = () => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/deals?limit=10`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/deals/form/select`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
       .then((res) => setDeals(res.data.data))
-      .catch((err) => {
+      .catch(async (err) => {
         if (err.response.data.message === "Unauthenticated.") {
           localStorage.clear();
           window.location.href = "/login";
+        }
+        if(err.response && err.response.status === 404){
+          setDeals([])
+        }
+        if(err.response && err.response.status === 429){
+          const delay = Math.pow(2, 0) * 1000;
+          await new Promise((resolve) => setTimeout(resolve, delay))
+          await getDeals()
         }
       });
   };
   const getContact = () => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/contacts?limit=10`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/contacts/form/select`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
       .then((res) => setContact(res.data.data))
-      .catch((err) => {
-        if (err.response.data.message === "Unauthenticated.") {
+      .catch(async(err) => {
+        if (err.response && err.response.data.message === "Unauthenticated.") {
           localStorage.clear();
           window.location.href = "/login";
+        }
+        if(err.response && err.response.status === 404){
+          setContact([])
+        }
+        if(err.response && err.response.status === 429){
+          const delay = Math.pow(2, 0) * 1000;
+          await new Promise((resolve) => setTimeout(resolve, delay))
+          await getContact()
         }
       });
   };
 
   const getCompanyParent = () => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/companies?limit=10`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/companies/form/select`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
       .then((res) => setParentCompany(res.data.data))
-      .catch((err) => {
+      .catch(async(err) => {
         if (err.response.data.message === "Unauthenticated.") {
           localStorage.clear();
           window.location.href = "/login";
+        }
+        if(err.response && err.response.status === 404){
+          setParentCompany([])
+        }
+        if(err.response && err.response.status === 429){
+          const delay = Math.pow(2, 0) * 1000;
+          await new Promise((resolve) => setTimeout(resolve, delay))
+          await getCompanyParent()
         }
       });
   };
@@ -352,9 +376,9 @@ const EditCompany = () => {
     }
     formData.append("_method", "put");
     console.log("FormData Content:");
-    for (const pair of formData.entries()) {
-      console.log(pair[0] + ": " + pair[1]);
-    }
+    // for (const pair of formData.entries()) {
+    //   console.log(pair[0] + ": " + pair[1]);
+    // }
     try {
       const update = await axios
         .post(
@@ -618,7 +642,7 @@ const EditCompany = () => {
                         placeholder="Select Owner"
                       />
                     </Form.Group>
-                    {telephone.map((tel, index) => (
+                    {telephone?.map((tel, index) => (
                       <div key={index}>
                         <Form.Group className="mb-3">
                           <Form.Label>
@@ -935,7 +959,7 @@ const EditCompany = () => {
                                           marginTop: "-8px",
                                         }}
                                       >
-                                        {data?.contact?.phone[0]?.number ?? "-"}
+                                        {data?.contact?.phone?.[0]?.number ?? "-"}
                                       </strong>
                                     </p>
                                     <p
@@ -1039,7 +1063,7 @@ const EditCompany = () => {
                                   No.Telp : <br />
                                   <strong className="mt-1">
 
-                                    {oldParentCompany?.phone[0]?.number || "-"}
+                                    {oldParentCompany?.phone?.[0]?.number || "-"}
                                   </strong>
                                 </p>
                           </Col>
@@ -1053,7 +1077,7 @@ const EditCompany = () => {
                       </div>
                     </Card>) : (   <Form.Group className="mb-3">
                       <Select options={selectComp()} onChange={(e) => {
-                          const parentUid = e.  value;
+                          const parentUid = e.value;
                           setEditCompany({
                             ...editCompany,
                             parent_company_uid: parentUid,
