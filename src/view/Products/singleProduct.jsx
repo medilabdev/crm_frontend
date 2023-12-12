@@ -89,7 +89,7 @@ const SingleProduct = () => {
   
   const [totalRows, setTotalRows] = useState(0)
 
-  const getProduct = async () => {
+  const getProduct = async (token, term, retryCount = 0 ) => {
     try {
       const response =await axios.get(`${process.env.REACT_APP_BACKEND_URL}/products`, {
         headers:{
@@ -97,7 +97,8 @@ const SingleProduct = () => {
         },
         params:{
           page:pagination.page,
-          limit: pagination.limit
+          limit: pagination.limit,
+          search: term
         }
       })
       setProduct(response.data.data);
@@ -108,59 +109,28 @@ const SingleProduct = () => {
         window.location.href = "/login";
       }
       if(error.response && error.response.status === 429){
-        const delay = Math.pow(2, pagination.page - 1) * 2000;
+        const delay = Math.pow(2, retryCount) * 2000;
         await new Promise(resolve => setTimeout(resolve, delay))
-        await getProduct()
+        await getProduct(retryCount + 1)
+      }
+      if(error.response && error.response.status === 404){
+        setProduct([])
+        setTotalRows(0)
       }
     }
   };
 
-  const searchProduct = async (term) => {
-    try {
-      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/products`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
-        params: {
-          search: term
-        }
-      })
-      setProduct(response.data.data)
-      setTotalRows(response.data.pagination.totalData)
-    } catch (error) {
-      if (error.response.data.message === "Unauthenticated") {
-        localStorage.clear();
-        window.location.href = "/login";
-      }
-      if(error.response && error.response.status === 429){
-        const delay = Math.pow(2, pagination.page - 1) * 2000;
-        await new Promise(resolve => setTimeout(resolve, delay))
-        await searchProduct()
-      }
-      if(error.response && error.response.status === 404){
-        await setProduct([])
-        await setTotalRows(0)
-      }
-    }
-  }
-
   const [pending, setPending] = useState(true)
   
-    console.log(pagination);
   useEffect(() => {
       setPending(true)
-      if(search){
-        setPagination((prev) => ({ ...prev, page: 1}))
-        searchProduct(search)
-      }else{
-        getProduct();
-      }
+        getProduct(token, search);
       setPending(false)
     const timeOut = setTimeout(() => {
       setPending(false)
     }, 2500)
     return () => clearTimeout(timeOut)
-  }, [token, search]);
+  }, [token, search, pagination.page, pagination.limit]);
 
   const handleChangePage = (page) => {
     setPagination((prev) => ({...prev, page}))

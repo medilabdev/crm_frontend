@@ -75,18 +75,23 @@ const EditPackageProduct = () => {
         }
       });
   };
-  const getProduct = () => {
+  const getProduct = (retryCount = 0) => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/products?limit=10`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/products/form/select`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
       .then((res) => setDataProduct(res.data.data))
-      .catch((error) => {
+      .catch(async(error) => {
         if (error.response.data.message === "Unauthenticated.") {
           localStorage.clear();
           window.location.href = "/login";
+        }
+        if(error.response && error.response.status === 429 && retryCount < 3){
+          const delay = Math.pow(2, retryCount) * 2000;
+        await new Promise(resolve => setTimeout(resolve, delay))
+        await getProduct(retryCount + 1)
         }
       });
   };

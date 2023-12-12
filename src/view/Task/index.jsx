@@ -39,7 +39,7 @@ const Task = () => {
   });
   const [totalRows, setTotalRows] = useState(0);
 
-  const getTask = async() => {
+  const getTask = async(token, term, retryCount = 0) => {
     try { 
       const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/tasks`, {
         headers:{
@@ -47,7 +47,8 @@ const Task = () => {
         },
         params: {
           page: pagination.page,
-          limit: pagination.limit
+          limit: pagination.limit,
+          search: term
         }
       })
       setTask(response.data.data)
@@ -57,45 +58,20 @@ const Task = () => {
         localStorage.clear();
         window.location.href = "/login";
       }
-      if(error.response && error.response.status === 429){
-        const delay = Math.pow(2, pagination.page - 1) * 2000;
+      if(error.response && error.response.status === 429 && retryCount < 3){
+        const delay = Math.pow(2, retryCount) * 2000;
         await new Promise(resolve => setTimeout(resolve, delay))
-        await getTask()
+        await getTask(retryCount + 1)
+      }
+      if(error.response && error.response.status === 404){
+        setTask([])
+        setTotalRows(0)
       }
     }
   };
 
 
-  const searchTask = async (term) => {
-    try {
-      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/tasks`, {
-        headers:{
-          Authorization:`Bearer ${token}`
-        },
-        params:{
-          search: term
-        }
-      })
-      setTask(response.data.data)
-      setTotalRows(response.data.pagination.totalData)
-    } catch (error) {
-      if (error.response && error.response.data.message === "Unauthenticated.") {
-        localStorage.clear();
-        window.location.href = "/login";
-      }
-      if(error.response && error.response.status === 429){
-        const delay = Math.pow(2, pagination.page - 1) * 2000
-        await new Promise(resolve => setTimeout(resolve, delay))
-        await searchTask(term)
-      }
-      if(error.response && error.response.data.message === 404){
-        await setTask([])
-        await setTotalRows(0)
-      }
-    }
-  }
-
-  const getStatus = (token) => {
+  const getStatus = (token, retryCount = 0) => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/statuses`, {
         headers: {
@@ -103,15 +79,20 @@ const Task = () => {
         },
       })
       .then((res) => setStatus(res.data.data))
-      .catch((err) => {
+      .catch(async(err) => {
         if (err.response.data.message === "Unauthenticated") {
           localStorage.clear();
           window.location.href = "/login";
         }
+        if(err.response && err.response.status && retryCount < 3){
+          const delay = Math.pow(2, retryCount) * 2000;
+        await new Promise(resolve => setTimeout(resolve, delay))
+        await getStatus(retryCount + 1)
+        }
       });
   };
 
-  const getOwner = (token) => {
+  const getOwner = (token, retryCount = 0) => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
         headers: {
@@ -119,58 +100,78 @@ const Task = () => {
         },
       })
       .then((res) => setOwner(res.data.data))
-      .catch((err) => {
+      .catch(async(err) => {
         if (err.response.data.message === "Unauthenticated") {
           localStorage.clear();
           window.location.href = "/login";
         }
+        if(err.response && err.response.status === 429 && retryCount < 3){
+          const delay = Math.pow(2, retryCount) * 2000;
+        await new Promise(resolve => setTimeout(resolve, delay))
+        await getOwner(retryCount + 1)
+        }
       });
   };
 
-  const getCompany = (token) => {
+  const getCompany = (token, retryCount = 0) => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/companies`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/companies/form/select`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
       .then((res) => setCompany(res.data.data))
-      .catch((err) => {
+      .catch(async(err) => {
         if (err.response.data.message === "Unauthenticated.") {
           localStorage.clear();
           window.location.href = "/login";
         }
+        if(err.response && err.response.status === 429 && retryCount < 3){
+          const delay = Math.pow(2, retryCount) * 2000;
+        await new Promise(resolve => setTimeout(resolve, delay))
+        await getCompany(retryCount + 1)
+        }
       });
   };
 
-  const getContact = (token) => {
+  const getContact = (token, retryCount = 0) => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/contacts`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/contacts/form/select`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
       .then((res) => setContact(res.data.data))
-      .catch((err) => {
+      .catch(async(err) => {
         if (err.response.data.message === "Unauthenticated.") {
           localStorage.clear();
           window.location.href = "/login";
         }
+        if(err.response && err.response.status === 429 && retryCount < 3){
+          const delay = Math.pow(2, retryCount) * 2000;
+          await new Promise(resolve => setTimeout(resolve, delay))
+          await getContact(retryCount + 1)
+        }
       });
   };
   
-  const getDeals = (token) => {
+  const getDeals = (token, retryCount = 0) => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/deals`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/deals/form/select`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
       .then((res) => setDeals(res.data.data))
-      .catch((err) => {
+      .catch(async(err) => {
         if (err.response.data.message === "Unauthenticated.") {
           localStorage.clear();
           window.location.href = "/login";
+        }
+        if(err.response && err.response.status === 429 && retryCount < 3){
+          const delay = Math.pow(2, retryCount) * 2000;
+          await new Promise(resolve => setTimeout(resolve, delay))
+          await getDeals(retryCount + 1)
         }
       });
   };
@@ -239,13 +240,7 @@ const Task = () => {
   const fetchData = async () => {
     try {
       setPending(true)
-
-      if(search){
-        setPagination((prev) => ({ ...prev, page: 1 }))
-        await searchTask(search)
-      }else{
-        await getTask(token, pagination, setTotalRows)
-      }
+      await getTask(token, search)
       await getOwner(token)
       await getCompany(token)
       await getContact(token)

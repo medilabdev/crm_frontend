@@ -39,22 +39,17 @@ const Deals = () => {
     limit: 10
   })
   const [totalRows, setTotalRows] = useState(0)
-
+  const MAX_RETRIES = 3;
   const fetchData = async () => {
     try {
       setPending(true)
-      if(search){
-        setPagination((prev) => ({ ...prev, page: 1}))
-        await searchDeals(search)
-      }else{
-        await getDeals()
-      }
+      await getDeals(token, search)
       await getOwnerUser()
       await getStage();
       await getPriority();
       await getCompany();
       await getContact()
-      await getProduct()
+      // await getProduct()
       await getPackage()
     } catch (error) {
       console.error('error in fetch data', error);
@@ -97,100 +92,124 @@ const Deals = () => {
   //     });
   // };
 
-  const getProduct = () => {
-    axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/products?limit=10`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => setProduct(res.data.data))
-      .catch((err) => {
-        if (err.response.data.message === "Unauthenticated.") {
-          localStorage.clear();
-          window.location.href = "/login";
-        }
-      });
-  };
+  // const getProduct = () => {
+  //   axios
+  //     .get(`${process.env.REACT_APP_BACKEND_URL}/products?limit=10`, {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //     })
+  //     .then((res) => setProduct(res.data.data))
+  //     .catch((err) => {
+  //       if (err.response.data.message === "Unauthenticated.") {
+  //         localStorage.clear();
+  //         window.location.href = "/login";
+  //       }
+  //     });
+  // };
   
-  const getContact = () => {
-    axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/contacts/form/select`, {
+  const getContact = async(retryCount = 0) => {
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/contacts/form/select`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((res) => setContact(res.data.data))
-      .catch((err) => {
-        if (err.response.data.message === "Unauthenticated.") {
-          localStorage.clear();
-          window.location.href = "/login";
-        }
-      });
+      setContact(response.data.data)
+    } catch (error) {
+      if (error.response && error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      if(error.response && error.response.status === 429 && retryCount < MAX_RETRIES){
+        const delay = Math.pow(2, retryCount) * 2000;
+        await new Promise((resolve) => setTimeout(resolve, delay))
+        await getContact(retryCount + 1)
+      }
+    }
   };
 
-  const getCompany = () => {
-    axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/companies/form/select`, {
+  const getCompany = async(retryCount = 0) => {
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/companies/form/select`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((res) => setCompany(res.data.data))
-      .catch((err) => {
-        if (err.response.data.message === "Unauthenticated.") {
-          localStorage.clear();
-          window.location.href = "/login";
-        }
-      });
+      setCompany(response.data.data)
+    } catch (error) {
+      if (error.response && error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      if(error.response && error.response.status === 429 && retryCount < MAX_RETRIES){
+        const delay = Math.pow(2, retryCount) * 2000;
+        await new Promise((resolve) => setTimeout(resolve, delay))
+        await getCompany(retryCount + 1)
+      }
+    }
   };
 
-  const getStage = () => {
-    axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/staging-masters`, {
+  const getStage = async(retryCount = 0) => {
+    try {
+      const response = await  axios.get(`${process.env.REACT_APP_BACKEND_URL}/staging-masters`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((res) => setStage(res.data.data))
-      .catch((err) => {
-        if (err.response.data.message === "Unauthenticated.") {
-          localStorage.clear();
-          window.location.href = "/login";
-        }
-      });
+      setStage(response.data.data)
+    } catch (error) {
+      if (error.response && error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      if(error.response && error.response.status === 429 && retryCount < MAX_RETRIES){
+        const delay = Math.pow(2, retryCount) * 3000;
+        await new Promise((resolve) => setTimeout(resolve, delay))
+        await getStage(retryCount + 1)
+      }
+    }
   };
 
-  const getOwnerUser = () => {
-    axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
+  const getOwnerUser = async(retryCount = 0) => {
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((res) => setOwner(res.data.data))
-      .catch((err) => {
-        if (err.response.data.message === "Unauthenticated.") {
-          localStorage.clear();
-          window.location.href = "/login";
-        }
-      });
+    } catch (error) {
+      if (error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      if(error.response && error.response.status === 429 && retryCount < MAX_RETRIES){
+        const delay = Math.pow(2, retryCount) * 2000;
+        await new Promise((resolve) => setTimeout(resolve, delay))
+        await getOwnerUser(retryCount + 1)
+      }
+    }
   };
 
-  const getPriority = () => {
-    axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/priorities`, {
+  const getPriority = async(retryCount = 0) => {
+    try {
+      const response = await  axios.get(`${process.env.REACT_APP_BACKEND_URL}/priorities`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((res) => setPriority(res.data.data))
-      .catch((err) => {
-        if (err.response.data.message === "Unauthenticated.") {
-          localStorage.clear();
-          window.location.href = "/login";
-        }
-      });
+      setPriority(response.data.data)
+    } catch (error) {
+      if (error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      if(error.response && error.response.status === 429 && retryCount < MAX_RETRIES){
+        const delay = Math.pow(2, retryCount) * 2000;
+        await new Promise((resolve) => setTimeout(resolve, delay))
+        await getPriority(retryCount + 1)
+      }
+    }
   };
 
   const selectUidDataTable = (e) => {
@@ -198,7 +217,7 @@ const Deals = () => {
     setSelectUid(select);
   };
 
-  const getDeals = async () => {
+  const getDeals = async (token, term, retryCount = 0) => {
     try {
       const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/deals`, {
         headers: {
@@ -206,7 +225,8 @@ const Deals = () => {
         },
         params: {
           page: pagination.page,
-          limit: pagination.limit
+          limit: pagination.limit,
+          search: term
         }
       })
       setDataDeals(response.data.data)
@@ -216,10 +236,14 @@ const Deals = () => {
         localStorage.clear();
         window.location.href = "/login";
       }
-      if(error.response && error.response.status === 429){
-        const delay = Math.pow(2, pagination.page - 1) * 2000;
+      if(error.response && error.response.status === 429 && retryCount < MAX_RETRIES){
+        const delay = Math.pow(2, retryCount) * 2000;
         await new Promise(resolve => setTimeout(resolve, delay))
-        await getDeals()
+        await getDeals(retryCount + 1)
+      }
+      if(error.response && error.response.status === 404){
+        setDataDeals([])
+        setTotalRows(0)
       }
     }
   };
@@ -357,17 +381,17 @@ const Deals = () => {
     return res;
   };
 
-  const selectProduct = () => {
-    const res = [];
-    product?.map((data) => {
-      const theme = {
-        value: data.uid,
-        label: data.name,
-      };
-      res.push(theme);
-    });
-    return res;
-  };
+  // const selectProduct = () => {
+  //   const res = [];
+  //   product?.map((data) => {
+  //     const theme = {
+  //       value: data.uid,
+  //       label: data.name,
+  //     };
+  //     res.push(theme);
+  //   });
+  //   return res;
+  // };
 
   const selectPackageProduct = () => {
     const res = [];
@@ -381,34 +405,6 @@ const Deals = () => {
     return res;
   };
 
-  const searchDeals = async (term) => {
-    try {
-       const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/deals`, {
-        headers: {
-          Authorization : `Bearer ${token}`
-        },
-        params: {
-          search: term
-        }
-       })
-       setDataDeals(response.data.data)
-       setTotalRows(response.data.pagination.totalData)
-    } catch (error) {
-      if (error.response && error.response.data.message === "Unauthenticated") {
-        localStorage.clear();
-        window.location.href = "/login";
-      }
-      if(error.response && error.response.status === 429){
-        const delay = Math.pow(2, pagination.page - 1) * 2000;
-        await new Promise(resolve => setTimeout(resolve, delay))
-        await searchDeals(term)
-      }
-      if(error.response && error.response.data.message === 404){
-        await setDataDeals([])
-        await setTotalRows(0)
-      }
-    }
-  }
 
   const [pending, setPending] = useState(true)
 
@@ -443,14 +439,14 @@ const Deals = () => {
     setSearchContact(result);
   };
   
-  const handleSelectProduct = (e) => {
-    const valCont = e.map((data) => data.value)
-    const result = valCont.reduce((acc, value) => acc.concat(value), [])
-    setSearchProduct(result);
-  };
-  const handleSelectPackageProduct = (e) => {
-    setSearchPackageProduct(e.map((data) => data.value));
-  };
+  // const handleSelectProduct = (e) => {
+  //   const valCont = e.map((data) => data.value)
+  //   const result = valCont.reduce((acc, value) => acc.concat(value), [])
+  //   setSearchProduct(result);
+  // };
+  // const handleSelectPackageProduct = (e) => {
+  //   setSearchPackageProduct(e.map((data) => data.value));
+  // };
   const handleSelectPriority = (e) => {
     setSearchPriority(e.map((data) => data.value));
   };

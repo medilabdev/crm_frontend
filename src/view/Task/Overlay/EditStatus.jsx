@@ -10,7 +10,7 @@ const EditStatus = ({ visible, uid, onClose }) => {
   const [status, setStatus] = useState([]);
   const [input, setInput] = useState({});
 
-  const getStatus = async () => {
+  const getStatus = async (retryCount = 0) => {
     try {
       const response = await axios.get(
         `${process.env.REACT_APP_BACKEND_URL}/statuses`,
@@ -22,13 +22,14 @@ const EditStatus = ({ visible, uid, onClose }) => {
       );
       setStatus(response.data.data);
     } catch (error) {
-      if (
-        error.response.data.message === "Unauthenticated"
-      ) {
+      if (error.response.data.message === "Unauthenticated") {
         localStorage.clear();
         window.location.href = "/login";
-      } else {
-        console.error("Error fetching status:", error);
+      }
+      if (error.response && error.response.status === 429 && retryCount < 3) {
+        const delay = Math.pow(2, retryCount) * 2000;
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        await getStatus(retryCount + 1);
       }
     }
   };

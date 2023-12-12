@@ -7,7 +7,9 @@ function Sidebar() {
   const role = localStorage.getItem("role");
   const [accessUser, setAccessUser] = useState([]);
 
-  const getAccess = async () => {
+
+  const MAX_RETRIES = 3;
+  const getAccess = async (retryCount = 0) => {
     try{
       const response = await axios
       .get(
@@ -25,8 +27,11 @@ function Sidebar() {
       ) {
         localStorage.clear();
         window.location.href = "/login";
-      } else {
-        console.error("Error fetching status:", error);
+      } 
+      if(error.response && error.response.status === 429 && retryCount < MAX_RETRIES){
+        const delay = Math.pow(2, retryCount) * 2000;
+          await new Promise((resolve) => setTimeout(resolve, delay))
+          await getAccess(retryCount + 1)
       }
     }
   };
