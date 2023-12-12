@@ -136,7 +136,7 @@ const DatatableTask = ({ data, selectUidDataTable, pending, handleChangePage, ha
               <Tooltip>
                 {row?.contact?.name ?? null}
                 <br />
-                {row?.contact.phone[0]?.number}
+                {row?.contact?.phone?.[0]?.number}
               </Tooltip>
             }
           >
@@ -235,17 +235,17 @@ const DatatableTask = ({ data, selectUidDataTable, pending, handleChangePage, ha
         data={data}
         defaultSortFieldId={1}
         pagination
-        paginationComponentOptions={{
-          noRowsPerPage: true
-        }}
         paginationServer
+        selectableRows
+        onSelectedRowsChange={selectUidDataTable}
         onChangePage={handleChangePage}
         paginationPerPage={PaginationLimit}
         onChangeRowsPerPage={handlePagePerChange}
         paginationTotalRows={totalRows}
-        selectableRows
-        onSelectedRowsChange={selectUidDataTable}
         progressPending={pending}
+        paginationComponentOptions={{
+          noRowsPerPage: true
+        }}
       />
       <EditTask
         onClose={handleCloseEdit}

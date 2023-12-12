@@ -75,7 +75,7 @@ const AddProductOverlay = ({ visible, onClose, onSaveData }) => {
 
   const getPackageProduct = () => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/packages-product`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/packages-product/form/select`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -90,7 +90,7 @@ const AddProductOverlay = ({ visible, onClose, onSaveData }) => {
   };
   const getProduct = () => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/products`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/products/form/select`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

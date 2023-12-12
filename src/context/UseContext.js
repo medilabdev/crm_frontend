@@ -1,7 +1,7 @@
 import axios from "axios";
 // ini khusus get
 
-export  const getPackageProduct =async (token) => {
+export const getPackageProduct =async (token) => {
    const datas = axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/packages-product`, {
         headers: {

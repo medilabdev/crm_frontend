@@ -20,16 +20,24 @@ const BulkChangeCompany = () => {
 
   const getCompanyTransfer = () => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/companies?limit=10`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/companies/form/select`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
       .then((res) => setBulkCompany(res.data.data))
-      .catch((err) => {
-        if (err.response.data.message === "Unauthenticated.") {
+      .catch(async (err) => {
+        if (err.response && err.response.data.message === "Unauthenticated.") {
           localStorage.clear();
           window.location.href = "/login";
+        }
+        if(err.response && err.response.status === 404){
+          setBulkCompany([])
+        }
+        if(err.response && err.response.status === 429){
+          const delay = Math.pow(2, 0) * 1000;
+          await new Promise((resolve) => setTimeout(resolve, delay))
+          await getCompanyTransfer()
         }
       });
   };
@@ -119,7 +127,11 @@ const BulkChangeCompany = () => {
         title: bulk.data.message,
         text: "Successfully bulk change",
         icon: "success",  
-      });
+      }).then((res) => {
+        if(res.isConfirmed){
+          window.location.href = "/company"
+        }
+      })
     } catch (error) {
       // console.log(error);
       if (error.response) {

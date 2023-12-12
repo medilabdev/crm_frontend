@@ -37,7 +37,6 @@ const Task = () => {
     page: 1,
     limit: 10,
   });
-
   const [totalRows, setTotalRows] = useState(0);
 
   const getTask = async() => {
@@ -143,6 +142,7 @@ const Task = () => {
         }
       });
   };
+
   const getContact = (token) => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/contacts`, {
@@ -158,6 +158,7 @@ const Task = () => {
         }
       });
   };
+  
   const getDeals = (token) => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/deals`, {
@@ -238,11 +239,12 @@ const Task = () => {
   const fetchData = async () => {
     try {
       setPending(true)
+
       if(search){
-        setPagination((prev) => ({ ...prev, page: 1}))
+        setPagination((prev) => ({ ...prev, page: 1 }))
         await searchTask(search)
       }else{
-        await getTask()
+        await getTask(token, pagination, setTotalRows)
       }
       await getOwner(token)
       await getCompany(token)
@@ -258,12 +260,14 @@ const Task = () => {
 
 
   useEffect(() => {
-    fetchData()
-    const timeOut = setTimeout(() => {
-      setPending(false)
-    }, 4000)
-    return () => clearTimeout(timeOut)
-  }, [token, search, pagination.page, pagination.limit]);
+    fetchData();
+    const pendingTimeoutId = setTimeout(() => {
+      setPending(false);
+    }, 4000);
+    return () => {
+      clearTimeout(pendingTimeoutId);
+    };
+  }, [token, search, pagination.page, pagination.limit ]);
 
   const selectUidDataTable = (e) => {
     const select = e.selectedRows.map((row) => row.uid);
@@ -365,12 +369,13 @@ const Task = () => {
   };
 
   const handleChangePage = (page) => {
-    setPagination((e) => ({ ...e, page }));
+    setPagination((prev) => ({ ...prev, page }));
   };
+  
   const handlePagePerChange = (pageSize, page) => {
-    setPagination((prev) => ({ ...prev, pageSize, page }));
+    setPagination((prev) => ({ ...prev, limit: pageSize, page }));
   };
-
+  
   const dobounceHandleFilter = debounce((value) => {
     setSearch(value.toLowerCase())
   }, 1000)

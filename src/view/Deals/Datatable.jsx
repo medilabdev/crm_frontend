@@ -15,12 +15,11 @@ const DataTableComponet = ({ data, selectUidDataTable, pending, paginationPerPag
   const columns = [
     {
       name: "Name",
-      selector: (row) => row.deal_name,
       cell: (row) => (
-        <div style={{ whiteSpace: "normal" }}>{row.deal_name}</div>
+        <a href={`deals/${row.uid}/edit`} className="text-decoration-none" style={{ whiteSpace: "normal", color:"black", fontWeight:"600" }}>{row.deal_name}</a>
       ),
       sortable: true,
-      width: "130px",
+      width: "150px",
     },
     {
       name: "Stage",
@@ -69,7 +68,7 @@ const DataTableComponet = ({ data, selectUidDataTable, pending, paginationPerPag
             </OverlayTrigger>
           ) : null}
           {row.contact_person
-            ? row.contact_person.slice(0, 2).map((item, index) => (
+            ? row.contact_person.slice(0, 4).map((item, index) => (
                 <OverlayTrigger
                   key={index}
                   placement="top"

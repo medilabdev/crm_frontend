@@ -56,52 +56,79 @@ const SingleCompany = () => {
   const handleCloseContact = () => setShowAddContact(false);
   const handleShowContact = () => setShowAddContact(true);
 
-  const getDeals = () => {
-    axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/deals?page=1&limit=10`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => setDeals(res.data.data))
-      .catch((err) => {
-        if (err.response.data.message === "Unauthenticated.") {
-          localStorage.clear();
-          window.location.href = "/login";
+  const getDeals = async (term) => {
+    try {
+      const respon = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}/deals/form/select`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-      });
-  };
-  // console.log(inputCompany);
-  const getContact = () => {
-    axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/contacts?page=1&limit=10`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => setContact(res.data.data))
-      .catch((err) => {
-        if (err.response.data.message === "Unauthenticated.") {
-          localStorage.clear();
-          window.location.href = "/login";
-        }
-      });
+      );
+      setDeals(respon.data.data);
+    } catch (error) {
+      if (error.respon && error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      if (error.respon && error.respon.status === 404) {
+        await setDeals([]);
+      }
+      if (error.respon && error.respon.status === 429) {
+        const delay = Math.pow(2, 0) * 1000;
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        await getDeals(term);
+      }
+    }
   };
 
-  const getCompanyParent = () => {
-    axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/companies`, {
+  const getContact = async (term) => {
+    try {
+      const respon = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/contacts/form/select`, {
+        headers:{
+          Authorization: `Bearer ${token}`
+        },
+      })
+      setContact(respon.data.data)
+    } catch (error) {
+      if (error.respon && error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      if (error.respon && error.respon.status === 404) {
+        await setContact([]);
+      }
+      if (error.respon && error.respon.status === 429) {
+        const delay = Math.pow(2, 0) * 1000;
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        await getContact(term);
+      }
+    }
+  };
+
+  const getCompanyParent = async(term) => {
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/companies/form/select`,{
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((res) => setParentCompany(res.data.data))
-      .catch((err) => {
-        if (err.response.data.message === "Unauthenticated.") {
-          localStorage.clear();
-          window.location.href = "/login";
-        }
-      });
+      setParentCompany(response.data.data)
+    } catch (error) {
+      if (error.response && error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      if (error.response && error.respon.status === 404) {
+        await setParentCompany([]);
+      }
+      if (error.respon && error.respon.status === 429) {
+        const delay = Math.pow(2, 0) * 1000;
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        await getCompanyParent(term);
+      }
+    }
   };
 
   const getSourceCompany = () => {
@@ -636,6 +663,7 @@ const SingleCompany = () => {
                     onChange={handleSelectParentCompany}
                     options={selectCompany()}
                     className="mb-3"
+                    isSearchable
                   />
                   <div className="text-center">
                     <a
