@@ -62,7 +62,7 @@ const Deals = () => {
     fetchData()
     const timeOut = setTimeout(() => {
       setPending(false)
-    }, 3500)
+    }, 2500)
     return () => clearTimeout(timeOut);
    }, [token, search, pagination.page, pagination.limit]);
 
@@ -178,19 +178,21 @@ const Deals = () => {
           Authorization: `Bearer ${token}`,
         },
       })
+      setOwner(response.data.data)
     } catch (error) {
       if (error.response.data.message === "Unauthenticated.") {
         localStorage.clear();
         window.location.href = "/login";
       }
       if(error.response && error.response.status === 429 && retryCount < MAX_RETRIES){
-        const delay = Math.pow(2, retryCount) * 2000;
+        const delay = Math.min(Math.pow(2, retryCount) * 2000, 16000);
         await new Promise((resolve) => setTimeout(resolve, delay))
         await getOwnerUser(retryCount + 1)
       }
     }
   };
 
+  // console.log(owner);
   const getPriority = async(retryCount = 0) => {
     try {
       const response = await  axios.get(`${process.env.REACT_APP_BACKEND_URL}/priorities`, {
@@ -421,6 +423,7 @@ const Deals = () => {
       setSearch(filter);
     }
   };
+
   const handleSelectOwner = (e) => {
     setSearchOwner(e.map((data) => data.value));
   };
