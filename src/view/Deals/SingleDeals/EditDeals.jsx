@@ -489,7 +489,7 @@ const EditDeals = () => {
     formData.append("deal_status", valueDeals.deal_status);
     formData.append("deal_category", valueDeals.deal_category);
     formData.append("staging_uid", selectedPipeline);
-    formData.append("company_uid", valueDeals.company_uid);
+    formData.append("company_uid", valueDeals.company_uid || '');
     formData.append("owner_user_uid", valueDeals.owner_user_uid);
     mentionUsers.forEach((ment, index) => {
       formData.append(`mention_user[${index}]`, ment);
@@ -509,12 +509,10 @@ const EditDeals = () => {
       formData.append(`products[${index}][total_price]`, product.total_price);
     });
     formData.append("notes", valueDeals.notes ? valueDeals.notes : "");
-
     formData.append("_method", "put");
     for (const pair of formData.entries()) {
       console.log(pair[0] + ": " + pair[1]);
     }
-
     axios
       .post(`${process.env.REACT_APP_BACKEND_URL}/deals/${uid} `, formData, {
         headers: {
@@ -533,7 +531,7 @@ const EditDeals = () => {
         });
       })
       .catch((err) => {
-        console.log(err);
+        // console.log(err);
         if (err.response) {
           Swal.fire({
             text: err.response.data.message,

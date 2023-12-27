@@ -19,13 +19,18 @@ const Auth = () => {
       [e.target.name]: e.target.value,
     });
   };
+  console.log(login);
   const handleLogin = async (e) => {
     e.preventDefault();
 
     try {
       const response = await axios.post(
         `${process.env.REACT_APP_BACKEND_URL}/users/login`,
-        login
+        login,{
+          headers:{
+            'Content-Type' : 'application/json'
+          }
+        }
       );
       if (response.data.message !== "Login successful!") {
         Swal.fire({
@@ -51,7 +56,6 @@ const Auth = () => {
         });
       }
     } catch (error) {
-      console.log(error);
       if (error.response) {
         Swal.fire({
           text: error.response.data.message,
