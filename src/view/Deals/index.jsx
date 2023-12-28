@@ -27,30 +27,39 @@ const Deals = () => {
   const [searchStage, setSearchStage] = useState([]);
   const [company, setCompany] = useState([]);
   const [contact, setContact] = useState([]);
-  const [product, setProduct] = useState([]);
-  const [packageProduct, setPackageProduct] = useState([]);
   const [searchCompany, setSearchCompany] = useState([]);
   const [searchContact, setSearchContact] = useState([]);
-  const [searchProduct, setSearchProduct] = useState([]);
-  const [searchPackageProduct, setSearchPackageProduct] = useState([]);
   const [searchPriority, setSearchPriority] = useState([]);
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 10
   })
   const [totalRows, setTotalRows] = useState(0)
+  const [ownerDeals, setOwnerDeals] = useState([])
+  const [formSearch, setFormSearch] = useState({})
   const MAX_RETRIES = 3;
   const fetchData = async () => {
     try {
+      
       setPending(true)
-      await getDeals(token, search)
-      await getOwnerUser()
-      await getStage();
-      await getPriority();
-      await getCompany();
-      await getContact()
-      // await getProduct()
-      await getPackage()
+      if(deals){
+        await getDeals(token, search, ownerDeals, formSearch) 
+      }
+      if(owner){
+        await getOwnerUser()
+      }
+      if(stage){
+        await getStage();
+      }
+      if(priority){
+        await getPriority();
+      }
+      if(company){
+        await getCompany();
+      }
+      if(contact){
+        await getContact()
+      }
     } catch (error) {
       console.error('error in fetch data', error);
     }finally{
@@ -64,49 +73,10 @@ const Deals = () => {
       setPending(false)
     }, 2500)
     return () => clearTimeout(timeOut);
-   }, [token, search, pagination.page, pagination.limit]);
+   }, [token, search, ownerDeals, formSearch, pagination.page, pagination.limit]);
 
    
 
-   const getPackage = async()=>{
-    let ret = await getPackageProduct(token).then((e)=>{
-      setPackageProduct(e)
-    })
-    return ret
-   }
-
-  // console.log(pagination);
-  // const getPackageProduct = () => {
-  //   axios
-  //     .get(`${process.env.REACT_APP_BACKEND_URL}/packages-product`, {
-  //       headers: {
-  //         Authorization: `Bearer ${token}`,
-  //       },
-  //     })
-  //     .then((res) => setPackageProduct(res.data.data))
-  //     .catch((err) => {
-  //       if (err.response.data.message === "Unauthenticated.") {
-  //         localStorage.clear();
-  //         window.location.href = "/login";
-  //       }
-  //     });
-  // };
-
-  // const getProduct = () => {
-  //   axios
-  //     .get(`${process.env.REACT_APP_BACKEND_URL}/products?limit=10`, {
-  //       headers: {
-  //         Authorization: `Bearer ${token}`,
-  //       },
-  //     })
-  //     .then((res) => setProduct(res.data.data))
-  //     .catch((err) => {
-  //       if (err.response.data.message === "Unauthenticated.") {
-  //         localStorage.clear();
-  //         window.location.href = "/login";
-  //       }
-  //     });
-  // };
   
   const getContact = async(retryCount = 0) => {
     try {
@@ -192,7 +162,6 @@ const Deals = () => {
     }
   };
 
-  // console.log(owner);
   const getPriority = async(retryCount = 0) => {
     try {
       const response = await  axios.get(`${process.env.REACT_APP_BACKEND_URL}/priorities`, {
@@ -219,37 +188,71 @@ const Deals = () => {
     setSelectUid(select);
   };
 
-  const getDeals = async (token, term, retryCount = 0) => {
-    try {
-      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/deals`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
-        params: {
-          page: pagination.page,
-          limit: pagination.limit,
-          search: term
+    const getDeals = async (token, term, ownerDeals, formSearch,  retryCount = 0) => {
+      try {
+        const params = {};
+        if (term) {
+          params.search = term;
         }
-      })
-      setDataDeals(response.data.data)
-      setTotalRows(response.data.pagination.totalData)
-    } catch (error) {
-      if (error.response && error.response.data.message === "Unauthenticated.") {
-        localStorage.clear();
-        window.location.href = "/login";
+        if(formSearch){
+          Object.assign(params, formSearch);
+          if (!params.page) {
+            params.page = pagination.page;
+          }
+          if (!params.limit) {
+            params.limit = pagination.limit;
+          }
+        }
+        if (ownerDeals) {
+          params.deals = ownerDeals;
+          params.page = pagination.page;
+          params.limit = pagination.limit;
+        }
+          params.page = pagination.page;
+          params.limit = pagination.limit;
+           
+        const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/deals`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          params: params,
+        });
+    
+        setDataDeals(response.data.data);
+        setTotalRows(response.data.pagination.totalData);
+      } catch (error) {
+        if (error.response && error.response.data.message === "Unauthenticated.") {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+        if (error.response && error.response.status === 429 && retryCount < MAX_RETRIES) {
+          const delay = Math.pow(2, retryCount) * 2000;
+          await new Promise(resolve => setTimeout(resolve, delay));
+          await getDeals(retryCount + 1);
+        }
+        if (error.response && error.response.status === 404) {
+          setDataDeals([]);
+          setTotalRows(0);
+        }
       }
-      if(error.response && error.response.status === 429 && retryCount < MAX_RETRIES){
-        const delay = Math.pow(2, retryCount) * 2000;
-        await new Promise(resolve => setTimeout(resolve, delay))
-        await getDeals(retryCount + 1)
-      }
-      if(error.response && error.response.status === 404){
-        setDataDeals([])
-        setTotalRows(0)
-      }
-    }
-  };
+    };
 
+    const handleSubmitSearchMultiple = (e) => {
+      e.preventDefault();
+      const formSearchMultiple ={
+        owner:searchOwner.value || '',
+        stage:searchStage.label || '',
+        associate_company:searchCompany.value || '',
+        associate_contact:searchContact.value || '',
+        deal_name:searchMultiple.deal_name || '',
+        priority:searchPriority.label || '',
+        deal_size:searchMultiple.deal_size || '',
+        created_at:searchMultiple.created_at || '',
+        updated_at:searchMultiple.updated_at || ''
+    }
+    setFormSearch(formSearchMultiple)
+    };
+    // console.log(searchStage.label);
   const handleDeleteSelect = async (e) => {
     e.preventDefault();
     const isResult = await Swal.fire({
@@ -383,76 +386,18 @@ const Deals = () => {
     return res;
   };
 
-  // const selectProduct = () => {
-  //   const res = [];
-  //   product?.map((data) => {
-  //     const theme = {
-  //       value: data.uid,
-  //       label: data.name,
-  //     };
-  //     res.push(theme);
-  //   });
-  //   return res;
-  // };
-
-  const selectPackageProduct = () => {
-    const res = [];
-    packageProduct?.map((data) => {
-      const theme = {
-        value: data.uid,
-        label: data.name,
-      };
-      res.push(theme);
-    });
-    return res;
-  };
-
-
   const [pending, setPending] = useState(true)
 
 
-
-  const uid = localStorage.getItem("uid");
-  const handleDealsMyOrPerson = (e) => {
+  const handleDealsMyOrPerson = async (e) => {
     const target = e.target.value;
-    let filter = [];
-    if (target === "all") {
-      setSearch(deals);
-    } else {
-      filter = deals.filter((row) => row.owner_user_uid === uid);
-      setSearch(filter);
-    }
-  };
-
-  const handleSelectOwner = (e) => {
-    setSearchOwner(e.map((data) => data.value));
-  };
-  const handleSelectStage = (e) => {
-    setSearchStage(e.map((data) => data.value));
-  };
-  const handleSelectCompany = (e) => {
-    const valComp = e.map((data) => data.value)
-    const result = valComp.reduce((acc, value) => acc.concat(value), [])
-    setSearchCompany(result);
-  };
-
-  const handleSelectContact = (e) => {
-    const valCont = e.map((data) => data.value)
-    const result = valCont.reduce((acc, value) => acc.concat(value), [])
-    setSearchContact(result);
+      if (target === "all") {
+        setOwnerDeals("all")
+      } else {
+       setOwnerDeals("my")
+      }
   };
   
-  // const handleSelectProduct = (e) => {
-  //   const valCont = e.map((data) => data.value)
-  //   const result = valCont.reduce((acc, value) => acc.concat(value), [])
-  //   setSearchProduct(result);
-  // };
-  // const handleSelectPackageProduct = (e) => {
-  //   setSearchPackageProduct(e.map((data) => data.value));
-  // };
-  const handleSelectPriority = (e) => {
-    setSearchPriority(e.map((data) => data.value));
-  };
   const handleSearchMultiple = (e) => {
     setSearchMultiple({
       ...searchMultiple,
@@ -467,22 +412,6 @@ const Deals = () => {
   const handlePagePerChange = (pageSize, page) => {
     setPagination((prev) => ({...prev, pageSize, page}))
   }
-
-  const handleSubmitSearchMultiple = () => {
-    const filterData = deals.filter((row) => {
-      return (
-        (!searchMultiple.deal_name || row.deal_name?.toLowerCase().includes(searchMultiple?.deal_name?.toLowerCase())) && 
-        (!searchMultiple.deal_size || row.deal_size?.toString().includes(searchMultiple.deal_size.toString())) && 
-        (!searchMultiple.created_at || row.created_at?.includes(searchMultiple?.created_at)) &&
-        (!searchMultiple.updated_at || row.updated_at?.includes(searchMultiple?.updated_at)) && 
-        (searchOwner.length === 0 || searchOwner.includes(row.owner_user_uid))&&
-        (searchStage.length === 0 || searchStage.includes(row.staging_uid))&&
-        (searchCompany.length === 0 || searchCompany.includes(row.uid))
-        
-      )
-    })
-    // setSearch(filterData)
-  };
 
   return (
     <body id="body">
@@ -619,8 +548,7 @@ const Deals = () => {
                     <div className="col mb-2">
                       <Select
                         options={selectOwner()}
-                        isMulti
-                        onChange={(value) => handleSelectOwner(value)}
+                        onChange={(e) => setSearchOwner(e)}
                         placeholder="Select Owner"
                       />
                     </div>
@@ -629,8 +557,7 @@ const Deals = () => {
                     <div className="col">
                       <Select
                         options={selectStage()}
-                        onChange={(e) => handleSelectStage(e)}
-                        isMulti
+                        onChange={(e) => setSearchStage(e)}
                         placeholder="Select Stage"
                       />
                     </div>
@@ -647,16 +574,14 @@ const Deals = () => {
                     <div className="mb-2">
                       <Select
                         options={selectCompany()}
-                        onChange={(e) => handleSelectCompany(e)}
-                        isMulti
+                        onChange={(e) => setSearchCompany(e)}
                         placeholder="Select Company"
                       />
                     </div>
                     <div className="mb-2">
                       <Select
                         options={selectContact()}
-                        onChange={(e) => handleSelectContact(e)}
-                        isMulti
+                        onChange={(e) => setSearchContact(e)}
                         placeholder="Select Contact"
                       />
                     </div>
@@ -698,8 +623,8 @@ const Deals = () => {
                   <div className="mb-1">
                     <Select
                       options={selectPriority()}
-                      onChange={(e) => handleSelectPriority(e)}
-                      isMulti
+                      name="priority"
+                      onChange={(e) => setSearchPriority(e)}
                       placeholder="Select Priority"
                     />
                   </div>

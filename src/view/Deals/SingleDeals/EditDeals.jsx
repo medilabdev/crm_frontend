@@ -143,7 +143,7 @@ const EditDeals = () => {
           deal_name: dealsOld.deal_name,
           priority_uid: dealsOld.priority_uid,
           deal_status: dealsOld.deal_status,
-          deal_category: dealsOld.deal_category_uid,
+          deal_category_uid: dealsOld.deal_category_uid,
           company_uid: dealsOld.company_uid,
           owner_user_uid: dealsOld.owner_user_uid,
           deal_size: dealsOld.deal_size,
@@ -344,9 +344,38 @@ const EditDeals = () => {
   };
 
   const [dataCompany, setDataCompany] = useState([]);
-  const handleDeleteCompany = () => {
-    localStorage.removeItem("companyStorage");
-    setDataCompany([]);
+  const handleDeleteCompany = (company) => {
+    Swal.fire({
+      title: "Konfirmasi",
+      text: "Apa anda yakin ingin menghapus item ini?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Ya, Hapus!",
+      cancelButtonText: "Batal",
+    }).then((res) => {
+      if(res.isConfirmed){
+        const formData = new FormData();
+        formData.append("deals_uid", uid)
+        formData.append("company_uid", company)
+        formData.append("_method", "delete")
+      // console.log("FormData Content:");
+      // for (const pair of formData.entries()) {
+      //   console.log(pair[0] + ": " + pair[1]);
+      // }
+        axios.post(`${process.env.REACT_APP_BACKEND_URL}/deals/item/company/delete`, formData,{
+          headers:{
+            Authorization: `Bearer ${token}`
+          }
+        })
+        .then(() => {
+          localStorage.removeItem("companyStorage");
+          setDataCompany([]);
+          window.location.reload();
+        })
+      }
+    })
   };
 
   const customStyles = {
@@ -666,9 +695,6 @@ const EditDeals = () => {
                     label={
                       <span>
                         Deal Size
-                        <span style={{ color: "red" }} className="fs-6">
-                          *
-                        </span>
                       </span>
                     }
                     className="mb-3"
@@ -679,7 +705,6 @@ const EditDeals = () => {
                       value={valueDeals.deal_size || totalPrice}
                       onChange={handlePrice}
                       placeholder="text"
-                      required
                     />
                   </FloatingLabel>
                   <FloatingLabel label="Deal Status" className="mb-3">
@@ -719,9 +744,6 @@ const EditDeals = () => {
                   <Form.Group className="mb-3">
                     <Form.Label>
                       Priority
-                      <span style={{ color: "red" }} className="fs-6">
-                        *
-                      </span>
                     </Form.Label>
                     <Select
                       options={selectPriority()}
@@ -734,28 +756,23 @@ const EditDeals = () => {
                           priority_uid: e.value,
                         })
                       }
-                      required
                     />
                   </Form.Group>
                   <Form.Group className="mb-3">
                     <Form.Label>
                       Deal Category
-                      <span style={{ color: "red" }} className="fs-6">
-                        *
-                      </span>
                     </Form.Label>
                     <Select
                       options={selectDealCategory()}
                       value={selectDealCategory().find(
-                        (e) => e.value === valueDeals.deal_category
+                        (e) => e.value === valueDeals.deal_category_uid
                       )}
                       onChange={(e) =>
                         setValueDeals({
                           ...valueDeals,
-                          deal_category: e.value,
+                          deal_category_uid: e.value,
                         })
                       }
-                      required
                     />
                   </Form.Group>
                 </Card.Body>
@@ -824,7 +841,7 @@ const EditDeals = () => {
                               </Col>
                               <Col md={2} sm={2} style={{ marginTop: "-12px" }}>
                                 <a
-                                  onClick={handleDeleteCompany}
+                                  onClick={() => handleDeleteCompany (companyStorage[0].uid)}
                                   className="ms-1"
                                   style={{
                                     cursor: "pointer",

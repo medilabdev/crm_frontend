@@ -19,7 +19,6 @@ const Auth = () => {
       [e.target.name]: e.target.value,
     });
   };
-  console.log(login);
   const handleLogin = async (e) => {
     e.preventDefault();
 

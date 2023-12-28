@@ -11,6 +11,9 @@ import IconPhone from "../../assets/img/telephone-call.png";
 
 const DataTableComponet = ({ data, selectUidDataTable, pending, paginationPerPage, paginationTotalRows, handleChangePage, handlePagePerChange  }) => {
   const token = localStorage.getItem("token");
+  const uid = localStorage.getItem('uid');
+  const role = localStorage.getItem('role');
+  console.log(role);
   const navigate = useNavigate();
   const columns = [
     {
@@ -102,6 +105,7 @@ const DataTableComponet = ({ data, selectUidDataTable, pending, paginationPerPag
     {
       name: "Owner/Created",
       selector: (row) => {
+        // console.log(row);
         const date = new Date(row.created_at);
         const formatDate = {
           year: "numeric",
@@ -131,66 +135,71 @@ const DataTableComponet = ({ data, selectUidDataTable, pending, paginationPerPag
       name: "Action",
       selector: (row) => (
         <div className="action-icon">
-          <button
-            className="ms-2 icon-button"
-            title="edit"
-            onClick={() => navigate(`/deals/${row.uid}/edit`)}
-          >
-            <i className="bi bi-pen edit"></i>
-          </button>
-          <button
-            className="icon-button"
-            title="delete"
-            onClick={() => {
-              Swal.fire({
-                title: "Konfirmasi",
-                text: "Apakah kamu yakin ingin menghapus ini deals ini?",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#3085d6",
-                cancelButtonColor: "#d33",
-                confirmButtonText: "Ya, Hapus!",
-                cancelButtonText: "Batal",
-              }).then((res) => {
-                if (res.isConfirmed) {
-                  const formData = new FormData();
-                  formData.append("deals_uid[]", row.uid);
-                  axios
-                    .post(
-                      `${process.env.REACT_APP_BACKEND_URL}/deals/item/delete`,
-                      formData,
-                      {
-                        headers: {
-                          Authorization: `Bearer ${token}`,
-                        },
-                      }
-                    )
-                    .then((res) => {
-                      Swal.fire({
-                        title: res.data.message,
-                        text: "Successfully delete deals",
-                        icon: "success",
-                      }).then((res) => {
-                        if (res.isConfirmed) {
-                          window.location.reload();
+            {row?.owner_user_uid === uid || (role === "hG5sy_dytt95")? (
+              <>
+                <button
+                      className="ms-2 icon-button"
+                      title="edit"
+                      onClick={() => navigate(`/deals/${row.uid}/edit`)}
+                    >
+                      <i className="bi bi-pen edit"></i>
+                </button>
+              
+            <button
+              className="icon-button"
+              title="delete"
+              onClick={() => {
+                Swal.fire({
+                  title: "Konfirmasi",
+                  text: "Apakah kamu yakin ingin menghapus ini deals ini?",
+                  icon: "warning",
+                  showCancelButton: true,
+                  confirmButtonColor: "#3085d6",
+                  cancelButtonColor: "#d33",
+                  confirmButtonText: "Ya, Hapus!",
+                  cancelButtonText: "Batal",
+                }).then((res) => {
+                  if (res.isConfirmed) {
+                    const formData = new FormData();
+                    formData.append("deals_uid[]", row.uid);
+                    axios
+                      .post(
+                        `${process.env.REACT_APP_BACKEND_URL}/deals/item/delete`,
+                        formData,
+                        {
+                          headers: {
+                            Authorization: `Bearer ${token}`,
+                          },
+                        }
+                      )
+                      .then((res) => {
+                        Swal.fire({
+                          title: res.data.message,
+                          text: "Successfully delete deals",
+                          icon: "success",
+                        }).then((res) => {
+                          if (res.isConfirmed) {
+                            window.location.reload();
+                          }
+                        });
+                      })
+                      .catch((err) => {
+                        if (err.response.data.message === "Delete failed!") {
+                          Swal.fire({
+                            title: "Delete Failed",
+                            text: "Tidak dapat menghapus, data master ini terkait dengan data lainnya",
+                            icon: "warning",
+                          });
                         }
                       });
-                    })
-                    .catch((err) => {
-                      if (err.response.data.message === "Delete failed!") {
-                        Swal.fire({
-                          title: "Delete Failed",
-                          text: "Tidak dapat menghapus, data master ini terkait dengan data lainnya",
-                          icon: "warning",
-                        });
-                      }
-                    });
-                }
-              });
-            }}
-          >
-            <i className="bi bi-trash-fill danger"></i>
-          </button>
+                  }
+                });
+              }}
+            >
+              <i className="bi bi-trash-fill danger"></i>
+            </button>
+            </>
+              ): null}
         </div>
       ),
       width: "120px",
