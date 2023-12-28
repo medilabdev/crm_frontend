@@ -368,30 +368,32 @@ const SingleDeals = () => {
     try {
       const formData = new FormData();
       for (const uidContact of inputContact) {
-        formData.append("contact_person[]", uidContact);
+        formData.append("contact_person[]", uidContact || '');
       }
       mentionUsers.forEach((ment, index) => {
         formData.append(`mention_user[${index}]`, ment);
       });
       formData.append("deal_name", inputDeals.deal_name);
-      formData.append("deal_size", price);
+      formData.append("deal_size", price || '');
       formData.append("deal_status", inputDeals.deal_status);
-      formData.append("priority", inputDeals.priority);
-      formData.append("deal_category", inputDeals.deal_category);
+      formData.append("priority_uid", inputDeals.priority ?? '');
+      formData.append("deal_category", inputDeals.deal_category || '');
       formData.append("staging_uid", selectedPipeline);
       formData.append("owner_user_uid", inputDeals.owner_user_uid);
-      formData.append("company_uid", inputDeals.company_uid);
+      formData.append("company_uid", inputDeals.company_uid || '');
       formData.append("notes", inputDeals.notes ? inputDeals.notes : "");
-      allData[0].forEach((product, index) => {
-        formData.append(`products[${index}][product_uid]`, product.product_uid);
-        formData.append(`products[${index}][qty]`, product.qty);
-        formData.append(
-          `products[${index}][discount_type]`,
-          product.discount_type
-        );
-        formData.append(`products[${index}][discount]`, product.discount);
-        formData.append(`products[${index}][total_price]`, product.total_price);
-      });
+      if (Array.isArray(allData[0]) && allData[0].length > 0) {
+        allData[0].forEach((product, index) => {
+          formData.append(`products[${index}][product_uid]`, product.product_uid || '');
+          formData.append(`products[${index}][qty]`, product.qty || '');
+          formData.append(
+            `products[${index}][discount_type]`,
+            product.discount_type || ''
+          );
+          formData.append(`products[${index}][discount]`, product.discount || '');
+          formData.append(`products[${index}][total_price]`, product.total_price || '');
+        });
+      }
       // for (const pair of formData.entries()) {
       //   console.log(pair[0] + ": " + pair[1]);
       // }
@@ -517,9 +519,6 @@ const SingleDeals = () => {
                     label={
                       <span>
                         Deal Size
-                        <span style={{ color: "red" }} className="fs-6">
-                          *
-                        </span>
                       </span>
                     }
                     className="mb-3"
@@ -529,7 +528,6 @@ const SingleDeals = () => {
                       placeholder="text"
                       value={price}
                       onChange={handlePrice}
-                      required
                     />
                   </FloatingLabel>
                   <FloatingLabel label="Deal Status" className="mb-3">
@@ -556,27 +554,19 @@ const SingleDeals = () => {
                   <Form.Group className="mb-3">
                     <Form.Label>
                       Priority
-                      <span style={{ color: "red" }} className="fs-6">
-                        *
-                      </span>
                     </Form.Label>
                     <Select
                       options={prioritySelect()}
                       onChange={(e) => handleInputPriority(e)}
-                      required
                     />
                   </Form.Group>
                   <Form.Group className="mb-3">
                     <Form.Label>
                       Deal Category
-                      <span style={{ color: "red" }} className="fs-6">
-                        *
-                      </span>
                     </Form.Label>
                     <Select
                       options={dealCategorySelect()}
                       onChange={(e) => handleInputDealCategory(e)}
-                      required
                     />
                   </Form.Group>
                 </Card.Body>
