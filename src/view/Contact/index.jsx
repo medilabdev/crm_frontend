@@ -48,8 +48,7 @@ const Contact = () => {
   const [user, setUser] = useState([]);
   const [source, setSource] = useState([]);
   const [associateCompany, setAssociateCompany] = useState([]);
-  // const [deals, setDeals] = useState([]);
-
+  const [associateDeals, setAssociateDeals] = useState([])
   const [searchMultiple, setSearchMultiple] = useState({
     name: "",
     email: "",
@@ -67,8 +66,11 @@ const Contact = () => {
     limit: 10,
   });
   const [totalRows, setTotalRows] = useState(0);
-
-  const getSource = (token) => {
+  const [ownerContact, setOwnerContact] = useState([])
+  const [formSearch, setFormSearch] = useState([]);
+  const [selectedUser, setSelectedUser] = useState([]);
+  
+  const getSource = () => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/companies-source`, {
         headers: {
@@ -81,16 +83,12 @@ const Contact = () => {
           localStorage.clear();
           window.location.href = "/login";
         }
-        if(err.response && err.response.status === 429){
-          const delay = Math.pow(2,)
-        }
       });
   };
-
- 
-  const getAssociateCompany = (token) => {
+  
+  const getCompany = () => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/associate`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/companies/form/select`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -103,7 +101,6 @@ const Contact = () => {
         }
       });
   };
-
   const getAllUser = (token) => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
@@ -119,19 +116,29 @@ const Contact = () => {
         }
       });
   };
-
-  const getContactAll = async (token, state) => {
+  const getContactAll = async (token, term, ownerContact, formSearch) => {
     try {
+      const params = {};
+      if(term){
+        params.search = term
+      }
+      if(ownerContact){
+        params.contact_all_or_my = ownerContact;
+        params.page = pagination.page;
+        params.limit = pagination.limit;
+      }
+      if(formSearch){
+        Object.assign(params, formSearch)
+      }
+      params.page = pagination.page;
+      params.limit = pagination.limit;
       const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/contacts`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        params: {
-          page: pagination.page,
-          limit: pagination.limit,
-        },
+        params : params
       });
-      state(response.data.data);
+      setContact(response.data.data);
       setTotalRows(response.data.pagination.totalData);
     } catch (error) {
       if (error.response && error.response.data.message === "Unauthenticated") {
@@ -141,16 +148,26 @@ const Contact = () => {
       if (error.response && error.response.status === 429) {
         const delay = Math.pow(2, pagination.page - 1) * 2000;
         await new Promise(resolve => setTimeout(resolve, delay));
-        await getContactAll(token, state, pagination, setTotalRows);
+        await getContactAll(token, term, ownerContact);
       }
     }
   };
-  
-  const [selectedUser, setSelectedUser] = useState([]);
-
-  const handleSelectUser = (e) => {
-    setSelectedUser(e.map((opt) => opt.value));
-  };
+  const getDeals = () => {
+    axios
+    .get(`${process.env.REACT_APP_BACKEND_URL}/deals/form/select`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    .then((res) => setAssociateDeals(res.data.data))
+    .catch((err) => {
+      if (err.response.data.message === "Unauthenticated") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+    });
+  }
+ 
 
   const handleSearchMultiple = (e) => {
     setSearchMultiple({
@@ -172,81 +189,34 @@ const Contact = () => {
   };
 
   const [resultDeals, setResultDeals] = useState([]);
-  const handleDeals = (e) => {
-    setResultDeals(e.map((opt) => opt.value));
-  };
-  // console.log(resultDeals);
   const selectDeals = () => {
-    if (
-      !associateCompany &&
-      !associateCompany[0]?.deals &&
-      associateCompany[0]?.deals.length === 0
-    ) {
-      return [{ label: "No Data Available", value: [] }];
-    }
-
-    const uniqueAssDeals = {};
-    associateCompany.forEach((data) => {
-      const dealsName = data?.deals?.deal_name;
-      const key = `${dealsName}-${data.deals_uid}`;
-
-      if (!uniqueAssDeals[key]) {
-        uniqueAssDeals[key] = {
-          label: dealsName,
-          values: [],
-        };
+    const result = [];
+    associateDeals?.map((data) => {
+      const dataDeals = {
+        value: data.uid,
+        label: data.deal_name
       }
-      uniqueAssDeals[key].values.push(data.contact_uid);
-    });
-
-    const result = Object.values(uniqueAssDeals).map((item) => {
-      return {
-        label: item.label,
-        value: item.values,
-      };
-    });
-
+      result.push(dataDeals)
+    })
     return result;
   };
 
+  const [resultCompany, setResultCompany] = useState([])
   const selectAssociateCompany = () => {
-    const uniqueAssCompany = {};
-    associateCompany?.forEach((data) => {
-      const companyName = data?.company?.name;
-      const key = `${companyName}-${data.company_uid}`;
-
-      if (!uniqueAssCompany[key]) {
-        uniqueAssCompany[key] = {
-          label: companyName,
-          values: [],
-        };
-      }
-      uniqueAssCompany[key].values.push(data.company_uid);
-    });
-
-    const result = Object.values(uniqueAssCompany).map((item) => {
-      return {
-        label: item.label,
-        value: item.values,
-      };
-    });
-    return result;
+   const result = [];
+   associateCompany?.map((data) => {
+    const dataResult = {
+      value: data.uid,
+      label:data.name
+    }
+    result.push(dataResult)
+   })
+   return result
   };
 
-  const [selectAssCompany, setSelectAssCompany] = useState([]);
-  const handleSelectAssCompany = (e) => {
-    const selectValue = e.map((data) => data.value);
-    const allValues = selectValue.reduce(
-      (acc, values) => acc.concat(values),
-      []
-    );
-    setSelectAssCompany(allValues);
-  };
 
   const [selectedSource, setSelectSource] = useState([]);
-  const handleSelectSource = (e) => {
-    setSelectSource(e.map((data) => data.value));
-  };
+
 
   const selectSource = () => {
     const result = [];
@@ -262,50 +232,15 @@ const Contact = () => {
 
   const [pending, setPending] = useState(true);
 
-  const searchContacts = async (term) => {
-    try {
-      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/contacts`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        params: {
-          search: term,
-        },
-      });
-  
-      setContact(response.data.data);
-      setTotalRows(response.data.pagination.totalData);
-    } catch (error) {
-      if (error.response && error.response.status === 429) {
-        const delay = Math.pow(2, pagination.page - 1) * 2000;
-        await new Promise(resolve => setTimeout(resolve, delay));  
-        await searchContacts(term);
-      } else if (error.response && error.response.data.message === "Unauthenticated") {
-        localStorage.clear();
-        window.location.href = "/login";
-      } else if(error.response && error.response.status === 404) {
-        await setContact([])
-        await setTotalRows(0)
-      } else{
-        // console.error('Error in searchContacts:', error);
-      }
-    }
-  };
-  
+
   const fetchData = async () => {
     try {
       setPending(true);
-
-      if (search) {
-        setPagination((prev) => ({ ...prev, page: 1 }));
-        await searchContacts(search);
-      } else {
-        await getContactAll(TokenAuth, setContact, pagination, setTotalRows);
-      }
-
-      await getAllUser(TokenAuth);
-      await getSource(TokenAuth);
-      await getAssociateCompany(TokenAuth);
+      await getContactAll(TokenAuth, search, ownerContact, formSearch);
+      await getAllUser();
+      await getSource();
+      await getCompany();
+      await getDeals();
     } catch (error) {
       console.error('Error in fetchData:', error);
     } finally {
@@ -313,7 +248,7 @@ const Contact = () => {
     }
   };
 
-useEffect(() => {
+  useEffect(() => {
   fetchData();
   const timeoutId = setTimeout(() => {
     setPending(false);
@@ -322,7 +257,7 @@ useEffect(() => {
   return () => {
     clearTimeout(timeoutId);
   };
-}, [TokenAuth, search, pagination.page, pagination.limit]);
+}, [TokenAuth, search, ownerContact,  formSearch, pagination.page, pagination.limit]);
 
   const handleChangePage = (page) => {
     setPagination((e) => ({ ...e, page }));
@@ -514,52 +449,32 @@ useEffect(() => {
       width: "150px",
     },
   ];
+  
 
   const handleContactMyOrPerson = (e) => {
     const target = e.target.value;
-    let filterData = [];
-    if (target === "all") {
-      setSearch(contact);
-    } else {
-      filterData = contact.filter((row) => row.owner_user_uid === uid);
-      setSearch(filterData);
+    if(target === "all"){
+      setOwnerContact('all')
+    }else{
+      setOwnerContact("my")
     }
   };
 
-  const handleSubmitSearch = () => {
-    const filteredData = contact.filter((row) => {
-      return (
-        (resultDeals.length === 0 || resultDeals.includes(row.uid)) &&
-        (selectAssCompany.length === 0 || selectAssCompany.includes(row.uid)) &&
-        (selectedUser.length === 0 ||
-          selectedUser.includes(row.owner_user_uid)) &&
-        (selectedSource.length === 0 ||
-          selectedSource.includes(row.source_uid)) &&
-        (!searchMultiple.name ||
-          row.name
-            ?.toLowerCase()
-            .includes(searchMultiple.name?.toLowerCase())) &&
-        (!searchMultiple.email ||
-          row.email
-            ?.toLowerCase()
-            .includes(searchMultiple.email?.toLowerCase())) &&
-        (!searchMultiple.position ||
-          row.position
-            ?.toLowerCase()
-            .includes(searchMultiple.position?.toLowerCase())) &&
-        (!searchMultiple.address ||
-          row.address
-            ?.toLowerCase()
-            .includes(searchMultiple.address?.toLowerCase())) &&
-        (!searchMultiple.city ||
-          row.city
-            ?.toLowerCase()
-            .includes(searchMultiple.city?.toLowerCase())) &&
-        (!searchMultiple?.created_at ||
-          row?.created_at?.includes(searchMultiple?.created_at))
-      );
-    });
-    setSearch(filteredData);
+  const handleSubmitSearch = (e) => {
+    e.preventDefault();
+    const formSearchMultiple = {
+      owner: selectedUser.value || '',
+      associate_company: resultCompany.value || '',
+      associate_deals: resultDeals.value || '',
+      contact_name: searchMultiple.name || '',
+      email:searchMultiple.email || '',
+      position: searchMultiple.position || '',
+      source: selectedSource.label || '',
+      address:searchMultiple.address || '',
+      city: searchMultiple.city || '',
+      created_at:searchMultiple.created_at || '',
+    }
+    setFormSearch(formSearchMultiple)
   };
 
   const selectUidDataTable = (state) => {
@@ -731,9 +646,8 @@ useEffect(() => {
                         <Select
                           placeholder="Select Owner"
                           closeMenuOnSelect={false}
-                          isMulti
                           options={selectUser()}
-                          onChange={(selected) => handleSelectUser(selected)}
+                          onChange={(e) => setSelectedUser(e)}
                         />
                       </div>
                     </div>
@@ -745,7 +659,7 @@ useEffect(() => {
                         className="form-select"
                         style={{ fontSize: "0.85rem" }}
                       >
-                        <option disabled selected>
+                        <option disabled e>
                           Team
                         </option>
                         <option value="">Team 1</option>
@@ -766,9 +680,8 @@ useEffect(() => {
                         <Select
                           placeholder="Select Company"
                           options={selectAssociateCompany()}
-                          isMulti
                           closeMenuOnSelect={false}
-                          onChange={(select) => handleSelectAssCompany(select)}
+                          onChange={(e) => setResultCompany(e)}
                         />
                       </div>
                     </div>
@@ -776,8 +689,7 @@ useEffect(() => {
                       <div className="col">
                         <Select
                           options={selectDeals()}
-                          isMulti
-                          onChange={(e) => handleDeals(e)}
+                          onChange={(e) => setResultDeals(e)}
                           placeholder="Select Deals"
                           closeMenuOnSelect={false}
                         />
@@ -825,9 +737,8 @@ useEffect(() => {
                       <Select
                         placeholder="Source"
                         options={selectSource()}
-                        isMulti
                         closeMenuOnSelect={false}
-                        onChange={(select) => handleSelectSource(select)}
+                        onChange={(e) =>setSelectSource(e)}
                       />
                     </div>
                     <div className="mb-1">

@@ -936,6 +936,7 @@ const EditDeals = () => {
                                     No.Telp :
                                     <strong className="ms-1">
                                       {data.contact?.phone?.[0]?.number || "-"}
+                                      {console.log(data.contact)}
                                     </strong>
                                   </p>
                                 </Col>
