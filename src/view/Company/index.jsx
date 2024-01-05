@@ -49,25 +49,27 @@ const Company = () => {
   const [source, setSource] = useState([]);
   const [resultSource, setResultSource] = useState([]);
   const [companyType, setCompanyType] = useState([]);
-  const [associateContact, setAssocicateContact] = useState([]);
-  const [associateDeals, setAssociateDeals] = useState([]);
+  const [contact, setContact] = useState([]);
   const [deals, setDeals] = useState([]);
   const [searchMultiple, setSearchMultiple] = useState({
     name: "",
     website_url: "",
     address: "",
-    city: "",
     company_type_uid: "",
     created_at: "",
     number_of_patient: "",
     parent_company_uid: "",
   });
-
+  
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 10,
   });
+
+  const [ownerCompany, setOwnerCompany] = useState([]);
+  const [formSearch, setFormSearch] = useState({})
   const [totalRows, setTotalRows] = useState(0);
+  const [searchAssContact, setSearchAssContact] = useState([])
   const MAX_RETRIES = 3;
   const handleSelectSearchCompany = (e) => {
     setSearchMultiple({
@@ -75,30 +77,16 @@ const Company = () => {
       [e.target.name]: e.target.value,
     });
   };
-  const handleSelectTypeCompany = (e) => {
-    setSearchMultiple({
-      ...searchMultiple,
-      company_type_uid: e.value,
-    });
-  };
-  const handleParentCompany = (e) => {
-    setSearchMultiple({
-      ...searchMultiple,
-      parent_company_uid: e.value,
-    });
-  };
 
-
-  const getAssociateContact = (retryCount = 0) => {
+  const getContact = (retryCount = 0) => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/associate`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/contacts/form/select`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
       .then((res) => {
-        setAssocicateContact(res.data.data);
-        setAssociateDeals(res.data.data);
+        setContact(res.data.data);
       })
       .catch(async(err) => {
         if (err.response.data.message === "Unauthenticated") {
@@ -108,23 +96,52 @@ const Company = () => {
         if(err.response.status === 429 && retryCount < MAX_RETRIES){
           const delay = Math.pow(2, retryCount) * 1000;
           await new Promise((resolve) => setTimeout(resolve, delay))
-          await setAssociateDeals()
-          await setAssociateDeals()
+          await getContact(retryCount + 1)
         }
       });
   };
-
-  const getAllCompany = async (token, term, retryCount = 0) => {
+  const getDeals = (retryCount = 0) => {
+    axios.get(`${process.env.REACT_APP_BACKEND_URL}/deals/form/select`, {
+      headers:{
+        Authorization: `Bearer ${token}`
+      }
+    })
+    .then((res) => {
+      setDeals(res.data.data)
+    })
+    .catch(async(err)=> {
+      if (err.response.data.message === "Unauthenticated") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      if(err.response.status === 429 && retryCount < MAX_RETRIES){
+        const delay = Math.pow(2, retryCount) * 1000;
+        await new Promise((resolve) => setTimeout(resolve, delay))
+        await getDeals(retryCount + 1)
+      }
+    })
+  }
+  const getAllCompany = async (token, term, ownerCompany, formSearch, retryCount = 0) => {
   try {
+    const params = {};
+    if(term){
+      params.search = term
+    }
+    if(ownerCompany){
+      params.company_all_or_my = ownerCompany;
+      params.page = pagination.page;
+      params.limit = pagination.limit;
+    }
+    if(formSearch){
+      Object.assign(params, formSearch);
+    }
+    params.page = pagination.page;
+    params.limit = pagination.limit;
     const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/companies`, {
       headers:{
         Authorization: `Bearer ${token}`
       },
-      params: {
-        page: pagination.page,
-        limit: pagination.limit,
-        search: term
-      },
+      params : params,
     })
     setAllCompany(response.data.data)
     setTotalRows(response.data.pagination.totalData)
@@ -209,70 +226,23 @@ const Company = () => {
         }
       });
   };
-  const selectAssContact = () => {
-    const uniqueAssCont = {};
-    associateContact?.forEach((data) => {
-      const contactName = data?.contact?.name;
-      const key = `${contactName}-${data.contact_uid}`;
-
-      if (!uniqueAssCont[key]) {
-        uniqueAssCont[key] = {
-          label: contactName,
-          values: [],
-        };
-      }
-      uniqueAssCont[key].values.push(data.contact_uid);
-    });
-    const result = Object.values(uniqueAssCont).map((data) => {
-      return {
-        label: data.label,
-        value: data.values,
-      };
-    });
-    return result;
-  };
+ 
 
   const [assContact, setAssContact] = useState([]);
-  const handleSelectAssContact = (e) => {
-    const selectValue = e.map((data) => data.value);
-    const allValue = selectValue.reduce((acc, value) => acc.concat(value), []);
-    setAssContact(allValue);
-  };
 
-  const [resultDeals, setResultDeals] = useState([]);
-  const handleDeals = (e) => {
-    const selValue = e.map((data) => data.value);
-    const allValue = selValue.reduce((acc, value) => acc.concat(value), []);
-    setResultDeals(allValue);
-  };
+  const [assDeals, setAssDeals] = useState([]);
+
 
   const selectAssDeals = () => {
-    if (
-      !associateDeals ||
-      !associateDeals[0]?.deals ||
-      associateDeals[0]?.deals.length === 0
-    ) {
-      return [{ label: "No Data Available", value: [] }];
-    }
     const result = [];
-    associateDeals?.map((data) => {
-      const dealName = data?.deals?.deal_name;
-      const key = `${dealName}-${data.deal_uid}`;
-      if (!result[key]) {
-        result[key] = {
-          label: dealName,
-          values: [],
-        };
+    deals?.map((data) => {
+      const dealsResult = {
+        value: data.uid,
+        label:data.deal_name,
       }
-      result[key].values.push(data.company_uid);
-    });
-    const hasil = Object.values(result).map((data) => {
-      return {
-        label: data.label,
-        value: data.values,
-      };
-    });
-    return hasil;
+      result.push(dealsResult)
+    })
+    return result
   };
 
   const dataUser = () => {
@@ -298,6 +268,7 @@ const Company = () => {
     });
     return result;
   };
+
   const dataSource = () => {
     const result = [];
     source?.map((data) => {
@@ -366,56 +337,41 @@ const Company = () => {
 
   const handleCompanyMyOrPerson = (e) => {
     const target = e.target.value;
-    let filterData = [];
-    if (target === "all") {
-      setSearch(allCompany);
-    } else {
-      filterData = allCompany.filter((row) => row.owner_user_uid === uid);
-      setSearch(filterData);
+    if(target === "all"){
+      setOwnerCompany("all")
+    }else{
+      setOwnerCompany("my")
     }
-  };
-  const handleSubmitSearch = () => {
-    const filterdata = allCompany.filter((row) => {
-      return (
-        (resultDeals.length === 0 || resultDeals.includes(row.uid)) &&
-        (assContact.length === 0 || assContact.includes(row.uid)) &&
-        (!searchMultiple.name ||
-          row.name
-            ?.toLowerCase()
-            .includes(searchMultiple?.name?.toLowerCase())) &&
-        (!searchMultiple.website_url ||
-          row.website_url
-            ?.toLowerCase()
-            .includes(searchMultiple?.website_url?.toLowerCase())) &&
-        (!searchMultiple.address ||
-          row.address
-            ?.toLowerCase()
-            .includes(searchMultiple?.address?.toLowerCase())) &&
-        (!searchMultiple.city ||
-          row.city
-            ?.toLowerCase()
-            .includes(searchMultiple?.city?.toLowerCase())) &&
-        (!searchMultiple.company_type_uid ||
-          row.company_type_uid
-            ?.toLowerCase()
-            .includes(searchMultiple?.company_type_uid?.toLowerCase())) &&
-        (!searchMultiple.created_at ||
-          row.created_at?.includes(searchMultiple?.created_at)) &&
-        (!searchMultiple?.number_of_patient ||
-          row?.number_of_patient === searchMultiple?.number_of_patient) &&
-        (!searchMultiple?.parent_company_uid ||
-          row.parent_company_uid?.includes(
-            searchMultiple?.parent_company_uid
-          )) &&
-        (resultOwner.length === 0 ||
-          resultOwner.includes(row.owner_user_uid)) &&
-        (resultSource.length === 0 ||
-          resultSource.includes(row.company_source_uid))
-      );
-    });
-    setSearch(filterdata);
-  };
+    }
 
+    const selectContact = () => {
+       const result = [];
+       contact?.map((data) => {
+        const conAss = {
+          value: data.uid,
+          label: data.name
+        }
+        result.push(conAss)
+       })
+       return result
+    }
+    const [resultTypeCompany, setResultTypeCompany] = useState([])
+    const [resultCompanySource, setResultCompanySource] = useState([])
+  const handleSubmitSearch = (e) => {
+    e.preventDefault()
+    const formSearchMultiple = {
+      owner: resultOwner.value || '',
+      associate_contact: assContact.value || '',
+      associate_deals: assDeals.value || '',
+      company_name : searchMultiple.name || '',
+      website_url : searchMultiple.website_url || '',
+      address : searchMultiple.address || '',
+      created_at: searchMultiple.created_at || '',
+      company_type : resultTypeCompany.value || '',
+      company_source : resultCompanySource.label || '',
+      }
+    setFormSearch(formSearchMultiple)
+  };
   const handleSubmitDeleteSelect = async (e) => {
     e.preventDefault();
     const result = await Swal.fire({
@@ -464,11 +420,12 @@ const Company = () => {
   const fetchData = async () => {
     try {
       setPending(true);
-      await getAllCompany(token, search);
+      await getAllCompany(token, search, ownerCompany, formSearch);
       await getOwnerUser();
       await getSource();
       await getAlltypeCompany();
-      await getAssociateContact();
+      await getContact();
+      await getDeals();
     } catch (error) {
       console.error("error in fetch data", error);
     } finally {
@@ -484,7 +441,7 @@ const Company = () => {
     return () => {
       clearTimeout(timout);
     }
-  }, [token, search, pagination.page, pagination.limit]);
+  }, [token, search, ownerCompany, formSearch, pagination.page, pagination.limit]);
   // console.log(pagination);
   const handleChangePage = (page) => {
     setPagination((prev) => ({ ...prev, page }));
@@ -795,8 +752,7 @@ const Company = () => {
                           <Select
                             placeholder="Select Owner"
                             options={dataUser()}
-                            isMulti
-                            onChange={(select) => handleSelectUser(select)}
+                            onChange={(e) =>  setResultOwner(e)}
                           />
                         </div>
                         {/* <div className="col mt-2">
@@ -824,20 +780,18 @@ const Company = () => {
                         <div className="col mt-3">
                           <Select
                             placeholder="Select Contact"
-                            options={selectAssContact()}
-                            onChange={(select) =>
-                              handleSelectAssContact(select)
+                            options={selectContact()}
+                            onChange={(e) =>
+                              setAssContact(e)
                             }
-                            isMulti
                             closeMenuOnSelect={false}
                           />
                         </div>
                         <div className="col mt-3">
                           <Select
                             options={selectAssDeals()}
-                            isMulti
                             closeMenuOnSelect={false}
-                            onChange={(e) => handleDeals(e)}
+                            onChange={(e) => setAssDeals(e)}
                             placeholder="Select Deals..."
                             className="mb-2"
                           />
@@ -881,7 +835,7 @@ const Company = () => {
                               style={{ fontSize: "0.85rem" }}
                             />
                           </div>
-                          <div className="mb-1">
+                          {/* <div className="mb-1">
                             <input
                               type="text"
                               name="city"
@@ -890,23 +844,22 @@ const Company = () => {
                               placeholder="City"
                               style={{ fontSize: "0.85rem" }}
                             />
-                          </div>
+                          </div> */}
                           <div className="mb-1">
                             <Select
                               placeholder="Type Company"
                               options={typeCompany()}
                               name="company_type_uid"
-                              onChange={handleSelectTypeCompany}
+                              onChange={(e) => setResultTypeCompany(e)}
                             />
                           </div>
                           <div className="mb-1">
                             <Select
                               placeholder="Source Company"
                               closeMenuOnSelect={false}
-                              isMulti
                               options={dataSource()}
-                              onChange={(selected) =>
-                                handleSelectSource(selected)
+                              onChange={(e) =>
+                                setResultCompanySource(e)
                               }
                             />
                           </div>
@@ -920,14 +873,14 @@ const Company = () => {
                               style={{ fontSize: "0.85rem" }}
                             />
                           </div>
-                          <div className="mb-1">
+                          {/* <div className="mb-1">
                             <Select
                               options={ParentCompany()}
                               placeholder="parent company..."
                               onChange={handleParentCompany}
                             />
-                          </div>
-                          <div className="mb-1">
+                          </div> */}
+                          {/* <div className="mb-1">
                             <input
                               type="number"
                               name="number_of_patient"
@@ -936,7 +889,7 @@ const Company = () => {
                               placeholder="Number Of Patient"
                               style={{ fontSize: "0.85rem" }}
                             />
-                          </div>
+                          </div> */}
                         </div>
                         <button
                           type="button"
