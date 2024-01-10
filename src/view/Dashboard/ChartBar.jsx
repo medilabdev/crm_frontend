@@ -24,7 +24,7 @@ export const options = {
   plugins: {
     title: {
       display: true,
-      text: "Harrisa Chart",
+      text: "Total Staging Deals",
     },
   },
   responsive: true,
