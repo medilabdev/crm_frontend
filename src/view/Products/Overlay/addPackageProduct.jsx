@@ -19,7 +19,7 @@ const AddPackageProduct = ({ visible, onClose }) => {
 
   const getProduct = () => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/products`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/products/form/select`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
