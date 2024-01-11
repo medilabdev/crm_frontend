@@ -24,7 +24,7 @@ function Dashboard() {
     })
     .then((res) => setStagingDeals(res.data.staging_data))
     .catch(async(err) => {
-      if (err.response.data.message === "Unauthenticated") {
+      if (err.response.data.message === "Unauthenticated" || err.response.status === 401) {
         localStorage.clear();
         window.location.href = "/login";
       }
