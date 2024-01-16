@@ -116,7 +116,9 @@ const Contact = () => {
         }
       });
   };
-  const getContactAll = async (token, term, ownerContact, formSearch) => {
+
+  const MAX_RETRIES = 3;
+  const getContactAll = async (token, term, ownerContact, formSearch, retryCount = 0) => {
     try {
       const params = {};
       if(term){
@@ -129,6 +131,12 @@ const Contact = () => {
       }
       if(formSearch){
         Object.assign(params, formSearch)
+        if (!params.page) {
+          params.page = pagination.page;
+        }
+        if (!params.limit) {
+          params.limit = pagination.limit;
+        }
       }
       params.page = pagination.page;
       params.limit = pagination.limit;
@@ -145,11 +153,16 @@ const Contact = () => {
         localStorage.clear();
         window.location.href = "/login";
       }
-      if (error.response && error.response.status === 429) {
-        const delay = Math.pow(2, pagination.page - 1) * 2000;
+      if(error.response && error.response.status === 429 && retryCount < MAX_RETRIES){
+        const delay = Math.pow(2, retryCount) * 2000;
         await new Promise(resolve => setTimeout(resolve, delay));
-        await getContactAll(token, term, ownerContact);
+        await getContactAll(retryCount + 1)
       }
+      if(error.response && error.response.status === 404){
+        setContact([])
+        setTotalRows(0)
+      }
+
     }
   };
   const getDeals = () => {
