@@ -400,9 +400,9 @@ const EditDeals = () => {
     {
       name: "Name Product",
       selector: (row) =>
-        row.product?.name ?? row.product_name,
+      row.product?.name || row.package_product?.name,
       sortable: true,
-      width: "150px",
+      width: "180px",
     },
     {
       name: "Quantity",
@@ -508,7 +508,6 @@ const EditDeals = () => {
   const handleCheckboxChange = (uid) => {
     setSelectedPipeline(uid === selectedPipeline ? null : uid);
   };
-
   const handleSubmit = (e) => {
     e.preventDefault();
     const formData = new FormData();
@@ -517,7 +516,7 @@ const EditDeals = () => {
     formData.append("priority", valueDeals.priority_uid);
     formData.append("deal_status", valueDeals.deal_status);
     formData.append("deal_category", valueDeals.deal_category);
-    formData.append("staging_uid", selectedPipeline);
+    formData.append("staging_uid", selectedPipeline ?? ""); 
     formData.append("company_uid", valueDeals.company_uid || '');
     formData.append("owner_user_uid", valueDeals.owner_user_uid);
     mentionUsers.forEach((ment, index) => {
@@ -526,9 +525,9 @@ const EditDeals = () => {
     combineCont.forEach((com, index) => {
       formData.append(`contact_person[${index}]`, com);
     });
-
+    
     allProduct[0].forEach((product, index) => {
-      formData.append(`products[${index}][product_uid]`, product.product_uid);
+      formData.append(`products[${index}][product_uid]`, product.product_uid || product.package_product_uid);
       formData.append(`products[${index}][qty]`, product.qty);
       formData.append(
         `products[${index}][discount_type]`,
@@ -539,9 +538,9 @@ const EditDeals = () => {
     });
     formData.append("notes", valueDeals.notes ? valueDeals.notes : "");
     formData.append("_method", "put");
-    for (const pair of formData.entries()) {
-      console.log(pair[0] + ": " + pair[1]);
-    }
+    // for (const pair of formData.entries()) {
+    //   console.log(pair[0] + ": " + pair[1]);
+    // }
     axios
       .post(`${process.env.REACT_APP_BACKEND_URL}/deals/${uid} `, formData, {
         headers: {
