@@ -70,7 +70,7 @@ const Contact = () => {
   const [formSearch, setFormSearch] = useState([]);
   const [selectedUser, setSelectedUser] = useState([]);
   
-  const getSource = () => {
+  const getSource = (retryCount = 0) => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/companies-source`, {
         headers: {
@@ -82,11 +82,22 @@ const Contact = () => {
         if (err.response.data.message === "Unauthenticated") {
           localStorage.clear();
           window.location.href = "/login";
+        }else if(err.response.status === 429){
+          const maxRetries = 3;
+          if (retryCount < maxRetries) {
+            setTimeout(() => {
+              getSource(retryCount + 1);
+            }, 2000);
+          } else {
+            console.error('Max retry attempts reached. Unable to complete the request.');
+          }
+        }else {
+          console.error('Unhandled error:', err);
         }
       });
   };
   
-  const getCompany = () => {
+  const getCompany = (retryCount = 0) => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/companies/form/select`, {
         headers: {
@@ -98,10 +109,23 @@ const Contact = () => {
         if (err.response.data.message === "Unauthenticated") {
           localStorage.clear();
           window.location.href = "/login";
+        }else if(err.response.status === 429){
+          const maxRetries = 3;
+          if (retryCount < maxRetries) {
+            setTimeout(() => {
+              getCompany(retryCount + 1);
+            }, 2000);
+          } else {
+            console.error('Max retry attempts reached. Unable to complete the request.');
+          }
+        }else {
+          console.error('Unhandled error:', err);
         }
       });
   };
-  const getAllUser = (token) => {
+
+
+  const getAllUser = (retryCount = 0) => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
         headers: {
@@ -113,11 +137,21 @@ const Contact = () => {
         if (err.response.data.message === "Unauthenticated") {
           localStorage.clear();
           window.location.href = "/login";
+        } else if(err.response.status === 429){
+          const maxRetries = 3;
+          if (retryCount < maxRetries) {
+            setTimeout(() => {
+              getAllUser(retryCount + 1);
+            }, 2000);
+          } else {
+            console.error('Max retry attempts reached. Unable to complete the request.');
+          }
+        }else {
+          console.error('Unhandled error:', err);
         }
       });
   };
 
-  const MAX_RETRIES = 3;
   const getContactAll = async (token, term, ownerContact, formSearch, retryCount = 0) => {
     try {
       const params = {};
@@ -148,24 +182,32 @@ const Contact = () => {
       });
       setContact(response.data.data);
       setTotalRows(response.data.pagination.totalData);
+      setPending(false)
     } catch (error) {
-      if (error.response && error.response.data.message === "Unauthenticated") {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated") {
         localStorage.clear();
         window.location.href = "/login";
       }
-      if(error.response && error.response.status === 429 && retryCount < MAX_RETRIES){
-        const delay = Math.pow(2, retryCount) * 2000;
-        await new Promise(resolve => setTimeout(resolve, delay));
-        await getContactAll(retryCount + 1)
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getContactAll(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
+        }
       }
-      if(error.response && error.response.status === 404){
+      else if(error.response && error.response.status === 404){
         setContact([])
         setTotalRows(0)
       }
-
+      else{
+        console.error('Unhandled error:', error);
+      }
     }
   };
-  const getDeals = () => {
+  const getDeals = (retryCount = 0) => {
     axios
     .get(`${process.env.REACT_APP_BACKEND_URL}/deals/form/select`, {
       headers: {
@@ -174,9 +216,20 @@ const Contact = () => {
     })
     .then((res) => setAssociateDeals(res.data.data))
     .catch((err) => {
-      if (err.response.data.message === "Unauthenticated") {
+      if (err.response.status === 401 && err.response.data.message === "Unauthenticated") {
         localStorage.clear();
         window.location.href = "/login";
+      }else if(err.response && err.response.status === 429) {
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getDeals(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
+        }
+      }else {
+        console.error('Unhandled error:', err);
       }
     });
   }
@@ -263,13 +316,6 @@ const Contact = () => {
 
   useEffect(() => {
   fetchData();
-  const timeoutId = setTimeout(() => {
-    setPending(false);
-  }, 2500);
-
-  return () => {
-    clearTimeout(timeoutId);
-  };
 }, [TokenAuth, search, ownerContact,  formSearch, pagination.page, pagination.limit]);
 
   const handleChangePage = (page) => {
@@ -280,13 +326,11 @@ const Contact = () => {
     setPagination((prev) => ({ ...prev, pageSize, page }));
   };
 
-  const debouncedHandleFilter = debounce((value) => {
-    setSearch(value.toLowerCase());
-  }, 1000);
-
   const handleFilter = (e) => {
-    const value = e.target.value.toLowerCase();
-    debouncedHandleFilter(value);
+    if(e.key === "Enter"){
+      const value = e.target.value.toLowerCase();
+      setSearch(value)
+    }
   };
 
   const columns = [
@@ -831,7 +875,7 @@ const Contact = () => {
                     <input
                       type="text"
                       placeholder="search name..."
-                      onChange={handleFilter}
+                      onKeyDown={handleFilter}
                       className="form-control search"
                       style={{
                         fontSize: "0.85rem",

@@ -20,3 +20,9 @@ export const getPackageProduct =async (token) => {
       })
       return datas
   };
+
+
+  // export const getCompany = (token) => {
+  //   const datas = axios
+  // }
+

@@ -37,29 +37,16 @@ const Deals = () => {
   const [totalRows, setTotalRows] = useState(0)
   const [ownerDeals, setOwnerDeals] = useState([])
   const [formSearch, setFormSearch] = useState({})
-  const MAX_RETRIES = 3;
+
   const fetchData = async () => {
     try {
-      
       setPending(true)
-      if(deals){
         await getDeals(token, search, ownerDeals, formSearch) 
-      }
-      if(owner){
         await getOwnerUser()
-      }
-      if(stage){
         await getStage();
-      }
-      if(priority){
         await getPriority();
-      }
-      if(company){
         await getCompany();
-      }
-      if(contact){
         await getContact()
-      }
     } catch (error) {
       console.error('error in fetch data', error);
     }finally{
@@ -69,10 +56,6 @@ const Deals = () => {
 
   useEffect(() => {
     fetchData()
-    const timeOut = setTimeout(() => {
-      setPending(false)
-    }, 2500)
-    return () => clearTimeout(timeOut);
    }, [token, search, ownerDeals, formSearch, pagination.page, pagination.limit]);
 
    
@@ -87,14 +70,21 @@ const Deals = () => {
       })
       setContact(response.data.data)
     } catch (error) {
-      if (error.response && error.response.data.message === "Unauthenticated.") {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
         localStorage.clear();
         window.location.href = "/login";
       }
-      if(error.response && error.response.status === 429 && retryCount < MAX_RETRIES){
-        const delay = Math.pow(2, retryCount) * 2000;
-        await new Promise((resolve) => setTimeout(resolve, delay))
-        await getContact(retryCount + 1)
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getContact(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
+        }
+      } else {
+        console.error('Unhandled error:', error);
       }
     }
   };
@@ -108,14 +98,21 @@ const Deals = () => {
       })
       setCompany(response.data.data)
     } catch (error) {
-      if (error.response && error.response.data.message === "Unauthenticated.") {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
         localStorage.clear();
         window.location.href = "/login";
       }
-      if(error.response && error.response.status === 429 && retryCount < MAX_RETRIES){
-        const delay = Math.pow(2, retryCount) * 2000;
-        await new Promise((resolve) => setTimeout(resolve, delay))
-        await getCompany(retryCount + 1)
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getCompany(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
+        }
+      } else {
+        console.error('Unhandled error:', error);
       }
     }
   };
@@ -129,14 +126,21 @@ const Deals = () => {
       })
       setStage(response.data.data)
     } catch (error) {
-      if (error.response && error.response.data.message === "Unauthenticated.") {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
         localStorage.clear();
         window.location.href = "/login";
       }
-      if(error.response && error.response.status === 429 && retryCount < MAX_RETRIES){
-        const delay = Math.pow(2, retryCount) * 3000;
-        await new Promise((resolve) => setTimeout(resolve, delay))
-        await getStage(retryCount + 1)
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getStage(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
+        }
+      } else {
+        console.error('Unhandled error:', error);
       }
     }
   };
@@ -150,14 +154,21 @@ const Deals = () => {
       })
       setOwner(response.data.data)
     } catch (error) {
-      if (error.response.data.message === "Unauthenticated.") {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
         localStorage.clear();
         window.location.href = "/login";
       }
-      if(error.response && error.response.status === 429 && retryCount < MAX_RETRIES){
-        const delay = Math.min(Math.pow(2, retryCount) * 2000, 16000);
-        await new Promise((resolve) => setTimeout(resolve, delay))
-        await getOwnerUser(retryCount + 1)
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getOwnerUser(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
+        }
+      } else {
+        console.error('Unhandled error:', error);
       }
     }
   };
@@ -171,14 +182,21 @@ const Deals = () => {
       })
       setPriority(response.data.data)
     } catch (error) {
-      if (error.response.data.message === "Unauthenticated.") {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
         localStorage.clear();
         window.location.href = "/login";
       }
-      if(error.response && error.response.status === 429 && retryCount < MAX_RETRIES){
-        const delay = Math.pow(2, retryCount) * 2000;
-        await new Promise((resolve) => setTimeout(resolve, delay))
-        await getPriority(retryCount + 1)
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getPriority(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
+        }
+      } else {
+        console.error('Unhandled error:', error);
       }
     }
   };
@@ -220,20 +238,29 @@ const Deals = () => {
     
         setDataDeals(response.data.data);
         setTotalRows(response.data.pagination.totalData);
+        setPending(false)
       } catch (error) {
-        if (error.response && error.response.data.message === "Unauthenticated.") {
+        if  (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
           localStorage.clear();
           window.location.href = "/login";
         }
-        if (error.response && error.response.status === 429 && retryCount < MAX_RETRIES) {
-          const delay = Math.pow(2, retryCount) * 2000;
-          await new Promise(resolve => setTimeout(resolve, delay));
-          await getDeals(retryCount + 1);
+        else if (error.response && error.response.status === 429) {
+          const maxRetries = 3;
+          if (retryCount < maxRetries) {
+            setTimeout(() => {
+              getDeals(retryCount + 1);
+            }, 2000);
+          } else {
+            console.error('Max retry attempts reached. Unable to complete the request.');
+          }
         }
-        if (error.response && error.response.status === 404) {
+        else if (error.response && error.response.status === 404) {
           setDataDeals([]);
           setTotalRows(0);
+        }else{
+          console.error('error' , error);
         }
+        
       }
     };
 
@@ -317,13 +344,12 @@ const Deals = () => {
   const boardKanbanDatatable = isSideFilter ? "col-md-9" : "col-md-12";
   const IconFilter = isSideFilter ? "bi bi-x-lg" : "bi bi-funnel";
 
-  const debouncedHandleFilter = debounce((value) => {
-    setSearch(value.toLowerCase())
-  }, 1000)
 
   const handleSearchDatatable = (e) => {
-    const value = e.target.value.toLowerCase();
-    debouncedHandleFilter(value);
+    if(e.key === "Enter"){
+      const value = e.target.value.toLowerCase();
+      setSearch(value)
+    }
   };
 
   const selectOwner = () => {
@@ -704,7 +730,7 @@ const Deals = () => {
                     <input
                       type="text"
                       placeholder="Search"
-                      onChange={handleSearchDatatable}
+                      onKeyDown={handleSearchDatatable}
                       className="form-control"
                       style={{ fontSize: "0.85rem" }}
                     />

@@ -146,21 +146,21 @@ const SingleDeals = () => {
       });
   };
   // ambil data deal category
-  const getDealCategory = () => {
-    axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/deal-categories`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => setDealCategory(res.data.data))
-      .catch((error) => {
-        if (error.response.data.message === "Unauthenticated") {
-          localStorage.clear();
-          window.location.href = "/login";
-        }
-      });
-  };
+    const getDealCategory = () => {
+      axios
+        .get(`${process.env.REACT_APP_BACKEND_URL}/deal-categories`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((res) => setDealCategory(res.data.data))
+        .catch((error) => {
+          if (error.response.data.message === "Unauthenticated") {
+            localStorage.clear();
+            window.location.href = "/login";
+          }
+        });
+    };
   // Ambil data company
   const getCompanies = () => {
     axios
