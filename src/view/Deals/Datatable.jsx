@@ -13,7 +13,6 @@ const DataTableComponet = ({ data, selectUidDataTable, pending, paginationPerPag
   const token = localStorage.getItem("token");
   const uid = localStorage.getItem('uid');
   const role = localStorage.getItem('role');
-  console.log(role);
   const navigate = useNavigate();
   const columns = [
     {
