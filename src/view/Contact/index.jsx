@@ -337,7 +337,7 @@ const Contact = () => {
     {
       name: "Name",
       selector: (row) => (
-        <a href={`/contact/${row.uid}/edit`} className="image-name text-decoration-none ">
+        <a href={`/contact/${row.uid}/edit`} target="_blank" className="image-name text-decoration-none ">
           <div className="d-flex align-items-center">
             <img src={IconImage} className="rounded-circle" />
             <div className="mt-3">
@@ -487,13 +487,13 @@ const Contact = () => {
       name: "Action",
       selector: (row) => (
         <div className="action-icon">
-          <button
-            onClick={() => navigate(`/contact/${row.uid}/edit`)}
-            className="ms-2 icon-button"
+          <a
+           href={`/contact/${row.uid}/edit`} target="_blank"
+           className="ms-2 icon-button text-dark"
             title="edit"
           >
             <i className="bi bi-pen edit"></i>
-          </button>
+          </a>
           <button
             className="ms-2 icon-button"
             title="delete"

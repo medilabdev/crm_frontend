@@ -18,7 +18,7 @@ const DataTableComponet = ({ data, selectUidDataTable, pending, paginationPerPag
     {
       name: "Name",
       cell: (row) => (
-        <a href={`deals/${row.uid}/edit`} className="text-decoration-none" style={{ whiteSpace: "normal", color:"black", fontWeight:"600" }}>{row.deal_name}</a>
+        <a href={`deals/${row.uid}/edit`} target="_blank" className="text-decoration-none" style={{ whiteSpace: "normal", color:"black", fontWeight:"600" }}>{row.deal_name}</a>
       ),
       sortable: true,
       width: "150px",
@@ -139,6 +139,7 @@ const DataTableComponet = ({ data, selectUidDataTable, pending, paginationPerPag
                 <button
                       className="ms-2 icon-button"
                       title="edit"
+                      target="_blank"
                       onClick={() => navigate(`/deals/${row.uid}/edit`)}
                     >
                       <i className="bi bi-pen edit"></i>
@@ -161,6 +162,7 @@ const DataTableComponet = ({ data, selectUidDataTable, pending, paginationPerPag
                   if (res.isConfirmed) {
                     const formData = new FormData();
                     formData.append("deals_uid[]", row.uid);
+                    // console.log("FormData:", Object.fromEntries(formData.entries()));
                     axios
                       .post(
                         `${process.env.REACT_APP_BACKEND_URL}/deals/item/delete`,

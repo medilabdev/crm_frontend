@@ -489,7 +489,7 @@ const Company = () => {
       id: 1,
       name: "Company Name",
       selector: (row) => (
-        <a href={`/company/${row.uid}/edit`} className="image-name text-decoration-none">
+        <a href={`/company/${row.uid}/edit`} target="_blank" className="image-name text-decoration-none">
           <div className="d-flex align-items-center">
             <img src={IconCompany} style={{ width: "20px" }} />
             <div className="mt-1">
@@ -636,13 +636,13 @@ const Company = () => {
           >
             <i className="bi bi-building-fill"></i>
           </button> */}
-          <button
-            className="ms-2 icon-button"
+          <a
+            className="ms-2 icon-button text-dark"
             title="edit"
-            onClick={() => navigate(`/company/${row.uid}/edit`)}
+            href={`/company/${row.uid}/edit`} target="_blank" 
           >
             <i className="bi bi-pen"></i>
-          </button>
+          </a>
           <button
             className="ms-2 icon-button"
             title="delete"
