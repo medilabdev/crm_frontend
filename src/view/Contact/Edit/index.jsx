@@ -29,101 +29,169 @@ const EditContact = () => {
   const { uid } = useParams();
   const token = localStorage.getItem("token");
 
-  const getDeals =(token) => {
-    axios.get(`${process.env.REACT_APP_BACKEND_URL}/deals/form/select`, {
-      headers:{
-        Authorization:`Bearer ${token}`
-      }
-    }).then((res) => setDeals(res.data.data))
-    .catch((err) => {
-      if (err.response.data.message === "Unauthenticated.") {
+  const getDeals = async(retryCount = 0) => {
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/deals/form/select`, {
+        headers:{
+          Authorization:`Bearer ${token}`
+        }
+      })
+      setDeals(response.data.data)
+    } catch (error) {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
         localStorage.clear();
         window.location.href = "/login";
       }
-    });
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getDeals(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
+        }
+      } else {
+        console.error('Unhandled error:', error);
+      }
+    }
   }
-  const getCompany = (token) => {
-    axios.get(`${process.env.REACT_APP_BACKEND_URL}/companies/form/select`, {
-      headers:{
-        Authorization: `Bearer ${token}`
-      }
-    }).then((res) => setCompany(res.data.data))
-    .catch((err) => {
-      if (err.response.data.message === "Unauthenticated.") {
+  
+  const getCompany = async(retryCount = 0) => {
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/companies/form/select`, {
+        headers:{
+          Authorization: `Bearer ${token}`
+        }
+      }) 
+      setCompany(response.data.data)
+    } catch (error) {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
         localStorage.clear();
         window.location.href = "/login";
       }
-    });
-  }
-  const getOwner = (token) => {
-    axios.get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
-      headers:{
-        Authorization:`Bearer ${token}`
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getCompany(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
+        }
+      } else {
+        console.error('Unhandled error:', error);
       }
-    }).then((res) => setOwner(res.data.data))
-    .catch((err) => {
-      if (err.response.data.message === "Unauthenticated.") {
-        localStorage.clear();
-        window.location.href = "/login";
-      }
-    });
+    }
   }
 
-  const getSource = (token) => {
-    axios.get(`${process.env.REACT_APP_BACKEND_URL}/companies-source`, {
-      headers:{
-        Authorization: `Bearer ${token}`
-      }
-    }).then((res) => setSource(res.data.data))
-    .catch((err) => {
-      if (err.response.data.message === "Unauthenticated.") {
+  const getOwner = async(retryCount = 0) => {
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
+        headers:{
+          Authorization:`Bearer ${token}`
+        }
+      })
+      setOwner(response.data.data)
+    } catch (error) {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
         localStorage.clear();
         window.location.href = "/login";
       }
-    });
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getOwner(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
+        }
+      } else {
+        console.error('Unhandled error:', error);
+      }
+    }
   }
-  const getContactDetail = (uid, token) => {
-    axios
+
+  const getSource = async(retryCount = 0) => {
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/companies-source`, {
+        headers:{
+          Authorization: `Bearer ${token}`
+        }
+      })
+      setSource(response.data.data)
+    } catch (error) {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getSource(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
+        }
+      } else {
+        console.error('Unhandled error:', error);
+      }
+    }
+  }
+
+  const getContactDetail = async(uid, token, retryCount = 0) => {
+    try {
+      const res = await axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/contacts/${uid}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((res) => {
-        const contactDetail = res.data.data;
-        const telp_number = contactDetail?.phone?.map(
+      const contactDetail = res.data.data;
+      const telp_number = contactDetail?.phone?.map(
           (phone) => phone
         );
-        
-        const companyOld = contactDetail?.associate?.map((data) => data)
-        console.log(companyOld);
-        setOldComp(companyOld);
-        setEditContact({
-          name: contactDetail.name,
-          birthday: contactDetail.birthday,
-          gender: contactDetail.gender,
-          email: contactDetail.email,
-          position: contactDetail.position,
-          address: contactDetail.address,
-          city: contactDetail.city,
-          postal_code: contactDetail.postal_code,
-          remarks: contactDetail.remarks,
-          image: contactDetail.image,
-          owner_user_uid: contactDetail.owner_user_uid,
-          source_uid: contactDetail.source_uid,
-          gps: contactDetail.gps,
-        });
-        setTelephone(telp_number ? telp_number : []);
-        setHistory(contactDetail.history)
-        
-      })
-      .catch((err) => {
-        if (err.response.data.message === "Unauthenticated.") {
-          localStorage.clear();
-          window.location.href = "/login";
-        }
+      const companyOld = contactDetail?.associate?.map((data) => data)
+      setOldComp(companyOld);
+      setEditContact({
+        name: contactDetail.name,
+        birthday: contactDetail.birthday,
+        gender: contactDetail.gender,
+        email: contactDetail.email,
+        position: contactDetail.position,
+        address: contactDetail.address,
+        city: contactDetail.city,
+        postal_code: contactDetail.postal_code,
+        remarks: contactDetail.remarks,
+        image: contactDetail.image,
+        owner_user_uid: contactDetail.owner_user_uid,
+        source_uid: contactDetail.source_uid,
+        gps: contactDetail.gps,
       });
+      setTelephone(telp_number ? telp_number : []);
+      setHistory(contactDetail.history)
+    } catch (error) {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getContactDetail(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
+        }
+      } else {
+        console.error('Unhandled error:', error);
+      }
+    }
   };
+
   const addTelephone = () => {
     setTelephone([...telephone, ""]);
   };
@@ -339,9 +407,9 @@ const EditContact = () => {
       })
     }
     formData.append("_method", "put")
-    for (const pair of formData.entries()) {
-      console.log(pair[0] + ": " + pair[1]);
-    }
+    // for (const pair of formData.entries()) {
+    //   console.log(pair[0] + ": " + pair[1]);
+    // }
     axios.post(`${process.env.REACT_APP_BACKEND_URL}/contacts/${uid}`, formData,{
       headers:{
         Authorization: `Bearer ${token}`
@@ -360,7 +428,7 @@ const EditContact = () => {
   }
 
   const handleDeleteDeals = (uid) => {
-    console.log(uid);
+    // console.log(uid);
     Swal.fire({
       title: "Konfirmasi",
       text: "Apa anda yakin ingin menghapus item ini?",

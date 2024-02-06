@@ -114,100 +114,179 @@ const SingleDeals = () => {
     setMentionUsers(e.map((opt) => opt.value));
   };
   // ambil data owner
-  const getOwnerUser = () => {
-    axios
+  const getOwnerUser = async(retryCount = 0) => {
+    try {
+      const response = await axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((res) => setOwner(res.data.data))
-      .catch((error) => {
-        if (error.response.data.message === "Unauthenticated") {
-          localStorage.clear();
-          window.location.href = "/login";
+      setOwner(response.data.data)
+    } catch (error) {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }  else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getOwnerUser(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
         }
-      });
+      } else {
+        console.error('Unhandled error:', error);
+      }
+    }
   };
+
   // ambil data priority
-  const getPriority = () => {
-    axios
+  const getPriority = async(retryCount = 0) => {
+    try {
+      const response = await axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/priorities`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((res) => setPriority(res.data.data))
-      .catch((error) => {
-        if (error.response.data.message === "Unauthenticated") {
-          localStorage.clear();
-          window.location.href = "/login";
+      setPriority(response.data.data)
+    } catch (error) {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getContact(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
         }
-      });
+      } else {
+        console.error('Unhandled error:', error);
+      }
+    }
   };
+
   // ambil data deal category
-    const getDealCategory = () => {
-      axios
+    const getDealCategory = async (retryCount = 0) => {
+      try {
+        const response = await axios
         .get(`${process.env.REACT_APP_BACKEND_URL}/deal-categories`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         })
-        .then((res) => setDealCategory(res.data.data))
-        .catch((error) => {
-          if (error.response.data.message === "Unauthenticated") {
-            localStorage.clear();
-            window.location.href = "/login";
+        setDealCategory(response.data.data)
+      } catch (error) {
+        if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+          localStorage.clear();
+          window.location.href = "/login";
+        } else if (error.response && error.response.status === 429){
+          const maxRetries = 3;
+          if (retryCount < maxRetries) {
+            setTimeout(() => {
+              getDealCategory(retryCount + 1);
+            }, 2000);
+          } else {
+            console.error('Max retry attempts reached. Unable to complete the request.');
           }
-        });
+        }else {
+          console.error('Unhandled error:', error);
+        }
+      }
     };
   // Ambil data company
-  const getCompanies = () => {
-    axios
+  const getCompanies = async(retryCount = 0) => {
+    try {
+      const response = await axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/companies/form/select`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((res) => setCompanies(res.data.data))
-      .catch((error) => {
-        if (error.response.data.message === "Unauthenticated") {
-          localStorage.clear();
-          window.location.href = "/login";
+      setCompanies(response.data.data)
+    } catch (error) {
+      if (error.response.data.message === "Unauthenticated") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getCompanies(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
         }
-      });
+    }else {
+      console.error('Unhandled error:', error);
+    }
+   }
   };
+
+
   // ambil data contact
-  const getContact = () => {
-    axios
+  const getContact =async (retryCount = 0) => {
+    try {
+      const response = await   axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/contacts/form/select`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((res) => setContact(res.data.data))
-      .catch((error) => {
-        if (error.response.data.message === "Unauthenticated") {
-          localStorage.clear();
-          window.location.href = "/login";
+      setContact(response.data.data)
+    } catch (error) {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getContact(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
         }
-      });
+    }else {
+      console.error('Unhandled error:', error);
+    }
+    }
   };
-  const getPipeline = () => {
-    axios
+
+  const getPipeline = async(retryCount = 0) => {
+    try {
+      const response = await  axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/staging-masters`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((res) => setPipeline(res.data.data))
-      .catch((error) => {
-        if (error.response.data.message === "Unauthenticated") {
-          localStorage.clear();
-          window.location.href = "/login";
+      setPipeline(response.data.data)
+    } catch (error) {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getPipeline(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
         }
-      });
+      } else {
+        console.error('Unhandled error:', error);
+      }
+    }
   };
+  
   // select owner
   const ownerSelect = () => {
     const result = [];
@@ -232,6 +311,7 @@ const SingleDeals = () => {
     });
     return result;
   };
+
   // select category deal
   const dealCategorySelect = () => {
     const result = [];
@@ -244,6 +324,7 @@ const SingleDeals = () => {
     });
     return result;
   };
+
   // select company
   const companySelect = () => {
     const result = [];
@@ -256,6 +337,7 @@ const SingleDeals = () => {
     });
     return result;
   };
+
   // select contact
   const contactSelect = () => {
     const result = [];
@@ -394,9 +476,9 @@ const SingleDeals = () => {
           formData.append(`products[${index}][total_price]`, product.total_price || '');
         });
       }
-      // for (const pair of formData.entries()) {
-      //   console.log(pair[0] + ": " + pair[1]);
-      // }
+      for (const pair of formData.entries()) {
+        console.log(pair[0] + ": " + pair[1]);
+      }
       axios
         .post(`${process.env.REACT_APP_BACKEND_URL}/deals`, formData, {
           headers: {
@@ -445,7 +527,7 @@ const SingleDeals = () => {
                   Save Changes
                 </button>
                 <a
-                  href="/company"
+                  onclick="window.history.back()"
                   className="btn btn-secondary text-decoration-none"
                 >
                   Cancel

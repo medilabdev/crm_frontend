@@ -37,20 +37,33 @@ const EditDeals = () => {
   const mantionUsersUid = (e) => {
     setMentionUsers(e.map((opt) => opt.value));
   };
-  const getContact = () => {
-    axios
+  const getContact = async(retryCount = 0) => {
+    try {
+      const response = await axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/contacts/form/select`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((res) => setContact(res.data.data))
-      .catch((error) => {
-        if (error.response.data.message === "Unauthenticated.") {
-          localStorage.clear();
-          window.location.href = "/login";
+      setContact(response.data.data)
+    } catch (error) {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getContact(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
         }
-      });
+      } else {
+        console.error('Unhandled error:', error);
+      }
+    }
   };
 
   const allProduct = [];
@@ -67,130 +80,208 @@ const EditDeals = () => {
       data.map((item) => (totalPrice += item.total_price));
     });
   }
-  const getCompany = () => {
-    axios
+
+
+  const getCompany = async(retryCount = 0) => {
+    try {
+      const response = await axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/companies/form/select`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((res) => setCompany(res.data.data))
-      .catch((error) => {
-        if (error.response.data.message === "Unauthenticated.") {
-          localStorage.clear();
-          window.location.href = "/login";
+      setCompany(response.data.data)
+    } catch (error) {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getCompany(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
         }
-      });
+      } else {
+        console.error('Unhandled error:', error);
+      }
+    }
   };
 
-  const getDealsCategory = () => {
-    axios
+  const getDealsCategory = async(retryCount = 0) => {
+    try {
+      const response = await axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/deal-categories`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((res) => setDealsCategory(res.data.data))
-      .catch((error) => {
-        if (error.response.data.message === "Unauthenticated.") {
-          localStorage.clear();
-          window.location.href = "/login";
+      setDealsCategory(response.data.data)
+    } catch (error) {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getDealsCategory(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
         }
-      });
+      } else {
+        console.error('Unhandled error:', error);
+      }
+    }
   };
 
-  const getPriority = () => {
-    axios
+  const getPriority = async(retryCount = 0) => {
+    try {
+      const response = await axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/priorities`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((res) => setPriority(res.data.data))
-      .catch((error) => {
-        if (error.response.data.message === "Unauthenticated.") {
-          localStorage.clear();
-          window.location.href = "/login";
+      setPriority(response.data.data)
+    } catch (error) {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getPriority(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
         }
-      });
+      } else {
+        console.error('Unhandled error:', error);
+      }
+    }
   };
 
-  const getOwner = () => {
-    axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
+  const getOwner = async(retryCount = 0) => {
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
         headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => setOwner(res.data.data))
-      .catch((error) => {
-        if (error.response.data.message === "Unauthenticated") {
-          localStorage.clear();
-          window.location.href = "/login";
+          Authorization: `Bearer ${token}`
         }
-      });
+      })
+      setOwner(response.data.data)
+    } catch (error) {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getOwner(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
+        }
+      } else {
+        console.error('Unhandled error:', error);
+      }
+    }
   };
-  const getDealsValueOld = (token, uid) => {
-    axios
+
+  const getDealsValueOld = async(token, uid, retryCount = 0) => {
+    try {
+      const response =await axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/deals/${uid}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((res) => {
-        const dealsOld = res.data.data;
-        setValueDeals({
-          deal_name: dealsOld.deal_name,
-          priority_uid: dealsOld.priority_uid,
-          deal_status: dealsOld.deal_status,
-          deal_category_uid: dealsOld.deal_category_uid,
-          company_uid: dealsOld.company_uid,
-          owner_user_uid: dealsOld.owner_user_uid,
-          deal_size: dealsOld.deal_size,
-        });
-        setHistory(dealsOld.history);
-        localStorage.setItem(
-          "DataProduct",
-          JSON.stringify(dealsOld?.detail_product)
-        );
-        setStageOld(dealsOld?.staging);
-        if (dealsOld?.contact_person) {
-          localStorage.setItem(
-            `contactPerson`,
-            JSON.stringify(dealsOld?.contact_person)
-          );
-          setContactDetail(dealsOld?.contact_person);
-        }
-        if (dealsOld?.company) {
-          localStorage.setItem(
-            "companyStorage",
-            JSON.stringify(dealsOld?.company)
-          );
-        }
-      })
-      .catch((error) => {
-        if (error.response?.data?.message === "Unauthenticated.") {
-          localStorage.clear();
-          window.location.href = "/login";
-        }
+      const dealsOld = response.data.data;
+      setValueDeals({
+        deal_name: dealsOld.deal_name,
+        priority_uid: dealsOld.priority_uid,
+        deal_status: dealsOld.deal_status,
+        deal_category_uid: dealsOld.deal_category_uid,
+        company_uid: dealsOld.company_uid,
+        owner_user_uid: dealsOld.owner_user_uid,
+        deal_size: dealsOld.deal_size,
       });
+      setHistory(dealsOld.history);
+      localStorage.setItem(
+        "DataProduct",
+        JSON.stringify(dealsOld?.detail_product)
+      );
+      setStageOld(dealsOld?.staging);
+      if (dealsOld?.contact_person) {
+        localStorage.setItem(
+          `contactPerson`,
+          JSON.stringify(dealsOld?.contact_person)
+        );
+        setContactDetail(dealsOld?.contact_person);
+      }
+      if (dealsOld?.company) {
+        localStorage.setItem(
+          "companyStorage",
+          JSON.stringify(dealsOld?.company)
+        );
+      }
+    } catch (error) {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getDealsValueOld(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
+        }
+      } else {
+        console.error('Unhandled error:', error);
+      }
+    }
   };
 
-  const getPipeline = () => {
-    axios
+  const getPipeline = async(retryCount = 0) => {
+    try {
+      const response = await axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/staging-masters`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((res) => setPipeline(res?.data?.data))
-      .catch((error) => {
-        if (error.response.data.message === "Unauthenticated.") {
-          localStorage.clear();
-          window.location.href = "/login";
+      setPipeline(response.data.data)
+    } catch (error) {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getPipeline(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
         }
-      });
-  };
+      } else {
+        console.error('Unhandled error:', error);
+      }
+    }
+  }
 
   const selectOwner = () => {
     const result = [];
@@ -285,7 +376,11 @@ const EditDeals = () => {
       [e.target.name]: e.target.value,
     });
   };
-  
+  const [selectFile, setSelectFile] = useState(null)
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setSelectFile(file)
+  }
   useEffect(() => {
     getPipeline();
     getDealsValueOld(token, uid);
@@ -307,7 +402,7 @@ const EditDeals = () => {
 
   const [dataProduct, setDataProduct] = useState([]);
   const handleDeleteProduct = (productUid) => {
-    const upData = allProduct[0].filter((data) => data.uid !== productUid);
+    const upData = allProduct[0].filter((data) => data.id !== productUid)
     setDataProduct(upData);
     localStorage.setItem("DataProduct", JSON.stringify(upData));
   };
@@ -400,7 +495,7 @@ const EditDeals = () => {
     {
       name: "Name Product",
       selector: (row) =>
-      row.product?.name || row.package_product?.name,
+      row.product?.name || row.package_product?.name || row.product_name,
       sortable: true,
       width: "180px",
     },
@@ -431,12 +526,12 @@ const EditDeals = () => {
     {
       name: "Action",
       selector: (row) => (
-        <button
-          onClick={() => handleDeleteProduct(row.uid)}
-          className="icon-button"
+        <a
+          onClick={() => handleDeleteProduct(row.id)}
+          className="icon-button text-black"
         >
           <i className="bi bi-trash-fill danger"></i>
-        </button>
+        </a>
       ),
     },
   ];
@@ -470,13 +565,23 @@ const EditDeals = () => {
       selector: (row) => (
         <div
           className="mt-2"
-          style={{ whiteSpace: "normal", fontSize: "12px" }}
+          style={{ whiteSpace: "normal", fontSize: "0.85rem" }}
         >
           <p dangerouslySetInnerHTML={{ __html: row?.note }} />
         </div>
       ),
       wrap: true,
       width: "200px",
+    },
+    {
+      name: "File",
+      selector:(row) =>(
+        <div>
+          {row.files ? (
+            <a className="text-decoration-none" href={`https://api-crm.medilabjakarta.id/storage/file/deals/${row.files?.file}`} style={{whiteSpace: "normal", fontSize:"0.75rem"}}>{row.files?.file}</a>
+          ): "-"}
+        </div>
+      )
     },
     {
       name: "Created at",
@@ -519,13 +624,13 @@ const EditDeals = () => {
     formData.append("staging_uid", selectedPipeline ?? ""); 
     formData.append("company_uid", valueDeals.company_uid || '');
     formData.append("owner_user_uid", valueDeals.owner_user_uid);
+    formData.append("file", selectFile || "");
     mentionUsers.forEach((ment, index) => {
       formData.append(`mention_user[${index}]`, ment);
     });
     combineCont.forEach((com, index) => {
       formData.append(`contact_person[${index}]`, com);
     });
-    
     allProduct[0].forEach((product, index) => {
       formData.append(`products[${index}][product_uid]`, product.product_uid || product.package_product_uid);
       formData.append(`products[${index}][qty]`, product.qty);
@@ -935,7 +1040,6 @@ const EditDeals = () => {
                                     No.Telp :
                                     <strong className="ms-1">
                                       {data.contact?.phone?.[0]?.number || "-"}
-                                      {console.log(data.contact)}
                                     </strong>
                                   </p>
                                 </Col>
@@ -1039,6 +1143,10 @@ const EditDeals = () => {
                       handleChange({ target: { name: "notes", value } })
                     }
                   />
+                    <Form.Group className="mb-3 ps-2">
+                    <Form.Label className="fw-semibold fs-6">File</Form.Label>
+                    <Form.Control type="file" name="file" onChange={handleFileChange}/>
+                    </Form.Group>
                   <Form.Group as={Row} xs={2} md={4} lg={6} className="p-2">
                     <Form.Label column lg={4} className="fw-semibold fs-6">
                       Mention Users :

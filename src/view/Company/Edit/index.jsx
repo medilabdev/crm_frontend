@@ -49,153 +49,204 @@ const EditCompany = () => {
   const [valueComp, setValueComp] = useState([]);
   const [formParentComp, setFormParentComp] = useState(false);
   // console.log(oldAssociate);
-  const getDeals = (retryCount = 0) => {
-    axios
+  const getDeals = async (retryCount = 0) => {
+    try {
+      const response = await axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/deals/form/select`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((res) => setDeals(res.data.data))
-      .catch(async (err) => {
-        if (err.response.data.message === "Unauthenticated.") {
-          localStorage.clear();
-          window.location.href = "/login";
+      setDeals(response.data.data)
+    } catch (error) {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getDeals(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
         }
-        if(err.response && err.response.status === 404){
-          setDeals([])
-        }
-        if(err.response && err.response.status === 429 && retryCount < 3){
-          const delay = Math.pow(2, retryCount) * 1000;
-          await new Promise((resolve) => setTimeout(resolve, delay))
-          await getDeals(retryCount + 1)
-        }
-      });
+      } else {
+        console.error('Unhandled error:', error);
+      }
+    }
   };
-  const getContact = (retryCount = 0) => {
-    axios
+
+
+  const getContact = async(retryCount = 0) => {
+    try {
+      const response =await axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/contacts/form/select`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((res) => setContact(res.data.data))
-      .catch(async(err) => {
-        if (err.response && err.response.data.message === "Unauthenticated.") {
-          localStorage.clear();
-          window.location.href = "/login";
+      setContact(response.data.data)
+    } catch (error) {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getContact(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
         }
-        if(err.response && err.response.status === 404){
-          setContact([])
-        }
-        if(err.response && err.response.status === 429 && retryCount < 3){
-          const delay = Math.pow(2, retryCount) * 1000;
-          await new Promise((resolve) => setTimeout(resolve, delay))
-          await getContact(retryCount + 1)
-        }
-      });
+      } else {
+        console.error('Unhandled error:', error);
+      }
+    }
   };
 
-  const getCompanyParent = (retryCount = 0) => {
-    axios
+  const getCompanyParent = async(retryCount = 0) => { 
+    try {
+      const response = await axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/companies/form/select`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((res) => setParentCompany(res.data.data))
-      .catch(async(err) => {
-        if (err.response.data.message === "Unauthenticated.") {
-          localStorage.clear();
-          window.location.href = "/login";
+      setParentCompany(response.data.data)
+    } catch (error) {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getCompanyParent(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
         }
-        if(err.response && err.response.status === 404){
-          setParentCompany([])
-        }
-        if(err.response && err.response.status === 429 && retryCount < 3){
-          const delay = Math.pow(2, retryCount) * 1000;
-          await new Promise((resolve) => setTimeout(resolve, delay))
-          await getCompanyParent(retryCount + 1)
-        }
-      });
+      } else {
+        console.error('Unhandled error:', error);
+      }
+    }
   };
-  const getSourceCompany = (retryCount = 0) => {
-    axios
+
+  const getSourceCompany = async(retryCount = 0) => {
+    try {
+      const response = await axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/companies-source`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((res) => setSourceCompany(res.data.data))
-      .catch(async (err) => {
-        if (err.response.data.message === "Unauthenticated.") {
-          localStorage.clear();
-          window.location.href = "/login";
+      setSourceCompany(response.data.data)
+    } catch (error) {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getSourceCompany(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
         }
-        if(err.response && err.response.status === 429 && retryCount < 3){
-          const delay = Math.pow(2, retryCount) * 1000;
-          await new Promise((resolve) => setTimeout(resolve, delay))
-          await getSourceCompany(retryCount + 1)
-        }
-      });
+      } else {
+        console.error('Unhandled error:', error);
+      }
+    }
   };
 
-  const getTypeCompany = (retryCount = 0) => {
-    axios
+  const getTypeCompany = async(retryCount = 0) => {
+    try {
+      const response = await axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/companies-type`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((res) => setTypeCompany(res.data.data))
-      .catch(async (err) => {
-        if (err.response.data.message === "Unauthenticated.") {
-          localStorage.clear();
-          window.location.href = "/login";
+      setTypeCompany(response.data.data)
+    } catch (error) {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getTypeCompany(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
         }
-        if(err.response && err.response.status === 429 && retryCount < 3){
-          const delay = Math.pow(2, retryCount) * 1000;
-          await new Promise((resolve) => setTimeout(resolve, delay))
-          await getTypeCompany(retryCount + 1)
-        }
-      });
+      } else {
+        console.error('Unhandled error:', error);
+      }
+    }
   };
   // console.log(oldAssociate);
-  const getCompanyDetail = (uid, token) => {
-    axios
+  const getCompanyDetail = async (uid, token, retryCount = 0) => {
+    try {
+      const response = await axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/companies/${uid}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((res) => {
-        const companyDetail = res.data.data;
-        const telp_number = companyDetail?.phone?.map((phoneObj) => phoneObj);
-        const oldAssociate = companyDetail?.associate?.map((data) => data);
-        setOldAssociate(oldAssociate);
-        setEditCompany({
-          name: companyDetail.name,
-          website_url: companyDetail.website_url,
-          address: companyDetail.address,
-          map_address: companyDetail.map_address,
-          city: companyDetail.city,
-          postal_code: companyDetail.postal_code,
-          number_of_employee: companyDetail.number_of_employee,
-          number_of_patient: companyDetail.number_of_patient,
-          owner_user_uid: companyDetail?.owner?.uid,
-          company_source_uid: companyDetail?.company_source?.uid,
-          company_type_uid: companyDetail?.company_type?.uid,
-        });
-        setTelephone(telp_number ? telp_number : []);
-        setHistory(companyDetail.history);
-        setOldParentCompany(companyDetail);
-        if(companyDetail?.parent){
-          localStorage.setItem(
-            "parentComp",
-            JSON.stringify(companyDetail?.parent)
-          )
-        }
+      const companyDetail = response.data.data;
+      const telp_number = companyDetail?.phone?.map((phoneObj) => phoneObj);
+      const oldAssociate = companyDetail?.associate?.map((data) => data);
+      setOldAssociate(oldAssociate);
+      setEditCompany({
+        name: companyDetail.name,
+        website_url: companyDetail.website_url,
+        address: companyDetail.address,
+        map_address: companyDetail.map_address,
+        city: companyDetail.city,
+        postal_code: companyDetail.postal_code,
+        number_of_employee: companyDetail.number_of_employee,
+        number_of_patient: companyDetail.number_of_patient,
+        owner_user_uid: companyDetail?.owner?.uid,
+        company_source_uid: companyDetail?.company_source?.uid,
+        company_type_uid: companyDetail?.company_type?.uid,
       });
+      setTelephone(telp_number ? telp_number : []);
+      setHistory(companyDetail.history);
+      setOldParentCompany(companyDetail);
+      if(companyDetail?.parent){
+        localStorage.setItem(
+          "parentComp",
+          JSON.stringify(companyDetail?.parent)
+        )
+      }
+    } catch (error) {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getCompanyDetail(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
+        }
+      } else {
+        console.error('Unhandled error:', error);
+      }
+    }
   };
 
   const parentCompanyLocalStorage = [];
@@ -206,26 +257,35 @@ const EditCompany = () => {
       parentCompanyLocalStorage.push(data);
     }
   }
-  const getOwnerUser = (retryCount = 0) => {
-    axios
+  const getOwnerUser = async(retryCount = 0) => {
+    try {
+      const response = await axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((res) => setOwner(res.data.data))
-      .catch(async (err) => {
-        if (err.response.data.message === "Unauthenticated.") {
-          localStorage.clear();
-          window.location.href = "/login";
+      setOwner(response.data.data)
+    } catch (error) {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getOwnerUser(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
         }
-        if(err.response && err.response.status === 429 && retryCount < 3){
-          const delay = Math.pow(2, retryCount) * 1000;
-          await new Promise((resolve) => setTimeout(resolve, delay))
-          await getOwnerUser(retryCount + 1)
-        }
-      });
+      } else {
+        console.error('Unhandled error:', error);
+      }
+    }
   };
+
   const addTelephone = () => {
     setTelephone([...telephone, ""]);
   };
@@ -390,7 +450,7 @@ const EditCompany = () => {
       });
     }
     formData.append("_method", "put");
-    console.log("FormData Content:");
+    // console.log("FormData Content:");
     // for (const pair of formData.entries()) {
     //   console.log(pair[0] + ": " + pair[1]);
     // }
