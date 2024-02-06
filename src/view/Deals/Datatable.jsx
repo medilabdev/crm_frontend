@@ -136,14 +136,14 @@ const DataTableComponet = ({ data, selectUidDataTable, pending, paginationPerPag
         <div className="action-icon">
             {row?.owner_user_uid === uid || (role === "hG5sy_dytt95")? (
               <>
-                <button
-                      className="ms-2 icon-button"
+                <a
+                      href={`/deals/${row.uid}/edit`}
+                      className="ms-2 icon-button text-dark"
                       title="edit"
                       target="_blank"
-                      onClick={() => navigate(`/deals/${row.uid}/edit`)}
                     >
                       <i className="bi bi-pen edit"></i>
-                </button>
+                </a>
               
             <button
               className="icon-button"
