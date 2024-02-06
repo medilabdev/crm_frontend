@@ -57,7 +57,7 @@ const SingleCompany = () => {
   const handleShowContact = () => setShowAddContact(true);
   const MAX_RETRIES = 3;
 
-  const getDeals = async (term, retryCount = 0) => {
+  const getDeals = async (retryCount = 0) => {
     try {
       const respon = await axios.get(
         `${process.env.REACT_APP_BACKEND_URL}/deals/form/select`,
@@ -69,17 +69,21 @@ const SingleCompany = () => {
       );
       setDeals(respon.data.data);
     } catch (error) {
-      if (error.respon && error.response.data.message === "Unauthenticated.") {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
         localStorage.clear();
         window.location.href = "/login";
       }
-      if (error.respon && error.respon.status === 404) {
-        await setDeals([]);
-      }
-      if (error.respon && error.respon.status === 429 && retryCount < MAX_RETRIES) {
-        const delay = Math.pow(2, retryCount) * 1000;
-        await new Promise((resolve) => setTimeout(resolve, delay));
-        await getDeals(term);
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getDeals(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
+        }
+      } else {
+        console.error('Unhandled error:', error);
       }
     }
   };
@@ -93,22 +97,26 @@ const SingleCompany = () => {
       })
       setContact(respon.data.data)
     } catch (error) {
-      if (error.respon && error.response.data.message === "Unauthenticated.") {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
         localStorage.clear();
         window.location.href = "/login";
       }
-      if (error.respon && error.respon.status === 404) {
-        await setContact([]);
-      }
-      if (error.respon && error.respon.status === 429 && retryCount < MAX_RETRIES) {
-        const delay = Math.pow(2, retryCount) * 1000;
-        await new Promise((resolve) => setTimeout(resolve, delay));
-        await getContact(term);
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getContact(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
+        }
+      } else {
+        console.error('Unhandled error:', error);
       }
     }
   };
 
-  const getCompanyParent = async(term, retryCount = 0) => {
+  const getCompanyParent = async(retryCount = 0) => {
     try {
       const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/companies/form/select`,{
         headers: {
@@ -117,66 +125,109 @@ const SingleCompany = () => {
       })
       setParentCompany(response.data.data)
     } catch (error) {
-      if (error.response && error.response.data.message === "Unauthenticated.") {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
         localStorage.clear();
         window.location.href = "/login";
       }
-      if (error.response && error.respon.status === 404) {
-        await setParentCompany([]);
-      }
-      if (error.respon && error.respon.status === 429 && retryCount < MAX_RETRIES) {
-        const delay = Math.pow(2, retryCount) * 1000;
-        await new Promise((resolve) => setTimeout(resolve, delay));
-        await getCompanyParent(term);
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getCompanyParent(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
+        }
+      } else {
+        console.error('Unhandled error:', error);
       }
     }
   };
 
-  const getSourceCompany = () => {
-    axios
+  const getSourceCompany = async(retryCount = 0) => {
+    try {
+      const response = await axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/companies-source`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((res) => setSourceCompany(res.data.data))
-      .catch((err) => {
-        if (err.response.data.message === "Unauthenticated.") {
-          localStorage.clear();
-          window.location.href = "/login";
+      setSourceCompany(response.data.data)
+    } catch (error) {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getSourceCompany(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
         }
-      });
+      } else {
+        console.error('Unhandled error:', error);
+      }
+    }
   };
-  const getCompanyType = () => {
-    axios
+
+  const getCompanyType = async(retryCount = 0) => {
+    try {
+      const response = await axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/companies-type`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      })
-      .then((res) => setTypeCompany(res.data.data))
-      .catch((err) => {
-        if (err.response.data.message === "Unauthenticated.") {
-          localStorage.clear();
-          window.location.href = "/login";
+      }) 
+      setTypeCompany(response.data.data)
+    } catch (error) {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getCompanyType(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
         }
-      });
+      } else {
+        console.error('Unhandled error:', error);
+      }
+    }
   };
 
-  const getOwnerUser = () => {
-    axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => setOwnerUser(res.data.data))
-      .catch((err) => {
-        if (err.response.data.message === "Unauthenticated.") {
-          localStorage.clear();
-          window.location.href = "/login";
+  const getOwnerUser = async(retryCount = 0) => {
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
+        headers:{
+          Authorization: `Bearer ${token}`
         }
-      });
+      })
+      setOwnerUser(response.data.data)
+    } catch (error) {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getOwnerUser(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
+        }
+      } else {
+        console.error('Unhandled error:', error);
+      }
+    }
   };
 
   const addTelephone = () => {
