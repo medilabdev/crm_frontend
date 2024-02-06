@@ -1143,15 +1143,19 @@ const EditDeals = () => {
                       handleChange({ target: { name: "notes", value } })
                     }
                   />
-                    <Form.Group className="mb-3 ps-2">
-                    <Form.Label className="fw-semibold fs-6">File</Form.Label>
-                    <Form.Control type="file" name="file" onChange={handleFileChange}/>
-                    </Form.Group>
+                   <Form.Group as={Row} xs={2} md={4} lg={6} className="p-2">
+                    <Form.Label column lg={4} className="fw-semibold fs-6">
+                     File : 
+                    </Form.Label>
+                    <Col lg={8} style={{ marginLeft: "-5rem" }}>
+                      <Form.Control type="file" name="file" size="sm" className="p-2" onChange={handleFileChange}/>
+                    </Col>
+                  </Form.Group>
                   <Form.Group as={Row} xs={2} md={4} lg={6} className="p-2">
                     <Form.Label column lg={4} className="fw-semibold fs-6">
                       Mention Users :
                     </Form.Label>
-                    <Col lg={6} style={{ marginLeft: "-5rem" }}>
+                    <Col lg={8} style={{ marginLeft: "-5rem" }}>
                       <Select
                         options={selectOwner()}
                         isMulti

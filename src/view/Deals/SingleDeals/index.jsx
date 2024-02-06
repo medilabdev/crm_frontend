@@ -444,7 +444,12 @@ const SingleDeals = () => {
       window.removeEventListener("beforeunload", clearDataProductLocalStorage);
     };
   }, [token, dealSize, totalPrice]);
-  // const
+
+  const [selectFile, setSelectFile] = useState(null)
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setSelectFile(file)
+  }
   const handleSubmitDeals = (e) => {
     e.preventDefault();
     try {
@@ -464,6 +469,7 @@ const SingleDeals = () => {
       formData.append("owner_user_uid", inputDeals.owner_user_uid);
       formData.append("company_uid", inputDeals.company_uid || '');
       formData.append("notes", inputDeals.notes ? inputDeals.notes : "");
+      formData.append("file", selectFile || "");
       if (Array.isArray(allData[0]) && allData[0].length > 0) {
         allData[0].forEach((product, index) => {
           formData.append(`products[${index}][product_uid]`, product.product_uid || '');
@@ -476,9 +482,9 @@ const SingleDeals = () => {
           formData.append(`products[${index}][total_price]`, product.total_price || '');
         });
       }
-      for (const pair of formData.entries()) {
-        console.log(pair[0] + ": " + pair[1]);
-      }
+      // for (const pair of formData.entries()) {
+      //   console.log(pair[0] + ": " + pair[1]);
+      // }
       axios
         .post(`${process.env.REACT_APP_BACKEND_URL}/deals`, formData, {
           headers: {
@@ -783,11 +789,19 @@ const SingleDeals = () => {
                       handleInputDeals({ target: { name: "notes", value } })
                     }
                   />
+                   <Form.Group as={Row} xs={2} md={4} lg={6} className="p-2">
+                    <Form.Label column lg={4} className="fw-semibold fs-6">
+                     File : 
+                    </Form.Label>
+                    <Col lg={8} style={{ marginLeft: "-5rem" }}>
+                      <Form.Control type="file" name="file" size="sm" className="p-2" onChange={handleFileChange}/>
+                    </Col>
+                  </Form.Group>
                   <Form.Group as={Row} xs={2} md={4} lg={6} className="p-2">
                     <Form.Label column lg={4} className="fw-semibold fs-6">
                       Mention Users :
                     </Form.Label>
-                    <Col lg={6} style={{ marginLeft: "-5rem" }}>
+                    <Col lg={8} style={{ marginLeft: "-5rem" }}>
                       <Select
                         options={ownerSelect()}
                         isMulti
