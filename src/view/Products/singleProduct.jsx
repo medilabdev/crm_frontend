@@ -103,19 +103,27 @@ const SingleProduct = () => {
       })
       setProduct(response.data.data);
       setTotalRows(response.data.pagination.totalData)
+      setPending(false)
     } catch (error) {
       if (error.response && error.response.data.message === "Unauthenticated") {
         localStorage.clear();
         window.location.href = "/login";
       }
-      if(error.response && error.response.status === 429){
-        const delay = Math.pow(2, retryCount) * 2000;
-        await new Promise(resolve => setTimeout(resolve, delay))
-        await getProduct(retryCount + 1)
+      else if(error.response && error.response.status === 404){
+        setTotalRows(0);
+        setProduct([]);
       }
-      if(error.response && error.response.status === 404){
-        setProduct([])
-        setTotalRows(0)
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getProduct(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
+        }
+      } else {
+        console.error('Unhandled error:', error);
       }
     }
   };
@@ -123,13 +131,7 @@ const SingleProduct = () => {
   const [pending, setPending] = useState(true)
   
   useEffect(() => {
-      setPending(true)
-        getProduct(token, search);
-      setPending(false)
-    const timeOut = setTimeout(() => {
-      setPending(false)
-    }, 2500)
-    return () => clearTimeout(timeOut)
+      getProduct(token, search);
   }, [token, search, pagination.page, pagination.limit]);
 
   const handleChangePage = (page) => {
@@ -202,8 +204,10 @@ const SingleProduct = () => {
   }, 1000)
 
   function SearchFilter(e) {
-    const value = e.target.value.toLowerCase()
-    debouncedHandleFilter(value)
+    if(e.key === "Enter"){
+      const value = e.target.value.toLowerCase()
+      debouncedHandleFilter(value)
+    }
   }
   
   return (
@@ -237,7 +241,7 @@ const SingleProduct = () => {
               type="text"
               placeholder="Search Product..."
               className="form-control"
-              onChange={SearchFilter}
+              onKeyDown={SearchFilter}
               style={{ fontSize: "0.85rem" }}
             />
           </div>

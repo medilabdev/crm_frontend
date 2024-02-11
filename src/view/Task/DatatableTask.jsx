@@ -186,10 +186,8 @@ const DatatableTask = ({ data, selectUidDataTable, pending, handleChangePage, ha
         const updt = new Date(row.updated_at);
         const format = {
           year: "numeric",
-          month: "2-digit",
+          month: "long",
           day: "2-digit",
-          hour: "2-digit",
-          minute: "2-digit",
         };
         const formattter = new Intl.DateTimeFormat("en-US", format);
         const created = formattter.format(create);
@@ -209,13 +207,14 @@ const DatatableTask = ({ data, selectUidDataTable, pending, handleChangePage, ha
       name: "Action",
       selector: (row) => (
         <div className="action-icon">
-          <button
-            className="ms-2 icon-button"
-            onClick={() => setEditTask(row.uid)}
+          <a
+            className="ms-2 icon-button text-black"
+            href={`/task/${row.uid}/edit`}
+            // onClick={() => setEditTask(row.uid)}
             title="Edit"
           >
             <i className="bi bi-pen edit"></i>
-          </button>
+          </a>
           <button
             className="ms-2 icon-button"
             onClick={() => handleDelete(row.uid)}

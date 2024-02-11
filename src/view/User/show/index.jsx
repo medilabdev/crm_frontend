@@ -21,91 +21,153 @@ const ShowUser = () => {
   const [primaryTeam, setPrimaryTeam] = useState([]);
   const [users, setUsers] = useState([]);
 
-  const getDataUserDetail = (uid, state, token) => {
-    axios
+  const getDataUserDetail = async(uid, state, token, retryCount = 0) => {
+    try {
+      const response = await axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/users/${uid}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((response) => {
-        // console.log(response?.data?.data);
-        state(response?.data?.data);
-      })
-      .catch((error) => {
-        if (error.response.data.message === "Unauthenticated") {
-          localStorage.clear();
-          window.location.href = "/login";
+      state(response.data.data) 
+    } catch (error) {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getDataUserDetail(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
         }
-      });
+      } else {
+        console.error('Unhandled error:', error);
+      }
+    }
   };
 
   // get all data roles
-  const getAllDataRole = (token) => {
-    axios
+  const getAllDataRole = async(token, retryCount = 0) => {
+    try {
+      const response = await axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/roles`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((response) => setRoles(response.data.data))
-      .catch((error) => {
-        if (error.response.data.message === "Unauthenticated") {
-          localStorage.clear();
-          window.location.href = "/login";
+      setRoles(response.data.data)
+    } catch (error) {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getAllDataRole(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
         }
-      });
+      } else {
+        console.error('Unhandled error:', error);
+      }
+    }
   };
 
   // get all data position
-  const getAllPosition = (token) => {
-    axios
+  const getAllPosition = async(token, retryCount= 0) => {
+    try {
+      const response = await axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/positions`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((response) => setPosition(response.data.data))
-      .catch((error) => {
-        if (error.response.data.message === "Unauthenticated") {
-          localStorage.clear();
-          window.location.href = "/login";
+      setPosition(response.data.data)
+    } catch (error) {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getAllPosition(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
         }
-      });
+      } else {
+        console.error('Unhandled error:', error);
+      }
+    }
   };
 
   // get all data primary team
-  const getAllPrimaryTeam = (token) => {
-    axios
+  const getAllPrimaryTeam = async(token, retryCount=0) => {
+    try {
+      const response = await axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/teams`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((response) => setPrimaryTeam(response.data.data))
-      .catch((error) => {
-        if (error.response.data.message === "Unauthenticated") {
-          localStorage.clear();
-          window.location.href = "/login";
+      setPrimaryTeam(response.data.data)
+    } catch (error) {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getAllPrimaryTeam(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
         }
-      });
+      } else {
+        console.error('Unhandled error:', error);
+      }
+    }
   };
 
   // get all user
-  const getAllUsers = (token) => {
-    axios
+  const getAllUsers = async(token, retryCount = 0) => {
+    try {
+      const response = await axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      })
-      .then((response) => setUsers(response.data.data))
-      .catch((error) => {
-        if (error.response.data.message === "Unauthenticated") {
-          localStorage.clear();
-          window.location.href = "/login";
+      }) 
+      setUsers(response.data.data)
+    } catch (error) {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getAllUsers(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
         }
-      });
+      } else {
+        console.error('Unhandled error:', error);
+      }
+    }
   };
 
   useEffect(() => {

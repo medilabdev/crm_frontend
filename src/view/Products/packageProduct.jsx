@@ -107,19 +107,27 @@ const PackageProduct = () => {
       packageProduct.map((packageLoop) => {
         setRowProduct(packageLoop?.package_detail_with_product)
       })
+      setPending(false)
     } catch (error) {
       if (error.response && error.response.data.message === "Unauthenticated") {
         localStorage.clear();
         window.location.href = "/login";
       }
-      if(error.response && error.response.status === 429 && retryCount < 3){
-        const delay = Math.pow(2, retryCount) * 2000;
-        await new Promise(resolve => setTimeout(resolve, delay))
-        await getPackageProduct(retryCount + 1)
+      else if(error.response && error.response.status === 404){
+        setTotalRows(0);
+        setPackageProduct([]);
       }
-      if(error.response && error.response.status === 404){
-        setPackageProduct([])
-        setTotalRows(0)
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getPackageProduct(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
+        }
+      } else {
+        console.error('Unhandled error:', error);
       }
     }
   };
@@ -171,10 +179,6 @@ const fetchData = async() => {
   
   useEffect(() => {
     fetchData()
-    const timeOut = setTimeout(() => {
-      setPending(false);
-    }, 2500);
-    return () => clearTimeout(timeOut);
   }, [token, search, pagination.page, pagination.limit]);
 
   const columns = [
@@ -275,8 +279,10 @@ const fetchData = async() => {
   }, 1000)
 
   function searchPackage(e) {
+    if(e.key === "Enter"){
     const value = e.target.value.toLowerCase();
     debouncedHandleFilter(value);
+    }
   }
 
   // const customStyle = {
@@ -319,7 +325,7 @@ const fetchData = async() => {
               type="text"
               placeholder="Search Package..."
               className="form-control"
-              onChange={searchPackage}
+              onKeyDown={searchPackage}
               style={{ fontSize: "0.85rem" }}
             />
           </div>

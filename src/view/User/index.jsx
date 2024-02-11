@@ -43,95 +43,171 @@ const User = () => {
 
   // get all position
   const [position, setPosition] = useState([]);
-  const getData = (url, token, state) => {
-    axios
+  const getData = async (url, token, state, retryCount = 0) => {
+    try {
+      const response = await axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/${url}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((response) => {
-        state(response.data.data);
-        setFilterData(response.data.data);
-      })
-      .catch((error) => {
-        if (error.response.data.message === "Unauthenticated.") {
-          localStorage.clear();
-          window.location.href = "/login";
+      state(response.data.data)
+      setFilterData(response.data.data)
+      setPending(false)
+    } catch (error) {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getData(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
         }
-      });
+      } else {
+        console.error('Unhandled error:', error);
+      }
+    }
   };
 
-  const getAllRoles = (token) => {
-    axios
+  const getAllRoles = async (token, retryCount = 0) => {
+    try {
+      const response = await axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/roles`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((response) => setRoles(response.data.data))
-      .catch((error) => {
-        if (error.response.data.message === "Unauthenticated.") {
-          localStorage.clear();
-          window.location.href = "/login";
+      setRoles(response.data.data)
+    } catch (error) {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getAllRoles(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
         }
-      });
+      } else {
+        console.error('Unhandled error:', error);
+      }
+    }
   };
 
-  const getPrimaryTeam = (token) => {
-    axios
+  const getPrimaryTeam = async(token, retryCount = 0) => {
+    try {
+      const resposne = await axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/teams`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((response) => setPrimary(response.data.data));
+      setPrimary(resposne.data.data)
+    } catch (error) {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getPrimaryTeam(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
+        }
+      } else {
+        console.error('Unhandled error:', error);
+      }
+    }
   };
 
-  const getAllUser = (token) => {
-    axios
+  const getAllUser = async(token, retryCount = 0) => {
+    try {
+      const response = await axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((response) => setUser(response.data.data))
-      .catch((error) => {
-        if (error.response.data.message === "Unauthenticated.") {
-          localStorage.clear();
-          window.location.href = "/login";
+      setUser(response.data.data)
+    } catch (error) {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getAllUser(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
         }
-      });
+      } else {
+        console.error('Unhandled error:', error);
+      }
+    }
   };
 
-  const getAllPosition = (token) => {
-    axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/positions`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((response) => setPosition(response.data.data))
-      .catch((error) => {
-        if (error.response.data.message === "Unauthenticated.") {
-          localStorage.clear();
-          window.location.href = "/login";
+  const getAllPosition = async(token, retryCount = 0) => {
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/positions`, {
+        headers:{
+          Authorization: `Bearer ${token}`
         }
-      });
+      })
+      setPosition(response.data.data)
+    } catch (error) {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getAllPosition(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
+        }
+      } else {
+        console.error('Unhandled error:', error);
+      }
+    }
   };
 
   const [pending, setPending] = useState(true)
-  useEffect(() => {
-    getData("users", token, setGetDataUser);
-    getAllRoles(token);
-    getPrimaryTeam(token);
-    getAllUser(token);
-    getAllPosition(token);
 
-    const timeOut = setTimeout(() => {
+  const fetchData = async() => {
+    try {
+      setPending(true)
+      await getData("users", token, setGetDataUser);
+      await getAllRoles(token);
+      await getPrimaryTeam(token);
+      await getAllUser(token);
+      await getAllPosition(token);
+    } catch (error) {
+      console.error("error" , error);
+    }finally{
       setPending(false)
-    }, 3500)
-    return () => clearTimeout(timeOut)
+    }
+  }
+
+  useEffect(() => {
+  fetchData()
   }, [token]);
 
   // show redirect
@@ -146,7 +222,8 @@ const User = () => {
       id: 1,
       name: "Name",
       selector: (row) => (
-        <div className="image-name">
+        <a href={`users/${row.uid}`} className="text-decoration-none">
+          <div className="image-name">
           <div className="d-flex align-items-center">
             <img
               src={row.image ? row.image : IconImage}
@@ -159,11 +236,12 @@ const User = () => {
               }}
             />
             <div className="mt-3">
-              <span className="fw-semibold">{row.name}</span>
+              <a href={`users/${row.uid}`} className="fw-semibold text-decoration-none" style={{ whiteSpace: "normal", color:"black", fontWeight:"080"}}>{row.name}</a>
               <p
                 className="mt-1"
                 style={{
                   fontSize: "11px",
+                  color:"black"
                 }}A
               >
                 {row.email}
@@ -171,6 +249,8 @@ const User = () => {
             </div>
           </div>
         </div>
+        </a>
+        
       ),
       left: true,
       width: "270px",
@@ -227,10 +307,12 @@ const User = () => {
   ];
 
   function handleFilter(event) {
-    const newData = getDataUser.filter((row) => {
-      return row.name.toLowerCase().includes(event.target.value.toLowerCase());
-    });
-    setFilterData(newData);
+    if(event.key === "Enter"){
+      const newData = getDataUser.filter((row) => {
+        return row.name.toLowerCase().includes(event.target.value.toLowerCase());
+      });
+      setFilterData(newData);
+    }
   }
 
   return (
@@ -273,7 +355,7 @@ const User = () => {
                   type="text"
                   placeholder="Search User...."
                   className="form-control search"
-                  onChange={handleFilter}
+                  onKeyDown={handleFilter}
                   style={{ fontSize: "0.85rem" }}
                 />
               </div>

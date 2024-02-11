@@ -24,6 +24,12 @@ const Task = () => {
   const [selectUid, setSelectUid] = useState([]);
   const [status, setStatus] = useState([]);
   const [addTask, setAddTask] = useState(false);
+  const [searchOwner, setSearchOwner] = useState([]);
+  const [searchCompany, setSearchCompany] = useState([]);
+  const [searchContact, setSearchContact] = useState([]);
+  const [searchDeals, setSearchDeals] = useState([]);
+  const [searchStatus, setSearchStatus] = useState([]);
+  const [searchForm, setSearchForm] = useState([])
   const handleCloseOverlay = () => setAddTask(false);
   const toggleSideFilter = () => {
     setIsSideFilter(!isSideFilter);
@@ -39,142 +45,199 @@ const Task = () => {
   });
   const [totalRows, setTotalRows] = useState(0);
 
-  const getTask = async(token, term, retryCount = 0) => {
+  const getTask = async(term, searchForm, retryCount = 0) => {
     try { 
+      const params ={};
+      if(term){
+        params.search = term
+      }
+      if(searchForm){
+        Object.assign(params, searchForm);
+        if (!params.page) {
+          params.page = pagination.page;
+        }
+        if (!params.limit) {
+          params.limit = pagination.limit;
+        }
+      }
+      params.page = pagination.page;
+      params.limit = pagination.limit;
       const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/tasks`, {
         headers:{
           Authorization :`Bearer ${token}`
         },
-        params: {
-          page: pagination.page,
-          limit: pagination.limit,
-          search: term
-        }
+        params: params 
       })
       setTask(response.data.data)
       setTotalRows(response.data.pagination.totalData)
+      setPending(false)
     } catch (error) {
       if (error.response && error.response.data.message === "Unauthenticated") {
         localStorage.clear();
         window.location.href = "/login";
       }
-      if(error.response && error.response.status === 429 && retryCount < 3){
-        const delay = Math.pow(2, retryCount) * 2000;
-        await new Promise(resolve => setTimeout(resolve, delay))
-        await getTask(retryCount + 1)
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getTask(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
+        }
       }
-      if(error.response && error.response.status === 404){
+      else if(error.response && error.response.status === 404){
         setTask([])
         setTotalRows(0)
+      }
+      else{
+        console.error("error"  , error);
       }
     }
   };
 
 
-  const getStatus = (token, retryCount = 0) => {
-    axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/statuses`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+  const getStatus = async(token, retryCount = 0) => {
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/statuses`, {
+        headers:{
+          Authorization: `Bearer ${token}`
+        }
       })
-      .then((res) => setStatus(res.data.data))
-      .catch(async(err) => {
-        if (err.response.data.message === "Unauthenticated") {
-          localStorage.clear();
-          window.location.href = "/login";
+      setStatus(response.data.data)
+    } catch (error) {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getStatus(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
         }
-        if(err.response && err.response.status && retryCount < 3){
-          const delay = Math.pow(2, retryCount) * 2000;
-        await new Promise(resolve => setTimeout(resolve, delay))
-        await getStatus(retryCount + 1)
-        }
-      });
+      } else {
+        console.error('Unhandled error:', error);
+      }
+    }
   };
 
-  const getOwner = (token, retryCount = 0) => {
-    axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+  const getOwner = async(token, retryCount = 0) => {
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
+        headers:{
+          Authorization: `Bearer ${token}`
+        }
       })
-      .then((res) => setOwner(res.data.data))
-      .catch(async(err) => {
-        if (err.response.data.message === "Unauthenticated") {
-          localStorage.clear();
-          window.location.href = "/login";
+      setOwner(response.data.data)
+    } catch (error) {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getOwner(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
         }
-        if(err.response && err.response.status === 429 && retryCount < 3){
-          const delay = Math.pow(2, retryCount) * 2000;
-        await new Promise(resolve => setTimeout(resolve, delay))
-        await getOwner(retryCount + 1)
-        }
-      });
+      } else {
+        console.error('Unhandled error:', error);
+      }
+    }
   };
 
-  const getCompany = (token, retryCount = 0) => {
-    axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/companies/form/select`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+  const getCompany = async(token, retryCount = 0) => {
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/companies/form/select`, {
+        headers:{
+          Authorization: `Bearer ${token}`
+        }
       })
-      .then((res) => setCompany(res.data.data))
-      .catch(async(err) => {
-        if (err.response.data.message === "Unauthenticated.") {
-          localStorage.clear();
-          window.location.href = "/login";
+      setCompany(response.data.data)
+    } catch (error) {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getCompany(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
         }
-        if(err.response && err.response.status === 429 && retryCount < 3){
-          const delay = Math.pow(2, retryCount) * 2000;
-        await new Promise(resolve => setTimeout(resolve, delay))
-        await getCompany(retryCount + 1)
-        }
-      });
+      } else {
+        console.error('Unhandled error:', error);
+      }
+    }
   };
 
-  const getContact = (token, retryCount = 0) => {
-    axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/contacts/form/select`, {
-        headers: {
+  const getContact = async(token, retryCount = 0) => {
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/contacts/form/select`, {
+        headers:{
           Authorization: `Bearer ${token}`,
-        },
+        }
       })
-      .then((res) => setContact(res.data.data))
-      .catch(async(err) => {
-        if (err.response.data.message === "Unauthenticated.") {
-          localStorage.clear();
-          window.location.href = "/login";
+      setContact(response.data.data)
+    } catch (error) {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getContact(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
         }
-        if(err.response && err.response.status === 429 && retryCount < 3){
-          const delay = Math.pow(2, retryCount) * 2000;
-          await new Promise(resolve => setTimeout(resolve, delay))
-          await getContact(retryCount + 1)
-        }
-      });
+      } else {
+        console.error('Unhandled error:', error);
+      }
+    }
   };
   
-  const getDeals = (token, retryCount = 0) => {
-    axios
+  const getDeals = async(token, retryCount = 0) => {
+    try {
+      const response = await axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/deals/form/select`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      })
-      .then((res) => setDeals(res.data.data))
-      .catch(async(err) => {
-        if (err.response.data.message === "Unauthenticated.") {
-          localStorage.clear();
-          window.location.href = "/login";
+      }) 
+      setDeals(response.data.data)
+    } catch (error) {
+      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      else if(error.response && error.response.status === 429){
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getDeals(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
         }
-        if(err.response && err.response.status === 429 && retryCount < 3){
-          const delay = Math.pow(2, retryCount) * 2000;
-          await new Promise(resolve => setTimeout(resolve, delay))
-          await getDeals(retryCount + 1)
-        }
-      });
+      } else {
+        console.error('Unhandled error:', error);
+      }
+    }
   };
+
   const SelectOwner = () => {
     const result = [];
     owner?.map((data) => {
@@ -234,13 +297,12 @@ const Task = () => {
     });
     return res;
   };
-
   const [pending, setPending] = useState(true)
   
   const fetchData = async () => {
     try {
       setPending(true)
-      await getTask(token, search)
+      await getTask(search, searchForm)
       await getOwner(token)
       await getCompany(token)
       await getContact(token)
@@ -256,13 +318,7 @@ const Task = () => {
 
   useEffect(() => {
     fetchData();
-    const pendingTimeoutId = setTimeout(() => {
-      setPending(false);
-    }, 4000);
-    return () => {
-      clearTimeout(pendingTimeoutId);
-    };
-  }, [token, search, pagination.page, pagination.limit ]);
+  }, [token, search, searchForm, pagination.page, pagination.limit ]);
 
   const selectUidDataTable = (e) => {
     const select = e.selectedRows.map((row) => row.uid);
@@ -314,53 +370,18 @@ const Task = () => {
       [e.target.name]: e.target.value,
     });
   };
-  const [searchOwner, setSearchOwner] = useState([]);
-  const handleSelectOwner = (e) => {
-    setSearchOwner(e.map((data) => data.value));
-  };
 
-  const [searchCompany, setSearchCompany] = useState([]);
-  const handleSelectCompany = (e) => {
-    const valComp = e.map((data) => data.value);
-    setSearchCompany(valComp);
-  };
-
-  const [searchContact, setSearchContact] = useState([]);
-  const handleSelectContact = (e) => {
-    const valCont = e.map((data) => data.value);
-    const result = valCont.reduce((acc, value) => acc.concat(value), []);
-    setSearchContact(result);
-  };
-
-  const [searchDeals, setSearchDeals] = useState([]);
-  const handleSelectDeals = (e) => {
-    const valCont = e.map((data) => data.value);
-    const result = valCont.reduce((acc, value) => acc.concat(value), []);
-    setSearchDeals(result);
-  };
-
-  const [searchStatus, setSearchStatus] = useState([]);
-  const handleSelectStatus = (e) => {
-    setSearchStatus(e.map((data) => data.value));
-  };
-  const handleSubmitSearchMultiple = () => {
-    const filter = task.filter((row) => {
-      return (
-        (searchOwner.length === 0 ||
-          searchOwner.includes(row.owner_user_uid)) &&
-        (searchCompany.length === 0 ||
-          searchCompany.includes(row.company_uid)) &&
-        (searchContact.length === 0 ||
-          searchContact.includes(row.contact_uid)) &&
-        (searchDeals.length === 0 || searchDeals.includes(row.deals_uid)) &&
-        (searchStatus.length === 0 || searchStatus.includes(row.status_uid)) &&
-        (!searchInput.created_at || row.created_at?.includes(searchInput?.created_at)) &&
-        (!searchInput.updated_at || row.updated_at?.includes(searchInput?.updated_at))&&
-        (!searchInput.reminder || row.date_email_reminder?.includes(searchInput?.reminder))&&
-        (!searchInput.task_name || row.task_name?.toLowerCase().includes(searchInput?.task_name?.toLowerCase()))
-      );
-    });
-    // setSearch(filter);
+  const handleSubmitSearchMultiple = (e) => {
+    e.preventDefault();
+    const formSearchMultiple = {
+      deal: searchDeals.label,
+      contact: searchContact.label,
+      status: searchStatus.label,
+      remainder: searchInput.remainder,
+      created_at: searchInput.created_at,
+      updated_at: searchInput.updated_at
+    }
+    setSearchForm(formSearchMultiple)
   };
 
   const handleChangePage = (page) => {
@@ -371,13 +392,11 @@ const Task = () => {
     setPagination((prev) => ({ ...prev, limit: pageSize, page }));
   };
   
-  const dobounceHandleFilter = debounce((value) => {
-    setSearch(value.toLowerCase())
-  }, 1000)
-
   const handleFilter = (e) => {
-    const value = e.target.value.toLowerCase();
-    dobounceHandleFilter(value);
+    if(e.key === "Enter"){
+      const value = e.target.value.toLowerCase();
+      setSearch(value)
+    }
   };
 
   return (
@@ -480,8 +499,7 @@ const Task = () => {
                       <div className="mt-2">
                         <Select
                           options={SelectOwner()}
-                          onChange={(e) => handleSelectOwner(e)}
-                          isMulti
+                          onChange={(e) => setSearchOwner(e)}
                           placeholder="Select Owner"
                         />
                       </div>
@@ -500,9 +518,8 @@ const Task = () => {
                       <Select
                         placeholder="Select Company"
                         options={SelectCompany()}
-                        isMulti
                         closeMenuOnSelect={false}
-                        onChange={(e) => handleSelectCompany(e)}
+                        onChange={(e) => setSearchCompany(e)}
                       />
                     </div>
                   </div>
@@ -511,8 +528,7 @@ const Task = () => {
                       <Select
                         placeholder="Select Contact"
                         options={SelectContact()}
-                        onChange={(e) => handleSelectContact(e)}
-                        isMulti
+                        onChange={(e) => setSearchContact(e)}
                         closeMenuOnSelect={false}
                       />
                     </div>
@@ -522,8 +538,7 @@ const Task = () => {
                       <Select
                         placeholder="Select Deals"
                         options={SelectDeals()}
-                        onChange={(e) => handleSelectDeals(e)}
-                        isMulti
+                        onChange={(e) => setSearchDeals(e)}
                         closeMenuOnSelect={false}
                       />
                     </div>
@@ -550,20 +565,8 @@ const Task = () => {
                     <Select
                       placeholder="Select Status"
                       options={SelectStatus()}
-                      onChange={(e) => handleSelectStatus(e)}
-                      isMulti
+                      onChange={(e) => setSearchStatus(e)}
                       closeMenuOnSelect={false}
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="date">Remainder</label>
-                    <input
-                      type="date"
-                      className="form-control"
-                      name="reminder"
-                      onChange={handleSearchInput}
-                      placeholder="Task Name"
-                      style={{ fontSize: "0.85rem" }}
                     />
                   </div>
                   <div className="mb-3">
@@ -582,7 +585,7 @@ const Task = () => {
                     <input
                       type="date"
                       className="form-control"
-                      name="created_at"
+                      name="updated_at"
                       onChange={handleSearchInput}
                       placeholder="Task Name"
                       style={{ fontSize: "0.85rem" }}
@@ -633,7 +636,7 @@ const Task = () => {
                       <input
                         type="text"
                         placeholder="Search"
-                        onChange={handleFilter}
+                        onKeyDown={handleFilter}
                         className="form-control"
                         style={{ fontSize: "0.85rem" }}
                       />
