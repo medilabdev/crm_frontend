@@ -142,7 +142,6 @@ const Company = () => {
       params.search = term
     }else{
       console.log('test');
-
     }
    if(ownerCompany){
       params.company_all_or_my = ownerCompany;

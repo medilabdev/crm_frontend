@@ -13,31 +13,6 @@ import { ChartWinLose } from "./ChartWinLose";
 import axios from "axios";
 
 function Dashboard() {
-  const token = localStorage.getItem('token');
-  const [stagingDeals, setStagingDeals] = useState([]);
-  const MAX_RETRIES = 3;
-  const getResultStage =  (retryCount = 0) => {
-    axios.get(`${process.env.REACT_APP_BACKEND_URL}/report/staging/deals`, {
-      headers:{
-        Authorization: `Bearer ${token}`
-      }
-    })
-    .then((res) => setStagingDeals(res.data.staging_data))
-    .catch(async(err) => {
-      if (err.response.data.message === "Unauthenticated" || err.response.status === 401) {
-        localStorage.clear();
-        window.location.href = "/login";
-      }
-      if(err.response.status === 429 && retryCount < MAX_RETRIES){
-        const delay = Math.pow(2, retryCount) * 1000;
-        await new Promise((resolve) => setTimeout(resolve, delay))
-        await getResultStage(retryCount + 1)
-      }
-    });
-  }
-  useEffect(() => {
-    getResultStage()
-  }, [token])
   return (
     <body id="body">
       <Topbar />

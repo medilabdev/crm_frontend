@@ -7,7 +7,7 @@ function Sidebar() {
   const role = localStorage.getItem("role");
   const [accessUser, setAccessUser] = useState([]);
 
-  const getAccess = async () => {
+  const getAccess = async (retryCount = 0) => {
     try{
       const response = await axios
       .get(
@@ -20,16 +20,21 @@ function Sidebar() {
       )
        setAccessUser(response.data.data)
     }catch(error){
-      if (
-        error.response.data.message === "Unauthenticated"
-      ) {
+      if  (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
         localStorage.clear();
         window.location.href = "/login";
-      } 
-      else if(error.response && error.response.status === 429){
-       setTimeout(async()=> {
-        await getAccess()
-       }, 2000);
+      }
+      else if (error.response && error.response.status === 429) {
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getAccess(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error('Max retry attempts reached. Unable to complete the request.');
+        }
+      }else{
+        console.error('error' , error);
       }
     }
   };

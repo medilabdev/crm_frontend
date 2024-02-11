@@ -51,6 +51,8 @@ import OtorisasiMenu from "../view/Properties/OtorisasiMenu";
 import UserAccessMenu from "../view/Properties/UserAccessMenu";
 import DetailAccessMenu from "../view/Properties/UserAccessMenu/DetailAccessMenu";
 import AccountProfil from "../view/User/AccountProfile";
+import EditTask from "../view/Task/Overlay/EditTask";
+import EditTaskFix from "../view/Task/EditTask";
 
 const Login = ({ children }) => {
   const token = localStorage.getItem("token");
@@ -437,6 +439,9 @@ function Router() {
             </Login>
           }
         />
+        <Route exact path="/task/:uid/edit"
+         element={<Login><EditTaskFix /></Login>} 
+         />
       </Routes>
     </BrowserRouter>
   );
