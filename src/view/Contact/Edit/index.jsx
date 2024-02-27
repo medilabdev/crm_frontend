@@ -28,6 +28,7 @@ const EditContact = () => {
   const [showForm, setShowForm] = useState(false);
   const { uid } = useParams();
   const token = localStorage.getItem("token");
+  const [isButtonDisabled, setButtonDisabled] = useState(false)
 
   const getDeals = async(retryCount = 0) => {
     try {
@@ -410,6 +411,7 @@ const EditContact = () => {
     // for (const pair of formData.entries()) {
     //   console.log(pair[0] + ": " + pair[1]);
     // }
+    setButtonDisabled(true)
     axios.post(`${process.env.REACT_APP_BACKEND_URL}/contacts/${uid}`, formData,{
       headers:{
         Authorization: `Bearer ${token}`
@@ -510,7 +512,7 @@ const EditContact = () => {
             <form onSubmit={handleSubmit} className="row">
             <div className="col-md-12">
               <div className="float-end mb-2">
-                  <button className="btn btn-primary me-2" type="submit">
+                  <button className="btn btn-primary me-2" type="submit" disabled={isButtonDisabled}>
                     Save Changes
                   </button>
                   <a

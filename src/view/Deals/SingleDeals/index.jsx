@@ -32,6 +32,8 @@ const SingleDeals = () => {
   const handleCloseContact = () => setShowAddContact(false);
   const handleShowContact = () => setShowAddContact(true);
 
+  // handleSubmit 
+  const [isButtonDisabled, setButtonDisabled] = useState(false);
   // overlay add product
   const [showAddProduct, setShowAddProduct] = useState(false);
   const handleCloseProduct = () => setShowAddProduct(false);
@@ -485,6 +487,7 @@ const SingleDeals = () => {
       // for (const pair of formData.entries()) {
       //   console.log(pair[0] + ": " + pair[1]);
       // }
+      setButtonDisabled(true)
       axios
         .post(`${process.env.REACT_APP_BACKEND_URL}/deals`, formData, {
           headers: {
@@ -529,7 +532,7 @@ const SingleDeals = () => {
           <form className="row" onSubmit={handleSubmitDeals}>
             <div className="col-md-12">
               <div className="float-end mt-2 mb-2">
-                <button className="btn btn-primary me-2" type="submit">
+                <button className="btn btn-primary me-2" type="submit" disabled={isButtonDisabled}>
                   Save Changes
                 </button>
                 <a

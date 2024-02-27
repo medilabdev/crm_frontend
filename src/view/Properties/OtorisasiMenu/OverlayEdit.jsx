@@ -23,7 +23,6 @@ const OverlayEdit = ({ visible, uid, onClose }) => {
       })
       .then((res) => {
         const oldData = res.data.data;
-        console.log(oldData);
         setOldValue({
           name: oldData.name,
           type: oldData.type,

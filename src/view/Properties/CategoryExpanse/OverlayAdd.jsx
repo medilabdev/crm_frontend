@@ -13,7 +13,6 @@ const OverlayAdd = ({ visible, onClose }) => {
       [e.target.name]: e.target.value,
     });
   };
-  console.log(input);
   const handleSubmit = (e) => {
     e.preventDefault();
     axios
