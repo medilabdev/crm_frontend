@@ -39,119 +39,144 @@ const SingleContact = () => {
   const [source, setSource] = useState([]);
   const [company, setCompany] = useState([]);
   const [deals, setDeals] = useState([]);
+  const [isButtonDisabled, setButtonDisabled] = useState(false);
 
-  const getDeals = async(retryCount = 0) => {
+  const getDeals = async (retryCount = 0) => {
     try {
-      const response = await axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/deals/form/select`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      setDeals(response.data.data)
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}/deals/form/select`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setDeals(response.data.data);
     } catch (error) {
-      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+      if (
+        error.response.status === 401 &&
+        error.response.data.message === "Unauthenticated."
+      ) {
         localStorage.clear();
         window.location.href = "/login";
-      }
-      else if(error.response && error.response.status === 429){
+      } else if (error.response && error.response.status === 429) {
         const maxRetries = 3;
         if (retryCount < maxRetries) {
           setTimeout(() => {
             getDeals(retryCount + 1);
           }, 2000);
         } else {
-          console.error('Max retry attempts reached. Unable to complete the request.');
+          console.error(
+            "Max retry attempts reached. Unable to complete the request."
+          );
         }
       } else {
-        console.error('Unhandled error:', error);
+        console.error("Unhandled error:", error);
       }
     }
   };
 
-  const getCompany = async(retryCount = 0) => {
+  const getCompany = async (retryCount = 0) => {
     try {
-      const response = await axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/companies/form/select`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      setCompany(response.data.data)
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}/companies/form/select`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setCompany(response.data.data);
     } catch (error) {
-      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+      if (
+        error.response.status === 401 &&
+        error.response.data.message === "Unauthenticated."
+      ) {
         localStorage.clear();
         window.location.href = "/login";
-      }
-      else if(error.response && error.response.status === 429){
+      } else if (error.response && error.response.status === 429) {
         const maxRetries = 3;
         if (retryCount < maxRetries) {
           setTimeout(() => {
             getCompany(retryCount + 1);
           }, 2000);
         } else {
-          console.error('Max retry attempts reached. Unable to complete the request.');
+          console.error(
+            "Max retry attempts reached. Unable to complete the request."
+          );
         }
       } else {
-        console.error('Unhandled error:', error);
+        console.error("Unhandled error:", error);
       }
     }
   };
 
-  const getSource = async(retryCount = 0) => {
+  const getSource = async (retryCount = 0) => {
     try {
-      const response = await axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/companies-source`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      setSource(response.data.data)
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}/companies-source`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setSource(response.data.data);
     } catch (error) {
-      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+      if (
+        error.response.status === 401 &&
+        error.response.data.message === "Unauthenticated."
+      ) {
         localStorage.clear();
         window.location.href = "/login";
-      }
-      else if(error.response && error.response.status === 429){
+      } else if (error.response && error.response.status === 429) {
         const maxRetries = 3;
         if (retryCount < maxRetries) {
           setTimeout(() => {
             getSource(retryCount + 1);
           }, 2000);
         } else {
-          console.error('Max retry attempts reached. Unable to complete the request.');
+          console.error(
+            "Max retry attempts reached. Unable to complete the request."
+          );
         }
       } else {
-        console.error('Unhandled error:', error);
+        console.error("Unhandled error:", error);
       }
     }
   };
 
-  const getOwnerUser = async(retryCount = 0) => {
+  const getOwnerUser = async (retryCount = 0) => {
     try {
-      const response = await axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }) 
-      setOwnerUser(response.data.data)
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}/users`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setOwnerUser(response.data.data);
     } catch (error) {
-      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+      if (
+        error.response.status === 401 &&
+        error.response.data.message === "Unauthenticated."
+      ) {
         localStorage.clear();
         window.location.href = "/login";
-      }
-      else if(error.response && error.response.status === 429){
+      } else if (error.response && error.response.status === 429) {
         const maxRetries = 3;
         if (retryCount < maxRetries) {
           setTimeout(() => {
             getOwnerUser(retryCount + 1);
           }, 2000);
         } else {
-          console.error('Max retry attempts reached. Unable to complete the request.');
+          console.error(
+            "Max retry attempts reached. Unable to complete the request."
+          );
         }
       } else {
-        console.error('Unhandled error:', error);
+        console.error("Unhandled error:", error);
       }
     }
   };
@@ -279,7 +304,7 @@ const SingleContact = () => {
       const formData = new FormData();
       compParent.forEach((comp, index) => {
         formData.append(`company_uid[${index}]`, comp);
-      })
+      });
       formData.append("name", inputContact.name);
       formData.append("birthday", inputContact.birthday);
       formData.append("email", inputContact.email);
@@ -290,16 +315,17 @@ const SingleContact = () => {
       formData.append("remarks", inputContact.remarks);
       formData.append("source_uid", inputContact.source_uid);
       formData.append("owner_user_uid", inputContact.owner_user_uid);
-      for(const phone of inputContact?.phone_number){
+      for (const phone of inputContact?.phone_number) {
         formData.append(`phone_number[]`, phone);
       }
       resultDeals.forEach((deals, index) => {
-        formData.append(`deals_uid[${index}]`, deals)
-      })
+        formData.append(`deals_uid[${index}]`, deals);
+      });
       // console.log("FormData Content:");
       // for (const pair of formData.entries()) {
       //   console.log(pair[0] + ": " + pair[1]);
       // }
+      setButtonDisabled(true);
       const addContact = await axios
         .post(`${process.env.REACT_APP_BACKEND_URL}/contacts`, formData, {
           headers: {
@@ -637,7 +663,11 @@ const SingleContact = () => {
                 </Card.Body>
               </Card>
               <div className="float-end">
-                <button className="btn btn-primary me-2" type="submit">
+                <button
+                  className="btn btn-primary me-2"
+                  type="submit"
+                  disabled={isButtonDisabled}
+                >
                   Save Changes
                 </button>
                 <a

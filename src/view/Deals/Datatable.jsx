@@ -18,7 +18,7 @@ const DataTableComponet = ({ data, selectUidDataTable, pending, paginationPerPag
     {
       name: "Name",
       cell: (row) => (
-        <a href={`deals/${row.uid}/edit`} className="text-decoration-none" style={{ whiteSpace: "normal", color:"black", fontWeight:"600" }}>{row.deal_name}</a>
+        <a href={`deals/${row.uid}/edit`} target="_blank" className="text-decoration-none" style={{ whiteSpace: "normal", color:"black", fontWeight:"600" }}>{row.deal_name}</a>
       ),
       sortable: true,
       width: "150px",

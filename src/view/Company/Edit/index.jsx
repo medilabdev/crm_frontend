@@ -48,161 +48,193 @@ const EditCompany = () => {
   const [valueDeals, setValueDeals] = useState([]);
   const [valueComp, setValueComp] = useState([]);
   const [formParentComp, setFormParentComp] = useState(false);
+  const [isButtonDisable, setButtonDisable] = useState(false);
   // console.log(oldAssociate);
   const getDeals = async (retryCount = 0) => {
     try {
-      const response = await axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/deals/form/select`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      setDeals(response.data.data)
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}/deals/form/select`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setDeals(response.data.data);
     } catch (error) {
-      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+      if (
+        error.response.status === 401 &&
+        error.response.data.message === "Unauthenticated."
+      ) {
         localStorage.clear();
         window.location.href = "/login";
-      }
-      else if(error.response && error.response.status === 429){
+      } else if (error.response && error.response.status === 429) {
         const maxRetries = 3;
         if (retryCount < maxRetries) {
           setTimeout(() => {
             getDeals(retryCount + 1);
           }, 2000);
         } else {
-          console.error('Max retry attempts reached. Unable to complete the request.');
+          console.error(
+            "Max retry attempts reached. Unable to complete the request."
+          );
         }
       } else {
-        console.error('Unhandled error:', error);
+        console.error("Unhandled error:", error);
       }
     }
   };
 
-
-  const getContact = async(retryCount = 0) => {
+  const getContact = async (retryCount = 0) => {
     try {
-      const response =await axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/contacts/form/select`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      setContact(response.data.data)
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}/contacts/form/select`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setContact(response.data.data);
     } catch (error) {
-      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+      if (
+        error.response.status === 401 &&
+        error.response.data.message === "Unauthenticated."
+      ) {
         localStorage.clear();
         window.location.href = "/login";
-      }
-      else if(error.response && error.response.status === 429){
+      } else if (error.response && error.response.status === 429) {
         const maxRetries = 3;
         if (retryCount < maxRetries) {
           setTimeout(() => {
             getContact(retryCount + 1);
           }, 2000);
         } else {
-          console.error('Max retry attempts reached. Unable to complete the request.');
+          console.error(
+            "Max retry attempts reached. Unable to complete the request."
+          );
         }
       } else {
-        console.error('Unhandled error:', error);
+        console.error("Unhandled error:", error);
       }
     }
   };
 
-  const getCompanyParent = async(retryCount = 0) => { 
+  const getCompanyParent = async (retryCount = 0) => {
     try {
-      const response = await axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/companies/form/select`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      setParentCompany(response.data.data)
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}/companies/form/select`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setParentCompany(response.data.data);
     } catch (error) {
-      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+      if (
+        error.response.status === 401 &&
+        error.response.data.message === "Unauthenticated."
+      ) {
         localStorage.clear();
         window.location.href = "/login";
-      }
-      else if(error.response && error.response.status === 429){
+      } else if (error.response && error.response.status === 429) {
         const maxRetries = 3;
         if (retryCount < maxRetries) {
           setTimeout(() => {
             getCompanyParent(retryCount + 1);
           }, 2000);
         } else {
-          console.error('Max retry attempts reached. Unable to complete the request.');
+          console.error(
+            "Max retry attempts reached. Unable to complete the request."
+          );
         }
       } else {
-        console.error('Unhandled error:', error);
+        console.error("Unhandled error:", error);
       }
     }
   };
 
-  const getSourceCompany = async(retryCount = 0) => {
+  const getSourceCompany = async (retryCount = 0) => {
     try {
-      const response = await axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/companies-source`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      setSourceCompany(response.data.data)
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}/companies-source`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setSourceCompany(response.data.data);
     } catch (error) {
-      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+      if (
+        error.response.status === 401 &&
+        error.response.data.message === "Unauthenticated."
+      ) {
         localStorage.clear();
         window.location.href = "/login";
-      }
-      else if(error.response && error.response.status === 429){
+      } else if (error.response && error.response.status === 429) {
         const maxRetries = 3;
         if (retryCount < maxRetries) {
           setTimeout(() => {
             getSourceCompany(retryCount + 1);
           }, 2000);
         } else {
-          console.error('Max retry attempts reached. Unable to complete the request.');
+          console.error(
+            "Max retry attempts reached. Unable to complete the request."
+          );
         }
       } else {
-        console.error('Unhandled error:', error);
+        console.error("Unhandled error:", error);
       }
     }
   };
 
-  const getTypeCompany = async(retryCount = 0) => {
+  const getTypeCompany = async (retryCount = 0) => {
     try {
-      const response = await axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/companies-type`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      setTypeCompany(response.data.data)
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}/companies-type`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setTypeCompany(response.data.data);
     } catch (error) {
-      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+      if (
+        error.response.status === 401 &&
+        error.response.data.message === "Unauthenticated."
+      ) {
         localStorage.clear();
         window.location.href = "/login";
-      }
-      else if(error.response && error.response.status === 429){
+      } else if (error.response && error.response.status === 429) {
         const maxRetries = 3;
         if (retryCount < maxRetries) {
           setTimeout(() => {
             getTypeCompany(retryCount + 1);
           }, 2000);
         } else {
-          console.error('Max retry attempts reached. Unable to complete the request.');
+          console.error(
+            "Max retry attempts reached. Unable to complete the request."
+          );
         }
       } else {
-        console.error('Unhandled error:', error);
+        console.error("Unhandled error:", error);
       }
     }
   };
   // console.log(oldAssociate);
   const getCompanyDetail = async (uid, token, retryCount = 0) => {
     try {
-      const response = await axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/companies/${uid}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}/companies/${uid}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       const companyDetail = response.data.data;
       const telp_number = companyDetail?.phone?.map((phoneObj) => phoneObj);
       const oldAssociate = companyDetail?.associate?.map((data) => data);
@@ -223,28 +255,32 @@ const EditCompany = () => {
       setTelephone(telp_number ? telp_number : []);
       setHistory(companyDetail.history);
       setOldParentCompany(companyDetail);
-      if(companyDetail?.parent){
+      if (companyDetail?.parent) {
         localStorage.setItem(
           "parentComp",
           JSON.stringify(companyDetail?.parent)
-        )
+        );
       }
     } catch (error) {
-      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+      if (
+        error.response.status === 401 &&
+        error.response.data.message === "Unauthenticated."
+      ) {
         localStorage.clear();
         window.location.href = "/login";
-      }
-      else if(error.response && error.response.status === 429){
+      } else if (error.response && error.response.status === 429) {
         const maxRetries = 3;
         if (retryCount < maxRetries) {
           setTimeout(() => {
             getCompanyDetail(retryCount + 1);
           }, 2000);
         } else {
-          console.error('Max retry attempts reached. Unable to complete the request.');
+          console.error(
+            "Max retry attempts reached. Unable to complete the request."
+          );
         }
       } else {
-        console.error('Unhandled error:', error);
+        console.error("Unhandled error:", error);
       }
     }
   };
@@ -257,31 +293,37 @@ const EditCompany = () => {
       parentCompanyLocalStorage.push(data);
     }
   }
-  const getOwnerUser = async(retryCount = 0) => {
+  const getOwnerUser = async (retryCount = 0) => {
     try {
-      const response = await axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      setOwner(response.data.data)
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}/users`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setOwner(response.data.data);
     } catch (error) {
-      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+      if (
+        error.response.status === 401 &&
+        error.response.data.message === "Unauthenticated."
+      ) {
         localStorage.clear();
         window.location.href = "/login";
-      }
-      else if(error.response && error.response.status === 429){
+      } else if (error.response && error.response.status === 429) {
         const maxRetries = 3;
         if (retryCount < maxRetries) {
           setTimeout(() => {
             getOwnerUser(retryCount + 1);
           }, 2000);
         } else {
-          console.error('Max retry attempts reached. Unable to complete the request.');
+          console.error(
+            "Max retry attempts reached. Unable to complete the request."
+          );
         }
       } else {
-        console.error('Unhandled error:', error);
+        console.error("Unhandled error:", error);
       }
     }
   };
@@ -365,13 +407,12 @@ const EditCompany = () => {
   };
   const selectComp = () => {
     return parentCompany
-    .map((data) => ({
-      value: data?.uid,
-      label: data?.name,
-    }))
-    .filter((parent) => uid !== parent.value);
+      .map((data) => ({
+        value: data?.uid,
+        label: data?.name,
+      }))
+      .filter((parent) => uid !== parent.value);
   };
-
 
   const selectDeals = () => {
     const rest = [];
@@ -454,6 +495,7 @@ const EditCompany = () => {
     // for (const pair of formData.entries()) {
     //   console.log(pair[0] + ": " + pair[1]);
     // }
+    setButtonDisable(true);
     try {
       const update = await axios
         .post(
@@ -653,7 +695,11 @@ const EditCompany = () => {
             <div className="row">
               <div className="col-md-12">
                 <div className="float-end mb-3">
-                  <button className="btn btn-primary me-2" type="submit">
+                  <button
+                    className="btn btn-primary me-2"
+                    type="submit"
+                    disabled={isButtonDisable}
+                  >
                     Save Changes
                   </button>
                   <a
@@ -1034,7 +1080,8 @@ const EditCompany = () => {
                                           marginTop: "-8px",
                                         }}
                                       >
-                                        {data?.contact?.phone?.[0]?.number ?? "-"}
+                                        {data?.contact?.phone?.[0]?.number ??
+                                          "-"}
                                       </strong>
                                     </p>
                                     <p
@@ -1103,32 +1150,49 @@ const EditCompany = () => {
                     </h5>
                   </Card.Header>
                   <Card.Body>
-                    {parentCompanyLocalStorage && Array.isArray(parentCompanyLocalStorage) && parentCompanyLocalStorage.length > 0 ? (
-                    <Card className="shadow p-2">
-                      <div className="row d-flex">
-                        <div className="col-md-10">
-                          <div className="d-flex">
-                          <img src={IconCompany} className="ms-1 me-3 mt-3" alt={IconCompany}  style={{ width: "30px", height: "30px" }} />
-                          <Col md={10} sm={10}>
-                            <p className="ms-1" style={{ fontSize:"10px", whiteSpace:"normal" }}>
-                              Name Company : <br />
-                              <strong className="mt-1">
-                                {oldParentCompany.parent?.name}
-                              </strong>
-                            </p>
-                            <p className="ms-1"
+                    {parentCompanyLocalStorage &&
+                    Array.isArray(parentCompanyLocalStorage) &&
+                    parentCompanyLocalStorage.length > 0 ? (
+                      <Card className="shadow p-2">
+                        <div className="row d-flex">
+                          <div className="col-md-10">
+                            <div className="d-flex">
+                              <img
+                                src={IconCompany}
+                                className="ms-1 me-3 mt-3"
+                                alt={IconCompany}
+                                style={{ width: "30px", height: "30px" }}
+                              />
+                              <Col md={10} sm={10}>
+                                <p
+                                  className="ms-1"
+                                  style={{
+                                    fontSize: "10px",
+                                    whiteSpace: "normal",
+                                  }}
+                                >
+                                  Name Company : <br />
+                                  <strong className="mt-1">
+                                    {oldParentCompany.parent?.name}
+                                  </strong>
+                                </p>
+                                <p
+                                  className="ms-1"
                                   style={{
                                     fontSize: "10px",
                                     marginTop: "-8px",
                                   }}
                                 >
                                   Type : <br />
-                              <strong className="mt-1">
-                                {oldParentCompany.parent?.company_type?.name}
-                              </strong>
-                            </p>
-                            <p
-                              className="ms-1"
+                                  <strong className="mt-1">
+                                    {
+                                      oldParentCompany.parent?.company_type
+                                        ?.name
+                                    }
+                                  </strong>
+                                </p>
+                                <p
+                                  className="ms-1"
                                   style={{
                                     fontSize: "10px",
                                     marginTop: "-8px",
@@ -1137,28 +1201,38 @@ const EditCompany = () => {
                                 >
                                   No.Telp : <br />
                                   <strong className="mt-1">
-
-                                    {oldParentCompany?.phone?.[0]?.number || "-"}
+                                    {oldParentCompany?.phone?.[0]?.number ||
+                                      "-"}
                                   </strong>
                                 </p>
-                          </Col>
-                          <Col md={2} sm={2}>
-                            <a onClick={deleteLocalStorageParent} className="ms-1" style={{ cursor:"pointer" }}>
-                            <i className="bi bi-x fs-5 text-danger"></i>
-                            </a>
-                          </Col>
+                              </Col>
+                              <Col md={2} sm={2}>
+                                <a
+                                  onClick={deleteLocalStorageParent}
+                                  className="ms-1"
+                                  style={{ cursor: "pointer" }}
+                                >
+                                  <i className="bi bi-x fs-5 text-danger"></i>
+                                </a>
+                              </Col>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </Card>) : (   <Form.Group className="mb-3">
-                      <Select options={selectComp()} onChange={(e) => {
-                          const parentUid = e.value;
-                          setEditCompany({
-                            ...editCompany,
-                            parent_company_uid: parentUid,
-                          });
-                        }} />
-                    </Form.Group> )}
+                      </Card>
+                    ) : (
+                      <Form.Group className="mb-3">
+                        <Select
+                          options={selectComp()}
+                          onChange={(e) => {
+                            const parentUid = e.value;
+                            setEditCompany({
+                              ...editCompany,
+                              parent_company_uid: parentUid,
+                            });
+                          }}
+                        />
+                      </Form.Group>
+                    )}
 
                     <div className="text-center">
                       <a

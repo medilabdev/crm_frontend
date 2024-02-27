@@ -21,7 +21,6 @@ const AddUser = ({ visible, onClose, roles, primary, refUsers, position }) => {
     reff_uid: "",
   });
 
-  // console.log(inputUser);
   const handleChange = (e) => {
     setInputUser({
       ...inputUser,
@@ -31,7 +30,6 @@ const AddUser = ({ visible, onClose, roles, primary, refUsers, position }) => {
 
   const handleImage = (e) => {
     const file = e.target.files[0];
-    // console.log(file);
     if (file) {
       setInputUser({
         ...inputUser,

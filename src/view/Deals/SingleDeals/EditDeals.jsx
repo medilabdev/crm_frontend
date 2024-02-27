@@ -32,36 +32,42 @@ const EditDeals = () => {
   const [stageOld, setStageOld] = useState([]);
   const handleCloseProduct = () => setShowAddProduct(false);
   const handleShowProduct = () => setShowAddProduct(true);
-
+  const [isButtonDisabled, setButtonDisabled] = useState(false);
   // mention user
   const mantionUsersUid = (e) => {
     setMentionUsers(e.map((opt) => opt.value));
   };
-  const getContact = async(retryCount = 0) => {
+  const getContact = async (retryCount = 0) => {
     try {
-      const response = await axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/contacts/form/select`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      setContact(response.data.data)
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}/contacts/form/select`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setContact(response.data.data);
     } catch (error) {
-      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+      if (
+        error.response.status === 401 &&
+        error.response.data.message === "Unauthenticated."
+      ) {
         localStorage.clear();
         window.location.href = "/login";
-      }
-      else if(error.response && error.response.status === 429){
+      } else if (error.response && error.response.status === 429) {
         const maxRetries = 3;
         if (retryCount < maxRetries) {
           setTimeout(() => {
             getContact(retryCount + 1);
           }, 2000);
         } else {
-          console.error('Max retry attempts reached. Unable to complete the request.');
+          console.error(
+            "Max retry attempts reached. Unable to complete the request."
+          );
         }
       } else {
-        console.error('Unhandled error:', error);
+        console.error("Unhandled error:", error);
       }
     }
   };
@@ -81,130 +87,156 @@ const EditDeals = () => {
     });
   }
 
-
-  const getCompany = async(retryCount = 0) => {
+  const getCompany = async (retryCount = 0) => {
     try {
-      const response = await axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/companies/form/select`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      setCompany(response.data.data)
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}/companies/form/select`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setCompany(response.data.data);
     } catch (error) {
-      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+      if (
+        error.response.status === 401 &&
+        error.response.data.message === "Unauthenticated."
+      ) {
         localStorage.clear();
         window.location.href = "/login";
-      }
-      else if(error.response && error.response.status === 429){
+      } else if (error.response && error.response.status === 429) {
         const maxRetries = 3;
         if (retryCount < maxRetries) {
           setTimeout(() => {
             getCompany(retryCount + 1);
           }, 2000);
         } else {
-          console.error('Max retry attempts reached. Unable to complete the request.');
+          console.error(
+            "Max retry attempts reached. Unable to complete the request."
+          );
         }
       } else {
-        console.error('Unhandled error:', error);
+        console.error("Unhandled error:", error);
       }
     }
   };
 
-  const getDealsCategory = async(retryCount = 0) => {
+  const getDealsCategory = async (retryCount = 0) => {
     try {
-      const response = await axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/deal-categories`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      setDealsCategory(response.data.data)
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}/deal-categories`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setDealsCategory(response.data.data);
     } catch (error) {
-      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+      if (
+        error.response.status === 401 &&
+        error.response.data.message === "Unauthenticated."
+      ) {
         localStorage.clear();
         window.location.href = "/login";
-      }
-      else if(error.response && error.response.status === 429){
+      } else if (error.response && error.response.status === 429) {
         const maxRetries = 3;
         if (retryCount < maxRetries) {
           setTimeout(() => {
             getDealsCategory(retryCount + 1);
           }, 2000);
         } else {
-          console.error('Max retry attempts reached. Unable to complete the request.');
+          console.error(
+            "Max retry attempts reached. Unable to complete the request."
+          );
         }
       } else {
-        console.error('Unhandled error:', error);
+        console.error("Unhandled error:", error);
       }
     }
   };
 
-  const getPriority = async(retryCount = 0) => {
+  const getPriority = async (retryCount = 0) => {
     try {
-      const response = await axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/priorities`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      setPriority(response.data.data)
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}/priorities`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setPriority(response.data.data);
     } catch (error) {
-      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+      if (
+        error.response.status === 401 &&
+        error.response.data.message === "Unauthenticated."
+      ) {
         localStorage.clear();
         window.location.href = "/login";
-      }
-      else if(error.response && error.response.status === 429){
+      } else if (error.response && error.response.status === 429) {
         const maxRetries = 3;
         if (retryCount < maxRetries) {
           setTimeout(() => {
             getPriority(retryCount + 1);
           }, 2000);
         } else {
-          console.error('Max retry attempts reached. Unable to complete the request.');
+          console.error(
+            "Max retry attempts reached. Unable to complete the request."
+          );
         }
       } else {
-        console.error('Unhandled error:', error);
+        console.error("Unhandled error:", error);
       }
     }
   };
 
-  const getOwner = async(retryCount = 0) => {
+  const getOwner = async (retryCount = 0) => {
     try {
-      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
-        headers: {
-          Authorization: `Bearer ${token}`
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}/users`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-      })
-      setOwner(response.data.data)
+      );
+      setOwner(response.data.data);
     } catch (error) {
-      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+      if (
+        error.response.status === 401 &&
+        error.response.data.message === "Unauthenticated."
+      ) {
         localStorage.clear();
         window.location.href = "/login";
-      }
-      else if(error.response && error.response.status === 429){
+      } else if (error.response && error.response.status === 429) {
         const maxRetries = 3;
         if (retryCount < maxRetries) {
           setTimeout(() => {
             getOwner(retryCount + 1);
           }, 2000);
         } else {
-          console.error('Max retry attempts reached. Unable to complete the request.');
+          console.error(
+            "Max retry attempts reached. Unable to complete the request."
+          );
         }
       } else {
-        console.error('Unhandled error:', error);
+        console.error("Unhandled error:", error);
       }
     }
   };
 
-  const getDealsValueOld = async(token, uid, retryCount = 0) => {
+  const getDealsValueOld = async (token, uid, retryCount = 0) => {
     try {
-      const response =await axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/deals/${uid}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}/deals/${uid}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       const dealsOld = response.data.data;
       setValueDeals({
         deal_name: dealsOld.deal_name,
@@ -235,53 +267,63 @@ const EditDeals = () => {
         );
       }
     } catch (error) {
-      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+      if (
+        error.response.status === 401 &&
+        error.response.data.message === "Unauthenticated."
+      ) {
         localStorage.clear();
         window.location.href = "/login";
-      }
-      else if(error.response && error.response.status === 429){
+      } else if (error.response && error.response.status === 429) {
         const maxRetries = 3;
         if (retryCount < maxRetries) {
           setTimeout(() => {
             getDealsValueOld(retryCount + 1);
           }, 2000);
         } else {
-          console.error('Max retry attempts reached. Unable to complete the request.');
+          console.error(
+            "Max retry attempts reached. Unable to complete the request."
+          );
         }
       } else {
-        console.error('Unhandled error:', error);
+        console.error("Unhandled error:", error);
       }
     }
   };
 
-  const getPipeline = async(retryCount = 0) => {
+  const getPipeline = async (retryCount = 0) => {
     try {
-      const response = await axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/staging-masters`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      setPipeline(response.data.data)
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}/staging-masters`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setPipeline(response.data.data);
     } catch (error) {
-      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+      if (
+        error.response.status === 401 &&
+        error.response.data.message === "Unauthenticated."
+      ) {
         localStorage.clear();
         window.location.href = "/login";
-      }
-      else if(error.response && error.response.status === 429){
+      } else if (error.response && error.response.status === 429) {
         const maxRetries = 3;
         if (retryCount < maxRetries) {
           setTimeout(() => {
             getPipeline(retryCount + 1);
           }, 2000);
         } else {
-          console.error('Max retry attempts reached. Unable to complete the request.');
+          console.error(
+            "Max retry attempts reached. Unable to complete the request."
+          );
         }
       } else {
-        console.error('Unhandled error:', error);
+        console.error("Unhandled error:", error);
       }
     }
-  }
+  };
 
   const selectOwner = () => {
     const result = [];
@@ -376,11 +418,11 @@ const EditDeals = () => {
       [e.target.name]: e.target.value,
     });
   };
-  const [selectFile, setSelectFile] = useState(null)
+  const [selectFile, setSelectFile] = useState(null);
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    setSelectFile(file)
-  }
+    setSelectFile(file);
+  };
   useEffect(() => {
     getPipeline();
     getDealsValueOld(token, uid);
@@ -402,7 +444,7 @@ const EditDeals = () => {
 
   const [dataProduct, setDataProduct] = useState([]);
   const handleDeleteProduct = (productUid) => {
-    const upData = allProduct[0].filter((data) => data.id !== productUid)
+    const upData = allProduct[0].filter((data) => data.id !== productUid);
     setDataProduct(upData);
     localStorage.setItem("DataProduct", JSON.stringify(upData));
   };
@@ -450,27 +492,32 @@ const EditDeals = () => {
       confirmButtonText: "Ya, Hapus!",
       cancelButtonText: "Batal",
     }).then((res) => {
-      if(res.isConfirmed){
+      if (res.isConfirmed) {
         const formData = new FormData();
-        formData.append("deals_uid", uid)
-        formData.append("company_uid", company)
-        formData.append("_method", "delete")
-      // console.log("FormData Content:");
-      // for (const pair of formData.entries()) {
-      //   console.log(pair[0] + ": " + pair[1]);
-      // }
-        axios.post(`${process.env.REACT_APP_BACKEND_URL}/deals/item/company/delete`, formData,{
-          headers:{
-            Authorization: `Bearer ${token}`
-          }
-        })
-        .then(() => {
-          localStorage.removeItem("companyStorage");
-          setDataCompany([]);
-          window.location.reload();
-        })
+        formData.append("deals_uid", uid);
+        formData.append("company_uid", company);
+        formData.append("_method", "delete");
+        // console.log("FormData Content:");
+        // for (const pair of formData.entries()) {
+        //   console.log(pair[0] + ": " + pair[1]);
+        // }
+        axios
+          .post(
+            `${process.env.REACT_APP_BACKEND_URL}/deals/item/company/delete`,
+            formData,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          )
+          .then(() => {
+            localStorage.removeItem("companyStorage");
+            setDataCompany([]);
+            window.location.reload();
+          });
       }
-    })
+    });
   };
 
   const customStyles = {
@@ -495,7 +542,7 @@ const EditDeals = () => {
     {
       name: "Name Product",
       selector: (row) =>
-      row.product?.name || row.package_product?.name || row.product_name,
+        row.product?.name || row.package_product?.name || row.product_name,
       sortable: true,
       width: "180px",
     },
@@ -575,13 +622,21 @@ const EditDeals = () => {
     },
     {
       name: "File",
-      selector:(row) =>(
+      selector: (row) => (
         <div>
           {row.files ? (
-            <a className="text-decoration-none" href={`https://api-crm.medilabjakarta.id/storage/file/deals/${row.files?.file}`} style={{whiteSpace: "normal", fontSize:"0.75rem"}}>{row.files?.file}</a>
-          ): "-"}
+            <a
+              className="text-decoration-none"
+              href={`https://api-crm.medilabjakarta.id/storage/file/deals/${row.files?.file}`}
+              style={{ whiteSpace: "normal", fontSize: "0.75rem" }}
+            >
+              {row.files?.file}
+            </a>
+          ) : (
+            "-"
+          )}
         </div>
-      )
+      ),
     },
     {
       name: "Created at",
@@ -621,8 +676,8 @@ const EditDeals = () => {
     formData.append("priority", valueDeals.priority_uid);
     formData.append("deal_status", valueDeals.deal_status);
     formData.append("deal_category", valueDeals.deal_category);
-    formData.append("staging_uid", selectedPipeline ?? ""); 
-    formData.append("company_uid", valueDeals.company_uid || '');
+    formData.append("staging_uid", selectedPipeline ?? "");
+    formData.append("company_uid", valueDeals.company_uid || "");
     formData.append("owner_user_uid", valueDeals.owner_user_uid);
     formData.append("file", selectFile || "");
     mentionUsers.forEach((ment, index) => {
@@ -632,7 +687,10 @@ const EditDeals = () => {
       formData.append(`contact_person[${index}]`, com);
     });
     allProduct[0].forEach((product, index) => {
-      formData.append(`products[${index}][product_uid]`, product.product_uid || product.package_product_uid);
+      formData.append(
+        `products[${index}][product_uid]`,
+        product.product_uid || product.package_product_uid
+      );
       formData.append(`products[${index}][qty]`, product.qty);
       formData.append(
         `products[${index}][discount_type]`,
@@ -646,6 +704,7 @@ const EditDeals = () => {
     // for (const pair of formData.entries()) {
     //   console.log(pair[0] + ": " + pair[1]);
     // }
+    setButtonDisabled(true);
     axios
       .post(`${process.env.REACT_APP_BACKEND_URL}/deals/${uid} `, formData, {
         headers: {
@@ -713,7 +772,11 @@ const EditDeals = () => {
                 >
                   Accounting
                 </a>
-                <button className="btn btn-primary me-2" type="submit">
+                <button
+                  className="btn btn-primary me-2"
+                  type="submit"
+                  disabled={isButtonDisabled}
+                >
                   Save Changes
                 </button>
                 <a
@@ -796,11 +859,7 @@ const EditDeals = () => {
                     />
                   </FloatingLabel>
                   <FloatingLabel
-                    label={
-                      <span>
-                        Deal Size
-                      </span>
-                    }
+                    label={<span>Deal Size</span>}
                     className="mb-3"
                   >
                     <Form.Control
@@ -846,9 +905,7 @@ const EditDeals = () => {
                     />
                   </Form.Group>
                   <Form.Group className="mb-3">
-                    <Form.Label>
-                      Priority
-                    </Form.Label>
+                    <Form.Label>Priority</Form.Label>
                     <Select
                       options={selectPriority()}
                       value={selectPriority().find(
@@ -863,9 +920,7 @@ const EditDeals = () => {
                     />
                   </Form.Group>
                   <Form.Group className="mb-3">
-                    <Form.Label>
-                      Deal Category
-                    </Form.Label>
+                    <Form.Label>Deal Category</Form.Label>
                     <Select
                       options={selectDealCategory()}
                       value={selectDealCategory().find(
@@ -939,13 +994,16 @@ const EditDeals = () => {
                                 >
                                   No.Telp : <br />
                                   <strong className="mt-1">
-                                    {companyStorage[0]?.phone?.[0]?.number ?? "-"}
+                                    {companyStorage[0]?.phone?.[0]?.number ??
+                                      "-"}
                                   </strong>
                                 </p>
                               </Col>
                               <Col md={2} sm={2} style={{ marginTop: "-12px" }}>
                                 <a
-                                  onClick={() => handleDeleteCompany (companyStorage[0].uid)}
+                                  onClick={() =>
+                                    handleDeleteCompany(companyStorage[0].uid)
+                                  }
                                   className="ms-1"
                                   style={{
                                     cursor: "pointer",
@@ -1143,12 +1201,18 @@ const EditDeals = () => {
                       handleChange({ target: { name: "notes", value } })
                     }
                   />
-                   <Form.Group as={Row} xs={2} md={4} lg={6} className="p-2">
+                  <Form.Group as={Row} xs={2} md={4} lg={6} className="p-2">
                     <Form.Label column lg={4} className="fw-semibold fs-6">
-                     File : 
+                      File :
                     </Form.Label>
                     <Col lg={8} style={{ marginLeft: "-5rem" }}>
-                      <Form.Control type="file" name="file" size="sm" className="p-2" onChange={handleFileChange}/>
+                      <Form.Control
+                        type="file"
+                        name="file"
+                        size="sm"
+                        className="p-2"
+                        onChange={handleFileChange}
+                      />
                     </Col>
                   </Form.Group>
                   <Form.Group as={Row} xs={2} md={4} lg={6} className="p-2">

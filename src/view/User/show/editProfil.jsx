@@ -39,7 +39,6 @@ const EditProfil = ({ roles, position, primaryTeam, users, uidLocal }) => {
         }
       });
   };
-  // console.log(oldImage);
   // image
   const [image, setImage] = useState(null);
   const handleImageChange = (e) => {
@@ -53,7 +52,7 @@ const EditProfil = ({ roles, position, primaryTeam, users, uidLocal }) => {
       reader.readAsDataURL(selectImage);
     }
   };
-  // console.log(editUser);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setEditUser({
@@ -108,7 +107,6 @@ const EditProfil = ({ roles, position, primaryTeam, users, uidLocal }) => {
         });
       })
     } catch (error) {
-      // console.log(error);
       if (error.response) {
         Swal.fire({
           text: error.response.data.message,

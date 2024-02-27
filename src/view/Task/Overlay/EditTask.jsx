@@ -21,6 +21,7 @@ const EditTask = ({ visible, onClose, uid }) => {
     setAddImg([...addImg, { id: addImg.length + 1 }]);
   };
 
+  const [isButtonDisable, setButtonDisable] = useState(false);
   const removeFormAttachment = (index) => {
     const removeForm = [...addImg];
     const removeFileAttachment = [...inputAttachment];
@@ -38,15 +39,15 @@ const EditTask = ({ visible, onClose, uid }) => {
         },
       })
       .then((res) => setPriority(res.data.data))
-      .catch(async(err) => {
+      .catch(async (err) => {
         if (err.response.data.message === "Unauthenticated.") {
           localStorage.clear();
           window.location.href = "/login";
         }
-        if(err.response && err.response.status === 429 && retryCount < 3){
+        if (err.response && err.response.status === 429 && retryCount < 3) {
           const delay = Math.pow(2, retryCount) * 2000;
-          await new Promise((resolve) => setTimeout(resolve, delay))
-          await getPriority(retryCount + 1)
+          await new Promise((resolve) => setTimeout(resolve, delay));
+          await getPriority(retryCount + 1);
         }
       });
   };
@@ -90,15 +91,15 @@ const EditTask = ({ visible, onClose, uid }) => {
         },
       })
       .then((res) => setContact(res.data.data))
-      .catch(async(err) => {
+      .catch(async (err) => {
         if (err.response.data.message === "Unauthenticated.") {
           localStorage.clear();
           window.location.href = "/login";
         }
-        if(err.response && err.response.status === 429 && retryCount < 3){
+        if (err.response && err.response.status === 429 && retryCount < 3) {
           const delay = Math.pow(2, retryCount) * 2000;
-          await new Promise((resolve) => setTimeout(resolve, delay))
-          await getContact(retryCount + 1)
+          await new Promise((resolve) => setTimeout(resolve, delay));
+          await getContact(retryCount + 1);
         }
       });
   };
@@ -110,15 +111,15 @@ const EditTask = ({ visible, onClose, uid }) => {
         },
       })
       .then((res) => setStatus(res.data.data))
-      .catch(async(err) => {
+      .catch(async (err) => {
         if (err.response.data.message === "Unauthenticated.") {
           localStorage.clear();
           window.location.href = "/login";
         }
-        if(err.response && err.response.status === 429 && retryCount < 3){
+        if (err.response && err.response.status === 429 && retryCount < 3) {
           const delay = Math.pow(2, retryCount) * 2000;
           await new Promise((resolve) => setTimeout(resolve, delay));
-          await getStatus(retryCount + 1)
+          await getStatus(retryCount + 1);
         }
       });
   };
@@ -130,15 +131,15 @@ const EditTask = ({ visible, onClose, uid }) => {
         },
       })
       .then((res) => setCompany(res.data.data))
-      .catch(async(err) => {
+      .catch(async (err) => {
         if (err.response.data.message === "Unauthenticated.") {
           localStorage.clear();
           window.location.href = "/login";
         }
-        if(err.response && err.response.status === 429 && retryCount < 3){
+        if (err.response && err.response.status === 429 && retryCount < 3) {
           const delay = Math.pow(2, retryCount) * 2000;
           await new Promise((resolve) => setTimeout(resolve, delay));
-          await getCompany(retryCount + 1)
+          await getCompany(retryCount + 1);
         }
       });
   };
@@ -151,15 +152,15 @@ const EditTask = ({ visible, onClose, uid }) => {
         },
       })
       .then((res) => setDeals(res.data.data))
-      .catch(async(err) => {
+      .catch(async (err) => {
         if (err.response.data.message === "Unauthenticated.") {
           localStorage.clear();
           window.location.href = "/login";
         }
-        if(err.response && err.response.status === 429 && retryCount < 3){
+        if (err.response && err.response.status === 429 && retryCount < 3) {
           const delay = Math.pow(2, retryCount) * 2000;
           await new Promise((resolve) => setTimeout(resolve, delay));
-          await getDeals(retryCount + 1)
+          await getDeals(retryCount + 1);
         }
       });
   };
@@ -171,15 +172,15 @@ const EditTask = ({ visible, onClose, uid }) => {
         },
       })
       .then((res) => setUser(res.data.data))
-      .catch(async(err) => {
+      .catch(async (err) => {
         if (err.response.data.message === "Unauthenticated.") {
           localStorage.clear();
           window.location.href = "/login";
         }
-        if(err.response && err.response.status === 429 && retryCount < 3){
+        if (err.response && err.response.status === 429 && retryCount < 3) {
           const delay = Math.pow(2, retryCount) * 2000;
           await new Promise((resolve) => setTimeout(resolve, delay));
-          await getUsers(retryCount + 1)
+          await getUsers(retryCount + 1);
         }
       });
   };
@@ -261,7 +262,7 @@ const EditTask = ({ visible, onClose, uid }) => {
       contact: e.value,
     });
   };
-  
+
   const handleInputDeals = (e) => {
     setOldTask({
       ...oldTask,
@@ -296,7 +297,7 @@ const EditTask = ({ visible, onClose, uid }) => {
       return dataFile;
     });
   };
-  
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const formData = new FormData();
@@ -318,6 +319,7 @@ const EditTask = ({ visible, onClose, uid }) => {
     // for (const pair of formData.entries()) {
     //   console.log(pair[0] + ": " + pair[1]);
     // }
+    setButtonDisable(true);
     axios
       .post(`${process.env.REACT_APP_BACKEND_URL}/tasks/${uid}`, formData, {
         headers: {
@@ -352,9 +354,9 @@ const EditTask = ({ visible, onClose, uid }) => {
         `${process.env.REACT_APP_BACKEND_URL}/tasks/item/attachment/${uidImage}`,
         formData,
         {
-          headers:{
-            Authorization: `Bearer ${token}`
-          }
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
       )
       .then((res) => {
@@ -586,7 +588,11 @@ const EditTask = ({ visible, onClose, uid }) => {
                 </Form.Group>
               </div>
             </div>
-            <button className="btn btn-primary mb-4 mt-3 ms-3" type="submit">
+            <button
+              className="btn btn-primary mb-4 mt-3 ms-3"
+              type="submit"
+              disabled={isButtonDisable}
+            >
               Save Changes
             </button>
             <button

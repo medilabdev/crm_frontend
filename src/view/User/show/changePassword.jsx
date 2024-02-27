@@ -18,7 +18,6 @@ const ChangePassword = ({uidLocal}) => {
     });
   };
 
-  // console.log(inputPass);
   const submitInput = async (e) => {
     e.preventDefault();
 

@@ -55,8 +55,7 @@ const SingleCompany = () => {
   const [showAddContact, setShowAddContact] = useState(false);
   const handleCloseContact = () => setShowAddContact(false);
   const handleShowContact = () => setShowAddContact(true);
-  const MAX_RETRIES = 3;
-
+  const [isButtonDisable, setButtonDisable] = useState(false)
   const getDeals = async (retryCount = 0) => {
     try {
       const respon = await axios.get(
@@ -355,7 +354,7 @@ const SingleCompany = () => {
     // for (const pair of formData.entries()) {
     //   console.log(pair[0] + ": " + pair[1]);
     // }
-
+    setButtonDisable(true);
     try {
       const addCompany = await axios
         .post(`${process.env.REACT_APP_BACKEND_URL}/companies`, formData, {
@@ -752,7 +751,7 @@ const SingleCompany = () => {
                 </Card.Body>
               </Card>
               <div className="float-end">
-                <button className="btn btn-primary me-2" type="submit">
+                <button className="btn btn-primary me-2" type="submit" disabled={isButtonDisable}>
                   Save Changes
                 </button>
                 <a

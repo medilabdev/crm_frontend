@@ -145,7 +145,6 @@ const NeedsApproval = () => {
     {
       name: "Action",
       selector: (row) => (
-        console.log(row),
         <div className="action-icon">
           <button className="btn btn-primary" title="Approve" onClick={() => handleApproval(row.uid)}>
             <i className="bi bi-check2" style={{ fontSize:"1.2rem" }}></i>

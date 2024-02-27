@@ -312,7 +312,6 @@ const Accounting = () => {
             });
           })
           .catch((err) => {
-            console.log(err);
             if (err.response.data.message === "Delete failed!") {
               Swal.fire({
                 title: "Delete Failed",
@@ -357,7 +356,6 @@ const Accounting = () => {
             });
           })
           .catch((err) => {
-            console.log(err);
             if (err.response.data.message === "Delete failed!") {
               Swal.fire({
                 title: "Delete Failed",

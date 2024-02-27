@@ -12,7 +12,6 @@ const EditUser = ({
   refUsers,
   position,
 }) => {
-  // console.log(uid);
   const [editUser, setEditUser] = useState({
     name: "",
     email: "",
@@ -60,7 +59,6 @@ const EditUser = ({
       handleOpenEditModal(uid);
     }
   }, [visible, uid]);
-  // console.log(editUser);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

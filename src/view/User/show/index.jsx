@@ -178,7 +178,7 @@ const ShowUser = () => {
     getDataUserDetail(uid, setUserDetail, tokenAuth);
   }, [uid, tokenAuth]);
 
-  // console.log(userDetail);
+
   return (
     <body id="body">
       <Topbar />

@@ -18,7 +18,6 @@ const OverlayEdit = ({ visible, onClose, uid }) => {
       })
       .then((res) => {
         const oldData = res.data.data;
-        console.log(oldData);
         setInput({
           name: oldData.name,
         });

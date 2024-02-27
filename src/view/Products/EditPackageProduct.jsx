@@ -261,7 +261,6 @@ const EditPackageProduct = () => {
             }
           )
           .then((res) => {
-            console.log(res);
             Swal.fire({
               title: res.data.message,
               text: "Successfully delete product",

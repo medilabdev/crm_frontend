@@ -45,7 +45,6 @@ const EditPackageProduct = ({ visible, uid, onClose }) => {
             }
           )
           .then((res) => {
-            console.log(res);
             Swal.fire({
               title: res.data.message,
               text: "Successfully delete product",
@@ -87,7 +86,6 @@ const EditPackageProduct = ({ visible, uid, onClose }) => {
         const productPackage = packageData?.package_detail_with_product?.map(
           (data) => data
         );
-        console.log(productPackage);
 
         setEditPackage({
           name: packageData.name,
