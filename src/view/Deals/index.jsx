@@ -565,8 +565,8 @@ const Deals = () => {
                         style={{ fontSize: "0.85rem" }}
                         onChange={handleDealsMyOrPerson}
                       >
-                        <option value="all">All Contact</option>
-                        <option value="my">My Contact</option>
+                        <option value="all">All Deals</option>
+                        <option value="my">My Deals</option>
                       </select>
                     </div>
                   </div>

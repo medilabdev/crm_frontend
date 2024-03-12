@@ -53,6 +53,8 @@ import DetailAccessMenu from "../view/Properties/UserAccessMenu/DetailAccessMenu
 import AccountProfil from "../view/User/AccountProfile";
 import EditTask from "../view/Task/Overlay/EditTask";
 import EditTaskFix from "../view/Task/EditTask";
+import SecondDeals from "../view/SecondDeals";
+import CreateSecondDeals from "../view/SecondDeals/create";
 
 const Login = ({ children }) => {
   const token = localStorage.getItem("token");
@@ -442,6 +444,8 @@ function Router() {
         <Route exact path="/task/:uid/edit"
          element={<Login><EditTaskFix /></Login>} 
          />
+        <Route exact path="/second-deals" element={<Login><SecondDeals /></Login>} />
+        <Route exact path="/create-deals" element={<Login><CreateSecondDeals /></Login>} />
       </Routes>
     </BrowserRouter>
   );

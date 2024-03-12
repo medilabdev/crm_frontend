@@ -2,7 +2,7 @@ export default [
   {
     id: 1,
     uid: "asjfaksd",
-    name_deals: "Rujukan PCR Rs. Siti Aisyah",
+    name: "Rujukan PCR Rs. Siti Aisyah",
     Stage: "Leads",
     jumlah: "0",
     name_owner: "Raima",
@@ -13,7 +13,7 @@ export default [
   {
     id: 2,
     uid: "jsakfda",
-    name_deals: "Rujukan PT.SkyJok",
+    name: "Rujukan PT.SkyJok",
     Stage: "Leads",
     jumlah: "0",
     name_owner: "Sintia",
@@ -24,7 +24,7 @@ export default [
   {
     id: 3,
     uid: "jjancsfs",
-    name_deals: "Rujukan PT.SanKrin",
+    name: "Rujukan PT.SanKrin",
     Stage: "Leads",
     jumlah: "0",
     name_owner: "Rahmet",

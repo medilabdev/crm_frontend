@@ -1,0 +1,26 @@
+import React from 'react'
+import { Link } from 'react-router-dom'
+
+const Breadcrumb = () => {
+  return (
+    <div className="row">
+    <div className="col">
+        <div className="pagetitle">
+            <h1>Deals</h1>
+            <nav>
+                <ol className="breadcrumb mt-2">
+                    <li className="breadcrumb-item">
+                        <Link to="/" className='text-decoration-none'>
+                            Dashboard
+                        </Link>
+                    </li>
+                    <li className="breadcrumb-item active" style={{fontWeight:"600"}}>Deals</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</div>
+  )
+}
+
+export default Breadcrumb
