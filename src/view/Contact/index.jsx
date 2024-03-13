@@ -16,7 +16,14 @@ import Swal from "sweetalert2";
 import Select from "react-select";
 import IconCompany from "../../assets/img/condo.png";
 import IconMoney from "../../assets/img/coin.png";
-import { debounce } from 'lodash';
+import { debounce } from "lodash";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faBuilding,
+  faPenToSquare,
+  faSackDollar,
+  faTrash,
+} from "@fortawesome/free-solid-svg-icons";
 
 const Contact = () => {
   const token = localStorage.getItem("token");
@@ -48,7 +55,7 @@ const Contact = () => {
   const [user, setUser] = useState([]);
   const [source, setSource] = useState([]);
   const [associateCompany, setAssociateCompany] = useState([]);
-  const [associateDeals, setAssociateDeals] = useState([])
+  const [associateDeals, setAssociateDeals] = useState([]);
   const [searchMultiple, setSearchMultiple] = useState({
     name: "",
     email: "",
@@ -66,10 +73,10 @@ const Contact = () => {
     limit: 10,
   });
   const [totalRows, setTotalRows] = useState(0);
-  const [ownerContact, setOwnerContact] = useState([])
+  const [ownerContact, setOwnerContact] = useState([]);
   const [formSearch, setFormSearch] = useState([]);
   const [selectedUser, setSelectedUser] = useState([]);
-  
+
   const getSource = (retryCount = 0) => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/companies-source`, {
@@ -82,21 +89,23 @@ const Contact = () => {
         if (err.response.data.message === "Unauthenticated") {
           localStorage.clear();
           window.location.href = "/login";
-        }else if(err.response.status === 429){
+        } else if (err.response.status === 429) {
           const maxRetries = 3;
           if (retryCount < maxRetries) {
             setTimeout(() => {
               getSource(retryCount + 1);
             }, 2000);
           } else {
-            console.error('Max retry attempts reached. Unable to complete the request.');
+            console.error(
+              "Max retry attempts reached. Unable to complete the request."
+            );
           }
-        }else {
-          console.error('Unhandled error:', err);
+        } else {
+          console.error("Unhandled error:", err);
         }
       });
   };
-  
+
   const getCompany = (retryCount = 0) => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/companies/form/select`, {
@@ -109,21 +118,22 @@ const Contact = () => {
         if (err.response.data.message === "Unauthenticated") {
           localStorage.clear();
           window.location.href = "/login";
-        }else if(err.response.status === 429){
+        } else if (err.response.status === 429) {
           const maxRetries = 3;
           if (retryCount < maxRetries) {
             setTimeout(() => {
               getCompany(retryCount + 1);
             }, 2000);
           } else {
-            console.error('Max retry attempts reached. Unable to complete the request.');
+            console.error(
+              "Max retry attempts reached. Unable to complete the request."
+            );
           }
-        }else {
-          console.error('Unhandled error:', err);
+        } else {
+          console.error("Unhandled error:", err);
         }
       });
   };
-
 
   const getAllUser = (retryCount = 0) => {
     axios
@@ -137,34 +147,42 @@ const Contact = () => {
         if (err.response.data.message === "Unauthenticated") {
           localStorage.clear();
           window.location.href = "/login";
-        } else if(err.response.status === 429){
+        } else if (err.response.status === 429) {
           const maxRetries = 3;
           if (retryCount < maxRetries) {
             setTimeout(() => {
               getAllUser(retryCount + 1);
             }, 2000);
           } else {
-            console.error('Max retry attempts reached. Unable to complete the request.');
+            console.error(
+              "Max retry attempts reached. Unable to complete the request."
+            );
           }
-        }else {
-          console.error('Unhandled error:', err);
+        } else {
+          console.error("Unhandled error:", err);
         }
       });
   };
 
-  const getContactAll = async (token, term, ownerContact, formSearch, retryCount = 0) => {
+  const getContactAll = async (
+    token,
+    term,
+    ownerContact,
+    formSearch,
+    retryCount = 0
+  ) => {
     try {
       const params = {};
-      if(term){
-        params.search = term
+      if (term) {
+        params.search = term;
       }
-      if(ownerContact){
+      if (ownerContact) {
         params.contact_all_or_my = ownerContact;
         params.page = pagination.page;
         params.limit = pagination.limit;
       }
-      if(formSearch){
-        Object.assign(params, formSearch)
+      if (formSearch) {
+        Object.assign(params, formSearch);
         if (!params.page) {
           params.page = pagination.page;
         }
@@ -174,66 +192,75 @@ const Contact = () => {
       }
       params.page = pagination.page;
       params.limit = pagination.limit;
-      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/contacts`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        params : params
-      });
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}/contacts`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          params: params,
+        }
+      );
       setContact(response.data.data);
       setTotalRows(response.data.pagination.totalData);
-      setPending(false)
+      setPending(false);
     } catch (error) {
-      if (error.response.status === 401 && error.response.data.message === "Unauthenticated") {
+      if (
+        error.response.status === 401 &&
+        error.response.data.message === "Unauthenticated"
+      ) {
         localStorage.clear();
         window.location.href = "/login";
-      }
-      else if(error.response && error.response.status === 429){
+      } else if (error.response && error.response.status === 429) {
         const maxRetries = 3;
         if (retryCount < maxRetries) {
           setTimeout(() => {
             getContactAll(retryCount + 1);
           }, 2000);
         } else {
-          console.error('Max retry attempts reached. Unable to complete the request.');
+          console.error(
+            "Max retry attempts reached. Unable to complete the request."
+          );
         }
-      }
-      else if(error.response && error.response.status === 404){
-        setContact([])
-        setTotalRows(0)
-      }
-      else{
-        console.error('Unhandled error:', error);
+      } else if (error.response && error.response.status === 404) {
+        setContact([]);
+        setTotalRows(0);
+      } else {
+        console.error("Unhandled error:", error);
       }
     }
   };
   const getDeals = (retryCount = 0) => {
     axios
-    .get(`${process.env.REACT_APP_BACKEND_URL}/deals/form/select`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-    .then((res) => setAssociateDeals(res.data.data))
-    .catch((err) => {
-      if (err.response.status === 401 && err.response.data.message === "Unauthenticated") {
-        localStorage.clear();
-        window.location.href = "/login";
-      }else if(err.response && err.response.status === 429) {
-        const maxRetries = 3;
-        if (retryCount < maxRetries) {
-          setTimeout(() => {
-            getDeals(retryCount + 1);
-          }, 2000);
+      .get(`${process.env.REACT_APP_BACKEND_URL}/deals/form/select`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => setAssociateDeals(res.data.data))
+      .catch((err) => {
+        if (
+          err.response.status === 401 &&
+          err.response.data.message === "Unauthenticated"
+        ) {
+          localStorage.clear();
+          window.location.href = "/login";
+        } else if (err.response && err.response.status === 429) {
+          const maxRetries = 3;
+          if (retryCount < maxRetries) {
+            setTimeout(() => {
+              getDeals(retryCount + 1);
+            }, 2000);
+          } else {
+            console.error(
+              "Max retry attempts reached. Unable to complete the request."
+            );
+          }
         } else {
-          console.error('Max retry attempts reached. Unable to complete the request.');
+          console.error("Unhandled error:", err);
         }
-      }else {
-        console.error('Unhandled error:', err);
-      }
-    });
-  }
- 
+      });
+  };
 
   const handleSearchMultiple = (e) => {
     setSearchMultiple({
@@ -260,29 +287,27 @@ const Contact = () => {
     associateDeals?.map((data) => {
       const dataDeals = {
         value: data.uid,
-        label: data.deal_name
-      }
-      result.push(dataDeals)
-    })
+        label: data.deal_name,
+      };
+      result.push(dataDeals);
+    });
     return result;
   };
 
-  const [resultCompany, setResultCompany] = useState([])
+  const [resultCompany, setResultCompany] = useState([]);
   const selectAssociateCompany = () => {
-   const result = [];
-   associateCompany?.map((data) => {
-    const dataResult = {
-      value: data.uid,
-      label:data.name
-    }
-    result.push(dataResult)
-   })
-   return result
+    const result = [];
+    associateCompany?.map((data) => {
+      const dataResult = {
+        value: data.uid,
+        label: data.name,
+      };
+      result.push(dataResult);
+    });
+    return result;
   };
 
-
   const [selectedSource, setSelectSource] = useState([]);
-
 
   const selectSource = () => {
     const result = [];
@@ -298,7 +323,6 @@ const Contact = () => {
 
   const [pending, setPending] = useState(true);
 
-
   const fetchData = async () => {
     try {
       setPending(true);
@@ -308,28 +332,35 @@ const Contact = () => {
       await getCompany();
       await getDeals();
     } catch (error) {
-      console.error('Error in fetchData:', error);
+      console.error("Error in fetchData:", error);
     } finally {
       setPending(false);
     }
   };
 
   useEffect(() => {
-  fetchData();
-}, [TokenAuth, search, ownerContact,  formSearch, pagination.page, pagination.limit]);
+    fetchData();
+  }, [
+    TokenAuth,
+    search,
+    ownerContact,
+    formSearch,
+    pagination.page,
+    pagination.limit,
+  ]);
 
   const handleChangePage = (page) => {
     setPagination((e) => ({ ...e, page }));
   };
-  
+
   const handlePagePerChange = (pageSize, page) => {
     setPagination((prev) => ({ ...prev, pageSize, page }));
   };
 
   const handleFilter = (e) => {
-    if(e.key === "Enter"){
+    if (e.key === "Enter") {
       const value = e.target.value.toLowerCase();
-      setSearch(value)
+      setSearch(value);
     }
   };
 
@@ -337,21 +368,32 @@ const Contact = () => {
     {
       name: "Name",
       selector: (row) => (
-        <a href={`/contact/${row.uid}/edit`} target="_blank" className="image-name text-decoration-none ">
-          <div className="d-flex align-items-center">
-            <img src={IconImage} className="rounded-circle" />
+        <a
+          href={`/contact/${row.uid}/edit`}
+          target="_blank"
+          className="image-name text-decoration-none "
+        >
+          <div className="align-items-center">
+            {/* <img src={IconImage} className="rounded-circle" /> */}
             <div className="mt-3">
-              <span className="fw-semibold" style={{ whiteSpace: "normal", color:'black' }}>
+              <span
+                style={{
+                  whiteSpace: "normal",
+                  fontSize: "0.85rem",
+                  color: "black",
+                  fontWeight: "650",
+                }}
+              >
                 {row.name}
               </span>
               <p
                 className="mt-1"
                 style={{
-                  fontSize: "11px",
-                  color:"#163020"
+                  fontSize: "0.75rem",
+                  color: "#163020",
                 }}
               >
-                {row.position}
+                {row.position ? row.position : "-"}
               </p>
             </div>
           </div>
@@ -363,7 +405,9 @@ const Contact = () => {
     {
       name: "Contact Info",
       selector: (row) => (
-        <p style={{ fontSize: "0.85rem" }}>{row?.phone?.[0]?.number}</p>
+        <p style={{ fontSize: "0.85rem", fontWeight: "550" }}>
+          {row?.phone?.[0]?.number ?? "-"}
+        </p>
       ),
       sortable: true,
       width: "150px",
@@ -374,47 +418,61 @@ const Contact = () => {
         <div className="d-flex">
           {row?.associate?.slice(0, 3).map((item, index) => (
             <div key={index} className="d-flex">
-            <OverlayTrigger
-              placement="top"
-              overlay={
-                <Tooltip>
-                  {item?.company?.name ? item?.company?.name : null}
-             
-                </Tooltip>
-              }
-            >
-              <div>
-                {item?.company ? (
-                  <img
-                    className="ms-1"
-                    src={IconCompany}
-                    style={{ width: "18px" }}
-                    data-tip={item?.company?.name}
-                  />
-                ) : null}
-              
-              </div>
-            </OverlayTrigger>
-            <OverlayTrigger placement="top" overlay={<Tooltip>
-              {item?.deals?.deal_name ?? null}
-                  <br />
-                  {item?.deals?.deal_size
-                    ? `Rp. ${new Intl.NumberFormat().format(
-                        item?.deals?.deal_size
-                      )}`
-                    : null}
-            </Tooltip>}>
-                  <div>
+              <OverlayTrigger
+                placement="top"
+                overlay={
+                  <Tooltip>
+                    {item?.company?.name ? item?.company?.name : null}
+                  </Tooltip>
+                }
+              >
+                <div>
+                  {item?.company ? (
+                    <FontAwesomeIcon
+                      icon={faBuilding}
+                      style={{ width: "35px", height: "20px" }}
+                      data-tip={item?.company?.name}
+                    />
+                  ) : // <img
+                  //   className="ms-1"
+                  //   src={IconCompany}
+                  //   style={{ width: "18px" }}
+                  //   data-tip={item?.company?.name}
+                  // />
+                  null}
+                </div>
+              </OverlayTrigger>
+              <OverlayTrigger
+                placement="top"
+                overlay={
+                  <Tooltip>
+                    {item?.deals?.deal_name ?? null}
+                    <br />
+                    {item?.deals?.deal_size
+                      ? `Rp. ${new Intl.NumberFormat().format(
+                          item?.deals?.deal_size
+                        )}`
+                      : null}
+                  </Tooltip>
+                }
+              >
+                <div>
                   {item?.deals ? (
-                  <img
-                    className="ms-1"
-                    src={IconMoney}
-                    style={{ width: "18px" }}
-                    data-tip={item?.deals?.dealName}
-                  />
-                ) : null}
-                  </div>
-            </OverlayTrigger>
+                    <FontAwesomeIcon
+                      icon={faSackDollar}
+                      data-tip={item?.deals?.dealName}
+                      className=""
+                      style={{ width: "35px", height: "20px" }}
+                    />
+                  ) : // <img
+                  //   className="ms-1"
+                  //   src={IconMoney}
+                  //   style={{ width: "18px" }}
+                  //   data-tip={item?.deals?.dealName}
+                  // />
+                  null}
+                </div>
+              </OverlayTrigger>
             </div>
           ))}
         </div>
@@ -423,7 +481,7 @@ const Contact = () => {
       width: "150px",
     },
     {
-      name: "Created/Updated",
+      name: "Owner (Created/Updated)",
       selector: (row) => {
         const createdAt = new Date(row.created_at);
         const updatedAt = new Date(row.updated_at);
@@ -437,101 +495,112 @@ const Contact = () => {
         const formatter = new Intl.DateTimeFormat("en-US", formatOptions);
         const createdDateTime = formatter.format(createdAt);
         const updatedDateTime = formatter.format(updatedAt);
-
+        // console.log(row);
         return (
           <div className="mt-1">
+            <p className="fw-bold mt-2">{row?.owner?.name}</p>
             <p
-              className="mt-1"
-              style={{ fontSize: "0.85rem", whiteSpace: "normal" }}
+              style={{
+                fontSize: "0.85rem",
+                whiteSpace: "normal",
+                marginTop: "-12px",
+              }}
             >
               {createdDateTime}
             </p>
             <p
               style={{
                 marginTop: "-12px",
-                fontSize: "0.85rem",
+                fontSize: "0.75rem",
                 whiteSpace: "normal",
               }}
             >
-              {updatedDateTime}
+              {createdDateTime === updatedDateTime ? "-" : updatedDateTime}
+              {/* {updatedDateTime} */}
             </p>
           </div>
         );
       },
       sortable: true,
-      width: "150px",
+      width: "200px",
     },
-    {
-      name: "Owner",
-      selector: (row) => (
-        <OverlayTrigger
-          placement="top"
-          overlay={
-            <Tooltip id={`tooltip-${row?.owner?.name}`}>
-              {row?.owner?.name}
-            </Tooltip>
-          }
-        >
-          <div className="image-name">
-            <img
-              src={IconImage}
-              className="rounded-circle"
-              data-tip={row.name}
-            />
-          </div>
-        </OverlayTrigger>
-      ),
-      sortable: true,
-    },
+    // {
+    //   name: "Owner",
+    //   selector: (row) => (
+    //     <OverlayTrigger
+    //       placement="top"
+    //       overlay={
+    //         <Tooltip id={`tooltip-${row?.owner?.name}`}>
+    //           {row?.owner?.name}
+    //         </Tooltip>
+    //       }
+    //     >
+    //       <div className="image-name">
+    //         <img
+    //           src={IconImage}
+    //           className="rounded-circle"
+    //           data-tip={row.name}
+    //         />
+    //       </div>
+    //     </OverlayTrigger>
+    //   ),
+    //   sortable: true,
+    // },
     {
       name: "Action",
       selector: (row) => (
         <div className="action-icon">
           <a
-           href={`/contact/${row.uid}/edit`} target="_blank"
-           className="ms-2 icon-button text-dark"
+            href={`/contact/${row.uid}/edit`}
+            target="_blank"
+            className="icon-button text-dark"
             title="edit"
           >
-            <i className="bi bi-pen edit"></i>
+            <FontAwesomeIcon
+              icon={faPenToSquare}
+              style={{ width: "23px", height: "13px" }}
+            />
           </a>
           <button
             className="ms-2 icon-button"
             title="delete"
             onClick={() => setDeleteContact(row.uid)}
           >
-            <i className="bi bi-trash-fill danger"></i>
+            <FontAwesomeIcon
+              icon={faTrash}
+              style={{ width: "23px", height: "13px" }}
+            />
           </button>
         </div>
       ),
       width: "150px",
     },
   ];
-  
 
   const handleContactMyOrPerson = (e) => {
     const target = e.target.value;
-    if(target === "all"){
-      setOwnerContact('all')
-    }else{
-      setOwnerContact("my")
+    if (target === "all") {
+      setOwnerContact("all");
+    } else {
+      setOwnerContact("my");
     }
   };
 
   const handleSubmitSearch = (e) => {
     e.preventDefault();
     const formSearchMultiple = {
-      owner: selectedUser.value || '',
-      associate_company: resultCompany.value || '',
-      associate_deals: resultDeals.value || '',
-      contact_name: searchMultiple.name || '',
-      email:searchMultiple.email || '',
-      position: searchMultiple.position || '',
-      source: selectedSource.label || '',
-      address:searchMultiple.address || '',
-      city: searchMultiple.city || '',
-      created_at:searchMultiple.created_at || '',
-    }
-    setFormSearch(formSearchMultiple)
+      owner: selectedUser.value || "",
+      associate_company: resultCompany.value || "",
+      associate_deals: resultDeals.value || "",
+      contact_name: searchMultiple.name || "",
+      email: searchMultiple.email || "",
+      position: searchMultiple.position || "",
+      source: selectedSource.label || "",
+      address: searchMultiple.address || "",
+      city: searchMultiple.city || "",
+      created_at: searchMultiple.created_at || "",
+    };
+    setFormSearch(formSearchMultiple);
   };
 
   const selectUidDataTable = (state) => {
@@ -795,7 +864,7 @@ const Contact = () => {
                         placeholder="Source"
                         options={selectSource()}
                         closeMenuOnSelect={false}
-                        onChange={(e) =>setSelectSource(e)}
+                        onChange={(e) => setSelectSource(e)}
                       />
                     </div>
                     <div className="mb-1">

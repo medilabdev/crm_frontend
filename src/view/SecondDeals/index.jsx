@@ -7,6 +7,12 @@ import TopButton from "./partials/TopButton";
 import Card from "../../components/Card";
 import FilterTable from "./partials/filterTable";
 import DatatableDealSecond from "./partials/Datatable";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faFilter,
+  faMagnifyingGlass,
+  faX,
+} from "@fortawesome/free-solid-svg-icons";
 
 const SecondDeals = () => {
   const [SideFilter, SetSideFilter] = useState(false);
@@ -17,7 +23,7 @@ const SecondDeals = () => {
     ? "col-md-3 d-block border-end"
     : "col-md-0 d-none";
   const DatatableClass = SideFilter ? "col-md-9" : "col-md-12";
-  const IconSideFilter = SideFilter ? "bi bi-x-lg fs-5" : "bi bi-funnel fs-5";
+  const IconSideFilter = SideFilter ? faX : faFilter;
   return (
     <div id="body">
       <Topbar />
@@ -39,12 +45,13 @@ const SecondDeals = () => {
                       onClick={ToggleSideFilter}
                       style={{ fontSize: "0.85rem", fontWeight: "600" }}
                     >
-                      <i className={`${IconSideFilter}`}></i>
+                      <FontAwesomeIcon icon={IconSideFilter} className="fs-6" />
+                      {/* <i className={`${IconSideFilter}`}></i> */}
                     </button>
                     <div className="float-end">
                       <div
                         className="input-group shadow-sm mt-3 me-3"
-                        style={{ width: "30rem" }}
+                        style={{ width: "25rem" }}
                       >
                         <div className="input-group-prepend">
                           <span
@@ -54,7 +61,10 @@ const SecondDeals = () => {
                               borderStartEndRadius: 0,
                             }}
                           >
-                            <i className="bi bi-search fs-5"></i>
+                            <FontAwesomeIcon
+                              icon={faMagnifyingGlass}
+                              className="fs-4"
+                            />
                           </span>
                         </div>
                         <input

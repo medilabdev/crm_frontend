@@ -64,7 +64,7 @@ function Sidebar() {
             type="nonCollapse"
             name="Deals /Second"
             icon="bi bi-coin"
-            url="/second-deals"
+            url="/deals-second"
             isActive="1"
           />
         </ul>

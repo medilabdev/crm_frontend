@@ -8,17 +8,40 @@ import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import IconCompany from "../../assets/img/condo.png";
 import IconPhone from "../../assets/img/telephone-call.png";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faBuilding,
+  faPenToSquare,
+  faPhone,
+  faPhoneVolume,
+  faTrash,
+} from "@fortawesome/free-solid-svg-icons";
 
-const DataTableComponet = ({ data, selectUidDataTable, pending, paginationPerPage, paginationTotalRows, handleChangePage, handlePagePerChange  }) => {
+const DataTableComponet = ({
+  data,
+  selectUidDataTable,
+  pending,
+  paginationPerPage,
+  paginationTotalRows,
+  handleChangePage,
+  handlePagePerChange,
+}) => {
   const token = localStorage.getItem("token");
-  const uid = localStorage.getItem('uid');
-  const role = localStorage.getItem('role');
+  const uid = localStorage.getItem("uid");
+  const role = localStorage.getItem("role");
   const navigate = useNavigate();
   const columns = [
     {
       name: "Name",
       cell: (row) => (
-        <a href={`deals/${row.uid}/edit`} target="_blank" className="text-decoration-none" style={{ whiteSpace: "normal", color:"black", fontWeight:"600" }}>{row.deal_name}</a>
+        <a
+          href={`deals/${row.uid}/edit`}
+          target="_blank"
+          className="text-decoration-none"
+          style={{ whiteSpace: "normal", color: "black", fontWeight: "600" }}
+        >
+          {row.deal_name}
+        </a>
       ),
       sortable: true,
       width: "150px",
@@ -59,13 +82,18 @@ const DataTableComponet = ({ data, selectUidDataTable, pending, paginationPerPag
               overlay={<Tooltip>{row?.company?.name}</Tooltip>}
             >
               <div>
-                <img
+                <FontAwesomeIcon
+                  icon={faBuilding}
+                  style={{ width: "30px", height: "18px" }}
+                  data-tip={row.company?.name}
+                />
+                {/* <img
                   className="ms-1"
                   src={IconCompany}
                   alt=""
                   style={{ width: "18px" }}
                   data-tip={row.company?.name}
-                />
+                /> */}
               </div>
             </OverlayTrigger>
           ) : null}
@@ -85,12 +113,18 @@ const DataTableComponet = ({ data, selectUidDataTable, pending, paginationPerPag
                   }
                 >
                   <div>
-                    <img
-                      className="ms-1"
-                      src={IconPhone}
-                      alt=""
-                      style={{ width: "18px" }}
-                    />
+                    <a
+                      href={`/contact/${row.company?.uid}/edit`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <FontAwesomeIcon
+                        icon={faPhoneVolume}
+                        style={{ width: "30px", height: "18px" }}
+                        data-tip={row.company?.name}
+                        className="text-black"
+                      />
+                    </a>
                   </div>
                 </OverlayTrigger>
               ))
@@ -118,12 +152,24 @@ const DataTableComponet = ({ data, selectUidDataTable, pending, paginationPerPag
         return (
           <div>
             <p
-              className="mt-2 fw-semibold"
-              style={{ fontSize: "13px", whiteSpace: "normal" }}
+              className="mt-2 fw-bold"
+              style={{
+                fontSize: "0.90rem",
+                fontWeight: "bold",
+                whiteSpace: "normal",
+              }}
             >
-              {row.owner?.name} -
+              {row.owner?.name}
             </p>
-            <p style={{ marginTop: "-8px", whiteSpace: "normal" }}>{time}</p>
+            <p
+              style={{
+                fontSize: "0.85rem",
+                marginTop: "-8px",
+                whiteSpace: "normal",
+              }}
+            >
+              {time}
+            </p>
           </div>
         );
       },
@@ -134,73 +180,73 @@ const DataTableComponet = ({ data, selectUidDataTable, pending, paginationPerPag
       name: "Action",
       selector: (row) => (
         <div className="action-icon">
-            {row?.owner_user_uid === uid || (role === "hG5sy_dytt95")? (
-              <>
-                <a
-                      href={`/deals/${row.uid}/edit`}
-                      className="ms-2 icon-button text-dark"
-                      title="edit"
-                      target="_blank"
-                    >
-                      <i className="bi bi-pen edit"></i>
-                </a>
-              
-            <button
-              className="icon-button"
-              title="delete"
-              onClick={() => {
-                Swal.fire({
-                  title: "Konfirmasi",
-                  text: "Apakah kamu yakin ingin menghapus ini deals ini?",
-                  icon: "warning",
-                  showCancelButton: true,
-                  confirmButtonColor: "#3085d6",
-                  cancelButtonColor: "#d33",
-                  confirmButtonText: "Ya, Hapus!",
-                  cancelButtonText: "Batal",
-                }).then((res) => {
-                  if (res.isConfirmed) {
-                    const formData = new FormData();
-                    formData.append("deals_uid[]", row.uid);
-                    // console.log("FormData:", Object.fromEntries(formData.entries()));
-                    axios
-                      .post(
-                        `${process.env.REACT_APP_BACKEND_URL}/deals/item/delete`,
-                        formData,
-                        {
-                          headers: {
-                            Authorization: `Bearer ${token}`,
-                          },
-                        }
-                      )
-                      .then((res) => {
-                        Swal.fire({
-                          title: res.data.message,
-                          text: "Successfully delete deals",
-                          icon: "success",
-                        }).then((res) => {
-                          if (res.isConfirmed) {
-                            window.location.reload();
+          {row?.owner_user_uid === uid || role === "hG5sy_dytt95" ? (
+            <>
+              <a
+                href={`/deals/${row.uid}/edit`}
+                className="me-3 icon-button text-dark"
+                title="edit"
+                target="_blank"
+              >
+                <FontAwesomeIcon icon={faPenToSquare} />
+              </a>
+
+              <button
+                className="icon-button"
+                title="delete"
+                onClick={() => {
+                  Swal.fire({
+                    title: "Konfirmasi",
+                    text: "Apakah kamu yakin ingin menghapus ini deals ini?",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "Ya, Hapus!",
+                    cancelButtonText: "Batal",
+                  }).then((res) => {
+                    if (res.isConfirmed) {
+                      const formData = new FormData();
+                      formData.append("deals_uid[]", row.uid);
+                      // console.log("FormData:", Object.fromEntries(formData.entries()));
+                      axios
+                        .post(
+                          `${process.env.REACT_APP_BACKEND_URL}/deals/item/delete`,
+                          formData,
+                          {
+                            headers: {
+                              Authorization: `Bearer ${token}`,
+                            },
+                          }
+                        )
+                        .then((res) => {
+                          Swal.fire({
+                            title: res.data.message,
+                            text: "Successfully delete deals",
+                            icon: "success",
+                          }).then((res) => {
+                            if (res.isConfirmed) {
+                              window.location.reload();
+                            }
+                          });
+                        })
+                        .catch((err) => {
+                          if (err.response.data.message === "Delete failed!") {
+                            Swal.fire({
+                              title: "Delete Failed",
+                              text: "Tidak dapat menghapus, data master ini terkait dengan data lainnya",
+                              icon: "warning",
+                            });
                           }
                         });
-                      })
-                      .catch((err) => {
-                        if (err.response.data.message === "Delete failed!") {
-                          Swal.fire({
-                            title: "Delete Failed",
-                            text: "Tidak dapat menghapus, data master ini terkait dengan data lainnya",
-                            icon: "warning",
-                          });
-                        }
-                      });
-                  }
-                });
-              }}
-            >
-              <i className="bi bi-trash-fill danger"></i>
-            </button>
+                    }
+                  });
+                }}
+              >
+                <FontAwesomeIcon icon={faTrash} />
+              </button>
             </>
-              ): null}
+          ) : null}
         </div>
       ),
       width: "120px",
@@ -216,7 +262,7 @@ const DataTableComponet = ({ data, selectUidDataTable, pending, paginationPerPag
         paginationServer
         paginationPerPage={paginationPerPage}
         paginationComponentOptions={{
-          noRowsPerPage : true
+          noRowsPerPage: true,
         }}
         selectableRows
         onSelectedRowsChange={selectUidDataTable}

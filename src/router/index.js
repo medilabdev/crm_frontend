@@ -55,6 +55,8 @@ import EditTask from "../view/Task/Overlay/EditTask";
 import EditTaskFix from "../view/Task/EditTask";
 import SecondDeals from "../view/SecondDeals";
 import CreateSecondDeals from "../view/SecondDeals/create";
+import NeedApprovalSecondDeals from "../view/SecondDeals/NeedApprovalSecondDeals";
+import LembarPersetujuanProject from "../view/SecondDeals/LembarPersetujuanProject";
 
 const Login = ({ children }) => {
   const token = localStorage.getItem("token");
@@ -444,8 +446,11 @@ function Router() {
         <Route exact path="/task/:uid/edit"
          element={<Login><EditTaskFix /></Login>} 
          />
-        <Route exact path="/second-deals" element={<Login><SecondDeals /></Login>} />
+        <Route exact path="/deals-second" element={<Login><SecondDeals /></Login>} />
         <Route exact path="/create-deals" element={<Login><CreateSecondDeals /></Login>} />
+        <Route exact path="/deals-second/need-approval" element={<Login><NeedApprovalSecondDeals/></Login>} />
+        <Route exact path="/deals-second/lpp" element={<Login><LembarPersetujuanProject /></Login>} /> 
+
       </Routes>
     </BrowserRouter>
   );

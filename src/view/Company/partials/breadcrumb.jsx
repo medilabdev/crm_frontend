@@ -1,11 +1,15 @@
+import { faBuilding } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
 
-const BreadCrumbCreate = () => {
+const BreadcrumbCompany = () => {
   return (
     <div className="row">
       <div className="col">
         <div className="pagetitle">
-          <h1>Create Deals</h1>
+          <h1>
+            <FontAwesomeIcon icon={faBuilding} className="fs-3 me-2" /> Company
+          </h1>
           <nav>
             <ol className="breadcrumb mt-2">
               <li className="breadcrumb-item">
@@ -13,10 +17,7 @@ const BreadCrumbCreate = () => {
                   Dashboard
                 </a>
               </li>
-              <li className="breadcrumb-item">
-                <a href="/deals-second" className="text-decoration-none">Deals</a>
-              </li>
-              <li className="breadcrumb-item active" style={{fontWeight:"600"}}>Create Deals</li>
+              <li className="breadcrumb-item active fw-bold">Company</li>
             </ol>
           </nav>
         </div>
@@ -25,4 +26,4 @@ const BreadCrumbCreate = () => {
   );
 };
 
-export default BreadCrumbCreate;
+export default BreadcrumbCompany;

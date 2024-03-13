@@ -5,6 +5,7 @@ import Main from "../../../components/Template/Main";
 import BreadCrumbCreate from "./breadcrumb";
 import { Card, FloatingLabel, Form } from "react-bootstrap";
 import ReactQuill from "react-quill";
+import TobButton from "./TobButton";
 
 const CreateSecondDeals = () => {
   return (
@@ -14,6 +15,7 @@ const CreateSecondDeals = () => {
       <Main>
         <div className="container">
           <BreadCrumbCreate />
+          <TobButton />
           <Card className="shadow-sm">
             <Card.Header className="text-center">
               <h4 className="mt-2" style={{ fontWeight: 700 }}>
