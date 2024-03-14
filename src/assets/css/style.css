@@ -9,17 +9,17 @@
 /*--------------------------------------------------------------
 # General
 --------------------------------------------------------------*/
-*{
+* {
   font-size: 0.85rem;
   /* font-weight: 600; */
-} 
+}
 :root {
   scroll-behavior: smooth;
 }
 
 body {
   font-family: "Open Sans", sans-serif;
-  background: rgba(235, 237, 255, 0.5) !important;
+  background: #fff7f374 !important;
   color: #444444;
 }
 
@@ -118,8 +118,6 @@ h6 {
   font-size: 15px;
   padding: 10px 25px;
 }
-
-
 
 .dropdown-menu .dropdown-footer a:hover {
   text-decoration: none;
@@ -461,7 +459,7 @@ h6 {
   list-style: none;
 }
 
-.header-nav>ul {
+.header-nav > ul {
   margin: 0;
   padding: 0;
 }
@@ -633,7 +631,6 @@ h6 {
 }
 
 @media (min-width: 1200px) {
-
   #main,
   #footer {
     margin-left: 300px;
@@ -647,7 +644,6 @@ h6 {
 }
 
 @media (min-width: 1200px) {
-
   .toggle-sidebar #main,
   .toggle-sidebar #footer {
     margin-left: 0;
@@ -686,7 +682,7 @@ h6 {
   margin-left: 14px;
   display: flex;
   align-items: center;
-  color: white ;
+  color: white;
   border: none;
   transition: 0.4;
   background: #1b70f08d;
@@ -695,11 +691,10 @@ h6 {
 }
 
 .sidebar-nav .nav-link i {
-  margin-right:15px ; 
+  margin-right: 15px;
   color: white;
   font-size: 17px !important;
 }
-
 
 .sidebar-nav .nav-link.collapsed {
   color: #012970;
@@ -713,7 +708,6 @@ h6 {
 .sidebar-nav .nav-link:hover {
   color: white;
   background: #1b70f08d;
- 
 }
 
 .sidebar-nav .nav-link:hover i {
@@ -888,7 +882,7 @@ h6 {
 }
 
 /* News & Updates */
-.dashboard .news .post-item+.post-item {
+.dashboard .news .post-item + .post-item {
   margin-top: 15px;
 }
 
@@ -1052,7 +1046,7 @@ h6 {
 .profile .profile-edit img {
   max-width: 120px;
 }
-.profile .change-password label{
+.profile .change-password label {
   font-weight: 600;
   color: rgba(1, 41, 112, 0.6);
 }
@@ -1158,7 +1152,7 @@ h6 {
   padding: 12px 15px;
 }
 
-.contact .php-email-form button[type=submit] {
+.contact .php-email-form button[type="submit"] {
   background: #4154f1;
   border: 0;
   padding: 10px 30px;
@@ -1167,7 +1161,7 @@ h6 {
   border-radius: 4px;
 }
 
-.contact .php-email-form button[type=submit]:hover {
+.contact .php-email-form button[type="submit"]:hover {
   background: #5969f3;
 }
 
