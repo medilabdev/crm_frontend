@@ -26,7 +26,10 @@ import {
   faMagnifyingGlass,
   faX,
 } from "@fortawesome/free-solid-svg-icons";
-import { ColumnsTableCompany, CustomStyles } from "./partials/ColumnsDataTable";
+import ColumnsDataTable, {
+  ColumnsTableCompany,
+  CustomStyles,
+} from "./partials/ColumnsDataTable";
 
 const Company = () => {
   const uid = localStorage.getItem("uid");
@@ -692,15 +695,18 @@ const Company = () => {
                 <div className={`${datatableClass}`} id="datatable-content">
                   <OverlayTrigger placement="top" overlay={showTooltip}>
                     <button
-                      className="btn btn-primary mt-3"
+                      className="btn shadow-sm btn-primary mt-3"
                       onClick={toggleSideBarCard}
                       style={{ fontSize: "0.85rem" }}
                     >
-                      <FontAwesomeIcon icon={iconFilter} className="fs-6" />
+                      <FontAwesomeIcon icon={iconFilter} className="fs-5" />
                     </button>
                   </OverlayTrigger>
-                  <div className="col-md-4 ms-5 mt-5 float-end">
-                    <div className="input-group search-users">
+                  <div className="float-end mb-4">
+                    <div
+                      className="input-group mt-3 shadow-sm search-users"
+                      style={{ height: "2.5rem", width: "19rem" }}
+                    >
                       <div className="input-group-prepend">
                         <span
                           className="input-group-text"
@@ -711,7 +717,7 @@ const Company = () => {
                         >
                           <FontAwesomeIcon
                             icon={faMagnifyingGlass}
-                            className="fs-4"
+                            style={{ height: "1.7rem" }}
                           />
                         </span>
                       </div>
@@ -724,23 +730,16 @@ const Company = () => {
                       />
                     </div>
                   </div>
-                  <DataTable
-                    columns={ColumnsTableCompany}
+
+                  <ColumnsDataTable
                     data={allCompany}
-                    defaultSortFieldId={1}
-                    pagination
-                    paginationServer
-                    selectableRows
-                    onSelectedRowsChange={selectUid}
-                    paginationPerPage={pagination.limit}
+                    selectUid={selectUid}
+                    paginationPerpage={pagination.limit}
                     onChangePage={handleChangePage}
                     onChangeRowsPerPage={handlePagePerChange}
-                    progressPending={pending}
-                    paginationTotalRows={totalRows}
-                    paginationComponentOptions={{
-                      noRowsPerPage: true,
-                    }}
-                    // customStyles={CustomStyles}
+                    pending={pending}
+                    totalRows={totalRows}
+                    setDeleteCompany={setDeleteCompany}
                   />
                 </div>
               </div>

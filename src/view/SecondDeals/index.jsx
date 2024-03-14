@@ -51,7 +51,7 @@ const SecondDeals = () => {
                     <div className="float-end">
                       <div
                         className="input-group shadow-sm mt-3 me-3"
-                        style={{ width: "25rem" }}
+                        style={{ width: "20rem" }}
                       >
                         <div className="input-group-prepend">
                           <span

@@ -9,6 +9,7 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import OverlayAdd from "./OverlayAdd";
 import OverlayEdit from "./OverlayEdit";
+import SidebarProperties from "../partials";
 const CompanyType = () => {
   const token = localStorage.getItem("token");
   const [comType, setCompType] = useState([]);
@@ -174,92 +175,8 @@ const CompanyType = () => {
             <Card className="shadow">
               <div className="container">
                 <div className="row">
-                  <div className="col-md-3 p-2 border-end">
-                  <div className="d-flex flex-column border rounded shadow mt-4">
-                      <Link
-                        to="/properties"
-                        className="text-decoration-none text-black fw-semibold border-bottom documents "
-                      >
-                        <div className="input-group">
-                          <i class="bi bi-people-fill mt-2 ms-2" style={{ fontSize:"1.3rem" }}></i>
-                          <p className="ms-3" style={{ fontSize:"0.95rem", marginTop:"10px" }}>Teams</p>
-                        </div>
-                      </Link>
-                      <Link
-                        to="/properties/position"
-                        className="text-decoration-none text-black fw-semibold border-bottom documents "
-                      >
-                        <div className="input-group">
-                          <i class="bi bi-diagram-3 mt-2 ms-2" style={{ fontSize:"1.3rem"  }}></i>
-                          <p className="ms-3" style={{ fontSize:"0.95rem", marginTop:"10px", fontWeight:"500" }}>Position</p>
-                        </div>
-                      </Link>
-                      <Link
-                        to="/properties/roles" 
-                        className="text-decoration-none text-black fw-semibold border-bottom documents "
-                      >
-                        <div className="input-group">
-                          <i class="bi bi-person-badge-fill mt-2 ms-2" style={{ fontSize:"1.3rem" }}></i>
-                          <p className="ms-3" style={{ fontSize:"0.95rem", marginTop:"10px", fontWeight:"500"  }} >Roles</p>
-                        </div>
-                      </Link>
-                      <Link
-                        to="/properties/source"
-                        className="text-decoration-none text-black fw-semibold border-bottom documents "
-                      >
-                        <div className="input-group">
-                          <i class="bi bi-building-fill-up mt-2 ms-2" style={{ fontSize:"1.3rem" }}></i>
-                          <p className="ms-3" style={{ fontSize:"0.95rem", marginTop:"10px", fontWeight:"500"  }}>Source</p>
-                        </div>
-                      </Link>
-                      <Link
-                        to="/properties/company-type"
-                        className="text-decoration-none text-black fw-semibold border-bottom documents "
-                      >
-                        <div className="input-group active-side">
-                          <i class="bi bi-buildings mt-2 ms-2" style={{ fontSize:"1.3rem" }}></i>
-                          <p className="ms-3" style={{ fontSize:"0.95rem", marginTop:"10px", fontWeight:"500" }}>Company Type</p>
-                        </div>
-                      </Link>
-                      <Link
-                        to="/properties/deal-stage"
-                        className="text-decoration-none text-black fw-semibold border-bottom documents "
-                      >
-                        <div className="input-group">
-                          <i class="bi bi-coin mt-2 ms-2" style={{ fontSize:"1.3rem" }}></i>
-                          <p className="ms-3" style={{ fontSize:"0.95rem", marginTop:"10px", fontWeight:"500" }}>Deal Stage</p>
-                        </div>
-                      </Link>
-                      <Link
-                        to="/properties/category-expanse"
-                        className="text-decoration-none text-black fw-semibold border-bottom documents "
-                      >
-                        <div className="input-group ">
-                          <i class="bi bi-c-circle mt-2 ms-2" style={{ fontSize:"1.3rem" }}></i>
-                          <p className="ms-3" style={{ fontSize:"0.95rem", marginTop:"10px", fontWeight:"500" }}>Category Expense</p>
-                        </div>
-                      </Link>
-                      <Link
-                        to="/properties/menu-management"
-                        className="text-decoration-none text-black fw-semibold border-bottom documents "
-                      >
-                        <div className="input-group">
-                          <i class="bi bi-menu-button-wide-fill mt-2 ms-2" style={{ fontSize:"1.3rem" }}></i>
-                          <p className="ms-3" style={{ fontSize:"0.95rem", marginTop:"10px", fontWeight:"500" }}>Menu Management</p>
-                        </div>
-                      </Link>
-                      <Link
-                        to="/properties/user-access-menu"
-                        className="text-decoration-none text-black fw-semibold border-bottom documents "
-                      >
-                        <div className="input-group">
-                          <i class="bi bi-menu-button-fill mt-2 ms-2" style={{ fontSize:"1.3rem" }}></i>
-                          <p className="ms-3"style={{ fontSize:"0.95rem", marginTop:"10px", fontWeight:"500" }}>User Access Menu</p>
-                        </div>
-                      </Link>
-                    </div>
-                  </div>
-                  
+                  <SidebarProperties />
+
                   <div className="col-md-9">
                     <div>
                       <button

@@ -20,10 +20,15 @@ import { debounce } from "lodash";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBuilding,
+  faFilter,
+  faMagnifyingGlass,
   faPenToSquare,
   faSackDollar,
   faTrash,
+  faX,
 } from "@fortawesome/free-solid-svg-icons";
+import Breadcrumb from "./Partials/Breadcrumb";
+import TopButton from "./Partials/TopButton";
 
 const Contact = () => {
   const token = localStorage.getItem("token");
@@ -40,7 +45,7 @@ const Contact = () => {
 
   const datatableClass = isSidebarToggleCard ? "col-md-9" : "col-sm-12";
 
-  const IconFilter = isSidebarToggleCard ? "bi bi-x-lg" : "bi bi-funnel";
+  const IconFilter = isSidebarToggleCard ? faX : faFilter;
 
   const showTooltip = isSidebarToggleCard ? (
     <Tooltip id="tooltip">Close Filter</Tooltip>
@@ -428,11 +433,17 @@ const Contact = () => {
               >
                 <div>
                   {item?.company ? (
-                    <FontAwesomeIcon
-                      icon={faBuilding}
-                      style={{ width: "35px", height: "20px" }}
-                      data-tip={item?.company?.name}
-                    />
+                    <a
+                      href={`/company/${item?.company?.uid}/edit`}
+                      target="_blank"
+                      className="text-dark"
+                    >
+                      <FontAwesomeIcon
+                        icon={faBuilding}
+                        style={{ width: "35px", height: "20px" }}
+                        data-tip={item?.company?.name}
+                      />
+                    </a>
                   ) : // <img
                   //   className="ms-1"
                   //   src={IconCompany}
@@ -458,12 +469,18 @@ const Contact = () => {
               >
                 <div>
                   {item?.deals ? (
-                    <FontAwesomeIcon
-                      icon={faSackDollar}
-                      data-tip={item?.deals?.dealName}
-                      className=""
-                      style={{ width: "35px", height: "20px" }}
-                    />
+                    <a
+                      href={`deals/${item?.deals?.uid}/edit`}
+                      target="_blank"
+                      className="text-dark"
+                    >
+                      <FontAwesomeIcon
+                        icon={faSackDollar}
+                        data-tip={item?.deals?.dealName}
+                        className=""
+                        style={{ width: "35px", height: "20px" }}
+                      />
+                    </a>
                   ) : // <img
                   //   className="ms-1"
                   //   src={IconMoney}
@@ -663,83 +680,8 @@ const Contact = () => {
       <Sidebar />
       <Main>
         <div className="container">
-          <div className="row">
-            <div className="col">
-              <div className="pagetitle">
-                <h1>Contact</h1>
-                <nav>
-                  <ol className="breadcrumb mt-2">
-                    <li className="breadcrumb-item">
-                      <Link to="/" className="text-decoration-none">
-                        Dashboard
-                      </Link>
-                    </li>
-                    <li className="breadcrumb-item active fw-bold">Contact</li>
-                  </ol>
-                </nav>
-              </div>
-            </div>
-          </div>
-          <div className="row button-contact mb-2">
-            <div className="col d-flex mb-2">
-              <div class="dropdown button-flex">
-                <button
-                  class="btn btn-primary dropdown-toggle"
-                  type="button"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
-                >
-                  Add Contact
-                </button>
-                <ul class="dropdown-menu">
-                  <li>
-                    <Link class="dropdown-item" to="/single-contact">
-                      Single Contact
-                    </Link>
-                  </li>
-                  <li>
-                    <Link class="dropdown-item" to="/contact/upload-file">
-                      Upload File
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-              <div class="dropdown donwload">
-                <button
-                  class="btn btn-outline-primary dropdown-toggle ms-2"
-                  type="button"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
-                >
-                  Donwload
-                </button>
-                <ul class="dropdown-menu">
-                  <li>
-                    <a class="dropdown-item" href="#">
-                      Donwload Selected
-                    </a>
-                  </li>
-                  <li>
-                    <a class="dropdown-item" href="#">
-                      Donwload All
-                    </a>
-                  </li>
-                </ul>
-              </div>
-              <Link
-                to="/contact/bulk-change"
-                class="btn btn-outline-primary ms-2 bulk-change"
-              >
-                Bulk Change
-              </Link>
-              <button
-                class="btn btn-danger ms-2 delete"
-                onClick={handleDeleteSelected}
-              >
-                Delete
-              </button>
-            </div>
-          </div>
+          <Breadcrumb />
+          <TopButton handleDeleteSelected={handleDeleteSelected} />
 
           <Card className="shadow">
             <div className="row">
@@ -925,6 +867,7 @@ const Contact = () => {
                       fontSize: "0.85rem",
                     }}
                   >
+                    <FontAwesomeIcon icon={IconFilter} className="fs-4" />
                     <i className={`${IconFilter}`}></i>
                   </button>
                 </OverlayTrigger>
@@ -938,7 +881,10 @@ const Contact = () => {
                           borderStartEndRadius: 0,
                         }}
                       >
-                        <i className="bi bi-search"></i>
+                        <FontAwesomeIcon
+                          icon={faMagnifyingGlass}
+                          className="fs-4"
+                        />
                       </span>
                     </div>
                     <input

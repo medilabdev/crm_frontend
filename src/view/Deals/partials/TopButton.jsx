@@ -1,11 +1,14 @@
-import { faHandshake } from "@fortawesome/free-solid-svg-icons";
+import {
+  faArrowsTurnToDots,
+  faHandshake,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
 import { Link } from "react-router-dom";
 
 const TopButton = ({ handleDeleteSelect }) => {
   return (
-    <div className="row">
+    <div className="row mb-2">
       <div className="col mb-2">
         <div className="d-flex float-end">
           <div className="dropdown button-flex">
@@ -74,6 +77,7 @@ const TopButton = ({ handleDeleteSelect }) => {
             className="btn btn-outline-primary ms-2 text-decoration-none"
             style={{ fontSize: "0.85rem", fontWeight: "600" }}
           >
+            <FontAwesomeIcon icon={faArrowsTurnToDots} className="me-2" />
             Bulk Change
           </Link>
           <button

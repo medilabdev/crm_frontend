@@ -47,7 +47,7 @@ function Sidebar() {
 
   return (
     <>
-      <aside id="sidebar" className="sidebar shadow-">
+      <aside id="sidebar" className="sidebar shadow">
         <ul className="sidebar-nav" id="sidebar-nav">
           {accessUser.map((data) => (
             <MenuSidebar

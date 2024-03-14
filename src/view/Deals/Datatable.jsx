@@ -82,18 +82,13 @@ const DataTableComponet = ({
               overlay={<Tooltip>{row?.company?.name}</Tooltip>}
             >
               <div>
+                <a href={`/company/${row.company?.uid}/edit`} target="_blank" className="text-dark">
                 <FontAwesomeIcon
                   icon={faBuilding}
-                  style={{ width: "30px", height: "18px" }}
+                  className="fs-4"
                   data-tip={row.company?.name}
                 />
-                {/* <img
-                  className="ms-1"
-                  src={IconCompany}
-                  alt=""
-                  style={{ width: "18px" }}
-                  data-tip={row.company?.name}
-                /> */}
+                </a>
               </div>
             </OverlayTrigger>
           ) : null}

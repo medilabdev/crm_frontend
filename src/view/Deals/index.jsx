@@ -674,13 +674,13 @@ const Deals = () => {
                       onClick={toggleSideFilter}
                       style={{ fontSize: "0.85rem" }}
                     >
-                      <FontAwesomeIcon icon={IconFilter} className="fs-6" />
+                      <FontAwesomeIcon icon={IconFilter} className="fs-5" />
                       {/* <i className={`${IconFilter}`}></i> */}
                     </button>
                     <div className="float-end">
                       <div
                         className="input-group mt-3 me-3"
-                        style={{ width: "25rem" }}
+                        style={{ height: "2.5rem", width: "18rem" }}
                       >
                         <div className="input-group-prepend">
                           <span
@@ -692,7 +692,7 @@ const Deals = () => {
                           >
                             <FontAwesomeIcon
                               icon={faMagnifyingGlass}
-                              className="fs-4"
+                              style={{ height: "1.8rem" }}
                             />
                           </span>
                         </div>
