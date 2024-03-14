@@ -18,6 +18,18 @@ import Swal from "sweetalert2";
 import Select from "react-select";
 import IconMoney from "../../assets/img/coin.png";
 import { debounce } from "lodash";
+import BreadcrumbCompany from "./partials/breadcrumb";
+import TopButton from "./partials/TopButton";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faFilter,
+  faMagnifyingGlass,
+  faX,
+} from "@fortawesome/free-solid-svg-icons";
+import ColumnsDataTable, {
+  ColumnsTableCompany,
+  CustomStyles,
+} from "./partials/ColumnsDataTable";
 
 const Company = () => {
   const uid = localStorage.getItem("uid");
@@ -38,7 +50,7 @@ const Company = () => {
     <Tooltip id="tooltip">Show Filter</Tooltip>
   );
 
-  const iconFilter = isSideBar ? "bi bi-x-lg" : "bi bi-funnel";
+  const iconFilter = isSideBar ? faX : faFilter;
   const navigate = useNavigate();
   const [search, setSearch] = useState(allCompany);
   const [selectedUIDs, setSelectedUIDs] = useState([]);
@@ -60,14 +72,14 @@ const Company = () => {
     number_of_patient: "",
     parent_company_uid: "",
   });
-  
+
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 10,
   });
 
   const [ownerCompany, setOwnerCompany] = useState([]);
-  const [formSearch, setFormSearch] = useState({})
+  const [formSearch, setFormSearch] = useState({});
   const [totalRows, setTotalRows] = useState(0);
   const handleSelectSearchCompany = (e) => {
     setSearchMultiple({
@@ -86,109 +98,123 @@ const Company = () => {
       .then((res) => {
         setContact(res.data.data);
       })
-      .catch(async(err) => {
+      .catch(async (err) => {
         if (err.response.data.message === "Unauthenticated") {
           localStorage.clear();
           window.location.href = "/login";
-        }
-        else if(err.response.status === 429) {
+        } else if (err.response.status === 429) {
           const maxRetries = 3;
           if (retryCount < maxRetries) {
             setTimeout(() => {
               getContact(retryCount + 1);
             }, 2000);
           } else {
-            console.error('Max retry attempts reached. Unable to complete the request.');
+            console.error(
+              "Max retry attempts reached. Unable to complete the request."
+            );
           }
         } else {
-          console.error('Unhandled error:', err);
+          console.error("Unhandled error:", err);
         }
       });
   };
 
-  const getDeals = (retryCount  = 0) => {
-    axios.get(`${process.env.REACT_APP_BACKEND_URL}/deals/form/select`, {
-      headers:{
-        Authorization: `Bearer ${token}`
+  const getDeals = (retryCount = 0) => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/deals/form/select`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => {
+        setDeals(res.data.data);
+      })
+      .catch(async (err) => {
+        if (err.response.data.message === "Unauthenticated") {
+          localStorage.clear();
+          window.location.href = "/login";
+        } else if (err.response.status === 429) {
+          const maxRetries = 3;
+          if (retryCount < maxRetries) {
+            setTimeout(() => {
+              getDeals(retryCount + 1);
+            }, 2000);
+          } else {
+            console.error(
+              "Max retry attempts reached. Unable to complete the request."
+            );
+          }
+        } else {
+          console.error("Unhandled error:", err);
+        }
+      });
+  };
+
+  const getAllCompany = async (
+    token,
+    term,
+    ownerCompany,
+    formSearch,
+    retryCount = 0
+  ) => {
+    try {
+      const params = {};
+      if (term) {
+        params.search = term;
+      } else {
+        console.log("test");
       }
-    })
-    .then((res) => {
-      setDeals(res.data.data)
-    })
-    .catch(async(err)=> {
-      if (err.response.data.message === "Unauthenticated") {
+      if (ownerCompany) {
+        params.company_all_or_my = ownerCompany;
+        params.page = pagination.page;
+        params.limit = pagination.limit;
+      } else {
+        console.log("test");
+      }
+      if (formSearch) {
+        Object.assign(params, formSearch);
+      } else {
+        console.log("test");
+      }
+      params.page = pagination.page;
+      params.limit = pagination.limit;
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}/companies`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          params: params,
+        }
+      );
+      setAllCompany(response.data.data);
+      setTotalRows(response.data.pagination.totalData);
+      setPending(false);
+    } catch (error) {
+      if (
+        error.response.status === 401 &&
+        error.response.data.message === "Unauthenticated"
+      ) {
         localStorage.clear();
         window.location.href = "/login";
-      }
-      else if(err.response.status === 429){
+      } else if (error.response && error.response.status === 429) {
         const maxRetries = 3;
         if (retryCount < maxRetries) {
           setTimeout(() => {
-            getDeals(retryCount + 1);
+            getAllCompany(retryCount + 1);
           }, 2000);
         } else {
-          console.error('Max retry attempts reached. Unable to complete the request.');
+          console.error(
+            "Max retry attempts reached. Unable to complete the request."
+          );
         }
+      } else if (error.response && error.response.status === 404) {
+        await setAllCompany([]);
+        await setTotalRows(0);
       } else {
-        console.error('Unhandled error:', err);
-      }
-    })
-  }
-
-  const getAllCompany = async (token, term, ownerCompany, formSearch, retryCount = 0) => {
-  try {
-    const params = {};
-    if(term){
-      params.search = term
-    }else{
-      console.log('test');
-    }
-   if(ownerCompany){
-      params.company_all_or_my = ownerCompany;
-      params.page = pagination.page;
-      params.limit = pagination.limit;
-    }else{
-
-      console.log('test');
-    }
-    if(formSearch){
-      Object.assign(params, formSearch);
-    }else{
-      console.log('test');
-    }
-      params.page = pagination.page;
-      params.limit = pagination.limit;
-    const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/companies`, {
-      headers:{
-        Authorization: `Bearer ${token}`
-      },
-      params : params,
-    })
-    setAllCompany(response.data.data)
-    setTotalRows(response.data.pagination.totalData)
-    setPending(false);
-  } catch (error) {
-    if (error.response.status === 401 && error.response.data.message === "Unauthenticated") {
-      localStorage.clear();
-      window.location.href = "/login";
-    }
-    else if(error.response && error.response.status === 429) {
-      const maxRetries = 3;
-      if (retryCount < maxRetries) {
-        setTimeout(() => {
-          getAllCompany(retryCount + 1);
-        }, 2000);
-      } else {
-        console.error('Max retry attempts reached. Unable to complete the request.');
+        console.error("Unhandled error:", error);
       }
     }
-    else if(error.response && error.response.status === 404){
-      await setAllCompany([])
-      await setTotalRows(0)
-    }else {
-      console.error('Unhandled error:', error);
-    }
-  }
   };
 
   const getAlltypeCompany = (retryCount = 0) => {
@@ -201,22 +227,26 @@ const Company = () => {
       .then((res) => {
         setCompanyType(res.data.data);
       })
-      .catch(async(err) => {
-        if (err.response.status === 401 && err.response.data.message === "Unauthenticated") {
+      .catch(async (err) => {
+        if (
+          err.response.status === 401 &&
+          err.response.data.message === "Unauthenticated"
+        ) {
           localStorage.clear();
           window.location.href = "/login";
-        }
-        else if(err.response && err.response.status === 429){
+        } else if (err.response && err.response.status === 429) {
           const maxRetries = 3;
           if (retryCount < maxRetries) {
             setTimeout(() => {
               getAlltypeCompany(retryCount + 1);
             }, 2000);
           } else {
-            console.error('Max retry attempts reached. Unable to complete the request.');
+            console.error(
+              "Max retry attempts reached. Unable to complete the request."
+            );
           }
         } else {
-          console.error('Unhandled error:', err);
+          console.error("Unhandled error:", err);
         }
       });
   };
@@ -233,22 +263,23 @@ const Company = () => {
         if (err.response.data.message === "Unauthenticated") {
           localStorage.clear();
           window.location.href = "/login";
-        }
-        else if(err.response && err.response.status === 429){
+        } else if (err.response && err.response.status === 429) {
           const maxRetries = 3;
           if (retryCount < maxRetries) {
             setTimeout(() => {
               getSource(retryCount + 1);
             }, 2000);
           } else {
-            console.error('Max retry attempts reached. Unable to complete the request.');
+            console.error(
+              "Max retry attempts reached. Unable to complete the request."
+            );
           }
         } else {
-          console.error('Unhandled error:', err);
+          console.error("Unhandled error:", err);
         }
       });
   };
-  
+
   const getOwnerUser = (retryCount = 0) => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
@@ -257,26 +288,26 @@ const Company = () => {
         },
       })
       .then((res) => setOwner(res.data.data))
-      .catch(async(err) => {
+      .catch(async (err) => {
         if (err.response.data.message === "Unauthenticated") {
           localStorage.clear();
           window.location.href = "/login";
-        }
-        else if(err.response && err.response.status === 429){
+        } else if (err.response && err.response.status === 429) {
           const maxRetries = 3;
           if (retryCount < maxRetries) {
             setTimeout(() => {
               getOwnerUser(retryCount + 1);
             }, 2000);
           } else {
-            console.error('Max retry attempts reached. Unable to complete the request.');
+            console.error(
+              "Max retry attempts reached. Unable to complete the request."
+            );
           }
         } else {
-          console.error('Unhandled error:', err);
+          console.error("Unhandled error:", err);
         }
       });
   };
- 
 
   const [assContact, setAssContact] = useState([]);
 
@@ -287,11 +318,11 @@ const Company = () => {
     deals?.map((data) => {
       const dealsResult = {
         value: data.uid,
-        label:data.deal_name,
-      }
-      result.push(dealsResult)
-    })
-    return result
+        label: data.deal_name,
+      };
+      result.push(dealsResult);
+    });
+    return result;
   };
 
   const dataUser = () => {
@@ -329,7 +360,6 @@ const Company = () => {
     });
     return result;
   };
-
 
   const selectUid = (state) => {
     const selectedRows = state.selectedRows.map((row) => row.uid);
@@ -369,40 +399,40 @@ const Company = () => {
 
   const handleCompanyMyOrPerson = (e) => {
     const target = e.target.value;
-    if(target === "all"){
-      setOwnerCompany("all")
-    }else{
-      setOwnerCompany("my")
+    if (target === "all") {
+      setOwnerCompany("all");
+    } else {
+      setOwnerCompany("my");
     }
-    }
+  };
 
-    const selectContact = () => {
-       const result = [];
-       contact?.map((data) => {
-        const conAss = {
-          value: data.uid,
-          label: data.name
-        }
-        result.push(conAss)
-       })
-       return result
-    }
-    const [resultTypeCompany, setResultTypeCompany] = useState([])
-    const [resultCompanySource, setResultCompanySource] = useState([])
+  const selectContact = () => {
+    const result = [];
+    contact?.map((data) => {
+      const conAss = {
+        value: data.uid,
+        label: data.name,
+      };
+      result.push(conAss);
+    });
+    return result;
+  };
+  const [resultTypeCompany, setResultTypeCompany] = useState([]);
+  const [resultCompanySource, setResultCompanySource] = useState([]);
   const handleSubmitSearch = (e) => {
-    e.preventDefault()
+    e.preventDefault();
     const formSearchMultiple = {
-      owner: resultOwner.value || '',
-      associate_contact: assContact.value || '',
-      associate_deals: assDeals.value || '',
-      company_name : searchMultiple.name || '',
-      website_url : searchMultiple.website_url || '',
-      address : searchMultiple.address || '',
-      created_at: searchMultiple.created_at || '',
-      company_type : resultTypeCompany.value || '',
-      company_source : resultCompanySource.label || '',
-      }
-    setFormSearch(formSearchMultiple)
+      owner: resultOwner.value || "",
+      associate_contact: assContact.value || "",
+      associate_deals: assDeals.value || "",
+      company_name: searchMultiple.name || "",
+      website_url: searchMultiple.website_url || "",
+      address: searchMultiple.address || "",
+      created_at: searchMultiple.created_at || "",
+      company_type: resultTypeCompany.value || "",
+      company_source: resultCompanySource.label || "",
+    };
+    setFormSearch(formSearchMultiple);
   };
   const handleSubmitDeleteSelect = async (e) => {
     e.preventDefault();
@@ -446,7 +476,6 @@ const Company = () => {
     }
   };
 
- 
   const [pending, setPending] = useState(true);
 
   const fetchData = async () => {
@@ -467,7 +496,14 @@ const Company = () => {
 
   useEffect(() => {
     fetchData();
-  }, [token, search, ownerCompany, formSearch, pagination.page, pagination.limit]);
+  }, [
+    token,
+    search,
+    ownerCompany,
+    formSearch,
+    pagination.page,
+    pagination.limit,
+  ]);
   const handleChangePage = (page) => {
     setPagination((prev) => ({ ...prev, page }));
   };
@@ -476,184 +512,12 @@ const Company = () => {
     setPagination((prev) => ({ ...prev, pageSize, page }));
   };
 
-
   function handleSearch(e) {
-    if(e.key === "Enter"){
+    if (e.key === "Enter") {
       const value = e.target.value.toLowerCase();
-      setSearch(value)
+      setSearch(value);
     }
   }
-  const columns = [
-    {
-      id: 1,
-      name: "Company Name",
-      selector: (row) => (
-        <a href={`/company/${row.uid}/edit`} target="_blank" className="image-name text-decoration-none">
-          <div className="d-flex align-items-center">
-            <img src={IconCompany} style={{ width: "20px" }} />
-            <div className="mt-1">
-              <span className="fw-semibold" style={{ whiteSpace: "normal", color: "black" }}>
-                {row.name}
-              </span>
-            </div>
-          </div>
-        </a>
-      ),
-      left: true,
-      width: "160px",
-      sortable: true,
-    },
-    {
-      id: 2,
-      name: "Associated with",
-      selector: (row) => (
-        <div className="d-flex">
-          {row?.associate?.slice(0, 3).map((item, index) => (
-            <div key={index} className="d-flex">
-              <OverlayTrigger
-                placement="top"
-                overlay={
-                  <Tooltip>
-                    {item?.contact?.name ?? null}
-                    <br />
-                    {item?.contact?.phone?.[0]?.number}
-                  </Tooltip>
-                }
-              >
-                <div>
-                  {item?.contact ? (
-                    <img
-                      className="ms-1"
-                      src={phone}
-                      style={{ width: "18px" }}
-                      data-tip={item?.contact?.name}
-                    />
-                  ) : null}
-                </div>
-              </OverlayTrigger>
-              <OverlayTrigger
-                placement="top"
-                overlay={
-                  <Tooltip>
-                    {item?.deals?.deal_name ?? null}
-                    <br />
-                    {item?.deals?.deal_size
-                      ? `Rp. ${new Intl.NumberFormat().format(
-                          item?.deals?.deal_size
-                        )}`
-                      : null}
-                  </Tooltip>
-                }
-              >
-                <div>
-                {item?.deals ? (
-                  <img
-                    className="ms-1"
-                    src={IconMoney}
-                    style={{ width: "18px" }}
-                    data-tip={item?.deals?.dealName}
-                  />
-                ) : null}
-                </div>
-              </OverlayTrigger>
-            </div>
-          ))}
-        </div>
-      ),
-      sortable: true,
-      width: "130px",
-    },
-    {
-      id: 3,
-      name: "Type",
-      selector: (row) => (
-        <div className="badge bg-primary">{row?.company_type?.name}</div>
-      ),
-      sortable: true,
-    },
-    {
-      id: 4,
-      name: "Owner/Created",
-      selector: (row) => {
-        const date = new Date(row.created_at);
-        const formatOptions = {
-          year: "numeric",
-          month: "long",
-          day: "2-digit",
-        };
-        const formate = new Intl.DateTimeFormat("en-US", formatOptions);
-        const time = formate.format(date);
-        return (
-          <div className="mt-2">
-            <span className="fw-semibold" style={{ whiteSpace: "normal" }}>
-              {row?.owner?.name}
-            </span>
-            <p className="mt-1" style={{ fontSize: "9.8px" }}>
-              {time}
-            </p>
-          </div>
-        );
-      },
-      sortable: true,
-      width: "120px",
-    },
-    {
-      id: 5,
-      name: "Updated",
-      selector: (row) => {
-        const date = new Date(row.updated_at);
-        const formatOptions = {
-          year: "numeric",
-          month: "long",
-          day: "2-digit",
-          hour: "2-digit",
-          minute: "2-digit",
-        };
-        const formatResult = new Intl.DateTimeFormat("en-US", formatOptions);
-        const time = formatResult.format(date);
-        return (
-          <p
-            className="mt-2"
-            style={{ fontSize: "11px", whiteSpace: "normal" }}
-          >
-            {time}
-          </p>
-        );
-      },
-      sortable: true,
-      width: "120px",
-    },
-    {
-      id: 6,
-      name: "Action",
-      selector: (row) => (
-        <div className="action-icon">
-          {/* <button
-            title="show"
-            className="icon-button"
-            onClick={() => navigate(`/company/${row.uid}`)}
-          >
-            <i className="bi bi-building-fill"></i>
-          </button> */}
-          <a
-            className="ms-2 icon-button text-dark"
-            title="edit"
-            href={`/company/${row.uid}/edit`} target="_blank" 
-          >
-            <i className="bi bi-pen"></i>
-          </a>
-          <button
-            className="ms-2 icon-button"
-            title="delete"
-            onClick={() => setDeleteCompany(row.uid)}
-          >
-            <i className="bi bi-trash-fill"></i>
-          </button>
-        </div>
-      ),
-      width: "150px",
-    },
-  ];
 
   return (
     <>
@@ -662,93 +526,8 @@ const Company = () => {
         <Sidebar />
         <Main>
           <div className="container">
-            <div className="row">
-              <div className="col">
-                <div className="pagetitle">
-                  <h1>Company</h1>
-                  <nav>
-                    <ol className="breadcrumb mt-2">
-                      <li className="breadcrumb-item">
-                        <a href="/" className="text-decoration-none">
-                          Dashboard
-                        </a>
-                      </li>
-                      <li className="breadcrumb-item active fw-bold">
-                        Company
-                      </li>
-                    </ol>
-                  </nav>
-                </div>
-              </div>
-            </div>
-            <div className="row button-contact mb-2">
-              <div className="col d-flex mb-2">
-                <div class="dropdown button-flex">
-                  <button
-                    class="btn btn-primary dropdown-toggle"
-                    type="button"
-                    data-bs-toggle="dropdown"
-                    aria-expanded="false"
-                  >
-                    Add Company
-                  </button>
-                  <ul class="dropdown-menu">
-                    <li>
-                      <a class="dropdown-item" href="/company/single-company">
-                        Single Company
-                      </a>
-                    </li>
-                    <li>
-                      <a class="dropdown-item" href="/company/upload-file">
-                        Upload File
-                      </a>
-                    </li>
-                  </ul>
-                </div>
-                <div class="dropdown donwload">
-                  <button
-                    class="btn btn-outline-primary dropdown-toggle ms-2"
-                    type="button"
-                    data-bs-toggle="dropdown"
-                    aria-expanded="false"
-                  >
-                    Donwload
-                  </button>
-                  <ul class="dropdown-menu">
-                    <li>
-                      <a
-                        class="dropdown-item"
-                        onClick={donwloadAll}
-                        style={{ cursor: "pointer" }}
-                      >
-                        Donwload Selected
-                      </a>
-                    </li>
-                    <li>
-                      <a
-                        class="dropdown-item"
-                        onClick={donwloadAll}
-                        style={{ cursor: "pointer" }}
-                      >
-                        Donwload All
-                      </a>
-                    </li>
-                  </ul>
-                </div>
-                <a
-                  href="/company/bulkchange"
-                  class="btn btn-outline-primary ms-2 bulk-change"
-                >
-                  Bulk Change
-                </a>
-                <button
-                  class="btn btn-danger ms-2 delete"
-                  onClick={handleSubmitDeleteSelect}
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
+            <BreadcrumbCompany />
+            <TopButton handleSubmitDeleteSelect={handleSubmitDeleteSelect} />
             <Card className="shadow">
               <div className="row">
                 <div className={`${filterClass}`} id="filter">
@@ -776,7 +555,7 @@ const Company = () => {
                           <Select
                             placeholder="Select Owner"
                             options={dataUser()}
-                            onChange={(e) =>  setResultOwner(e)}
+                            onChange={(e) => setResultOwner(e)}
                           />
                         </div>
                         {/* <div className="col mt-2">
@@ -805,9 +584,7 @@ const Company = () => {
                           <Select
                             placeholder="Select Contact"
                             options={selectContact()}
-                            onChange={(e) =>
-                              setAssContact(e)
-                            }
+                            onChange={(e) => setAssContact(e)}
                             closeMenuOnSelect={false}
                           />
                         </div>
@@ -882,9 +659,7 @@ const Company = () => {
                               placeholder="Source Company"
                               closeMenuOnSelect={false}
                               options={dataSource()}
-                              onChange={(e) =>
-                                setResultCompanySource(e)
-                              }
+                              onChange={(e) => setResultCompanySource(e)}
                             />
                           </div>
                           <div className="mb-1">
@@ -920,15 +695,18 @@ const Company = () => {
                 <div className={`${datatableClass}`} id="datatable-content">
                   <OverlayTrigger placement="top" overlay={showTooltip}>
                     <button
-                      className="btn btn-primary mt-3"
+                      className="btn shadow-sm btn-primary mt-3"
                       onClick={toggleSideBarCard}
                       style={{ fontSize: "0.85rem" }}
                     >
-                      <i className={iconFilter}></i>
+                      <FontAwesomeIcon icon={iconFilter} className="fs-5" />
                     </button>
                   </OverlayTrigger>
-                  <div className="col-md-4 ms-5 mt-5 float-end">
-                    <div className="input-group search-users">
+                  <div className="float-end mb-4">
+                    <div
+                      className="input-group mt-3 shadow-sm search-users"
+                      style={{ height: "2.5rem", width: "19rem" }}
+                    >
                       <div className="input-group-prepend">
                         <span
                           className="input-group-text"
@@ -937,7 +715,10 @@ const Company = () => {
                             borderStartEndRadius: 0,
                           }}
                         >
-                          <i className="bi bi-search"></i>
+                          <FontAwesomeIcon
+                            icon={faMagnifyingGlass}
+                            style={{ height: "1.7rem" }}
+                          />
                         </span>
                       </div>
                       <input
@@ -949,22 +730,16 @@ const Company = () => {
                       />
                     </div>
                   </div>
-                  <DataTable
-                    columns={columns}
+
+                  <ColumnsDataTable
                     data={allCompany}
-                    defaultSortFieldId={1}
-                    pagination
-                    paginationServer
-                    selectableRows
-                    onSelectedRowsChange={selectUid}
-                    paginationPerPage={pagination.limit}
+                    selectUid={selectUid}
+                    paginationPerpage={pagination.limit}
                     onChangePage={handleChangePage}
                     onChangeRowsPerPage={handlePagePerChange}
-                    progressPending={pending}
-                    paginationTotalRows={totalRows}
-                    paginationComponentOptions={{
-                      noRowsPerPage: true,
-                    }}
+                    pending={pending}
+                    totalRows={totalRows}
+                    setDeleteCompany={setDeleteCompany}
                   />
                 </div>
               </div>

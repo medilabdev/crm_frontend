@@ -4,9 +4,12 @@ import "./style.css";
 import axios from "axios";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faAt } from "@fortawesome/free-solid-svg-icons";
 
 const Auth = () => {
   const navigate = useNavigate();
+  const [buttonDisabled, setButtonDisabled] = useState(false);
 
   const [login, setLogin] = useState({
     email: "",
@@ -20,14 +23,14 @@ const Auth = () => {
   };
   const handleLogin = async (e) => {
     e.preventDefault();
-
     try {
       const response = await axios.post(
         `${process.env.REACT_APP_BACKEND_URL}/users/login`,
-        login,{
-          headers:{
-            'Content-Type' : 'application/json'
-          }
+        login,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
         }
       );
       if (response.data.message !== "Login successful!") {
@@ -44,8 +47,9 @@ const Auth = () => {
         localStorage.setItem("name", name);
         localStorage.setItem("uid", uid);
         localStorage.setItem("image", image);
-        localStorage.setItem("role", role)
+        localStorage.setItem("role", role);
         navigate("/");
+        setButtonDisabled(true);
       } else {
         Swal.fire({
           title: "Error",
@@ -70,7 +74,7 @@ const Auth = () => {
 
   return (
     <body className="auth-body">
-      <main className="auth-main">
+      <main className="auth-main color-auth">
         <Container>
           <section className="section min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
             <Container>
@@ -86,11 +90,17 @@ const Auth = () => {
                         <Card.Title>
                           <h3
                             className="text-center pb-0 fw-bold mb-4 "
-                            style={{ fontFamily: "revert-layer" }}
+                            style={{
+                              fontFamily: "revert-layer",
+                              fontWeight: "bold",
+                            }}
                           >
                             CRM
                           </h3>
-                          <p className="text-center fw-light small fs-6">
+                          <p
+                            className="text-center small fs-6"
+                            style={{ fontWeight: "400" }}
+                          >
                             Enter your email & password to login
                           </p>
                         </Card.Title>
@@ -106,7 +116,7 @@ const Auth = () => {
                                 className="input-group-text"
                                 id="inputGroupPrepend"
                               >
-                                @
+                                <FontAwesomeIcon icon={faAt} />
                               </span>
                               <input
                                 type="email"
@@ -134,7 +144,6 @@ const Auth = () => {
                               name="password"
                               className="form-control mb-2 shadow-sm"
                               id="yourPassword"
-                              value={login.password}
                               onChange={handleChange}
                               required
                             />
@@ -144,8 +153,16 @@ const Auth = () => {
                           </div>
                           <div className="col-12">
                             <button
-                              className="btn btn-primary w-100 mb-4 shadow"
+                              className="btn rounded-pill w-100 mb-4 shadow-sm"
                               type="submit"
+                              disabled={buttonDisabled}
+                              style={{
+                                fontWeight: "600",
+                                height: "2.8rem",
+                                fontSize: "1.2rem",
+                                backgroundColor: "#378CE7",
+                                color: "white",
+                              }}
                             >
                               Login
                             </button>

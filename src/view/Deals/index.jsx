@@ -10,8 +10,17 @@ import DataTableComponet from "./Datatable";
 import axios from "axios";
 import Select from "react-select";
 import Swal from "sweetalert2";
-import {getPackageProduct} from "../../context/UseContext";
-import { debounce } from 'lodash';
+import { getPackageProduct } from "../../context/UseContext";
+import { debounce } from "lodash";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faFilter,
+  faMagnifyingGlass,
+  faSackDollar,
+  faX,
+} from "@fortawesome/free-solid-svg-icons";
+import BreadcrumbDeals from "./partials/breadcrumb";
+import TopButton from "./partials/TopButton";
 
 const Deals = () => {
   const token = localStorage.getItem("token");
@@ -32,171 +41,210 @@ const Deals = () => {
   const [searchPriority, setSearchPriority] = useState([]);
   const [pagination, setPagination] = useState({
     page: 1,
-    limit: 10
-  })
-  const [totalRows, setTotalRows] = useState(0)
-  const [ownerDeals, setOwnerDeals] = useState([])
-  const [formSearch, setFormSearch] = useState({})
+    limit: 10,
+  });
+  const [totalRows, setTotalRows] = useState(0);
+  const [ownerDeals, setOwnerDeals] = useState([]);
+  const [formSearch, setFormSearch] = useState({});
 
   const fetchData = async () => {
     try {
-      setPending(true)
-        await getDeals(token, search, ownerDeals, formSearch) 
-        await getOwnerUser()
-        await getStage();
-        await getPriority();
-        await getCompany();
-        await getContact()
+      setPending(true);
+      await getDeals(token, search, ownerDeals, formSearch);
+      await getOwnerUser();
+      await getStage();
+      await getPriority();
+      await getCompany();
+      await getContact();
     } catch (error) {
-      console.error('error in fetch data', error);
-    }finally{
-      setPending(false)
+      console.error("error in fetch data", error);
+    } finally {
+      setPending(false);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchData()
-   }, [token, search, ownerDeals, formSearch, pagination.page, pagination.limit]);
+    fetchData();
+  }, [
+    token,
+    search,
+    ownerDeals,
+    formSearch,
+    pagination.page,
+    pagination.limit,
+  ]);
 
-   
-
-  
-  const getContact = async(retryCount = 0) => {
+  const getContact = async (retryCount = 0) => {
     try {
-      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/contacts/form/select`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      setContact(response.data.data)
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}/contacts/form/select`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setContact(response.data.data);
     } catch (error) {
-      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+      if (
+        error.response.status === 401 &&
+        error.response.data.message === "Unauthenticated."
+      ) {
         localStorage.clear();
         window.location.href = "/login";
-      }
-      else if(error.response && error.response.status === 429){
+      } else if (error.response && error.response.status === 429) {
         const maxRetries = 3;
         if (retryCount < maxRetries) {
           setTimeout(() => {
             getContact(retryCount + 1);
           }, 2000);
         } else {
-          console.error('Max retry attempts reached. Unable to complete the request.');
+          console.error(
+            "Max retry attempts reached. Unable to complete the request."
+          );
         }
       } else {
-        console.error('Unhandled error:', error);
+        console.error("Unhandled error:", error);
       }
     }
   };
 
-  const getCompany = async(retryCount = 0) => {
+  const getCompany = async (retryCount = 0) => {
     try {
-      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/companies/form/select`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      setCompany(response.data.data)
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}/companies/form/select`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setCompany(response.data.data);
     } catch (error) {
-      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+      if (
+        error.response.status === 401 &&
+        error.response.data.message === "Unauthenticated."
+      ) {
         localStorage.clear();
         window.location.href = "/login";
-      }
-      else if(error.response && error.response.status === 429){
+      } else if (error.response && error.response.status === 429) {
         const maxRetries = 3;
         if (retryCount < maxRetries) {
           setTimeout(() => {
             getCompany(retryCount + 1);
           }, 2000);
         } else {
-          console.error('Max retry attempts reached. Unable to complete the request.');
+          console.error(
+            "Max retry attempts reached. Unable to complete the request."
+          );
         }
       } else {
-        console.error('Unhandled error:', error);
+        console.error("Unhandled error:", error);
       }
     }
   };
 
-  const getStage = async(retryCount = 0) => {
+  const getStage = async (retryCount = 0) => {
     try {
-      const response = await  axios.get(`${process.env.REACT_APP_BACKEND_URL}/staging-masters`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      setStage(response.data.data)
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}/staging-masters`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setStage(response.data.data);
     } catch (error) {
-      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+      if (
+        error.response.status === 401 &&
+        error.response.data.message === "Unauthenticated."
+      ) {
         localStorage.clear();
         window.location.href = "/login";
-      }
-      else if(error.response && error.response.status === 429){
+      } else if (error.response && error.response.status === 429) {
         const maxRetries = 3;
         if (retryCount < maxRetries) {
           setTimeout(() => {
             getStage(retryCount + 1);
           }, 2000);
         } else {
-          console.error('Max retry attempts reached. Unable to complete the request.');
+          console.error(
+            "Max retry attempts reached. Unable to complete the request."
+          );
         }
       } else {
-        console.error('Unhandled error:', error);
+        console.error("Unhandled error:", error);
       }
     }
   };
 
-  const getOwnerUser = async(retryCount = 0) => {
+  const getOwnerUser = async (retryCount = 0) => {
     try {
-      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      setOwner(response.data.data)
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}/users`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setOwner(response.data.data);
     } catch (error) {
-      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+      if (
+        error.response.status === 401 &&
+        error.response.data.message === "Unauthenticated."
+      ) {
         localStorage.clear();
         window.location.href = "/login";
-      }
-      else if(error.response && error.response.status === 429){
+      } else if (error.response && error.response.status === 429) {
         const maxRetries = 3;
         if (retryCount < maxRetries) {
           setTimeout(() => {
             getOwnerUser(retryCount + 1);
           }, 2000);
         } else {
-          console.error('Max retry attempts reached. Unable to complete the request.');
+          console.error(
+            "Max retry attempts reached. Unable to complete the request."
+          );
         }
       } else {
-        console.error('Unhandled error:', error);
+        console.error("Unhandled error:", error);
       }
     }
   };
 
-  const getPriority = async(retryCount = 0) => {
+  const getPriority = async (retryCount = 0) => {
     try {
-      const response = await  axios.get(`${process.env.REACT_APP_BACKEND_URL}/priorities`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      setPriority(response.data.data)
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}/priorities`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setPriority(response.data.data);
     } catch (error) {
-      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+      if (
+        error.response.status === 401 &&
+        error.response.data.message === "Unauthenticated."
+      ) {
         localStorage.clear();
         window.location.href = "/login";
-      }
-      else if(error.response && error.response.status === 429){
+      } else if (error.response && error.response.status === 429) {
         const maxRetries = 3;
         if (retryCount < maxRetries) {
           setTimeout(() => {
             getPriority(retryCount + 1);
           }, 2000);
         } else {
-          console.error('Max retry attempts reached. Unable to complete the request.');
+          console.error(
+            "Max retry attempts reached. Unable to complete the request."
+          );
         }
       } else {
-        console.error('Unhandled error:', error);
+        console.error("Unhandled error:", error);
       }
     }
   };
@@ -206,80 +254,91 @@ const Deals = () => {
     setSelectUid(select);
   };
 
-    const getDeals = async (token, term, ownerDeals, formSearch,  retryCount = 0) => {
-      try {
-        const params = {};
-        if (term) {
-          params.search = term;
-        }
-        if(formSearch){
-          Object.assign(params, formSearch);
-          if (!params.page) {
-            params.page = pagination.page;
-          }
-          if (!params.limit) {
-            params.limit = pagination.limit;
-          }
-        }
-        if (ownerDeals) {
-          params.deals = ownerDeals;
+  const getDeals = async (
+    token,
+    term,
+    ownerDeals,
+    formSearch,
+    retryCount = 0
+  ) => {
+    try {
+      const params = {};
+      if (term) {
+        params.search = term;
+      }
+      if (formSearch) {
+        Object.assign(params, formSearch);
+        if (!params.page) {
           params.page = pagination.page;
+        }
+        if (!params.limit) {
           params.limit = pagination.limit;
         }
-          params.page = pagination.page;
-          params.limit = pagination.limit;
-           
-        const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/deals`, {
+      }
+      if (ownerDeals) {
+        params.deals = ownerDeals;
+        params.page = pagination.page;
+        params.limit = pagination.limit;
+      }
+      params.page = pagination.page;
+      params.limit = pagination.limit;
+
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}/deals`,
+        {
           headers: {
             Authorization: `Bearer ${token}`,
           },
           params: params,
-        });
-    
-        setDataDeals(response.data.data);
-        setTotalRows(response.data.pagination.totalData);
-        setPending(false)
-      } catch (error) {
-        if  (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
-          localStorage.clear();
-          window.location.href = "/login";
         }
-        else if (error.response && error.response.status === 429) {
-          const maxRetries = 3;
-          if (retryCount < maxRetries) {
-            setTimeout(() => {
-              getDeals(retryCount + 1);
-            }, 2000);
-          } else {
-            console.error('Max retry attempts reached. Unable to complete the request.');
-          }
-        }
-        else if (error.response && error.response.status === 404) {
-          setDataDeals([]);
-          setTotalRows(0);
-        }else{
-          console.error('error' , error);
-        }
-        
-      }
-    };
+      );
 
-    const handleSubmitSearchMultiple = (e) => {
-      e.preventDefault();
-      const formSearchMultiple ={
-        owner:searchOwner.value || '',
-        stage:searchStage.label || '',
-        associate_company:searchCompany.value || '',
-        associate_contact:searchContact.value || '',
-        deal_name:searchMultiple.deal_name || '',
-        priority:searchPriority.label || '',
-        deal_size:searchMultiple.deal_size || '',
-        created_at:searchMultiple.created_at || '',
-        updated_at:searchMultiple.updated_at || ''
+      setDataDeals(response.data.data);
+      setTotalRows(response.data.pagination.totalData);
+      setPending(false);
+    } catch (error) {
+      if (
+        error.response.status === 401 &&
+        error.response.data.message === "Unauthenticated."
+      ) {
+        localStorage.clear();
+        window.location.href = "/login";
+      } else if (error.response && error.response.status === 429) {
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getDeals(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error(
+            "Max retry attempts reached. Unable to complete the request."
+          );
+        }
+      } else if (error.response && error.response.status === 404) {
+        setDataDeals([]);
+        setTotalRows(0);
+      } else {
+        console.error("error", error);
+      }
     }
-    setFormSearch(formSearchMultiple)
+  };
+
+  const handleSubmitSearchMultiple = (e) => {
+    e.preventDefault();
+    const formSearchMultiple = {
+      owner: searchOwner.value || "",
+      stage: searchStage.label || "",
+      associate_company: searchCompany.value || "",
+      associate_contact: searchContact.value || "",
+      deal_name: searchMultiple.deal_name || "",
+      priority: searchPriority.label || "",
+      deal_size: searchMultiple.deal_size || "",
+      created_at: searchMultiple.created_at || "",
+      updated_at: searchMultiple.updated_at || "",
     };
-    // console.log(searchStage.label);
+    setFormSearch(formSearchMultiple);
+  };
+  // console.log(searchStage.label);
   const handleDeleteSelect = async (e) => {
     e.preventDefault();
     const isResult = await Swal.fire({
@@ -342,13 +401,12 @@ const Deals = () => {
     ? "col-md-3 d-block border-end"
     : "col-md-0 d-none";
   const boardKanbanDatatable = isSideFilter ? "col-md-9" : "col-md-12";
-  const IconFilter = isSideFilter ? "bi bi-x-lg" : "bi bi-funnel";
-
+  const IconFilter = isSideFilter ? faX : faFilter;
 
   const handleSearchDatatable = (e) => {
-    if(e.key === "Enter"){
+    if (e.key === "Enter") {
       const value = e.target.value.toLowerCase();
-      setSearch(value)
+      setSearch(value);
     }
   };
 
@@ -412,18 +470,17 @@ const Deals = () => {
     return res;
   };
 
-  const [pending, setPending] = useState(true)
-
+  const [pending, setPending] = useState(true);
 
   const handleDealsMyOrPerson = async (e) => {
     const target = e.target.value;
-      if (target === "all") {
-        setOwnerDeals("all")
-      } else {
-       setOwnerDeals("my")
-      }
+    if (target === "all") {
+      setOwnerDeals("all");
+    } else {
+      setOwnerDeals("my");
+    }
   };
-  
+
   const handleSearchMultiple = (e) => {
     setSearchMultiple({
       ...searchMultiple,
@@ -432,12 +489,12 @@ const Deals = () => {
   };
 
   const handleChangePage = (page) => {
-    setPagination((e) => ({ ...e, page}))
-  } 
-  
+    setPagination((e) => ({ ...e, page }));
+  };
+
   const handlePagePerChange = (pageSize, page) => {
-    setPagination((prev) => ({...prev, pageSize, page}))
-  }
+    setPagination((prev) => ({ ...prev, pageSize, page }));
+  };
 
   return (
     <body id="body">
@@ -445,173 +502,79 @@ const Deals = () => {
       <Sidebar />
       <Main>
         <div className="container">
-          <div className="row">
-            <div className="col">
-              <div className="pagetitle">
-                <h1>Deals</h1>
-                <nav>
-                  <ol className="breadcrumb mt-2">
-                    <li className="breadcrumb-item">
-                      <Link to="/" className="text-decoration-none">
-                        Dashboard
-                      </Link>
-                    </li>
-                    <li className="breadcrumb-item active">Deals</li>
-                  </ol>
-                </nav>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="row">
-          <div className="col mb-2">
-            <div className="d-flex float-end">
-              <div className="dropdown button-flex">
-                <button
-                  className="btn btn-primary dropdown-toggle"
-                  type="button"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
-                >
-                  Add Deals
-                </button>
-                <ul className="dropdown-menu">
-                  <li>
-                    <Link className="dropdown-item" to="/deals/single-deals">
-                      Single Deal
-                    </Link>
-                  </li>
-                  <li>
-                    <a
-                      className="dropdown-item text-decoration-none"
-                      href="/deals/upload-deals"
-                    >
-                      Upload Deals
-                    </a>
-                  </li>
-                  {/* <li>
-                    <Link className="dropdown-item" to="">
-                      Upload Product
-                    </Link>
-                  </li> */}
-                </ul>
-              </div>
-              <div className="dropdown button-flex">
-                <button
-                  className="btn btn-outline-primary dropdown-toggle ms-2"
-                  type="button"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
-                >
-                  Donwload
-                </button>
-                <ul class="dropdown-menu">
-                  <li>
-                    <a class="dropdown-item" href="#">
-                      Donwload Selected
-                    </a>
-                  </li>
-                  <li>
-                    <a class="dropdown-item" href="#">
-                      Donwload All
-                    </a>
-                  </li>
-                </ul>
-              </div>
-              <Link
-                to="/deals/need-approval"
-                className="btn btn-outline-primary ms-2"
-                style={{ fontSize: "0.85rem" }}
-              >
-                Need Approval
-              </Link>
-              <Link
-                to="/deals/bulk-change"
-                className="btn btn-outline-primary ms-2 text-decoration-none"
-                style={{ fontSize: "0.85rem" }}
-              >
-                Bulk Change
-              </Link>
-              <button
-                onClick={handleDeleteSelect}
-                className="btn btn-outline-danger ms-2"
-                style={{ fontSize: "0.85rem" }}
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-        <Card className="shadow">
-          <div className="row">
-            <div id="filter" className={`${filterClass}`}>
-              <form onSubmit={handleSubmitSearchMultiple}>
-                <div className="container">
-                  <div className="row mt-3">
-                    <div className="col">
-                      <h6>
-                        <i class="bi bi-funnel ml"></i>
-                        <span className="fw-semibold ms-2 fs-6">Filter</span>
-                      </h6>
-                    </div>
-                  </div>
+          <BreadcrumbDeals />
+          <TopButton handleDeleteSelect={handleDeleteSelect} />
 
-                  <div className="row">
-                    <div className="col">
-                      <select
-                        name="select"
-                        id=""
-                        className="form-select"
-                        style={{ fontSize: "0.85rem" }}
-                        onChange={handleDealsMyOrPerson}
-                      >
-                        <option value="all">All Contact</option>
-                        <option value="my">My Contact</option>
-                      </select>
+          <Card className="shadow">
+            <div className="row">
+              <div id="filter" className={`${filterClass}`}>
+                <form onSubmit={handleSubmitSearchMultiple}>
+                  <div className="container">
+                    <div className="row mt-3">
+                      <div className="col">
+                        <h6>
+                          <i class="bi bi-funnel ml"></i>
+                          <span className="fw-semibold ms-2 fs-6">Filter</span>
+                        </h6>
+                      </div>
                     </div>
-                  </div>
-                  <div className="row mt-2">
-                    <div className="col mb-2">
-                      <Select
-                        options={selectOwner()}
-                        onChange={(e) => setSearchOwner(e)}
-                        placeholder="Select Owner"
-                      />
+
+                    <div className="row">
+                      <div className="col">
+                        <select
+                          name="select"
+                          id=""
+                          className="form-select"
+                          style={{ fontSize: "0.85rem" }}
+                          onChange={handleDealsMyOrPerson}
+                        >
+                          <option value="all">All Deals</option>
+                          <option value="my">My Deals</option>
+                        </select>
+                      </div>
                     </div>
-                  </div>
-                  <div className="row mt-2">
-                    <div className="col">
-                      <Select
-                        options={selectStage()}
-                        onChange={(e) => setSearchStage(e)}
-                        placeholder="Select Stage"
-                      />
+                    <div className="row mt-2">
+                      <div className="col mb-2">
+                        <Select
+                          options={selectOwner()}
+                          onChange={(e) => setSearchOwner(e)}
+                          placeholder="Select Owner"
+                        />
+                      </div>
                     </div>
-                  </div>
-                  <div className="row mt-5">
-                    <div className="col">
-                      <h6>
-                        <i className="bi bi-link-45deg"></i>
-                        <span className="fw-semibold ms-2 fs-6">
-                          Associated
-                        </span>
-                      </h6>
+                    <div className="row mt-2">
+                      <div className="col">
+                        <Select
+                          options={selectStage()}
+                          onChange={(e) => setSearchStage(e)}
+                          placeholder="Select Stage"
+                        />
+                      </div>
                     </div>
-                    <div className="mb-2">
-                      <Select
-                        options={selectCompany()}
-                        onChange={(e) => setSearchCompany(e)}
-                        placeholder="Select Company"
-                      />
-                    </div>
-                    <div className="mb-2">
-                      <Select
-                        options={selectContact()}
-                        onChange={(e) => setSearchContact(e)}
-                        placeholder="Select Contact"
-                      />
-                    </div>
-                    {/* <div className="mb-2">
+                    <div className="row mt-5">
+                      <div className="col">
+                        <h6>
+                          <i className="bi bi-link-45deg"></i>
+                          <span className="fw-semibold ms-2 fs-6">
+                            Associated
+                          </span>
+                        </h6>
+                      </div>
+                      <div className="mb-2">
+                        <Select
+                          options={selectCompany()}
+                          onChange={(e) => setSearchCompany(e)}
+                          placeholder="Select Company"
+                        />
+                      </div>
+                      <div className="mb-2">
+                        <Select
+                          options={selectContact()}
+                          onChange={(e) => setSearchContact(e)}
+                          placeholder="Select Contact"
+                        />
+                      </div>
+                      {/* <div className="mb-2">
                       <Select
                         options={selectProduct()}
                         onChange={(e) => handleSelectProduct(e)}
@@ -627,115 +590,123 @@ const Deals = () => {
                         placeholder="Select Package Product"
                       />
                     </div> */}
-                  </div>
-                  <div className="row mt-5">
-                    <div className="col">
-                      <h6>
-                        <i class="bi bi-currency-dollar"></i>
-                        <span className="fw-semibold ms-2 fs-6">Deals</span>
-                      </h6>
                     </div>
-                  </div>
-                  <div className="mb-1">
-                    <input
-                      type="text"
-                      className="form-control"
-                      name="deal_name"
-                      onChange={handleSearchMultiple}
-                      placeholder="Deals Name"
+                    <div className="row mt-5">
+                      <div className="col">
+                        <h6>
+                          <i class="bi bi-currency-dollar"></i>
+                          <span className="fw-semibold ms-2 fs-6">Deals</span>
+                        </h6>
+                      </div>
+                    </div>
+                    <div className="mb-1">
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="deal_name"
+                        onChange={handleSearchMultiple}
+                        placeholder="Deals Name"
+                        style={{ fontSize: "0.85rem" }}
+                      />
+                    </div>
+                    <div className="mb-1">
+                      <Select
+                        options={selectPriority()}
+                        name="priority"
+                        onChange={(e) => setSearchPriority(e)}
+                        placeholder="Select Priority"
+                      />
+                    </div>
+                    <div className="mb-1">
+                      <input
+                        type="number"
+                        className="form-control"
+                        name="deal_size"
+                        placeholder="Deal Size"
+                        onChange={handleSearchMultiple}
+                        style={{ fontSize: "0.85rem" }}
+                      />
+                    </div>
+                    <div className="mb-1">
+                      <label htmlFor="date">Created</label>
+                      <input
+                        type="date"
+                        name="created_at"
+                        className="form-control"
+                        onChange={handleSearchMultiple}
+                        style={{ fontSize: "0.85rem" }}
+                      />
+                    </div>
+                    <div className="mb-1">
+                      <label htmlFor="date">Updated</label>
+                      <input
+                        type="date"
+                        name="updated_at"
+                        className="form-control"
+                        onChange={handleSearchMultiple}
+                        style={{ fontSize: "0.85rem" }}
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleSubmitSearchMultiple}
+                      className="btn btn-primary mt-2"
                       style={{ fontSize: "0.85rem" }}
-                    />
-                  </div>
-                  <div className="mb-1">
-                    <Select
-                      options={selectPriority()}
-                      name="priority"
-                      onChange={(e) => setSearchPriority(e)}
-                      placeholder="Select Priority"
-                    />
-                  </div>
-                  <div className="mb-1">
-                    <input
-                      type="number"
-                      className="form-control"
-                      name="deal_size"
-                      placeholder="Deal Size"
-                      onChange={handleSearchMultiple}
+                    >
+                      Apply
+                    </button>
+                    <a
+                      href="/deals"
+                      className="btn btn-secondary mt-2 ms-2"
                       style={{ fontSize: "0.85rem" }}
-                    />
+                    >
+                      Cancel
+                    </a>
                   </div>
-                  <div className="mb-1">
-                    <label htmlFor="date">Created</label>
-                    <input
-                      type="date"
-                      name="created_at"
-                      className="form-control"
-                      onChange={handleSearchMultiple}
-                      style={{ fontSize: "0.85rem" }}
-                    />
-                  </div>
-                  <div className="mb-1">
-                    <label htmlFor="date">Updated</label>
-                    <input
-                      type="date"
-                      name="updated_at"
-                      className="form-control"
-                      onChange={handleSearchMultiple}
-                      style={{ fontSize: "0.85rem" }}
-                    />
-                  </div>
-                  <button
-                    type="button" onClick={handleSubmitSearchMultiple}
-                    className="btn btn-primary mt-2"
-                    style={{ fontSize: "0.85rem" }}
-                  >
-                    Apply
-                  </button>
-                  <a
-                    href="/deals"
-                    className="btn btn-secondary mt-2 ms-2"
-                    style={{ fontSize: "0.85rem" }}
-                  >
-                    Cancel
-                  </a>
-                </div>
-              </form>
-            </div>
+                </form>
+              </div>
 
-            <div className={`${boardKanbanDatatable}`}>
-              <div className="row">
-                <div className="col d-flex">
-                  <button
-                    className="btn btn-primary mt-3"
-                    onClick={toggleSideFilter}
-                    style={{ fontSize: "0.85rem" }}
-                  >
-                    <i className={`${IconFilter}`}></i>
-                  </button>
-                  <div
-                    className="input-group mt-3 ms-3"
-                    style={{ width: "20rem" }}
-                  >
-                    <div className="input-group-prepend">
-                      <span
-                        className="input-group-text"
-                        style={{
-                          borderEndEndRadius: 0,
-                          borderStartEndRadius: 0,
-                        }}
-                      >
-                        <i className="bi bi-search"></i>
-                      </span>
-                    </div>
-                    <input
-                      type="text"
-                      placeholder="Search"
-                      onKeyDown={handleSearchDatatable}
-                      className="form-control"
+              <div className={`${boardKanbanDatatable}`}>
+                <div className="row">
+                  <div className="col">
+                    <button
+                      className="btn btn-primary mt-3"
+                      onClick={toggleSideFilter}
                       style={{ fontSize: "0.85rem" }}
-                    />
-                  </div>
-                  {/* <div className="mt-3 ms-3">
+                    >
+                      <FontAwesomeIcon icon={IconFilter} className="fs-5" />
+                      {/* <i className={`${IconFilter}`}></i> */}
+                    </button>
+                    <div className="float-end">
+                      <div
+                        className="input-group mt-3 me-3"
+                        style={{ height: "2.5rem", width: "18rem" }}
+                      >
+                        <div className="input-group-prepend">
+                          <span
+                            className="input-group-text"
+                            style={{
+                              borderEndEndRadius: 0,
+                              borderStartEndRadius: 0,
+                            }}
+                          >
+                            <FontAwesomeIcon
+                              icon={faMagnifyingGlass}
+                              style={{ height: "1.8rem" }}
+                            />
+                          </span>
+                        </div>
+                        <input
+                          type="text"
+                          placeholder="Search"
+                          onKeyDown={handleSearchDatatable}
+                          className="form-control"
+                          style={{ fontSize: "0.85rem" }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* <div className="mt-3 ms-3">
                     <select
                       name=""
                       id=""
@@ -746,24 +717,25 @@ const Deals = () => {
                       <option value="">Sales Pipeline</option>
                     </select>
                   </div> */}
+                  </div>
                 </div>
-              </div>
-              <div className="row">
-                <div className="col mt-3">
-                  <DataTableComponet
-                    data={deals}
-                    selectUidDataTable={selectUidDataTable}
-                    pending={pending}
-                    paginationPerPage={pagination.limit}
-                    paginationTotalRows={totalRows}
-                    handleChangePage={handleChangePage}
-                    handlePagePerChange={handlePagePerChange}
-                  />
+                <div className="row">
+                  <div className="col mt-3">
+                    <DataTableComponet
+                      data={deals}
+                      selectUidDataTable={selectUidDataTable}
+                      pending={pending}
+                      paginationPerPage={pagination.limit}
+                      paginationTotalRows={totalRows}
+                      handleChangePage={handleChangePage}
+                      handlePagePerChange={handlePagePerChange}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </Card>
+          </Card>
+        </div>
       </Main>
     </body>
   );

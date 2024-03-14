@@ -1,11 +1,23 @@
-.auth-body{
-    background-image: url("/src//assets/img/bg-login.jpg");
-    background-position: center;
-    background-size: cover;
+.auth-main {
+  background-size: cover;
+  background-position: center;
+  background-image: url("/src//assets/img/bg-login.jpg");
+  position: relative;
+  z-index: 1;
 }
-.auth-main{
-    background-color: rgba(60, 77, 121, 0.308);
+.auth-main::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-color: rgba(52, 36, 36, 0.269);
+  z-index: 1;
 }
-.card-login{
-    box-shadow: 12px 8px 8px 0 rgba(0, 0, 0, 0.2), 3px 6px 20px 0 rgba(239, 59, 59, 0.19);
+.card-login {
+  box-shadow:
+    12px 8px 8px 0 rgba(0, 0, 0, 0.384),
+    3px 6px 20px 0 rgba(68, 41, 41, 0.19);
+  z-index: 2;
 }
