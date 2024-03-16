@@ -15,6 +15,10 @@ const Auth = () => {
     email: "",
     password: "",
   });
+  const [checkPass, setCheckPass] = useState(false);
+  const handleCheckPass = () => {
+    setCheckPass(!checkPass);
+  };
   const handleChange = (e) => {
     setLogin({
       ...login,
@@ -71,7 +75,6 @@ const Auth = () => {
       }
     }
   };
-
   return (
     <body className="auth-body">
       <main className="auth-main color-auth">
@@ -140,13 +143,25 @@ const Auth = () => {
                               Password
                             </label>
                             <input
-                              type="password"
+                              type={checkPass === true ? "text" : "password"}
                               name="password"
                               className="form-control mb-2 shadow-sm"
                               id="yourPassword"
                               onChange={handleChange}
                               required
                             />
+                            <input
+                              className="form-check-input"
+                              type="checkbox"
+                              onChange={handleCheckPass}
+                              checked={checkPass}
+                            />
+                            <label
+                              class="form-check-label ms-2"
+                              for="flexCheckDefault"
+                            >
+                              Check Password
+                            </label>
                             <div className="invalid-feedback">
                               Please enter your password!
                             </div>

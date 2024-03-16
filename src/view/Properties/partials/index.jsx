@@ -1,6 +1,7 @@
 import {
   faBuildingFlag,
   faBuildingUser,
+  faCodeCompare,
   faLayerGroup,
   faList,
   faPeopleGroup,
@@ -180,7 +181,7 @@ const SidebarProperties = () => {
         >
           <div
             className={`input-group ${
-              location.pathname === "/properties/menu-managemen"
+              location.pathname === "/properties/menu-management"
                 ? "active-side"
                 : ""
             }`}
@@ -209,7 +210,10 @@ const SidebarProperties = () => {
                 : ""
             }`}
           >
-            <FontAwesomeIcon icon={faUniversalAccess} className="mt-2 ms-4 fs-3"/>
+            <FontAwesomeIcon
+              icon={faUniversalAccess}
+              className="mt-2 ms-4 fs-3"
+            />
             <p
               className="ms-3"
               style={{
@@ -222,6 +226,30 @@ const SidebarProperties = () => {
             </p>
           </div>
         </Link>
+        {/* <a
+          href="/properties/deals-version"
+          className="text-decoration-none text-black fw-semibold border-bottom documents"
+        >
+          <div
+            className={`input-group ${
+              location.pathname === "/properties/deals-version"
+                ? "active-side"
+                : ""
+            }`}
+          >
+            <FontAwesomeIcon icon={faCodeCompare} className="mt-2 ms-4 fs-3" />
+            <p
+              className="ms-3"
+              style={{
+                fontSize: "0.95rem",
+                marginTop: "10px",
+                fontWeight: "500",
+              }}
+            >
+              Deals Version
+            </p>
+          </div>
+        </a> */}
       </div>
     </div>
   );
