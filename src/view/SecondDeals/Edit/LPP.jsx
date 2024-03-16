@@ -1,11 +1,27 @@
 import React, { useState } from "react";
 import { Card } from "react-bootstrap";
+import DataTableRab from "./Lpp/Rab";
+import DataTableFeeAction from "./Lpp/FeeAction";
+import DataTableRekapBiaya from "./Lpp/RekapBiaya";
+import ReactQuill from "react-quill";
+import Timeline from "./Lpp/Timeline";
 
 const LPP = ({}) => {
   const [jenisKerjasama, setJenisKerjaSama] = useState();
+  const [Rab, setRab] = useState();
+  const [feeAction, setFeeAction] = useState();
   const handleChangeJenisKerjaSama = (e) => {
     const target = e.target.value;
     setJenisKerjaSama(target);
+  };
+
+  const handleRab = (e) => {
+    const target = e.target.value;
+    setRab(target);
+  };
+  const handleFeeAction = (e) => {
+    const target = e.target.value;
+    setFeeAction(target);
   };
   return (
     <div className="col-12">
@@ -314,6 +330,41 @@ const LPP = ({}) => {
             />
             <label htmlFor="">Tindakan Selama Bekerja Sama</label>
           </div>
+          <div className="mb-3">
+            <label htmlFor="" className="mb-1 fw-bold">
+              RAB Bangunan & Lainnya terkait pembiayaan awal (Optional)
+            </label>
+            <select name="" id="" className="form-select" onChange={handleRab}>
+              <option value="">Select Chose</option>
+              <option value="yes">Ya</option>
+              <option value="no">Tidak</option>
+            </select>
+          </div>
+          {Rab === "yes" ? <DataTableRab /> : ""}
+          <div className="mb-3">
+            <label htmlFor="" className="mb-1 fw-bold">
+              Fee Tindakan (Optional)
+            </label>
+            <select
+              name=""
+              id=""
+              className="form-select"
+              onChange={handleFeeAction}
+            >
+              <option value="">Select Chose</option>
+              <option value="yes">Ya</option>
+              <option value="no">Tidak</option>
+            </select>
+          </div>
+          {feeAction === "yes" ? <DataTableFeeAction /> : ""}
+          <div className="mb-3">
+            <DataTableRekapBiaya />
+          </div>
+          <div className="mb-2">
+            <h6 className="fw-bold ms-2 mt-3">Catatan Tambahan</h6>
+            <ReactQuill className="p-2" theme="snow" />
+          </div>
+          <Timeline jenisKerjasama={jenisKerjasama} />
         </Card.Body>
       </Card>
     </div>

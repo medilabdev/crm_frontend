@@ -13,7 +13,7 @@ export const ColumnsTable = [
     name: "Name",
     selector: (row) => (
       <a
-        href=""
+        href="/deals-second/123123/edit"
         target="_blank"
         className="text-decoration-none"
         style={{ whiteSpace: "normal", color: "black", fontWeight: "540" }}
@@ -36,31 +36,6 @@ export const ColumnsTable = [
     name: "Action",
     selector: (row) => (
       <div className="action-icon">
-        <OverlayTrigger
-          placement="top"
-          overlay={<Tooltip>Formulir Data Customer</Tooltip>}
-        >
-          <a
-            href="/deals-second/fdc"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="me-3 icon-button text-dark"
-          >
-            <FontAwesomeIcon icon={faFolderPlus} />
-          </a>
-        </OverlayTrigger>
-        <OverlayTrigger
-          placement="top"
-          overlay={<Tooltip>Lembar Persetujuan Project</Tooltip>}
-        >
-          <a
-            href="/deals-second/lpp"
-            className="me-3 icon-button text-dark"
-            target="_blank"
-          >
-            <FontAwesomeIcon icon={faCirclePlus} />
-          </a>
-        </OverlayTrigger>
         <a
           href="/deals-second/123123/edit"
           className="me-2 icon-button text-dark"
