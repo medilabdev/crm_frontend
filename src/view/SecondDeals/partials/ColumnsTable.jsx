@@ -1,12 +1,19 @@
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPenToSquare, faTrash } from "@fortawesome/free-solid-svg-icons";
+import {
+  faCircle,
+  faCirclePlus,
+  faFolderPlus,
+  faPenToSquare,
+  faTrash,
+} from "@fortawesome/free-solid-svg-icons";
+import { OverlayTrigger, Tooltip } from "react-bootstrap";
 export const ColumnsTable = [
   {
     name: "Name",
     selector: (row) => (
       <a
-        href=""
+        href="/deals-second/123123/edit"
         target="_blank"
         className="text-decoration-none"
         style={{ whiteSpace: "normal", color: "black", fontWeight: "540" }}
@@ -29,10 +36,14 @@ export const ColumnsTable = [
     name: "Action",
     selector: (row) => (
       <div className="action-icon">
-        <a href="" className="me-3 icon-button text-dark" target="_blank">
+        <a
+          href="/deals-second/123123/edit"
+          className="me-2 icon-button text-dark"
+          target="_blank"
+        >
           <FontAwesomeIcon icon={faPenToSquare} />
         </a>
-        <button className="icon-button" title="delete">
+        <button className="icon-button">
           <FontAwesomeIcon icon={faTrash} />
         </button>
       </div>

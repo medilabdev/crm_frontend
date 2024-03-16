@@ -1,6 +1,11 @@
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPenToSquare, faTrash } from "@fortawesome/free-solid-svg-icons";
+import {
+  faCheck,
+  faPenToSquare,
+  faTrash,
+  faXmark,
+} from "@fortawesome/free-solid-svg-icons";
 export const ColumnsTable = [
   {
     name: "Name",
@@ -30,10 +35,10 @@ export const ColumnsTable = [
     selector: (row) => (
       <div className="action-icon">
         <a href="" className="me-3 icon-button text-dark" target="_blank">
-          <FontAwesomeIcon icon={faPenToSquare} />
+          <FontAwesomeIcon icon={faCheck} />
         </a>
         <button className="icon-button" title="delete">
-          <FontAwesomeIcon icon={faTrash} />
+          <FontAwesomeIcon icon={faXmark} />
         </button>
       </div>
     ),
