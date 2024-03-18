@@ -1,13 +1,6 @@
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faCircle,
-  faCirclePlus,
-  faFolderPlus,
-  faPenToSquare,
-  faTrash,
-} from "@fortawesome/free-solid-svg-icons";
-import { OverlayTrigger, Tooltip } from "react-bootstrap";
+import { faPenToSquare, faTrash } from "@fortawesome/free-solid-svg-icons";
 export const ColumnsTable = [
   {
     name: "Name",
@@ -25,12 +18,30 @@ export const ColumnsTable = [
   },
   {
     name: "Stage",
+    selector: (row) => (
+      <div>
+        <p
+          className={`btn ${
+            row.stage === "Closed Won"
+              ? "btn-success"
+              : row.stage === "Closed Lost"
+                ? "btn-danger"
+                : "btn-primary"
+          }`}
+          style={{ fontSize: "0.65rem" }}
+        >
+          {row.stage}
+        </p>
+      </div>
+    ),
   },
   {
     name: "Jumlah",
+    selector: (row) => <p className="fw-semibold">Rp. {row.jumlah}</p>,
   },
   {
     name: "Owner",
+    selector: (row) => row.owner,
   },
   {
     name: "Action",
