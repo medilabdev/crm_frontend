@@ -1,52 +1,67 @@
-import React, { useState } from "react";
-import DataTable from "react-data-table-component";
-import dummy from "./dummy";
-import { Card } from "react-bootstrap";
-import ModalsRab from "./ModalsRab";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPenToSquare, faTrash } from "@fortawesome/free-solid-svg-icons";
-import EditModalsRab from "./EditModalsRab";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React, { useState } from "react";
+import { Card } from "react-bootstrap";
+import DataTable from "react-data-table-component";
+import AddModalSupport from "./modals/AddModalSupport";
+import EditModalSupport from "./modals/EditModalSupport";
 
-const DataTableRab = () => {
+const SupportKerjaSama = () => {
   const [ShowModal, setShowModal] = useState(false);
-  const [data, setData] = useState([]);
   const handleShow = () => setShowModal(true);
   const handleClose = () => setShowModal(false);
-
-  const [editDataModal, setEditDataModal] = useState(false);
-  const [editDataRab, setEditDataRab] = useState({});
-  const handleCloseEdit = () => setEditDataModal(false);
-  const handleEditRab = (
-    id,
-    item,
-    nilai_estimasi_biaya,
-    qty,
-    total_estimasi_biaya,
-    note
-  ) => {
-    setEditDataRab({
-      id: id,
-      item: item,
-      nilai_estimasi_biaya: nilai_estimasi_biaya,
-      qty: qty,
-      total_estimasi_biaya: total_estimasi_biaya,
-      note: note,
-    });
-    setEditDataModal(true);
-  };
-
+  const [data, setData] = useState([]);
+  const [editDataSupport, setEditDataSupport] = useState({})
+  const [editModal, setEditModal] = useState(false);
+  const handleCloseEditModal = () => setEditModal(false)
   const allData = [];
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
-    if (key.startsWith("RAB")) {
+    if (key.startsWith("SupportKerjaSama")) {
       const data = JSON.parse(localStorage.getItem(key));
       allData.push(data);
     }
   }
-  const handleDeleteRAB = (id) => {
-    const data = allData[0].filter((rab) => rab.id !== id);
+  const handleDeleteSupport = (id) => {
+    const data = allData[0].filter((support) => support.id !== id);
     setData(data);
-    localStorage.setItem("RAB", JSON.stringify(data));
+    localStorage.setItem("SupportKerjaSama", JSON.stringify(data));
+  };
+
+  const handleEditSupport = (    id,
+    item,
+    nilai_estimasi_biaya,
+    qty,
+    total_estimasi_biaya,
+    note ) => {
+        setEditDataSupport({
+            id: id,
+            item: item,
+            nilai_estimasi_biaya: nilai_estimasi_biaya,
+            qty: qty,
+            total_estimasi_biaya: total_estimasi_biaya,
+            note: note,
+        })
+        setEditModal(true)
+    }
+  const customStyle = {
+    headRow: {
+      style: {
+        backgroundColor: "#496989",
+        color: "white",
+        marginTop: "15px",
+        borderRadius: "8px",
+        fontWeight: "600",
+        fontSize: "12px",
+      },
+    },
+    cells: {
+      style: {
+        fontSize: "8px",
+        marginTop: "4px",
+        fontWeight: "500",
+      },
+    },
   };
   const ColumnsTable = [
     {
@@ -78,7 +93,7 @@ const DataTableRab = () => {
           <button
             style={{ border: "none", backgroundColor: "white" }}
             onClick={() =>
-              handleEditRab(
+              handleEditSupport(
                 row.id,
                 row.item,
                 row.nilai_estimasi_biaya,
@@ -92,7 +107,7 @@ const DataTableRab = () => {
           </button>
           <button
             style={{ border: "none", backgroundColor: "white" }}
-            onClick={() => handleDeleteRAB(row.id)}
+            onClick={() => handleDeleteSupport(row.id)}
           >
             <FontAwesomeIcon icon={faTrash} />
           </button>
@@ -100,26 +115,6 @@ const DataTableRab = () => {
       ),
     },
   ];
-  const customStyle = {
-    headRow: {
-      style: {
-        backgroundColor: "#496989",
-        color: "white",
-        marginTop: "15px",
-        borderRadius: "8px",
-        fontWeight: "600",
-        fontSize: "12px",
-      },
-    },
-    cells: {
-      style: {
-        fontSize: "8px",
-        marginTop: "4px",
-        fontWeight: "500",
-      },
-    },
-  };
-
   return (
     <div className="row mb-2">
       <div className="col">
@@ -128,8 +123,8 @@ const DataTableRab = () => {
             <div className="">
               <button
                 type="button"
-                onClick={handleShow}
                 className="btn btn-primary"
+                onClick={handleShow}
               >
                 Tambah
               </button>
@@ -138,15 +133,15 @@ const DataTableRab = () => {
           <DataTable
             className="p-2"
             columns={ColumnsTable}
-            data={allData[0]}
             customStyles={customStyle}
+            data={allData[0]}
           />
-          <ModalsRab show={ShowModal} handleClose={handleClose} />
-          <EditModalsRab show={editDataModal} handleClose={handleCloseEdit} data={editDataRab} dataOld={allData[0]} />
+          <AddModalSupport show={ShowModal} handleClose={handleClose} />
+          <EditModalSupport  show={editModal} handleClose={handleCloseEditModal} data={editDataSupport} dataOld={allData[0]}/>
         </Card>
       </div>
     </div>
   );
 };
 
-export default DataTableRab;
+export default SupportKerjaSama;

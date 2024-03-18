@@ -1,6 +1,6 @@
 import React from "react";
 import DataTable from "react-data-table-component";
-import DataDumy from "../../../Deals/Dummy";
+import DataDumy from "./dummy";
 import { ColumnsTable } from "./ColumnsTable";
 
 const DatatableNeedApproval = () => {

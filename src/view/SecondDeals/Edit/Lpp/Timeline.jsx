@@ -1,13 +1,20 @@
 import React from "react";
 
-const Timeline = ({jenisKerjasama}) => {
+const Timeline = ({ statusKerjaSama }) => {
   return (
     <div>
-      <table className="table table-sm caption-top">
+      <table className="table table-sm caption-top table-bordered">
         <caption className="fw-bold fs-5">Timeline</caption>
+        <thead className="text-center table-info">
+          <tr>
+            <th colSpan="13">Bulan</th>
+          </tr>
+        </thead>
         <thead className="table-primary">
           <tr>
-            <th scope="col">Process</th>
+            <th scope="col" className="fw-bold">
+              Process
+            </th>
             <th scope="col">1</th>
             <th scope="col">2</th>
             <th scope="col">3</th>
@@ -24,13 +31,21 @@ const Timeline = ({jenisKerjasama}) => {
         </thead>
         <tbody>
           <tr>
-            <td>New HD</td>
+            <td className="fw-semibold">
+              {statusKerjaSama === "replace"
+                ? "Replace"
+                : statusKerjaSama === "new_hd"
+                  ? "New HD"
+                  : statusKerjaSama === "expand"
+                    ? "Expand"
+                    : ""}
+            </td>
             <td>
               <input
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -38,7 +53,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -46,7 +61,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -54,7 +69,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -62,7 +77,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -70,7 +85,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -78,7 +93,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -86,7 +101,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -94,7 +109,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -102,7 +117,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -110,7 +125,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -118,7 +133,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
           </tr>
@@ -129,7 +144,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -137,7 +152,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -145,7 +160,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -153,7 +168,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -161,7 +176,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -169,7 +184,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -177,7 +192,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -185,7 +200,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -193,7 +208,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -201,7 +216,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -209,7 +224,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -217,7 +232,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
           </tr>
@@ -228,7 +243,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -236,7 +251,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -244,7 +259,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -252,7 +267,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -260,7 +275,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -268,7 +283,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -276,7 +291,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -284,7 +299,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -292,7 +307,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -300,7 +315,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -308,7 +323,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -316,7 +331,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
           </tr>
@@ -327,7 +342,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -335,7 +350,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -343,7 +358,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -351,7 +366,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -359,7 +374,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -367,7 +382,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -375,7 +390,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -383,7 +398,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -391,7 +406,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -399,7 +414,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -407,7 +422,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -415,7 +430,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
           </tr>
@@ -426,7 +441,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -434,7 +449,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -442,7 +457,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -450,7 +465,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -458,7 +473,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -466,7 +481,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -474,7 +489,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -482,7 +497,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -490,7 +505,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -498,7 +513,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -506,7 +521,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -514,7 +529,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
           </tr>
@@ -525,7 +540,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -533,7 +548,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -541,7 +556,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -549,7 +564,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -557,7 +572,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -565,7 +580,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -573,7 +588,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -581,7 +596,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -589,7 +604,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -597,7 +612,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -605,7 +620,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -613,18 +628,18 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
           </tr>
           <tr>
-            <td>1t Running Patient</td>
+            <td>1st Running Patient</td>
             <td>
               <input
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -632,7 +647,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -640,7 +655,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -648,7 +663,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -656,7 +671,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -664,7 +679,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -672,7 +687,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -680,7 +695,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -688,7 +703,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -696,7 +711,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -704,7 +719,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
             <td>
@@ -712,7 +727,7 @@ const Timeline = ({jenisKerjasama}) => {
                 type="checkbox"
                 name=""
                 id=""
-                className="form-check-input"
+                className="form-check-input border-secondary"
               />
             </td>
           </tr>
