@@ -4,6 +4,7 @@ import ReactQuill from "react-quill";
 
 const FQP = () => {
   return (
+    <div id="FQP">
     <div className="col-12">
       <Card>
         <Card.Header>
@@ -288,6 +289,7 @@ const FQP = () => {
         </Card.Body>
         <Card.Footer></Card.Footer>
       </Card>
+    </div>
     </div>
   );
 };
