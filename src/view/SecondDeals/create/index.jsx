@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Topbar from "../../../components/Template/Topbar";
 import Sidebar from "../../../components/Template/Sidebar";
 import Main from "../../../components/Template/Main";
@@ -6,17 +6,162 @@ import BreadCrumbCreate from "./breadcrumb";
 import { Card, FloatingLabel, Form } from "react-bootstrap";
 import ReactQuill from "react-quill";
 import TobButton from "./TobButton";
+import Select from "react-select";
+import OverlayAddCompany from "../../../components/Overlay/addCompany";
+import { useDispatch, useSelector } from "react-redux";
+import { getListCompany } from "../../../action/FormCompany";
+import axios from "axios";
+import Swal from "sweetalert2";
 
 const CreateSecondDeals = () => {
-  const [showFQP, setShowFQP] = useState(false);
-  const handleSelectFQP = (e) => {
-    const value = e.target.value;
-    console.log(value);
-    if (value === "yes") {
-      setShowFQP(true);
+  const token = localStorage.getItem("token");
+  const uid = localStorage.getItem("uid");
+  const [showOverlay, setShowOverlay] = useState(false);
+  const handleShow = () => setShowOverlay(true);
+  const handleClose = () => setShowOverlay(false);
+  const [buttonBlocked, setButtonBlocked] = useState(false);
+  const [inputData, setInputData] = useState([]);
+  const handleInputData = (e) => {
+    setInputData({
+      ...inputData,
+      [e.target.name]: e.target.value,
+    });
+  };
+  const { listResult, listLoading, listError } = useSelector(
+    (state) => state.FormCompany
+  );
+  const selectCompany = () => {
+    const result = [];
+    if (Array.isArray(listResult)) {
+      listResult.map((data) => {
+        const finalResult = {
+          label: `${data.name}`,
+          value: data.uid,
+        };
+        result.push(finalResult);
+      });
     } else {
-      setShowFQP(false);
+      console.error("listResult is not an array or is not yet initialized.");
     }
+    return result;
+  };
+  const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(getListCompany(token));
+  }, [dispatch]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append("owner_user_uid", uid);
+    formData.append("hospital_uid", inputData.company_uid || "");
+    formData.append(
+      "head_name_hd_room",
+      inputData.name_kepala_ruangan_hd || ""
+    );
+    formData.append(
+      "name_of_general_practitioner",
+      inputData.name_dokter_umum_or_hd || ""
+    );
+    formData.append(
+      "name_of_consular_doctor",
+      inputData.name_dokter_konsulen_or_sppd || ""
+    );
+    formData.append(
+      "contact_person_nurse_or_doctor",
+      inputData.no_telp_perawat_or_dokter || ""
+    );
+    formData.append(
+      "procurement_or_management_contact_person",
+      inputData.no_telp_pengadaan_manajemen || ""
+    );
+    formData.append("promoters[0]", inputData.promoters[0] || "");
+    formData.append("promoters[1]", inputData.promoters[1] || "");
+    formData.append("promoters[2]", inputData.promoters[2] || "");
+    formData.append("neutrals[0]", inputData.neutrals[0] || "");
+    formData.append("neutrals[1]", inputData.neutrals[1] || "");
+    formData.append("neutrals[2]", inputData.neutrals[2] || "");
+    formData.append("detcractors[0]", inputData.detractors[0] || "");
+    formData.append("detcractors[1]", inputData.detractors[1] || "");
+    formData.append("detcractors[2]", inputData.detractors[2] || "");
+    formData.append("existing_vendor", inputData.existing_vendor || "");
+    formData.append(
+      "number_of_machine_unit",
+      inputData.jumlah_unit_mesin || ""
+    );
+    formData.append(
+      "average_total_actions_last_six_months",
+      inputData.tindakan_enam_bulan || ""
+    );
+    formData.append(
+      "number_of_existing_patients",
+      inputData.jumlah_pasien_existing || ""
+    );
+    formData.append(
+      "expired_contract_period",
+      inputData.masa_kontrak_berakhir || ""
+    );
+    formData.append("", inputData.is_replace || "");
+    formData.append("existing_bhp_price", inputData.harga_bhp_existing || "");
+    formData.append(
+      "expired_hd_permit_period",
+      inputData.masa_berlaku_izin || ""
+    );
+    formData.append(
+      "collaborating_with_bpjs",
+      inputData.is_berkerja_bpjs || ""
+    );
+    formData.append(
+      "number_of_unit_facilities",
+      inputData.jumlah_sarana_unit || ""
+    );
+    formData.append("total_of_machine_unit", inputData.jumlah_unit || "");
+    formData.append("cooperation_system", inputData.sistem_kerjasama || "");
+    formData.append("human_resources", inputData.sdm || "");
+    formData.append("", inputData.faskes_hd_lima_km || "");
+    formData.append("hd_health_facilities_arround", inputData.kapasistas_faskes_hd_sekitar_unit || "");
+    formData.append("hd_health_facilities_capacity_approximately", inputData.jumlah_unit_hd_kurang_dua_pulu_km || "");
+    formData.append("cataclysm", inputData.is_banjir || "");
+    formData.append("near_the_sea", inputData.dekat_laut || "");
+    formData.append(
+      "availability_of_human_resource",
+      inputData.ketersedian_sdm || ""
+    );
+    formData.append(
+      "access_to_transportation",
+      inputData.akses_transportasi || ""
+    );
+    setButtonBlocked(true);
+    axios
+      .post(`${process.env.REACT_APP_BACKEND_URL}/v2/deals`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => {
+        Swal.fire({
+          title: res.data.message,
+          text: "Successfully Created Data",
+          icon: "success",
+        }).then((res) => {
+          if (res.isConfirmed) {
+            window.location.href = "/deals-second";
+          }
+        });
+      })
+      .catch((err) => {
+        if (err.response) {
+          Swal.fire({
+            text: err.response.data.message,
+            icon: "warning",
+          });
+        } else {
+          Swal.fire({
+            text: "Something went wrong !",
+            icon: "error",
+          });
+        }
+      });
   };
   return (
     <div id="body">
@@ -37,81 +182,95 @@ const CreateSecondDeals = () => {
                 <div class="alert alert-primary mt-2" role="alert">
                   <h6 style={{ fontWeight: "700" }}>Data Dasar Informasi</h6>
                 </div>
-                <div className="form-floating mb-3">
-                  <input
-                    type="text"
-                    placeholder="Input in here"
-                    className="form-control"
+                <div className="mb-3">
+                  <Select
+                    placeholder="Pilih Rumah Sakit / Klinik"
+                    className="mb-2"
+                    options={selectCompany()}
+                    onChange={(e) =>
+                      setInputData({
+                        ...inputData,
+                        company_uid: e.value,
+                      })
+                    }
                   />
-                  <label htmlFor="floatingInput">
-                    Nama Rumah Sakit / Klinik
-                  </label>
+                  <button
+                    className="form-text text-primary fw-semibold border-0 "
+                    onClick={handleShow}
+                  >
+                    Tambah Rumah Sakit / Klinik
+                  </button>
+                  <OverlayAddCompany
+                    visible={showOverlay}
+                    onClose={handleClose}
+                  />
                 </div>
-                <div className="form-floating mb-3">
+                <div className="mb-3">
+                  <label htmlFor="floatingInput">Nama Kepala Ruangan HD</label>
                   <input
                     type="text"
                     className="form-control"
-                    placeholder="Input in here"
+                    name="name_kepala_ruangan_hd"
+                    onChange={handleInputData}
                   />
-                  <label htmlFor="floatingInput">Nama Kepala Ruangan HD</label>
                 </div>
                 <div className="row">
                   <div className="col-md-6">
-                    <div className="form-floating mb-3">
-                      <input
-                        type="text"
-                        name=""
-                        id=""
-                        placeholder="Input in here"
-                        className="form-control"
-                      />
+                    <div className="mb-3">
                       <label htmlFor="floatingInput">
                         Nama Dokter Umum / Pelaksana HD
                       </label>
+                      <input
+                        type="text"
+                        name="name_dokter_umum_or_hd"
+                        id=""
+                        onChange={handleInputData}
+                        className="form-control"
+                      />
                     </div>
                   </div>
                   <div className="col-md-6">
-                    <div className="form-floating mb-3">
-                      <input
-                        type="text"
-                        name=""
-                        id=""
-                        placeholder="Input in here"
-                        className="form-control"
-                      />
+                    <div className="mb-3">
                       <label htmlFor="floatingInput">
                         Nama Dokter Konsulen / SpPD KGH
                       </label>
+                      <input
+                        type="text"
+                        name="name_dokter_konsulen_or_sppd"
+                        onChange={handleInputData}
+                        id=""
+                        className="form-control"
+                      />
                     </div>
                   </div>
                 </div>
                 <div className="row">
                   <div className="col-md-6">
-                    <div className="form-floating mb-3">
-                      <input
-                        type="number"
-                        name=""
-                        id=""
-                        placeholder="Input in here"
-                        className="form-control"
-                      />
+                    <div className="mb-3">
                       <label htmlFor="floatingInput">
                         No.Telp Perawat / Dokter
                       </label>
+                      <input
+                        type="number"
+                        name="no_telp_perawat_or_dokter"
+                        onChange={handleInputData}
+                        id=""
+                        className="form-control"
+                      />
                     </div>
                   </div>
                   <div className="col-md-6">
-                    <div className="form-floating mb-3">
-                      <input
-                        type="number"
-                        name=""
-                        id=""
-                        placeholder="Input in here"
-                        className="form-control"
-                      />
+                    <div className="mb-3">
                       <label htmlFor="floatingInput">
                         No.Telp Pengadaan / Manajemen
                       </label>
+                      <input
+                        type="number"
+                        name="no_telp_pengadaan_manajemen"
+                        onChange={handleInputData}
+                        id=""
+                        className="form-control"
+                      />
                     </div>
                   </div>
                 </div>
@@ -122,19 +281,22 @@ const CreateSecondDeals = () => {
                   <h6 className="fw-bold ms-2 mt-3">Promoters</h6>
                   <input
                     type="text"
-                    name=""
+                    name="promoters[0]"
+                    onChange={handleInputData}
                     id=""
                     className="form-control mb-2"
                   />
                   <input
                     type="text"
-                    name=""
+                    name="promoters[1]"
+                    onChange={handleInputData}
                     id=""
                     className="form-control mb-2"
                   />
                   <input
                     type="text"
-                    name=""
+                    name="promoters[2]"
+                    onChange={handleInputData}
                     id=""
                     className="form-control mb-2"
                   />
@@ -143,19 +305,22 @@ const CreateSecondDeals = () => {
                   <h6 className="fw-bold ms-2 mt-3">Neutrals</h6>
                   <input
                     type="text"
-                    name=""
+                    name="neutrals[0]"
+                    onChange={handleInputData}
                     id=""
                     className="form-control mb-2"
                   />
                   <input
                     type="text"
-                    name=""
+                    name="neutrals[1]"
+                    onChange={handleInputData}
                     id=""
                     className="form-control mb-2"
                   />
                   <input
                     type="text"
-                    name=""
+                    name="neutrals[2]"
+                    onChange={handleInputData}
                     id=""
                     className="form-control mb-2"
                   />
@@ -164,19 +329,22 @@ const CreateSecondDeals = () => {
                   <h6 className="fw-bold ms-2 mt-3">Detractors</h6>
                   <input
                     type="text"
-                    name=""
+                    name="detractors[0]"
+                    onChange={handleInputData}
                     id=""
                     className="form-control mb-2"
                   />
                   <input
                     type="text"
-                    name=""
+                    name="detractors[1]"
+                    onChange={handleInputData}
                     id=""
                     className="form-control mb-2"
                   />
                   <input
                     type="text"
-                    name=""
+                    name="detractors[2]"
+                    onChange={handleInputData}
                     id=""
                     className="form-control mb-2"
                   />
@@ -189,7 +357,8 @@ const CreateSecondDeals = () => {
                     <div className="form-floating mb-3">
                       <input
                         type="text"
-                        name=""
+                        name="existing_vendor"
+                        onChange={handleInputData}
                         className="form-control"
                         placeholder=""
                         id=""
@@ -201,7 +370,8 @@ const CreateSecondDeals = () => {
                     <div className="form-floating mb-3">
                       <input
                         type="text"
-                        name=""
+                        name="jumlah_unit_mesin"
+                        onChange={handleInputData}
                         className="form-control"
                         placeholder=""
                         id=""
@@ -215,7 +385,8 @@ const CreateSecondDeals = () => {
                     <div className="form-floating mb-3">
                       <input
                         type="text"
-                        name=""
+                        name="tindakan_enam_bulan"
+                        onChange={handleInputData}
                         className="form-control"
                         placeholder=""
                         id=""
@@ -229,7 +400,8 @@ const CreateSecondDeals = () => {
                     <div className="form-floating mb-3">
                       <input
                         type="text"
-                        name=""
+                        name="jumlah_pasien_existing"
+                        onChange={handleInputData}
                         className="form-control"
                         placeholder=""
                         id=""
@@ -245,7 +417,8 @@ const CreateSecondDeals = () => {
                     <div className="form-floating mb-3">
                       <input
                         type="text"
-                        name=""
+                        name="masa_kontrak_berakhir"
+                        onChange={handleInputData}
                         className="form-control"
                         placeholder=""
                         id=""
@@ -256,15 +429,18 @@ const CreateSecondDeals = () => {
                     </div>
                   </div>
                   <div className="col-md-6">
-                    <div className="form-floating mb-3">
-                      <input
-                        type="text"
-                        name=""
-                        className="form-control"
-                        placeholder=""
-                        id=""
-                      />
+                    <div className="mb-3">
                       <label htmlFor="floatingInput">Replace/ Expand</label>
+                      <select
+                        name="is_replace"
+                        id=""
+                        onChange={handleInputData}
+                        className="form-control"
+                      >
+                        <option value="">Select Chose</option>
+                        <option value="replace">Replace</option>
+                        <option value="expand">Expand</option>
+                      </select>
                     </div>
                   </div>
                 </div>
@@ -273,7 +449,8 @@ const CreateSecondDeals = () => {
                     <div className="form-floating mb-3">
                       <input
                         type="text"
-                        name=""
+                        name="harga_bhp_existing"
+                        onChange={handleInputData}
                         className="form-control"
                         placeholder=""
                         id=""
@@ -285,7 +462,8 @@ const CreateSecondDeals = () => {
                     <div className="form-floating mb-3">
                       <input
                         type="text"
-                        name=""
+                        name="masa_berlaku_izin"
+                        onChange={handleInputData}
                         className="form-control"
                         placeholder=""
                         id=""
@@ -300,15 +478,25 @@ const CreateSecondDeals = () => {
                   <label htmlFor="" className="mb-1">
                     Apakah Bekerjasama Dengan BPJS
                   </label>
-                  <select name="" id="" className="form-select">
+                  <select
+                    name="is_berkerja_bpjs"
+                    id=""
+                    onChange={handleInputData}
+                    className="form-select"
+                  >
                     <option value="">Select Choose</option>
-                    <option value="">Ya</option>
-                    <option value="">Tidak</option>
+                    <option value="yes">Ya</option>
+                    <option value="no">Tidak</option>
                   </select>
                 </div>
                 <div className="mb-3">
                   <label htmlFor="">Jumlah Sarana Unit</label>
-                  <input type="text" className="form-control" />
+                  <input
+                    type="text"
+                    className="form-control"
+                    name="jumlah_sarana_unit"
+                    onChange={handleInputData}
+                  />
                 </div>
                 <div class="alert alert-primary mt-4" role="alert">
                   <h6 style={{ fontWeight: "700" }}>New Unit</h6>
@@ -316,8 +504,9 @@ const CreateSecondDeals = () => {
                 <div className="form-floating mb-3">
                   <input
                     type="text"
-                    name=""
+                    name="jumlah_unit"
                     placeholder=""
+                    onChange={handleInputData}
                     id=""
                     className="form-control"
                   />
@@ -327,27 +516,117 @@ const CreateSecondDeals = () => {
                   <label htmlFor="" className="mb-1">
                     Sistem Kerja Sama
                   </label>
-                  <select name="" id="" className="form-select">
-                    <option value="">Select Choose</option>
-                  </select>
+                  <input
+                    type="text"
+                    name="sistem_kerjasama"
+                    onChange={handleInputData}
+                    className="form-control"
+                    id=""
+                  />
                 </div>
                 <div className="mb-3">
                   <label htmlFor="" className="mb-1">
                     SDM
                   </label>
-                  <select name="" id="" className="form-select">
-                    <option value="">Select Choose</option>
-                  </select>
+                  <input
+                    type="text"
+                    name="sdm"
+                    onChange={handleInputData}
+                    className="form-control"
+                    id=""
+                  />
                 </div>
                 <div className="mb-2">
                   <h6 className="ms-2 mt-3">Faskes HD 5 km sekitar New Unit</h6>
-                  <ReactQuill className="p-2" theme="snow" />
+                  <ReactQuill
+                    className="p-2"
+                    theme="snow"
+                    onChange={(value) =>
+                      handleInputData({
+                        target: { name: "faskes_hd_lima_km", value },
+                      })
+                    }
+                  />
                 </div>
                 <div className="mb-2">
                   <h6 className="ms-2 mt-3">
                     Kapasitas Faskes HD Sekitar New Unit
                   </h6>
-                  <ReactQuill className="p-2" theme="snow" />
+                  <ReactQuill
+                    className="p-2"
+                    theme="snow"
+                    onChange={(value) =>
+                      handleInputData({
+                        target: {
+                          name: "kapasistas_faskes_hd_sekitar_unit",
+                          value,
+                        },
+                      })
+                    }
+                  />
+                </div>
+                <div class="alert alert-primary mt-4" role="alert">
+                  <h6 style={{ fontWeight: "700" }}>Keadaan Lingkungan</h6>
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="" className="mb-1">
+                    Banjir
+                  </label>
+                  <select
+                    name="is_banjir"
+                    id=""
+                    onChange={handleInputData}
+                    className="form-select"
+                  >
+                    <option value="">Select Choose</option>
+                    <option value="yes">Ya</option>
+                    <option value="no">Tidak</option>
+                  </select>
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="" className="mb-1">
+                    Dekat Laut (Kurang dari 5km)
+                  </label>
+                  <select
+                    name="dekat_laut"
+                    id=""
+                    onChange={handleInputData}
+                    className="form-select"
+                  >
+                    <option value="">Select Choose</option>
+                    <option value="yes">Ya</option>
+                    <option value="no">Tidak</option>
+                  </select>
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="" className="mb-1">
+                    Ketersedian SDM
+                  </label>
+                  <select
+                    name="ketersedian_sdm"
+                    id=""
+                    onChange={handleInputData}
+                    className="form-select"
+                  >
+                    <option value="">Select Choose</option>
+                    <option value="available">Ada</option>
+                    <option value="not_yet_available">Tidak</option>
+                  </select>
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="" className="mb-1">
+                    Akses Transportasi / Logistik
+                  </label>
+                  <select
+                    name="akses_transportasi"
+                    id=""
+                    onChange={handleInputData}
+                    className="form-select"
+                  >
+                    <option value="">Select Choose</option>
+                    <option value="easy">Mudah</option>
+                    <option value="difficult">Sulit</option>
+                  </select>
                 </div>
                 <div class="alert alert-primary mt-4" role="alert">
                   <h6 style={{ fontWeight: "700" }}>Other Information</h6>
@@ -355,7 +634,7 @@ const CreateSecondDeals = () => {
                 <div className="form-floating mb-3">
                   <input
                     type="number"
-                    name=""
+                    name="jumlah_unit_hd_kurang_dua_pulu_km"
                     id=""
                     className="form-control"
                     placeholder=""
@@ -367,7 +646,8 @@ const CreateSecondDeals = () => {
                 <div className="form-floating mb-3">
                   <input
                     type="number"
-                    name=""
+                    name="jumlah_mesin_unit_hd"
+                    onChange={handleInputData}
                     id=""
                     className="form-control"
                     placeholder=""
@@ -378,7 +658,13 @@ const CreateSecondDeals = () => {
             </Card.Body>
             <Card.Footer>
               <div className="float-end mt-2">
-                <button className="btn btn-primary me-2">Simpan</button>
+                <button
+                  className="btn btn-primary me-2"
+                  disabled={buttonBlocked}
+                  onClick={handleSubmit}
+                >
+                  Simpan
+                </button>
                 <button className="btn btn-secondary">Kembali</button>
               </div>
             </Card.Footer>

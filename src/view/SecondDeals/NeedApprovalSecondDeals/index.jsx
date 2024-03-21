@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Topbar from "../../../components/Template/Topbar";
 import Sidebar from "../../../components/Template/Sidebar";
 import Main from "../../../components/Template/Main";
@@ -8,8 +8,24 @@ import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 import Card from "../../../components/Card";
 import TopButton from "./partials/TopButton";
 import DatatableNeedApproval from "./partials/Datatable";
+import { GetListNeedApprovalManager } from "../../../action/DataNeedApprovalManager";
+import { useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { GetListNeedApprovalAccounting } from "../../../action/DataNeedApprovalAccounting";
 
 const NeedApprovalSecondDeals = () => {
+  const token = localStorage.getItem("token");
+  const dispatch = useDispatch();
+  const { ResultNeedManager, LoadingNeedManager, ErrorNeedManager } =
+    useSelector((state) => state.NeedApprovalManager);
+
+  const { ResultNeedAccounting, LoadingNeedAccounting, ErrorNeedAccounting } =
+    useSelector((state) => state.NeedApprovalAccounting);
+
+  useEffect(() => {
+    dispatch(GetListNeedApprovalManager(token));
+    dispatch(GetListNeedApprovalAccounting(token));
+  }, [token]);
   return (
     <body id="body">
       <Topbar />
@@ -52,9 +68,12 @@ const NeedApprovalSecondDeals = () => {
               </div>
             </div>
             <div className="row">
-                <div className="col mt-4">
-                    <DatatableNeedApproval />
-                </div>
+              <div className="col mt-4">
+                <DatatableNeedApproval
+                  NeedApprovalManager={ResultNeedManager}
+                  NeedApprovalAccounting={ResultNeedAccounting}
+                />
+              </div>
             </div>
           </Card>
         </div>

@@ -6,7 +6,6 @@ import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAt } from "@fortawesome/free-solid-svg-icons";
-
 const Auth = () => {
   const navigate = useNavigate();
   const [buttonDisabled, setButtonDisabled] = useState(false);
@@ -62,6 +61,7 @@ const Auth = () => {
         });
       }
     } catch (error) {
+      console.log(error);
       if (error.response) {
         Swal.fire({
           text: error.response.data.message,

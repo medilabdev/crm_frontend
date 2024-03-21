@@ -2,8 +2,6 @@ import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCheck,
-  faPenToSquare,
-  faTrash,
   faXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import { handleApprove, handleReject } from "./Approve";
@@ -17,7 +15,6 @@ export const ColumnsTable = [
         className="text-decoration-none"
         style={{ whiteSpace: "normal", color: "black", fontWeight: "540" }}
       >
-        {row.name}
       </a>
     ),
     sortable: true,
@@ -36,18 +33,13 @@ export const ColumnsTable = [
           }`}
           style={{ fontSize: "0.65rem" }}
         >
-          {row.stage}
         </p>
       </div>
     ),
   },
   {
-    name: "Jumlah",
-    selector: (row) => <p className="fw-semibold">Rp. {row.jumlah}</p>,
-  },
-  {
     name: "Owner",
-    selector: (row) => <p className="fw-semibold">{row.owner}</p>,
+    selector: (row) => <p className="fw-semibold"></p>,
   },
   {
     name: "Action",

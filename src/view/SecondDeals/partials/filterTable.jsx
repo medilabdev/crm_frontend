@@ -1,7 +1,52 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Select from "react-select";
-
+import { useDispatch } from "react-redux";
+import { getListOwner } from "../../../action/FormOwner";
+import { useSelector } from "react-redux";
+import { getListCompany } from "../../../action/FormCompany";
 const FilterTable = () => {
+  const token = localStorage.getItem("token");
+  const dispatch = useDispatch();
+  const { listResultOwner, listLoadingOwner, listErrorOwner } = useSelector(
+    (state) => state.SelectOwner
+  );
+  const selectOwner = () => {
+    const result = [];
+    if (Array.isArray(listResultOwner)) {
+      listResultOwner.map((data) => {
+        const finalResult = {
+          label: `${data.name}`,
+          value: data.uid,
+        };
+        result.push(finalResult);
+      });
+    } else {
+      console.error("listResult is not an array or is not yet initialized.");
+    }
+    return result;
+  };
+  const selectCompany = () => {
+    const result = [];
+    if (Array.isArray(listResult)) {
+      listResult.map((data) => {
+        const finalResult = {
+          label: `${data.name}`,
+          value: data.uid,
+        };
+        result.push(finalResult);
+      });
+    } else {
+      console.error("listResult is not an array or is not yet initialized.");
+    }
+    return result;
+  };
+  const { listResult, listLoading, listError } = useSelector(
+    (state) => state.FormCompany
+  );
+  useEffect(() => {
+    dispatch(getListOwner(token));
+    dispatch(getListCompany(token));
+  }, [dispatch]);
   return (
     <form onSubmit="">
       <div className="container">
@@ -28,7 +73,7 @@ const FilterTable = () => {
         </div>
         <div className="row mt-2">
           <div className="col mb-2">
-            <Select placeholder="Select Owner" />
+            <Select placeholder="Select Owner" options={selectOwner()} />
           </div>
         </div>
         <div className="row mt-2">
@@ -39,7 +84,10 @@ const FilterTable = () => {
             </h6>
           </div>
           <div className="mb-2">
-            <Select placeholder="Select Hospital / Klinik" />
+            <Select
+              placeholder="Select Hospital / Klinik"
+              options={selectCompany()}
+            />
           </div>
         </div>
         <div className="row mt-3">

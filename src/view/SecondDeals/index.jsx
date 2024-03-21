@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Topbar from "../../components/Template/Topbar";
 import Sidebar from "../../components/Template/Sidebar";
 import Main from "../../components/Template/Main";
@@ -13,8 +13,12 @@ import {
   faMagnifyingGlass,
   faX,
 } from "@fortawesome/free-solid-svg-icons";
+import { useDispatch } from "react-redux";
+import { GetDataDeals } from "../../action/DataDeals";
+import { useSelector } from "react-redux";
 
 const SecondDeals = () => {
+  const token = localStorage.getItem("token");
   const [SideFilter, SetSideFilter] = useState(false);
   const ToggleSideFilter = () => {
     SetSideFilter(!SideFilter);
@@ -24,6 +28,41 @@ const SecondDeals = () => {
     : "col-md-0 d-none";
   const DatatableClass = SideFilter ? "col-md-9" : "col-md-12";
   const IconSideFilter = SideFilter ? faX : faFilter;
+
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+  });
+  const [search, setSearch] = useState([]);
+  const [ownerDeals, setOwnerDeals] = useState([]);
+  const [formSearch, setFormSearch] = useState({});
+  const [selectUid, setSelectUid] = useState([]);
+  const dispatch = useDispatch();
+  const { listResultDataDeals, listLoadingDataDeals, listErrorDataDeals } =
+    useSelector((state) => state.DataDeals);
+  useEffect(() => {
+    dispatch(GetDataDeals(token, search, ownerDeals, formSearch, pagination));
+  }, [dispatch]);
+
+  const handleSearchDataTable = (e) => {
+    if (e.key === "Enter") {
+      const value = e.target.value.toLowerCase();
+      setSearch(value);
+    }
+  };
+
+  const selectUidDataTable = (e) => {
+    const selected = e.selectedRows.map((row) => row.uid);
+    setSelectUid(selected);
+  };
+
+  const handleChangePage = (page) => {
+    setPagination((e) => ({...e, page}))
+  }
+
+  const handlePagePerChange = (pageSize, page) => {
+    setPagination((prev) => ({...prev, pageSize, page}))
+  }
   return (
     <div id="body">
       <Topbar />
@@ -46,7 +85,6 @@ const SecondDeals = () => {
                       style={{ fontSize: "0.85rem", fontWeight: "600" }}
                     >
                       <FontAwesomeIcon icon={IconSideFilter} className="fs-6" />
-                      {/* <i className={`${IconSideFilter}`}></i> */}
                     </button>
                     <div className="float-end">
                       <div
@@ -70,7 +108,7 @@ const SecondDeals = () => {
                         <input
                           type="text"
                           placeholder="Search Input"
-                          onKeyDown=""
+                          onKeyDown={handleSearchDataTable}
                           className="form-control"
                           id=""
                         />
@@ -80,7 +118,13 @@ const SecondDeals = () => {
                 </div>
                 <div className="row">
                   <div className="mt-3">
-                    <DatatableDealSecond />
+                    <DatatableDealSecond
+                      data={listResultDataDeals}
+                      selectUidDataTable={selectUidDataTable}
+                      paginationPerPage={pagination.limit}
+                      handleChangePage={handleChangePage}
+                      handlePagePerChange={handlePagePerChange}
+                    />
                   </div>
                 </div>
               </div>

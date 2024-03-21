@@ -14,7 +14,7 @@ import FDC from "./FDC";
 const EditDataSecondDeals = () => {
   const token = localStorage.getItem("token");
 
-  const [ShowFQP, setShowFQP] = useState(false);
+  const [ShowFQP, setShowFQP] = useState(true);
   const [ShowLPP, setShowLPP] = useState(false);
   const [ShowFDC, setShowFDC] = useState(false);
   const handleShowFQP = () => {
@@ -48,14 +48,12 @@ const EditDataSecondDeals = () => {
             {ShowLPP ? <LPP /> : ""}
             {ShowFDC ? <FDC /> : ""}
             <div className="col">
-              <div className="float-end">
                 <button type="submit" className="btn btn-primary me-2">
                   Save Changes
                 </button>
                 <a href="/deals-second" className="btn btn-secondary">
                   Back
                 </a>
-              </div>
             </div>
           </div>
         </div>

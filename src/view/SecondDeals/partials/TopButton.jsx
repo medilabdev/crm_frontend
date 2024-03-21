@@ -1,6 +1,6 @@
-
+import { faPersonCircleCheck } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 const TopButton = () => {
-
   return (
     <div className="row">
       <div className="col mb-2">
@@ -17,14 +17,15 @@ const TopButton = () => {
             className="btn btn-outline-primary ms-2"
             style={{ fontSize: "0.85rem", fontWeight: "600" }}
           >
-            Need Approval
+            <FontAwesomeIcon icon={faPersonCircleCheck} className="me-1" /> Need
+            Approval
           </a>
-          <button
+          {/* <button
             className="btn btn-danger ms-2"
             style={{ fontSize: "0.85rem", fontWeight: "600" }}
           >
             Delete
-          </button>
+          </button> */}
         </div>
       </div>
     </div>
