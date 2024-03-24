@@ -1,9 +1,15 @@
-import { GET_DATA_DEALS } from "../../action/DataDeals";
+import { GET_DATA_DEALS, GET_DATA_DEALS_DETAIL } from "../../action/DataDeals";
 
 const initialstate = {
   listResultDataDeals: false,
   listLoadingDataDeals: false,
   listErrorDataDeals: false,
+  totalDataDeals:false,
+
+
+  detailDataDeals: false,
+  loadingDataDeals:false,
+  errorDataDeals:false
 };
 
 const DataDeals = (state = initialstate, action) => {
@@ -14,7 +20,15 @@ const DataDeals = (state = initialstate, action) => {
         listResultDataDeals: action.payload.data,
         listLoadingDataDeals: action.payload.loading,
         listErrorDataDeals: action.payload.errorMessage,
+        totalDataDeals:action.payload.totalRows
       };
+      case GET_DATA_DEALS_DETAIL:
+        return {
+          ...state,
+          detailDataDeals: action.payload.data,
+          loadingDataDeals: action.payload.loading,
+          errorDataDeals: action.payload.errorMessage
+        }
     default:
       return state;
   }

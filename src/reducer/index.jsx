@@ -5,6 +5,8 @@ import SelectContact from "./contact/FormContactSelect";
 import DataDeals from "./dealsV2/DataDeals";
 import NeedApprovalManager from "./dealsV2/DataNeedApprovalManager";
 import NeedApprovalAccounting from "./dealsV2/DataNeedApprovalAccounting";
+import DataStage from "./dealsV2/DealStage";
+import DataSideBar from "./Properties/Sidebar";
 
 export default combineReducers({
     FormCompany,
@@ -13,4 +15,6 @@ export default combineReducers({
     DataDeals,
     NeedApprovalManager,
     NeedApprovalAccounting,
+    DataStage,
+    DataSideBar
 });

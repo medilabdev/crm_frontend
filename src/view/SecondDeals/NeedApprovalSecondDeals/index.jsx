@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Topbar from "../../../components/Template/Topbar";
 import Sidebar from "../../../components/Template/Sidebar";
 import Main from "../../../components/Template/Main";
@@ -19,13 +19,15 @@ const NeedApprovalSecondDeals = () => {
   const { ResultNeedManager, LoadingNeedManager, ErrorNeedManager } =
     useSelector((state) => state.NeedApprovalManager);
 
-  const { ResultNeedAccounting, LoadingNeedAccounting, ErrorNeedAccounting } =
-    useSelector((state) => state.NeedApprovalAccounting);
-
+  const [searchInput, setSearchInput] = useState([]);
+  
+  const handleSearchInput = (e) => {
+    const value = e.target.value.toLowerCase()
+    setSearchInput(value)
+  };
   useEffect(() => {
     dispatch(GetListNeedApprovalManager(token));
-    dispatch(GetListNeedApprovalAccounting(token));
-  }, [token]);
+  }, [dispatch]);
   return (
     <body id="body">
       <Topbar />
@@ -59,7 +61,7 @@ const NeedApprovalSecondDeals = () => {
                     <input
                       type="text"
                       placeholder="Search Input"
-                      onKeyDown=""
+                      onKeyDown={handleSearchInput}
                       className="form-control"
                       id=""
                     />
@@ -71,7 +73,7 @@ const NeedApprovalSecondDeals = () => {
               <div className="col mt-4">
                 <DatatableNeedApproval
                   NeedApprovalManager={ResultNeedManager}
-                  NeedApprovalAccounting={ResultNeedAccounting}
+                  // NeedApprovalAccounting={ResultNeedAccounting}
                 />
               </div>
             </div>

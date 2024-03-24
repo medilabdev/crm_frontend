@@ -4,10 +4,10 @@ import { ColumnsTable, CustomStyles } from "./ColumnsTable";
 
 const DatatableDealSecond = ({
   data,
-  selectUidDataTable,
   paginationPerPage,
   handleChangePage,
   handlePagePerChange,
+  totalRows
 }) => {
   return (
     <div>
@@ -18,10 +18,10 @@ const DatatableDealSecond = ({
         paginationServer
         selectableRows
         customStyles={CustomStyles}
-        onSelectedRowsChange={selectUidDataTable}
         paginationPerPage={paginationPerPage}
         onChangePage={handleChangePage}
         onChangeRowsPerPage={handlePagePerChange}
+        paginationTotalRows={totalRows}
         paginationComponentOptions={{
           noRowsPerPage: true,
         }}

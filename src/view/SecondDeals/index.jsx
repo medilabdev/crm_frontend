@@ -16,6 +16,7 @@ import {
 import { useDispatch } from "react-redux";
 import { GetDataDeals } from "../../action/DataDeals";
 import { useSelector } from "react-redux";
+import { GetStaging } from "../../action/StagingDealSecond";
 
 const SecondDeals = () => {
   const token = localStorage.getItem("token");
@@ -36,33 +37,73 @@ const SecondDeals = () => {
   const [search, setSearch] = useState([]);
   const [ownerDeals, setOwnerDeals] = useState([]);
   const [formSearch, setFormSearch] = useState({});
-  const [selectUid, setSelectUid] = useState([]);
+  const [inputStage, setInputStage] = useState([]);
+  const [inputOwner, setInputOwner] = useState([]);
   const dispatch = useDispatch();
-  const { listResultDataDeals, listLoadingDataDeals, listErrorDataDeals } =
-    useSelector((state) => state.DataDeals);
-  useEffect(() => {
-    dispatch(GetDataDeals(token, search, ownerDeals, formSearch, pagination));
-  }, [dispatch]);
+  const {
+    listResultDataDeals,
+    listLoadingDataDeals,
+    listErrorDataDeals,
+    totalDataDeals,
+  } = useSelector((state) => state.DataDeals);
 
+  useEffect(() => {
+    dispatch(
+      GetDataDeals(
+        token,
+        search,
+        ownerDeals,
+        formSearch,
+        pagination
+      )
+    );
+    dispatch(GetStaging(token));
+  }, [
+    dispatch,
+    search,
+    ownerDeals,
+    formSearch,
+    pagination
+  ]);
   const handleSearchDataTable = (e) => {
     if (e.key === "Enter") {
       const value = e.target.value.toLowerCase();
       setSearch(value);
     }
   };
-
-  const selectUidDataTable = (e) => {
-    const selected = e.selectedRows.map((row) => row.uid);
-    setSelectUid(selected);
+  const handleChangePage = (page) => {
+    setPagination((e) => ({ ...e, page }));
   };
 
-  const handleChangePage = (page) => {
-    setPagination((e) => ({...e, page}))
-  }
-
   const handlePagePerChange = (pageSize, page) => {
-    setPagination((prev) => ({...prev, pageSize, page}))
-  }
+    setPagination((prev) => ({ ...prev, pageSize, page }));
+  };
+  const { ResultStageDeals } = useSelector((state) => state.DataStage);
+
+  const handleDealsType = async (e) => {
+    const target = e.target.value;
+    if (target === "my") {
+      setOwnerDeals("my");
+    } else {
+      setOwnerDeals("all");
+    }
+  };
+  const handleSearchMultiple = (e) => {
+    setFormSearch({
+      ...formSearch,
+      [e.target.name]: e.target.value,
+    });
+  };
+  const handleSearchMutiple = (e) => {
+    e.preventDefault();
+    const data = {
+      owner: inputOwner.value || "",
+      stage: inputStage.value || "",
+      created_at: formSearch.created_at || "",
+      updated_at: formSearch.updated_at || "",
+    };
+    setFormSearch(data);
+  };
   return (
     <div id="body">
       <Topbar />
@@ -74,7 +115,14 @@ const SecondDeals = () => {
           <Card className="shadow">
             <div className="row">
               <div id="filter" className={`${FilterClass}`}>
-                <FilterTable />
+                <FilterTable
+                  handleDealsType={handleDealsType}
+                  handleSearchMultiple={handleSearchMultiple}
+                  setInputOwner={setInputOwner}
+                  handleSearchMutiple={handleSearchMutiple}
+                  setInputStage={setInputStage}
+                  stage={ResultStageDeals}
+                />
               </div>
               <div className={`${DatatableClass}`}>
                 <div className="row">
@@ -120,10 +168,10 @@ const SecondDeals = () => {
                   <div className="mt-3">
                     <DatatableDealSecond
                       data={listResultDataDeals}
-                      selectUidDataTable={selectUidDataTable}
                       paginationPerPage={pagination.limit}
                       handleChangePage={handleChangePage}
                       handlePagePerChange={handlePagePerChange}
+                      totalRows={totalDataDeals}
                     />
                   </div>
                 </div>

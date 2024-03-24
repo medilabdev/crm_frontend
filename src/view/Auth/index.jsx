@@ -46,11 +46,13 @@ const Auth = () => {
         const image = response.data.data.image;
         const uid = response.data.data.uid;
         const role = response.data.data.role_uid;
+        const position = response.data.data.position_uid;
         localStorage.setItem("token", response.data.data.token);
         localStorage.setItem("name", name);
         localStorage.setItem("uid", uid);
         localStorage.setItem("image", image);
         localStorage.setItem("role", role);
+        localStorage.setItem("position", position);
         navigate("/");
         setButtonDisabled(true);
       } else {

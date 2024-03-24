@@ -50,97 +50,168 @@ const CreateSecondDeals = () => {
     dispatch(getListCompany(token));
   }, [dispatch]);
 
-  const handleSubmit = (e) => {
+  const [inputValue, setInputValue] = useState("");
+  const [inputNps, setInputNps] = useState({
+    promoters: ["", "", ""],
+    neutrals: ["", "", ""],
+    detractors: ["", "", ""],
+  });
+  const handleInputDataRP = (event) => {
+    const rawValue = event.target.value;
+    const formattedValue = formatCurrency(rawValue);
+    setInputValue(formattedValue);
+  };
+
+  const formatCurrency = (value) => {
+    const sanitizedValue = value.replace(/[^\d]/g, "");
+    const formattedValue = Number(sanitizedValue).toLocaleString("id-ID");
+
+    return formattedValue;
+  };
+  const handleInputNps = (e) => {
+    const { name, value } = e.target;
+    const [field, index] = name.split("[");
+    const fieldArray = field.slice(0, -1);
+    const updatedInputData = { ...inputNps };
+    if (!updatedInputData[fieldArray]) {
+      updatedInputData[fieldArray] = ["", "", ""];
+    }
+    updatedInputData[fieldArray][index.slice(0, -1)] = value;
+    setInputNps(updatedInputData);
+  };
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const formData = new FormData();
-    formData.append("owner_user_uid", uid);
-    formData.append("hospital_uid", inputData.company_uid || "");
-    formData.append(
-      "head_name_hd_room",
-      inputData.name_kepala_ruangan_hd || ""
-    );
-    formData.append(
-      "name_of_general_practitioner",
-      inputData.name_dokter_umum_or_hd || ""
-    );
-    formData.append(
-      "name_of_consular_doctor",
-      inputData.name_dokter_konsulen_or_sppd || ""
-    );
-    formData.append(
-      "contact_person_nurse_or_doctor",
-      inputData.no_telp_perawat_or_dokter || ""
-    );
-    formData.append(
-      "procurement_or_management_contact_person",
-      inputData.no_telp_pengadaan_manajemen || ""
-    );
-    formData.append("promoters[0]", inputData.promoters[0] || "");
-    formData.append("promoters[1]", inputData.promoters[1] || "");
-    formData.append("promoters[2]", inputData.promoters[2] || "");
-    formData.append("neutrals[0]", inputData.neutrals[0] || "");
-    formData.append("neutrals[1]", inputData.neutrals[1] || "");
-    formData.append("neutrals[2]", inputData.neutrals[2] || "");
-    formData.append("detcractors[0]", inputData.detractors[0] || "");
-    formData.append("detcractors[1]", inputData.detractors[1] || "");
-    formData.append("detcractors[2]", inputData.detractors[2] || "");
-    formData.append("existing_vendor", inputData.existing_vendor || "");
-    formData.append(
-      "number_of_machine_unit",
-      inputData.jumlah_unit_mesin || ""
-    );
-    formData.append(
-      "average_total_actions_last_six_months",
-      inputData.tindakan_enam_bulan || ""
-    );
-    formData.append(
-      "number_of_existing_patients",
-      inputData.jumlah_pasien_existing || ""
-    );
-    formData.append(
-      "expired_contract_period",
-      inputData.masa_kontrak_berakhir || ""
-    );
-    formData.append("", inputData.is_replace || "");
-    formData.append("existing_bhp_price", inputData.harga_bhp_existing || "");
-    formData.append(
-      "expired_hd_permit_period",
-      inputData.masa_berlaku_izin || ""
-    );
-    formData.append(
-      "collaborating_with_bpjs",
-      inputData.is_berkerja_bpjs || ""
-    );
-    formData.append(
-      "number_of_unit_facilities",
-      inputData.jumlah_sarana_unit || ""
-    );
-    formData.append("total_of_machine_unit", inputData.jumlah_unit || "");
-    formData.append("cooperation_system", inputData.sistem_kerjasama || "");
-    formData.append("human_resources", inputData.sdm || "");
-    formData.append("", inputData.faskes_hd_lima_km || "");
-    formData.append("hd_health_facilities_arround", inputData.kapasistas_faskes_hd_sekitar_unit || "");
-    formData.append("hd_health_facilities_capacity_approximately", inputData.jumlah_unit_hd_kurang_dua_pulu_km || "");
-    formData.append("cataclysm", inputData.is_banjir || "");
-    formData.append("near_the_sea", inputData.dekat_laut || "");
-    formData.append(
-      "availability_of_human_resource",
-      inputData.ketersedian_sdm || ""
-    );
-    formData.append(
-      "access_to_transportation",
-      inputData.akses_transportasi || ""
-    );
-    setButtonBlocked(true);
-    axios
-      .post(`${process.env.REACT_APP_BACKEND_URL}/v2/deals`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => {
+    try {
+      let timerInterval;
+      const { isConfirmed } = await Swal.fire({
+        title: "Apakah kamu yakin untuk menyimpan?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Ya",
+        cancelButtonText: "Tidak",
+      });
+      if (isConfirmed) {
         Swal.fire({
-          title: res.data.message,
+          title: "Loading...",
+          html: "Tolong Tunggu <b></b> Beberapa Detik.",
+          timer: 3000,
+          timerProgressBar: true,
+          didOpen: () => {
+            Swal.showLoading();
+            const timer = Swal.getPopup().querySelector("b");
+            timerInterval = setInterval(() => {
+              timer.textContent = `${Swal.getTimerLeft()}`;
+            }, 100);
+          },
+          willClose: () => {
+            clearInterval(timerInterval);
+          },
+        });
+        const formData = new FormData();
+        formData.append("owner_user_uid", uid);
+        formData.append("hospital_uid", inputData.company_uid || "");
+        formData.append(
+          "head_name_hd_room",
+          inputData.name_kepala_ruangan_hd || ""
+        );
+        formData.append(
+          "name_of_general_practitioner",
+          inputData.name_dokter_umum_or_hd || ""
+        );
+        formData.append(
+          "name_of_consular_doctor",
+          inputData.name_dokter_konsulen_or_sppd || ""
+        );
+        formData.append(
+          "contact_person_nurse_or_doctor",
+          inputData.no_telp_perawat_or_dokter || ""
+        );
+        formData.append(
+          "procurement_or_management_contact_person",
+          inputData.no_telp_pengadaan_manajemen || ""
+        );
+        formData.append(`promoters[0]`, inputNps.promoter[0] || "");
+        formData.append(`promoters[1]`, inputNps.promoter[1] || "");
+        formData.append(`promoters[2]`, inputNps.promoter[2] || "");
+        formData.append("neutrals[0]", inputNps.neutral[0] || "");
+        formData.append("neutrals[1]", inputNps.neutral[1] || "");
+        formData.append("neutrals[2]", inputNps.neutral[2] || "");
+        formData.append("detcractors[0]", inputNps.detractor[0] || "");
+        formData.append("detcractors[1]", inputNps.detractor[1] || "");
+        formData.append("detcractors[2]", inputNps.detractor[2] || "");
+        formData.append("existing_vendor", inputData.existing_vendor || "");
+        formData.append(
+          "number_of_machine_unit",
+          inputData.jumlah_unit_mesin || ""
+        );
+        formData.append(
+          "average_total_actions_last_six_months",
+          inputData.tindakan_enam_bulan || ""
+        );
+        formData.append(
+          "number_of_existing_patients",
+          inputData.jumlah_pasien_existing || ""
+        );
+        formData.append(
+          "expired_contract_period",
+          inputData.masa_kontrak_berakhir || ""
+        );
+        formData.append("status_contract_unit", inputData.is_replace || "");
+        formData.append("existing_bhp_price", inputValue || "");
+        formData.append(
+          "expired_hd_permit_period",
+          inputData.masa_berlaku_izin || ""
+        );
+        formData.append(
+          "collaborating_with_bpjs",
+          inputData.is_berkerja_bpjs || ""
+        );
+        formData.append(
+          "number_of_unit_facilities",
+          inputData.jumlah_sarana_unit || ""
+        );
+        formData.append("total_of_machine_unit", inputData.jumlah_unit || "");
+        formData.append("cooperation_system", inputData.sistem_kerjasama || "");
+        formData.append("human_resources", inputData.sdm || "");
+        formData.append(
+          "hd_unit_count_distance_from_faskes",
+          inputData.faskes_hd_lima_km || ""
+        );
+        formData.append(
+          "hd_health_facilities_arround",
+          inputData.kapasistas_faskes_hd_sekitar_unit || ""
+        );
+        formData.append(
+          "hd_health_facilities_capacity_approximately",
+          inputData.jumlah_unit_hd_kurang_dua_pulu_km || ""
+        );
+        formData.append("cataclysm", inputData.is_banjir || "");
+        formData.append("near_the_sea", inputData.dekat_laut || "");
+        formData.append(
+          "availability_of_human_resource",
+          inputData.ketersedian_sdm || ""
+        );
+        formData.append(
+          "access_to_transportation",
+          inputData.akses_transportasi || ""
+        );
+        formData.append("another_notes", inputData.another_notes || "");
+        for (const pair of formData.entries()) {
+          console.log(pair[0] + ": " + pair[1]);
+        }
+        setButtonBlocked(true);
+        const response = await axios.post(
+          `${process.env.REACT_APP_BACKEND_URL}/v2/deals`,
+          formData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        Swal.close();
+        await Swal.fire({
+          title: response.data.message,
           text: "Successfully Created Data",
           icon: "success",
         }).then((res) => {
@@ -148,21 +219,22 @@ const CreateSecondDeals = () => {
             window.location.href = "/deals-second";
           }
         });
-      })
-      .catch((err) => {
-        if (err.response) {
-          Swal.fire({
-            text: err.response.data.message,
-            icon: "warning",
-          });
-        } else {
-          Swal.fire({
-            text: "Something went wrong !",
-            icon: "error",
-          });
-        }
-      });
+      }
+    } catch (error) {
+      if (error.response) {
+        Swal.fire({
+          text: error.response.data.message,
+          icon: "warning",
+        });
+      } else {
+        Swal.fire({
+          text: "Something went wrong !",
+          icon: "error",
+        });
+      }
+    }
   };
+
   return (
     <div id="body">
       <Topbar />
@@ -193,6 +265,7 @@ const CreateSecondDeals = () => {
                         company_uid: e.value,
                       })
                     }
+                    required
                   />
                   <button
                     className="form-text text-primary fw-semibold border-0 "
@@ -206,19 +279,24 @@ const CreateSecondDeals = () => {
                   />
                 </div>
                 <div className="mb-3">
-                  <label htmlFor="floatingInput">Nama Kepala Ruangan HD</label>
+                  <label htmlFor="floatingInput">
+                    <span className="text-danger fs-6 fw-bold">*</span> Nama
+                    Kepala Ruangan HD{" "}
+                  </label>
                   <input
                     type="text"
                     className="form-control"
                     name="name_kepala_ruangan_hd"
                     onChange={handleInputData}
+                    required
                   />
                 </div>
                 <div className="row">
                   <div className="col-md-6">
                     <div className="mb-3">
                       <label htmlFor="floatingInput">
-                        Nama Dokter Umum / Pelaksana HD
+                        <span className="text-danger fs-6 fw-bold">*</span> Nama
+                        Dokter Umum / Pelaksana HD
                       </label>
                       <input
                         type="text"
@@ -226,13 +304,15 @@ const CreateSecondDeals = () => {
                         id=""
                         onChange={handleInputData}
                         className="form-control"
+                        required
                       />
                     </div>
                   </div>
                   <div className="col-md-6">
                     <div className="mb-3">
                       <label htmlFor="floatingInput">
-                        Nama Dokter Konsulen / SpPD KGH
+                        <span className="text-danger fs-6 fw-bold">*</span> Nama
+                        Dokter Konsulen / SpPD KGH
                       </label>
                       <input
                         type="text"
@@ -248,6 +328,7 @@ const CreateSecondDeals = () => {
                   <div className="col-md-6">
                     <div className="mb-3">
                       <label htmlFor="floatingInput">
+                        <span className="text-danger fs-6 fw-bold">*</span>
                         No.Telp Perawat / Dokter
                       </label>
                       <input
@@ -256,12 +337,14 @@ const CreateSecondDeals = () => {
                         onChange={handleInputData}
                         id=""
                         className="form-control"
+                        required
                       />
                     </div>
                   </div>
                   <div className="col-md-6">
                     <div className="mb-3">
                       <label htmlFor="floatingInput">
+                        <span className="text-danger fs-6 fw-bold">*</span>
                         No.Telp Pengadaan / Manajemen
                       </label>
                       <input
@@ -270,6 +353,7 @@ const CreateSecondDeals = () => {
                         onChange={handleInputData}
                         id=""
                         className="form-control"
+                        required
                       />
                     </div>
                   </div>
@@ -281,23 +365,25 @@ const CreateSecondDeals = () => {
                   <h6 className="fw-bold ms-2 mt-3">Promoters</h6>
                   <input
                     type="text"
-                    name="promoters[0]"
-                    onChange={handleInputData}
-                    id=""
+                    name={`promoters[0]`}
+                    onChange={handleInputNps}
+                    placeholder="Input Nama/Jabatan"
                     className="form-control mb-2"
                   />
                   <input
                     type="text"
-                    name="promoters[1]"
-                    onChange={handleInputData}
+                    name={`promoters[1]`}
+                    onChange={handleInputNps}
                     id=""
+                    placeholder="Input Nama/Jabatan"
                     className="form-control mb-2"
                   />
                   <input
                     type="text"
-                    name="promoters[2]"
-                    onChange={handleInputData}
+                    name={`promoters[2]`}
+                    onChange={handleInputNps}
                     id=""
+                    placeholder="Input Nama/Jabatan"
                     className="form-control mb-2"
                   />
                 </div>
@@ -305,22 +391,25 @@ const CreateSecondDeals = () => {
                   <h6 className="fw-bold ms-2 mt-3">Neutrals</h6>
                   <input
                     type="text"
-                    name="neutrals[0]"
-                    onChange={handleInputData}
+                    name={`neutrals[0]`}
+                    onChange={handleInputNps}
+                    id=""
+                    placeholder="Input Nama/Jabatan"
+                    className="form-control mb-2"
+                  />
+                  <input
+                    type="text"
+                    name={`neutrals[1]`}
+                    onChange={handleInputNps}
+                    placeholder="Input Nama/Jabatan"
                     id=""
                     className="form-control mb-2"
                   />
                   <input
                     type="text"
-                    name="neutrals[1]"
-                    onChange={handleInputData}
-                    id=""
-                    className="form-control mb-2"
-                  />
-                  <input
-                    type="text"
-                    name="neutrals[2]"
-                    onChange={handleInputData}
+                    name={`neutrals[2]`}
+                    onChange={handleInputNps}
+                    placeholder="Input Nama/Jabatan"
                     id=""
                     className="form-control mb-2"
                   />
@@ -329,22 +418,25 @@ const CreateSecondDeals = () => {
                   <h6 className="fw-bold ms-2 mt-3">Detractors</h6>
                   <input
                     type="text"
-                    name="detractors[0]"
-                    onChange={handleInputData}
+                    name={`detractors[0]`}
+                    onChange={handleInputNps}
+                    placeholder="Input Nama/Jabatan"
                     id=""
                     className="form-control mb-2"
                   />
                   <input
                     type="text"
-                    name="detractors[1]"
-                    onChange={handleInputData}
+                    name={`detractors[1]`}
+                    onChange={handleInputNps}
+                    placeholder="Input Nama/Jabatan"
                     id=""
                     className="form-control mb-2"
                   />
                   <input
                     type="text"
-                    name="detractors[2]"
-                    onChange={handleInputData}
+                    name={`detractors[2]`}
+                    onChange={handleInputNps}
+                    placeholder="Input Nama/Jabatan"
                     id=""
                     className="form-control mb-2"
                   />
@@ -369,7 +461,7 @@ const CreateSecondDeals = () => {
                   <div className="col-md-6">
                     <div className="form-floating mb-3">
                       <input
-                        type="text"
+                        type="number"
                         name="jumlah_unit_mesin"
                         onChange={handleInputData}
                         className="form-control"
@@ -384,7 +476,7 @@ const CreateSecondDeals = () => {
                   <div className="col-md-6">
                     <div className="form-floating mb-3">
                       <input
-                        type="text"
+                        type="number"
                         name="tindakan_enam_bulan"
                         onChange={handleInputData}
                         className="form-control"
@@ -399,7 +491,7 @@ const CreateSecondDeals = () => {
                   <div className="col-md-6">
                     <div className="form-floating mb-3">
                       <input
-                        type="text"
+                        type="number"
                         name="jumlah_pasien_existing"
                         onChange={handleInputData}
                         className="form-control"
@@ -450,9 +542,10 @@ const CreateSecondDeals = () => {
                       <input
                         type="text"
                         name="harga_bhp_existing"
-                        onChange={handleInputData}
                         className="form-control"
                         placeholder=""
+                        value={inputValue}
+                        onChange={handleInputDataRP}
                         id=""
                       />
                       <label htmlFor="floatingInput">Harga BHP existing</label>
@@ -489,21 +582,22 @@ const CreateSecondDeals = () => {
                     <option value="no">Tidak</option>
                   </select>
                 </div>
-                <div className="mb-3">
-                  <label htmlFor="">Jumlah Sarana Unit</label>
+                <div className="form-floating mb-3">
                   <input
-                    type="text"
+                    type="number"
                     className="form-control"
                     name="jumlah_sarana_unit"
                     onChange={handleInputData}
+                    placeholder=""
                   />
+                  <label htmlFor="">Jumlah Sarana Unit</label>
                 </div>
                 <div class="alert alert-primary mt-4" role="alert">
                   <h6 style={{ fontWeight: "700" }}>New Unit</h6>
                 </div>
                 <div className="form-floating mb-3">
                   <input
-                    type="text"
+                    type="number"
                     name="jumlah_unit"
                     placeholder=""
                     onChange={handleInputData}
@@ -516,25 +610,31 @@ const CreateSecondDeals = () => {
                   <label htmlFor="" className="mb-1">
                     Sistem Kerja Sama
                   </label>
-                  <input
-                    type="text"
+                  <select
                     name="sistem_kerjasama"
                     onChange={handleInputData}
-                    className="form-control"
                     id=""
-                  />
+                    className="form-control"
+                  >
+                    <option value="">Select Chose</option>
+                    <option value="buy">Buy</option>
+                    <option value="kso">Kso</option>
+                    <option value="etc">Lainnya</option>
+                  </select>
                 </div>
                 <div className="mb-3">
                   <label htmlFor="" className="mb-1">
                     SDM
                   </label>
-                  <input
-                    type="text"
+                  <select
                     name="sdm"
-                    onChange={handleInputData}
                     className="form-control"
-                    id=""
-                  />
+                    onChange={handleInputData}
+                  >
+                    <option value="">Select Chose</option>
+                    <option value="available">Tersedia</option>
+                    <option value="not_yet_available">Belum Tersedia</option>
+                  </select>
                 </div>
                 <div className="mb-2">
                   <h6 className="ms-2 mt-3">Faskes HD 5 km sekitar New Unit</h6>
@@ -654,13 +754,28 @@ const CreateSecondDeals = () => {
                   />
                   <label htmlFor="">Jumlah mesin unit HD sekitar</label>
                 </div>
+                <div className="mb-2">
+                  <h6 className="ms-2 mt-3">Catatan</h6>
+                  <ReactQuill
+                    className="p-2"
+                    theme="snow"
+                    onChange={(value) =>
+                      handleInputData({
+                        target: {
+                          name: "another_notes",
+                          value,
+                        },
+                      })
+                    }
+                  />
+                </div>
               </>
             </Card.Body>
             <Card.Footer>
               <div className="float-end mt-2">
                 <button
                   className="btn btn-primary me-2"
-                  disabled={buttonBlocked}
+                  // disabled={buttonBlocked}
                   onClick={handleSubmit}
                 >
                   Simpan

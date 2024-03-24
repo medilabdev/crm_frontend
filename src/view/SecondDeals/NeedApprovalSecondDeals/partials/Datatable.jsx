@@ -1,14 +1,13 @@
 import React, { useEffect } from "react";
 import DataTable from "react-data-table-component";
-import DataDumy from "./dummy";
 import { ColumnsTable } from "./ColumnsTable";
 
-const DatatableNeedApproval = ({ NeedApprovalManager, NeedApprovalAccounting }) => {
-  console.log(NeedApprovalAccounting);
+const DatatableNeedApproval = ({ NeedApprovalManager }) => {
+  console.log(NeedApprovalManager);
   return (
     <div>
       <DataTable
-        // data={NeedApprovalManager}
+        data={NeedApprovalManager}
         columns={ColumnsTable}
         pagination
         paginationServer

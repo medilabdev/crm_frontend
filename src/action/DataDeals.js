@@ -1,7 +1,7 @@
 import axios, { Axios } from "axios";
 // import { useState } from "react";
 export const GET_DATA_DEALS = "GET_DATA_DEALS";
-
+export const GET_DATA_DEALS_DETAIL = "GET_DATA_DEALS_DETAIL";
 export const GetDataDeals = (
   token,
   term,
@@ -16,6 +16,7 @@ export const GetDataDeals = (
         loading: true,
         data: false,
         errorMessage: false,
+        totalRows: false,
       },
     });
     const params = {};
@@ -52,6 +53,7 @@ export const GetDataDeals = (
             loading: false,
             data: response.data.data,
             errorMessage: false,
+            totalRows: response.data.pagination.totalData,
           },
         });
       })
@@ -62,10 +64,49 @@ export const GetDataDeals = (
             loading: false,
             data: error.message,
             errorMessage: false,
+            totalRows: false,
           },
         });
       });
   };
 };
 
-
+export const GetDataDealsDetail = (uid, token) => {
+  return async (dispatch) => {
+    dispatch({
+      type: GET_DATA_DEALS_DETAIL,
+      payload: {
+        loading: true,
+        data: false,
+        errorMessage: false,
+      },
+    });
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}/v2/deals/${uid}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      dispatch({
+        type: GET_DATA_DEALS_DETAIL,
+        payload: {
+          loading: true,
+          data: response.data.data,
+          errorMessage: false,
+        },
+      });
+    } catch (error) {
+      dispatch({
+        type: GET_DATA_DEALS_DETAIL,
+        payload: {
+          loading: true,
+          data: false,
+          errorMessage: error.message || "Failed",
+        },
+      });
+    }
+  };
+};

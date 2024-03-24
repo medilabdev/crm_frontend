@@ -1,9 +1,6 @@
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faCheck,
-  faXmark,
-} from "@fortawesome/free-solid-svg-icons";
+import { faCheck, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { handleApprove, handleReject } from "./Approve";
 export const ColumnsTable = [
   {
@@ -15,6 +12,7 @@ export const ColumnsTable = [
         className="text-decoration-none"
         style={{ whiteSpace: "normal", color: "black", fontWeight: "540" }}
       >
+        {row.deal?.fqp_document?.hospital?.name ?? "-"}
       </a>
     ),
     sortable: true,
@@ -33,13 +31,18 @@ export const ColumnsTable = [
           }`}
           style={{ fontSize: "0.65rem" }}
         >
+          {row?.staging.name ?? "-"}
         </p>
       </div>
     ),
   },
   {
     name: "Owner",
-    selector: (row) => <p className="fw-semibold"></p>,
+    selector: (row) => (
+      <p className="mt-2" style={{ fontWeight: "600" }}>
+        {row.deal?.owner?.name ?? "-"}
+      </p>
+    ),
   },
   {
     name: "Action",
@@ -47,7 +50,7 @@ export const ColumnsTable = [
       <div className="action-icon">
         <button
           type="button"
-          onClick={handleApprove}
+          onClick={() => handleApprove(row.uid)}
           className="me-3 badge bg-success"
           style={{ border: "none" }}
         >
@@ -55,7 +58,7 @@ export const ColumnsTable = [
         </button>
         <button
           type="button"
-          onClick={handleReject}
+          onClick={() => handleReject(row.uid)}
           className="badge bg-danger"
           style={{ border: "none" }}
           title="delete"
