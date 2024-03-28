@@ -47,7 +47,7 @@ const DataTableFeeAction = () => {
     },
     {
       name: "Nilai Estimasi Biaya",
-      selector: (row) => row.nilai,
+      selector: (row) => `Rp. ` + row.nilai,
     },
     {
       name: "Qty",
@@ -55,7 +55,7 @@ const DataTableFeeAction = () => {
     },
     {
       name: "Total Estimasi Biaya",
-      selector: (row) => row.total,
+      selector: (row) => `Rp. ${new Intl.NumberFormat().format(row.total)}`,
     },
     {
       name: "Catatan Realisasi",

@@ -16,18 +16,37 @@ import { GetListNeedApprovalAccounting } from "../../../action/DataNeedApprovalA
 const NeedApprovalSecondDeals = () => {
   const token = localStorage.getItem("token");
   const dispatch = useDispatch();
-  const { ResultNeedManager, LoadingNeedManager, ErrorNeedManager } =
-    useSelector((state) => state.NeedApprovalManager);
-
+  const {
+    ResultNeedManager,
+    LoadingNeedManager,
+    ErrorNeedManager,
+    totalDataManager,
+  } = useSelector((state) => state.NeedApprovalManager);
   const [searchInput, setSearchInput] = useState([]);
-  
+
   const handleSearchInput = (e) => {
-    const value = e.target.value.toLowerCase()
-    setSearchInput(value)
+    if (e.key === "Enter") {
+      const value = e.target.value.toLowerCase();
+      setSearchInput(value);
+    }
+  };
+
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+  });
+  const handleChangePage = (page) => {
+    setPagination((e) => ({ ...e, page }));
+  };
+
+  const handlePagePerChange = (pageSize, page) => {
+    setPagination((prev) => ({ ...prev, pageSize, page }));
   };
   useEffect(() => {
-    dispatch(GetListNeedApprovalManager(token));
-  }, [dispatch]);
+    dispatch(GetListNeedApprovalManager(token, pagination, searchInput));
+  }, [dispatch, pagination, searchInput]);
+
+  console.log(ResultNeedManager);
   return (
     <body id="body">
       <Topbar />
@@ -73,7 +92,10 @@ const NeedApprovalSecondDeals = () => {
               <div className="col mt-4">
                 <DatatableNeedApproval
                   NeedApprovalManager={ResultNeedManager}
-                  // NeedApprovalAccounting={ResultNeedAccounting}
+                  paginationPerPage={pagination.limit}
+                  handleChangePage={handleChangePage}
+                  handlePagePerChange={handlePagePerChange}
+                  totalRows={totalDataManager}
                 />
               </div>
             </div>

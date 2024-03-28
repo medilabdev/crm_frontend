@@ -21,36 +21,37 @@ const StatusDeals = ({ show, handleClose, data, uid }) => {
     e.preventDefault();
     const formData = new FormData();
     formData.append("staging_uid", inputData.status_deals || "");
-    formData.append("_method", "put")
-    axios.post(`${process.env.REACT_APP_BACKEND_URL}/v2/deals/${uid}`, formData,{
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-    .then((res) => {
-      Swal.fire({
-        title: res.data.message,
-        text: "Successfully Created Data",
-        icon: "success",
-      }).then((res) => {
-        if (res.isConfirmed) {
-          window.location.reload()
+    formData.append("_method", "put");
+    axios
+      .post(`${process.env.REACT_APP_BACKEND_URL}/v2/deals/${uid}`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => {
+        Swal.fire({
+          title: res.data.message,
+          text: "Successfully Created Data",
+          icon: "success",
+        }).then((res) => {
+          if (res.isConfirmed) {
+            window.location.reload();
+          }
+        });
+      })
+      .catch((err) => {
+        if (err.response) {
+          Swal.fire({
+            text: err.response.data.message,
+            icon: "warning",
+          });
+        } else {
+          Swal.fire({
+            text: "Something went wrong !",
+            icon: "error",
+          });
         }
       });
-    })
-    .catch((err) => {
-      if (err.response) {
-        Swal.fire({
-          text: err.response.data.message,
-          icon: "warning",
-        });
-      } else {
-        Swal.fire({
-          text: "Something went wrong !",
-          icon: "error",
-        });
-      }
-    });
   };
   const dispatch = useDispatch();
   useEffect(() => {
@@ -74,14 +75,14 @@ const StatusDeals = ({ show, handleClose, data, uid }) => {
           >
             <option value="">Select Choose</option>
             {Array.isArray(ResultStageDeals)
-                ? ResultStageDeals.filter(
-                    (item) => item.name === "Closed Lost"
-                  ).map((item, index) => (
-                    <option key={index} value={item.uid}>
-                      {item.name}
-                    </option>
-                  ))
-                : "-"}
+              ? ResultStageDeals.filter(
+                  (item) => item.name === "Closed Lost"
+                ).map((item, index) => (
+                  <option key={index} value={item.uid}>
+                    {item.name}
+                  </option>
+                ))
+              : "-"}
           </select>
         </div>
         {inputData.status_deals === "M-s3254fdg" ? (

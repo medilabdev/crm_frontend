@@ -27,7 +27,7 @@ const SupportKerjaSama = () => {
     setData(data);
     localStorage.setItem("SupportKerjaSama", JSON.stringify(data));
   };
-
+ 
   const handleEditSupport = (    id,
     item,
     nilai_estimasi_biaya,
@@ -44,6 +44,7 @@ const SupportKerjaSama = () => {
         })
         setEditModal(true)
     }
+ 
   const customStyle = {
     headRow: {
       style: {

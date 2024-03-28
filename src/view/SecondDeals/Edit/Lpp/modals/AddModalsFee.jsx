@@ -9,6 +9,24 @@ const AddModalsFee = ({ show, handleClose }) => {
       [e.target.name]: e.target.value,
     });
   };
+  const [inputEst, setInputEst] = useState([]);
+  const handleInputDataRP = (event) => {
+    const rawValue = event.target.value;
+    const formattedValue = formatCurrency(rawValue);
+    setInputEst(formattedValue);
+  };
+
+  const formatCurrency = (value) => {
+    const sanitizedValue = value.replace(/[^\d]/g, "");
+    const formattedValue = Number(sanitizedValue).toLocaleString("id-ID");
+
+    return formattedValue;
+  };
+  const inputWithoutSeparator =
+    inputEst.length > 0 ? inputEst.replace(/\./g, "") : "";
+  const tempOne = parseFloat(inputWithoutSeparator);
+  const tempTwo = parseFloat(inputData.qty);
+  const result_estimasi_charge = tempOne * tempTwo;
   const handleSubmit = (e) => {
     e.preventDefault();
     if (Object.keys(inputData).length > 0) {
@@ -17,13 +35,27 @@ const AddModalsFee = ({ show, handleClose }) => {
       const payload = {
         id: id,
         name: inputData.name,
-        nilai: inputData.nilai,
+        nilai: inputEst,
         qty: inputData.qty,
-        total: inputData.total,
+        total: result_estimasi_charge,
         note: inputData.note,
       };
       dataExist.push(payload);
       localStorage.setItem("FeeTindakan", JSON.stringify(dataExist));
+      setInputData({
+        item: "",
+        name: "",
+        nilai: "",
+        qty: "",
+        note: "",
+      });
+
+      const valueFeeString = localStorage.getItem("valueFee");
+      let totalExistingValue = valueFeeString ? parseInt(valueFeeString) : 0;
+      totalExistingValue += result_estimasi_charge;
+      localStorage.setItem("valueFee", totalExistingValue.toString());
+
+      setInputEst(0);
       handleClose();
     }
   };
@@ -46,10 +78,11 @@ const AddModalsFee = ({ show, handleClose }) => {
         </div>
         <div class="form-floating mb-3">
           <input
-            type="number"
+            type="text"
             class="form-control"
             name="nilai"
-            onChange={handleInput}
+            value={inputEst}
+            onChange={handleInputDataRP}
             id="floatingInput"
             placeholder="name@example.com"
           />
@@ -71,7 +104,7 @@ const AddModalsFee = ({ show, handleClose }) => {
             type="number"
             class="form-control"
             name="total"
-            onChange={handleInput}
+            value={result_estimasi_charge}
             id="floatingInput"
             placeholder="name@example.com"
           />

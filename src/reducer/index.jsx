@@ -7,6 +7,9 @@ import NeedApprovalManager from "./dealsV2/DataNeedApprovalManager";
 import NeedApprovalAccounting from "./dealsV2/DataNeedApprovalAccounting";
 import DataStage from "./dealsV2/DealStage";
 import DataSideBar from "./Properties/Sidebar";
+import DataFaskes from "./Properties/Faskes";
+import BpjsRegional from "./Properties/RegionalBpjs";
+import CategoryType from "./Properties/CategoryType";
 
 export default combineReducers({
     FormCompany,
@@ -16,5 +19,8 @@ export default combineReducers({
     NeedApprovalManager,
     NeedApprovalAccounting,
     DataStage,
-    DataSideBar
+    DataSideBar,
+    DataFaskes,
+    BpjsRegional,
+    CategoryType
 });

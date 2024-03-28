@@ -2,8 +2,13 @@ import React, { useEffect } from "react";
 import DataTable from "react-data-table-component";
 import { ColumnsTable } from "./ColumnsTable";
 
-const DatatableNeedApproval = ({ NeedApprovalManager }) => {
-  console.log(NeedApprovalManager);
+const DatatableNeedApproval = ({
+  NeedApprovalManager,
+  paginationPerPage,
+  handleChangePage,
+  handlePagePerChange,
+  totalRows,
+}) => {
   return (
     <div>
       <DataTable
@@ -12,6 +17,13 @@ const DatatableNeedApproval = ({ NeedApprovalManager }) => {
         pagination
         paginationServer
         selectableRows
+        paginationPerPage={paginationPerPage}
+        onChangePage={handleChangePage}
+        onChangeRowsPerPage={handlePagePerChange}
+        paginationTotalRows={totalRows}
+        paginationComponentOptions={{
+          noRowsPerPage: true,
+        }}
       />
     </div>
   );

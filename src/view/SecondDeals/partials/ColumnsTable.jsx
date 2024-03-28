@@ -31,9 +31,9 @@ export const ColumnsTable = [
       <div>
         <p
           className={`btn mt-3 ${
-            row.stage === "Closed Won"
+            row.staging?.name === "Closed Won" || row.staging?.name === "Implementation"
               ? "btn-success"
-              : row.stage === "Closed Lost"
+              : row.staging?.name === "Closed Lost"
                 ? "btn-danger"
                 : "btn-primary"
           }`}
@@ -48,6 +48,7 @@ export const ColumnsTable = [
     name: "Owner",
     selector: (row) => (
       <p className="mt-2" style={{ fontWeight: "600" }}>
+        {console.log(row)}
         {row.owner?.name ?? "-"}
       </p>
     ),

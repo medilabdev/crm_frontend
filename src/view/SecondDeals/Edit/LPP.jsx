@@ -13,9 +13,9 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import ShowLPP from "./ShowLPP";
-import InputLpp from "./ShowLPP/InputLpp";
+import InputLpp from "./Lpp/InputLpp";
 
-const LPP = ({ userUid }) => {
+const LPP = ({ userUid, data, listCompany, uidDeals }) => {
   const [showLpp, setShowLpp] = useState(true);
   const uid = localStorage.getItem("uid");
   const handleShowLpp = () => setShowLpp(!showLpp);
@@ -40,7 +40,13 @@ const LPP = ({ userUid }) => {
               </div>
             </div>
           </Card.Header>
-          {userUid !== uid ? <ShowLPP /> : showLpp ? <InputLpp /> : <ShowLPP />}
+          {userUid !== uid ? (
+            <ShowLPP />
+          ) : showLpp ? (
+            <InputLpp data={data} listCompany={listCompany} uidDeals={uidDeals}/>
+          ) : (
+            <ShowLPP data={data} />
+          )}
         </Card>
       </div>
     </div>

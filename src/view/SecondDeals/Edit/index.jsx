@@ -14,14 +14,20 @@ import { useDispatch } from "react-redux";
 import { GetDataDealsDetail } from "../../../action/DataDeals";
 import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { getListCompany } from "../../../action/FormCompany";
+import InputRoi from "./Lpp/InputRoi";
+import FormPks from "./FormPks";
+import HistoryDeals from "./ShowLPP/history";
 
 const EditDataSecondDeals = () => {
   const token = localStorage.getItem("token");
   const { detailDataDeals } = useSelector((state) => state.DataDeals);
   const stage = detailDataDeals?.staging?.name;
-  const [ShowFQP, setShowFQP] = useState(stage === "leads" ? true : false);
-  const [ShowLPP, setShowLPP] = useState(stage === "Approaching" ? true : false);
-  const [ShowFDC, setShowFDC] = useState(stage === "Decide" ? true : false);
+  const [ShowFQP, setShowFQP] = useState(true);
+  const [ShowLPP, setShowLPP] = useState(false);
+  const [ShowFDC, setShowFDC] = useState(false);
+  const [showFormRoi, setShowFormRoi] = useState(false);
+  const [showFormPks, setShowFormPks] = useState(false);
   const handleShowFQP = () => {
     setShowFQP(!ShowFQP);
   };
@@ -33,12 +39,21 @@ const EditDataSecondDeals = () => {
   const handleShowFDC = () => {
     setShowFDC(!ShowFDC);
   };
+  const handleShowRoi = () => {
+    setShowFormRoi(!showFormRoi);
+  };
+  const handleShowPks = () => {
+    setShowFormPks(!showFormPks);
+  };
   const { uid } = useParams();
   const dispatch = useDispatch();
+  const { listResult } = useSelector((state) => state.FormCompany);
 
   useEffect(() => {
     dispatch(GetDataDealsDetail(uid, token));
+    dispatch(getListCompany(token));
   }, [dispatch]);
+  console.log(detailDataDeals);
   return (
     <body id="body">
       <Topbar />
@@ -55,18 +70,43 @@ const EditDataSecondDeals = () => {
             ShowFDC={ShowFDC}
             data={detailDataDeals}
             uid={uid}
+            handleShowRoi={handleShowRoi}
+            showFormRoi={showFormRoi}
+            handleShowPks={handleShowPks}
+            showFormPks={showFormPks}
           />
           <div className="row mt-3">
-            {ShowFQP ? (
-              <FQP
+            {showFormPks ? <FormPks data={detailDataDeals} /> : ""}
+            {showFormRoi ? <InputRoi data={detailDataDeals} /> : ""}
+            {ShowFDC ? (
+              <FDC
                 userUid={detailDataDeals.owner_user_uid}
-                dataFQP={detailDataDeals?.fqp_document}
+                data={detailDataDeals}
               />
             ) : (
               ""
             )}
-            {ShowLPP ? <LPP userUid={detailDataDeals.owner_user_uid} /> : ""}
-            {ShowFDC ? <FDC userUid={detailDataDeals.owner_user_uid} /> : ""}
+            {ShowLPP ? (
+              <LPP
+                userUid={detailDataDeals.owner_user_uid}
+                data={detailDataDeals}
+                listCompany={listResult}
+                uidDeals={detailDataDeals.uid}
+              />
+            ) : (
+              ""
+            )}
+            {ShowFQP ? (
+              <FQP
+                userUid={detailDataDeals.owner_user_uid}
+                dataFQP={detailDataDeals?.fqp_document}
+                listCompany={listResult}
+                data={detailDataDeals}
+              />
+            ) : (
+              ""
+            )}
+            <HistoryDeals data={detailDataDeals.history} />
           </div>
         </div>
       </Main>

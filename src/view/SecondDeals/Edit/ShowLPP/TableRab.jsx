@@ -22,7 +22,14 @@ const TableRab = () => {
       },
     },
   };
-
+  const allData = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.startsWith("RAB")) {
+      const data = JSON.parse(localStorage.getItem(key));
+      allData.push(data);
+    }
+  }
   const ColumnsTable = [
     {
       name: "Item",
@@ -30,7 +37,8 @@ const TableRab = () => {
     },
     {
       name: "Nilai Estimasi Biaya",
-      selector: (row) => row.nilai_estimasi,
+      selector: (row) =>
+        `Rp. ${new Intl.NumberFormat().format(row.nilai_estimasi_biaya)}`,
     },
     {
       name: "Qty",
@@ -38,18 +46,19 @@ const TableRab = () => {
     },
     {
       name: "Total Estimasi Biaya",
-      selector: (row) => row.total_estimasi,
+      selector: (row) =>
+        `Rp. ${new Intl.NumberFormat().format(row.total_estimasi_biaya)}`,
     },
     {
       name: "Catatan Realisasi",
-      selector: (row) => row.catatan,
+      selector: (row) => row.note,
     },
   ];
   return (
     <div>
       <DataTable
         columns={ColumnsTable}
-        data={dummy}
+        data={allData[0]}
         customStyles={customStyle}
         dense
       />

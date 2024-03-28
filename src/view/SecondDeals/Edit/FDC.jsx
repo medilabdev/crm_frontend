@@ -9,7 +9,7 @@ import { Card } from "react-bootstrap";
 import ShowFDC from "./ShowFDC";
 import InputFDC from "./ShowFDC/InputFDC";
 
-const FDC = ({ userUid}) => {
+const FDC = ({ userUid, data}) => {
   const [showFDC, setShowFDC] = useState(true);
   const handleShowFDC = () => setShowFDC(!showFDC);
   const uid = localStorage.getItem("uid")
@@ -29,7 +29,7 @@ const FDC = ({ userUid}) => {
         </Card.Header>
         {userUid !== uid ? <ShowFDC /> :
         showFDC ? (
-          <InputFDC />
+          <InputFDC data={data} />
         ) : (
           <ShowFDC />
         )}

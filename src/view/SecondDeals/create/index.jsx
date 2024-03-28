@@ -32,8 +32,8 @@ const CreateSecondDeals = () => {
   );
   const selectCompany = () => {
     const result = [];
-    if (Array.isArray(listResult)) {
-      listResult.map((data) => {
+    if (Array?.isArray(listResult)) {
+      listResult?.map((data) => {
         const finalResult = {
           label: `${data.name}`,
           value: data.uid,
@@ -51,11 +51,7 @@ const CreateSecondDeals = () => {
   }, [dispatch]);
 
   const [inputValue, setInputValue] = useState("");
-  const [inputNps, setInputNps] = useState({
-    promoters: ["", "", ""],
-    neutrals: ["", "", ""],
-    detractors: ["", "", ""],
-  });
+  const [inputNps, setInputNps] = useState({});
   const handleInputDataRP = (event) => {
     const rawValue = event.target.value;
     const formattedValue = formatCurrency(rawValue);
@@ -68,13 +64,14 @@ const CreateSecondDeals = () => {
 
     return formattedValue;
   };
+
   const handleInputNps = (e) => {
     const { name, value } = e.target;
     const [field, index] = name.split("[");
     const fieldArray = field.slice(0, -1);
     const updatedInputData = { ...inputNps };
     if (!updatedInputData[fieldArray]) {
-      updatedInputData[fieldArray] = ["", "", ""];
+      updatedInputData[fieldArray] = [null, null, null];
     }
     updatedInputData[fieldArray][index.slice(0, -1)] = value;
     setInputNps(updatedInputData);
@@ -99,9 +96,13 @@ const CreateSecondDeals = () => {
           didOpen: () => {
             Swal.showLoading();
             const timer = Swal.getPopup().querySelector("b");
-            timerInterval = setInterval(() => {
-              timer.textContent = `${Swal.getTimerLeft()}`;
-            }, 100);
+            if (timer) {
+              timerInterval = setInterval(() => {
+                if (timer.textContent) {
+                  timer.textContent = `${Swal.getTimerLeft()}`;
+                }
+              }, 100);
+            }
           },
           willClose: () => {
             clearInterval(timerInterval);
@@ -130,15 +131,33 @@ const CreateSecondDeals = () => {
           "procurement_or_management_contact_person",
           inputData.no_telp_pengadaan_manajemen || ""
         );
-        formData.append(`promoters[0]`, inputNps.promoter[0] || "");
-        formData.append(`promoters[1]`, inputNps.promoter[1] || "");
-        formData.append(`promoters[2]`, inputNps.promoter[2] || "");
-        formData.append("neutrals[0]", inputNps.neutral[0] || "");
-        formData.append("neutrals[1]", inputNps.neutral[1] || "");
-        formData.append("neutrals[2]", inputNps.neutral[2] || "");
-        formData.append("detcractors[0]", inputNps.detractor[0] || "");
-        formData.append("detcractors[1]", inputNps.detractor[1] || "");
-        formData.append("detcractors[2]", inputNps.detractor[2] || "");
+        if (
+          (inputNps.promoter && inputNps.promoter[0]) ||
+          (inputNps.promoter && inputNps.promoter[1]) ||
+          (inputNps.promoter && inputNps.promoter[2])
+        ) {
+          formData.append(`promoters[0]`, inputNps?.promoter[0] || "");
+          formData.append(`promoters[1]`, inputNps?.promoter[1] || "");
+          formData.append(`promoters[2]`, inputNps?.promoter[2] || "");
+        }
+        if (
+          (inputNps.neutral && inputNps.neutral[0]) ||
+          (inputNps.neutral && inputNps.neutral[1]) ||
+          (inputNps.neutral && inputNps.neutral[2])
+        ) {
+          formData.append("neutrals[0]", inputNps?.neutral[0] || "");
+          formData.append("neutrals[1]", inputNps?.neutral[1] || "");
+          formData.append("neutrals[2]", inputNps?.neutral[2] || "");
+        }
+        if (
+          (inputNps.detractor && inputNps.detractor[0]) ||
+          (inputNps.detractor && inputNps.detractor[1]) ||
+          (inputNps.detractor && inputNps.detractor[2])
+        ) {
+          formData.append("detcractors[0]", inputNps?.detractor[0] || "");
+          formData.append("detcractors[1]", inputNps?.detractor[1] || "");
+          formData.append("detcractors[2]", inputNps?.detractor[2] || "");
+        }
         formData.append("existing_vendor", inputData.existing_vendor || "");
         formData.append(
           "number_of_machine_unit",
@@ -157,7 +176,10 @@ const CreateSecondDeals = () => {
           inputData.masa_kontrak_berakhir || ""
         );
         formData.append("status_contract_unit", inputData.is_replace || "");
-        formData.append("existing_bhp_price", inputValue || "");
+        if (inputValue) {
+          const inputValueWithoutDot = inputValue.replace(/\./g, "");
+          formData.append("existing_bhp_price", inputValueWithoutDot || "");
+        }
         formData.append(
           "expired_hd_permit_period",
           inputData.masa_berlaku_izin || ""
@@ -195,10 +217,18 @@ const CreateSecondDeals = () => {
           "access_to_transportation",
           inputData.akses_transportasi || ""
         );
+        formData.append(
+          "hd_unit_count_distance_from_faskes",
+          inputData.jumlah_unit_hd_kurang_dua_pulu_km || ""
+        );
+        formData.append(
+          "hd_machine_unit_count",
+          inputData.jumlah_mesin_unit_hd || ""
+        );
         formData.append("another_notes", inputData.another_notes || "");
-        for (const pair of formData.entries()) {
-          console.log(pair[0] + ": " + pair[1]);
-        }
+        // for (const pair of formData.entries()) {
+        //   console.log(pair[0] + ": " + pair[1]);
+        // }
         setButtonBlocked(true);
         const response = await axios.post(
           `${process.env.REACT_APP_BACKEND_URL}/v2/deals`,

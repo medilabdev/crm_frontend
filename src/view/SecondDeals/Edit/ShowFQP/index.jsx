@@ -2,7 +2,6 @@ import React from "react";
 import { Card } from "react-bootstrap";
 
 const ShowFQP = ({ data }) => {
-  console.log(data);
   return (
     <Card.Body>
       <div class="fw-bold mb-3">
@@ -246,7 +245,7 @@ const ShowFQP = ({ data }) => {
           <td>
             {" "}
             {data && data.number_of_unit_facilities
-              ? data.expired_hd_permit_period
+              ? data.number_of_unit_facilities
               : "-"}
           </td>
         </tr>
@@ -394,7 +393,7 @@ const ShowFQP = ({ data }) => {
             Jumlah unit HD kurang dari 20 km dari faskes
           </td>
           <td className="px-1">:</td>
-          <td>-</td>
+          <td>{data && data.hd_unit_count_distance_from_faskes ? data.hd_unit_count_distance_from_faskes : "-"}</td>
         </tr>
 
         <tr className="fw-medium">
@@ -402,7 +401,7 @@ const ShowFQP = ({ data }) => {
             Jumlah mesin unit HD sekitar
           </td>
           <td className="px-1">:</td>
-          <td>-</td>
+          <td>{data && data.hd_machine_unit_count ? data.hd_machine_unit_count : "-"}</td>
         </tr>
       </table>
       <div class="fw-bold mb-3">

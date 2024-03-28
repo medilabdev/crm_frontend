@@ -20,14 +20,18 @@ const TopButton = ({
   ShowFDC,
   data,
   uid,
+  handleShowRoi,
+  showFormRoi,
+  handleShowPks,
+  showFormPks,
 }) => {
+  console.log(data);
   const [isVisible, setIsVisible] = useState(false);
   const [buttonStatus, setButtonStatus] = useState(false);
   const handleShowModalStatus = () => setButtonStatus(true);
   const handleCloseModalStatus = () => setButtonStatus(false);
   const position = localStorage.getItem("position");
   const stage = data.staging?.name;
-
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 100) {
@@ -41,71 +45,146 @@ const TopButton = ({
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
-
-  const handleApprove = (e) => {
+  const needApprovalDeal = data?.need_approval?.uid;
+  const handleApprove = async (e) => {
     e.preventDefault();
-    Swal.fire({
-      title: "Approved!",
-      text: "Apakah kamu yakin untuk approve ini?",
-      icon: "success",
-      showCancelButton: true,
-      confirmButtonText: "Approve",
-      denyButtonText: `Cancel`,
-    }).then((res) => {
-      if (res.isConfirmed) {
+    let timerInterval;
+    try {
+      const confirmationResult = await Swal.fire({
+        title: "Apakah Kamu yakin untuk Approve?",
+        icon: "success",
+        showCancelButton: true,
+        confirmButtonText: "Approve",
+        cancelButtonText: "Close",
+      });
+      if (confirmationResult.isConfirmed) {
+        Swal.fire({
+          title: "Loading...",
+          html: "Tolong Tunggu <b></b> Beberapa Detik.",
+          timer: 2500,
+          timerProgressBar: true,
+          didOpen: () => {
+            Swal.showLoading();
+            const timer = Swal.getPopup().querySelector("b");
+            timerInterval = setInterval(() => {
+              timer.textContent = `${Swal.getTimerLeft()}`;
+            }, 100);
+          },
+          willClose: () => {
+            clearInterval(timerInterval);
+          },
+        });
         const formData = new FormData();
-        formData.append("temporary_deals_uid[0]", uid);
+        formData.append("temporary_deals_uid[0]", needApprovalDeal);
         formData.append("_method", "put");
-        axios
-          .post(
-            `${process.env.REACT_APP_BACKEND_URL}/v2/deals/accepted/manager`,
-            formData,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          )
-          .then((res) => {
-            Swal.fire({
-              title: res.data.message,
-              text: "Successfully delete deals",
-              icon: "success",
-            }).then((res) => {
-              if (res.isConfirmed) {
-                window.location.reload();
-              }
-            });
-          })
-          .catch((err) => {
-            Swal.fire({
-              title: "Failed Accepted",
-              iconL: "warning",
-            });
-          });
-      }
-    });
-  };
 
-  const handleReject = async (e) => {
-    const { value: text } = await Swal.fire({
-      input: "textarea",
-      inputLabel: "<b>Alasan Reject</b>",
-      inputPlaceholder: "Type your message here...",
-      inputAttributes: {
-        "aria-label": "Type your message here",
-      },
-      showCancelButton: true,
-    });
-    if (text) {
-      Swal.fire(text);
+        const response = await axios.post(
+          `${process.env.REACT_APP_BACKEND_URL}/v2/deals/accepted/manager`,
+          formData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        Swal.close();
+        await Swal.fire({
+          title: response.data.message,
+          text: "Approval Successfully",
+          icon: "success",
+        });
+        window.location.reload();
+      }
+    } catch (error) {
+      Swal.fire({
+        title: "Error!",
+        text: "Something went wrong. Please try again later.",
+        icon: "error",
+      });
     }
   };
 
+  const handleReject = async (e) => {
+    let timerInterval;
+    try {
+      const { value: text, isConfirmed } = await Swal.fire({
+        input: "textarea",
+        inputLabel: "Alasan Reject",
+        inputPlaceholder: "Type your message here...",
+        inputAttributes: {
+          "aria-label": "Type your message here",
+        },
+        showCancelButton: true,
+      });
+      if (isConfirmed) {
+        Swal.fire({
+          title: "Loading...",
+          html: "Tolong Tunggu <b></b> Beberapa Detik.",
+          timer: 3000,
+          timerProgressBar: true,
+          didOpen: () => {
+            Swal.showLoading();
+            const timer = Swal.getPopup().querySelector("b");
+            timerInterval = setInterval(() => {
+              timer.textContent = `${Swal.getTimerLeft()}`;
+            }, 100);
+          },
+          willClose: () => {
+            clearInterval(timerInterval);
+          },
+        });
+        const formData = new FormData();
+        formData.append("notes", text);
+        formData.append("temporary_deals_uid[0]", needApprovalDeal);
+        formData.append("_method", "put");
+        const response = await axios.post(
+          `${process.env.REACT_APP_BACKEND_URL}/v2/deals/rejected/manager`,
+          formData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        Swal.close();
+        await Swal.fire({
+          title: response.data.message,
+          icon: "success",
+        });
+        window.location.reload();
+      }
+    } catch (error) {
+      console.log("error", error);
+      Swal.fire({
+        title: "Error!",
+        text: "Something went wrong. Please try again later.",
+        icon: "error",
+      });
+    }
+  };
+  const uidPerson = localStorage.getItem("uid");
+  const ownerUserUidDeals = data.owner_user_uid;
+  const statusDeals = data?.staging?.name;
+  const handleReffresh = () => {
+    window.location.reload();
+  };
   return (
     <div className="row">
       <div className="col mt-2">
-        <button className="btn btn-primary" onClick={handleShowModalStatus}>
+        <button
+          className={`btn ${
+            statusDeals === "Closed Won" || statusDeals === "Implementation"
+              ? "btn-success"
+              : statusDeals === "Closed Lost"
+                ? "btn-danger"
+                : "btn-primary"
+          }`}
+          onClick={
+            uidPerson === ownerUserUidDeals
+              ? handleShowModalStatus
+              : handleReffresh
+          }
+        >
           <span className="fs-6 me-2">Status:</span>
           <span className="fw-semibold fs-6">{data?.staging?.name}</span>
         </button>
@@ -117,13 +196,61 @@ const TopButton = ({
         />
 
         <div className="d-flex float-end">
+          {((position === "pRGYXVKdzCPoQ8" ||
+            position === "_dLjLFdH-Nw8vg8U" ||
+            position === "pRGYXVKdzCPoQ1") &&
+            stage !== "leads" &&
+            stage !== "Approaching" &&
+            stage !== "Decide") ||
+          (uidPerson === ownerUserUidDeals &&
+            stage !== "leads" &&
+            stage !== "Approaching" &&
+            stage !== "Decide") ? (
+            <button
+              className={`btn ${
+                showFormPks ? "btn-secondary" : "btn-success"
+              } text-white me-2`}
+              style={{ fontSize: "0.85rem", fontWeight: "600" }}
+              onClick={handleShowPks}
+            >
+              <FontAwesomeIcon
+                icon={showFormPks ? faEyeSlash : faEye}
+                className="me-2"
+              />
+              {uidPerson === ownerUserUidDeals ? "Upload PKS" : "PKS"}
+            </button>
+          ) : (
+            ""
+          )}
+          {position === "pRGYXVKdzCPoQ8" &&
+          stage !== "leads" &&
+          stage !== "Approaching" ? (
+            <button
+              className={`btn ${
+                showFormRoi ? "btn-secondary" : "btn-success"
+              } me-2`}
+              style={{ fontSize: "0.85rem", fontWeight: "600" }}
+              onClick={handleShowRoi}
+            >
+              <FontAwesomeIcon
+                icon={showFormRoi ? faEyeSlash : faEye}
+                className="me-2"
+              />
+              Upload ROI
+            </button>
+          ) : (
+            ""
+          )}
           {position === "pRGYXVKdzCPoQ8" ||
           position === "pRGYXVKdzCPoQ1" ||
           position === "_dLjLFdH-Nw8vg8U" ? (
             <>
               <button
                 className="btn btn-success me-2"
-                style={{ fontSize: "0.85rem", fontWeight: "600" }}
+                style={{
+                  fontSize: "0.85rem",
+                  fontWeight: "600",
+                }}
                 onClick={handleApprove}
               >
                 Approve
@@ -137,7 +264,7 @@ const TopButton = ({
               </button>
             </>
           ) : (
-            "- "
+            ""
           )}
           <a
             id={isVisible ? `floatingButtonFQP` : ""}
