@@ -7,7 +7,8 @@ const DatatableDealSecond = ({
   paginationPerPage,
   handleChangePage,
   handlePagePerChange,
-  totalRows
+  totalRows,
+  pending,
 }) => {
   return (
     <div>
@@ -25,6 +26,7 @@ const DatatableDealSecond = ({
         paginationComponentOptions={{
           noRowsPerPage: true,
         }}
+        progressPending={pending}
       />
     </div>
   );

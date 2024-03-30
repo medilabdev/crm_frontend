@@ -23,7 +23,7 @@ const NeedApprovalSecondDeals = () => {
     totalDataManager,
   } = useSelector((state) => state.NeedApprovalManager);
   const [searchInput, setSearchInput] = useState([]);
-
+  const [pending, setPending] = useState(true);
   const handleSearchInput = (e) => {
     if (e.key === "Enter") {
       const value = e.target.value.toLowerCase();
@@ -44,6 +44,10 @@ const NeedApprovalSecondDeals = () => {
   };
   useEffect(() => {
     dispatch(GetListNeedApprovalManager(token, pagination, searchInput));
+    const timeoutId = setTimeout(() => {
+      setPending(false);
+    }, 1040);
+    return () => clearTimeout(timeoutId);
   }, [dispatch, pagination, searchInput]);
 
   return (
@@ -95,6 +99,7 @@ const NeedApprovalSecondDeals = () => {
                   handleChangePage={handleChangePage}
                   handlePagePerChange={handlePagePerChange}
                   totalRows={totalDataManager}
+                  pending={pending}
                 />
               </div>
             </div>

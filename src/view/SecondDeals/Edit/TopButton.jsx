@@ -25,7 +25,6 @@ const TopButton = ({
   handleShowPks,
   showFormPks,
 }) => {
-  console.log(data);
   const [isVisible, setIsVisible] = useState(false);
   const [buttonStatus, setButtonStatus] = useState(false);
   const handleShowModalStatus = () => setButtonStatus(true);
@@ -244,27 +243,29 @@ const TopButton = ({
           {position === "pRGYXVKdzCPoQ8" ||
           position === "pRGYXVKdzCPoQ1" ||
           position === "_dLjLFdH-Nw8vg8U" ? (
-            data?.need_approval?.manager_approval == 0 ?   
-            <>
-              <button
-                className="btn btn-success me-2"
-                style={{
-                  fontSize: "0.85rem",
-                  fontWeight: "600",
-                }}
-                onClick={handleApprove}
-              >
-                Approve
-              </button>
-              <button
-                className="btn btn-danger me-2"
-                style={{ fontSize: "0.85rem", fontWeight: "600" }}
-                onClick={handleReject}
-              >
-                Reject
-              </button>
-            </>
-              : "" 
+            data?.need_approval?.manager_approval == 0 ? (
+              <>
+                <button
+                  className="btn btn-success me-2"
+                  style={{
+                    fontSize: "0.85rem",
+                    fontWeight: "600",
+                  }}
+                  onClick={handleApprove}
+                >
+                  Approve
+                </button>
+                <button
+                  className="btn btn-danger me-2"
+                  style={{ fontSize: "0.85rem", fontWeight: "600" }}
+                  onClick={handleReject}
+                >
+                  Reject
+                </button>
+              </>
+            ) : (
+              ""
+            )
           ) : (
             ""
           )}

@@ -1,8 +1,8 @@
 import axios from "axios";
 export const GET_LIST_CONTACT = "GET_LIST_CONTACT"
 
-export const getListContact = (token) => {
-    return (dispatch) =>{
+export const getListContact = (token, retryCount = 0) => {
+    return async (dispatch) =>{
         dispatch({
             type: GET_LIST_CONTACT,
             payload: {
@@ -11,12 +11,12 @@ export const getListContact = (token) => {
               errorMessage: false,
             },
           });
-          axios.get(`${process.env.REACT_APP_BACKEND_URL}/contacts/form/select`,{
-            headers:{
-                Authorization: `Bearer ${token}`
-            }
-          })
-          .then((response) => {
+          try {
+            const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/contacts/form/select`,{
+              headers:{
+                  Authorization: `Bearer ${token}`
+              }
+            }) 
             dispatch({
               type: GET_LIST_CONTACT,
               payload: {
@@ -25,8 +25,29 @@ export const getListContact = (token) => {
                 errorMessage: false,
               },
             });
-          })
-          .catch((error) => {
+          } catch (error) {
+            if (error.response) {
+              if (error.response.status === 401 &&
+                error.response.data.message === "Unauthenticated.") {
+                localStorage.clear();
+                window.location.href = "/login";
+              } else if (error.response.status === 429) {
+                const maxRetries = 3;
+                if (retryCount < maxRetries) {
+                  setTimeout(() => {
+                    dispatch(getListContact(token, retryCount + 1));
+                  }, 2000);
+                } else {
+                  console.error(
+                    "Max retry attempts reached. Unable to complete the request."
+                  );
+                }
+              } else {
+                console.error("Unhandled error:", error);
+              }
+            } else {
+              console.error("Network error:", error);
+            }
             dispatch({
               type: GET_LIST_CONTACT,
               payload: {
@@ -35,6 +56,6 @@ export const getListContact = (token) => {
                 errorMessage: false,
               },
             });
-          });
+          }
     }
 }

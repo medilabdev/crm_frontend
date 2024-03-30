@@ -12,15 +12,13 @@ const FilterTable = ({
   setInputStage,
   stage,
 }) => {
-  const token = localStorage.getItem("token");
-  const dispatch = useDispatch();
   const { listResultOwner} = useSelector(
     (state) => state.SelectOwner
   );
   const selectOwner = () => {
     const result = [];
     if (Array.isArray(listResultOwner)) {
-      listResultOwner.map((data) => {
+      listResultOwner.forEach((data) => {
         const finalResult = {
           label: `${data.name}`,
           value: data.uid,
@@ -28,10 +26,12 @@ const FilterTable = ({
         result.push(finalResult);
       });
     } else {
-      console.error("listResult is not an array or is not yet initialized.");
+      console.error("listResultOwner is not an array or is not yet initialized.");
     }
+  
     return result;
   };
+  
   const selectStage = () => {
     const result = [];
     if (Array.isArray(stage)) {
@@ -47,9 +47,7 @@ const FilterTable = ({
     }
     return result;
   };
-  useEffect(() => {
-    dispatch(getListOwner(token));
-  }, [dispatch]);
+
   return (
     <form onSubmit="">
       <div className="container">

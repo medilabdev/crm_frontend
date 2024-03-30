@@ -21,13 +21,16 @@ import axios from "axios";
 
 const InputLpp = ({ data, listCompany, uidDeals }) => {
   const uidPerson = localStorage.getItem("uid");
-  const [jenisKerjasama, setJenisKerjaSama] = useState();
-  const [Rab, setRab] = useState();
-  const [feeAction, setFeeAction] = useState();
-  const [supportKerjaSama, setSupportKerjaSama] = useState();
   const [inputData, setInputData] = useState(data?.lpp_document);
+  const [jenisKerjasama, setJenisKerjaSama] = useState();
+  const [Rab, setRab] = useState(inputData.is_rab || "");
+  const [feeAction, setFeeAction] = useState(inputData.is_fee || "");
+  const [supportKerjaSama, setSupportKerjaSama] = useState(
+    inputData.is_support || ""
+  );
+
   const [showOverlay, setShowOverlay] = useState(false);
-  const [priceFormat, setPriceFormat] = useState("");
+  const [priceFormat, setPriceFormat] = useState(inputData.price || "");
   const handleInputDataRP = (event) => {
     const rawValue = event.target.value;
     const formattedValue = formatCurrency(rawValue);
@@ -305,32 +308,11 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
       }
     }
   };
-  const [dataRab, setDataRab] = useState([]);
-  const [totalRab, setTotalRab] = useState(0);
-  useEffect(() => {
-    const rabFromLocalStorage = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key.startsWith("RAB")) {
-        const data = JSON.parse(localStorage.getItem(key));
-        rabFromLocalStorage.push(data);
-      }
-    }
-    setDataRab(rabFromLocalStorage);
-  }, [localStorage]); // useEffect akan dijalankan ketika localStorage berubah
+  // useEffect akan dijalankan ketika localStorage berubah
 
-  useEffect(() => {
-    let totalPrice = 0;
-    if (dataRab.length > 0) {
-      dataRab.forEach((data) => {
-        totalPrice += data.reduce(
-          (subtotal, item) => subtotal + item.total_estimasi_biaya,
-          0
-        );
-      });
-    }
-    setTotalRab(totalPrice);
-  }, [dataRab]);
+  const handelUpdate = async(e) => {
+    e.preventDefault()
+  } 
   return (
     <Card.Body>
       <div class="alert alert-primary mt-2" role="alert">
@@ -417,6 +399,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
               <input
                 type="number"
                 name="revenue_sharing_iss"
+                value={inputData.revenue_sharing_iss || ""}
                 onChange={handleInputData}
                 id=""
                 className="form-control"
@@ -430,6 +413,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
               <input
                 type="number"
                 name="revenue_sharing_customer"
+                value={inputData.revenue_sharing_customer || ""}
                 onChange={handleInputData}
                 placeholder="%"
                 id=""
@@ -446,6 +430,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
           </label>
           <select
             name="sell_disconect"
+            value={inputData.sell_disconect || ""}
             id=""
             onChange={handleInputData}
             className="form-select"
@@ -462,6 +447,9 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
         <Select
           options={SelectCategory()}
           placeholder="Select Status"
+          value={SelectCategory().find(
+            (e) => e.value === inputData.category_type_uid || ""
+          )}
           onChange={(e) =>
             setInputData({ ...inputData, category_type_uid: e.value })
           }
@@ -474,6 +462,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
         <input
           type="text"
           name="collaboration_period"
+          value={inputData.collaboration_period || ""}
           id=""
           onChange={handleInputData}
           className="form-control"
@@ -520,6 +509,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
         </label>
         <select
           name="shipping_cost"
+          value={inputData.shipping_cost || ""}
           onChange={handleInputData}
           id=""
           className="form-select"
@@ -536,6 +526,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
         <input
           type="number"
           name="ro"
+          value={inputData.ro || ""}
           id=""
           onChange={handleInputData}
           className="form-control"
@@ -549,6 +540,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
             <input
               type="number"
               name="operate_mkhd_first_qty"
+              value={inputData.operate_mkhd_first_qty || ""}
               onChange={handleInputData}
               id=""
               className="form-control"
@@ -562,6 +554,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
             <input
               type="number"
               name="operate_mkhd_second_qty"
+              value={inputData.operate_mkhd_second_qty || ""}
               onChange={handleInputData}
               id=""
               className="form-control"
@@ -577,6 +570,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
             <input
               type="number"
               name="backup_mkhd_first_qty"
+              value={inputData.backup_mkhd_first_qty || ""}
               onChange={handleInputData}
               id=""
               className="form-control"
@@ -590,6 +584,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
             <input
               type="number"
               name="backup_mkhd_second_qty"
+              value={inputData.backup_mkhd_second_qty || ""}
               onChange={handleInputData}
               id=""
               className="form-control"
@@ -617,6 +612,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
             <input
               type="number"
               name="total_mesin_qty"
+              value={inputData.total_mesin_qty || ""}
               id=""
               onChange={handleInputData}
               className="form-control"
@@ -631,6 +627,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
             <input
               type="date"
               name="date_first_delivery"
+              value={inputData.date_first_delivery || ""}
               onChange={handleInputData}
               id=""
               className="form-control"
@@ -642,6 +639,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
             <input
               type="number"
               name="delivery_mkhd_first_qty"
+              value={inputData.delivery_mkhd_first_qty || ""}
               onChange={handleInputData}
               id=""
               className="form-control"
@@ -655,6 +653,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
             <input
               type="number"
               name="delivery_mkhd_second_qty"
+              value={inputData.delivery_mkhd_second_qty || ""}
               onChange={handleInputData}
               id=""
               className="form-control"
@@ -695,7 +694,13 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
         <label htmlFor="" className="mb-1 fw-bold">
           RAB Bangunan & Lainnya terkait pembiayaan awal (Optional)
         </label>
-        <select name="" id="" className="form-select" onChange={handleRab}>
+        <select
+          name=""
+          id=""
+          className="form-select"
+          value={Rab || ""}
+          onChange={handleRab}
+        >
           <option value="">Select Chose</option>
           <option value="yes">Ya</option>
           <option value="no">Tidak</option>
@@ -709,6 +714,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
         <select
           name="support"
           id=""
+          value={supportKerjaSama || ""}
           className="form-select"
           onChange={handleSupportKerjaSama}
         >
@@ -726,6 +732,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
           name="fee"
           id=""
           className="form-select"
+          value={feeAction || ""}
           onChange={handleFeeAction}
         >
           <option value="">Select Chose</option>
@@ -764,8 +771,8 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
         className="mb-3"
       />
       <div className=" mt-2">
-        <button className="btn btn-primary me-2" onClick={handleSubmit}>
-          Simpan
+        <button className="btn btn-primary me-2" onClick={data?.lpp_document !== null ? handelUpdate : handleSubmit}>
+          {data?.lpp_document !== null ? `Update` : `Simpan`}
         </button>
         <button className="btn btn-secondary">Kembali</button>
       </div>

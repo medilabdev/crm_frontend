@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Topbar from "../../components/Template/Topbar";
 import Sidebar from "../../components/Template/Sidebar";
 import Main from "../../components/Template/Main";
@@ -17,6 +17,7 @@ import { useDispatch } from "react-redux";
 import { GetDataDeals } from "../../action/DataDeals";
 import { useSelector } from "react-redux";
 import { GetStaging } from "../../action/StagingDealSecond";
+import { getListOwner } from "../../action/FormOwner";
 
 const SecondDeals = () => {
   const token = localStorage.getItem("token");
@@ -39,6 +40,7 @@ const SecondDeals = () => {
   const [formSearch, setFormSearch] = useState({});
   const [inputStage, setInputStage] = useState([]);
   const [inputOwner, setInputOwner] = useState([]);
+  const [pending, setPending] = useState(true);
   const dispatch = useDispatch();
   const {
     listResultDataDeals,
@@ -46,11 +48,19 @@ const SecondDeals = () => {
     listErrorDataDeals,
     totalDataDeals,
   } = useSelector((state) => state.DataDeals);
+  console.log(listResultDataDeals);
 
   useEffect(() => {
     dispatch(GetDataDeals(token, search, ownerDeals, formSearch, pagination));
     dispatch(GetStaging(token));
+    dispatch(getListOwner(token));
+
+    const timeoutId = setTimeout(() => {
+      setPending(false);
+    }, 1040);
+    return () => clearTimeout(timeoutId);
   }, [dispatch, search, ownerDeals, formSearch, pagination]);
+
   const handleSearchDataTable = (e) => {
     if (e.key === "Enter") {
       const value = e.target.value.toLowerCase();
@@ -158,6 +168,7 @@ const SecondDeals = () => {
                       handleChangePage={handleChangePage}
                       handlePagePerChange={handlePagePerChange}
                       totalRows={totalDataDeals}
+                      pending={pending}
                     />
                   </div>
                 </div>

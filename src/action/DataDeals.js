@@ -10,7 +10,7 @@ export const GetDataDeals = (
   pagination,
   retryCount = 0
 ) => {
-  return (dispatch) => {
+  return async (dispatch) => {
     dispatch({
       type: GET_DATA_DEALS,
       payload: {
@@ -40,60 +40,73 @@ export const GetDataDeals = (
     }
     params.page = pagination.page;
     params.limit = pagination.limit;
-    axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/v2/deals`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        params: params,
-      })
-      .then((response) => {
-        dispatch({
-          type: GET_DATA_DEALS,
-          payload: {
-            loading: false,
-            data: response.data.data,
-            errorMessage: false,
-            totalRows: response.data.pagination.totalData,
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}/v2/deals`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
           },
-        });
-      })
-      .catch((error) => {
-        if (error.response) {
-          if (error.response.status === 401 && error.response.data.message === "Unauthenticated") {
-            localStorage.clear();
-            window.location.href = "/login";
-          } else if (error.response.status === 429) {
-            const maxRetries = 3;
-            if (retryCount < maxRetries) {
-              setTimeout(() => {
-                dispatch(GetDataDeals(token, term, ownerDeals, formSearch, pagination, retryCount + 1));
-              }, 2000);
-            } else {
-              console.error(
-                "Max retry attempts reached. Unable to complete the request."
+          params: params,
+        }
+      );
+      dispatch({
+        type: GET_DATA_DEALS,
+        payload: {
+          loading: false,
+          data: response.data.data,
+          errorMessage: false,
+          totalRows: response.data.pagination.totalData,
+        },
+      });
+    } catch (error) {
+      if (error.response) {
+        if (
+          error.response.status === 401 &&
+          error.response.data.message === "Unauthenticated."
+        ) {
+          localStorage.clear();
+          window.location.href = "/login";
+        } else if (error.response.status === 429) {
+          const maxRetries = 3;
+          if (retryCount < maxRetries) {
+            setTimeout(() => {
+              dispatch(
+                GetDataDeals(
+                  token,
+                  term,
+                  ownerDeals,
+                  formSearch,
+                  pagination,
+                  retryCount + 1
+                )
               );
-            }
+            }, 2000);
           } else {
-            console.error("Unhandled error:", error);
+            console.error(
+              "Max retry attempts reached. Unable to complete the request."
+            );
           }
         } else {
-          console.error("Network error:", error);
+          console.error("Unhandled error:", error);
         }
-        dispatch({
-          type: GET_DATA_DEALS,
-          payload: {
-            loading: false,
-            data: error.message,
-            errorMessage: false,
-            totalRows: false,
-          },
-        });
+      } else {
+        console.error("Network error:", error);
+      }
+      dispatch({
+        type: GET_DATA_DEALS,
+        payload: {
+          loading: false,
+          data: error.message,
+          errorMessage: false,
+          totalRows: false,
+        },
       });
+    }
   };
 };
 
-export const GetDataDealsDetail = (uid, token) => {
+export const GetDataDealsDetail = (uid, token, retryCount = 0) => {
   return async (dispatch) => {
     dispatch({
       type: GET_DATA_DEALS_DETAIL,
@@ -121,6 +134,30 @@ export const GetDataDealsDetail = (uid, token) => {
         },
       });
     } catch (error) {
+      if (error.response) {
+        if (
+          error.response.status === 401 &&
+          error.response.data.message === "Unauthenticated."
+        ) {
+          localStorage.clear();
+          window.location.href = "/login";
+        } else if (error.response.status === 429) {
+          const maxRetries = 3;
+          if (retryCount < maxRetries) {
+            setTimeout(() => {
+              dispatch(GetDataDealsDetail(uid, token, retryCount + 1));
+            }, 2000);
+          } else {
+            console.error(
+              "Max retry attempts reached. Unable to complete the request."
+            );
+          }
+        } else {
+          console.error("Unhandled error:", error);
+        }
+      } else {
+        console.error("Network error:", error);
+      }
       dispatch({
         type: GET_DATA_DEALS_DETAIL,
         payload: {

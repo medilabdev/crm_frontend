@@ -8,6 +8,7 @@ const DatatableNeedApproval = ({
   handleChangePage,
   handlePagePerChange,
   totalRows,
+  pending,
 }) => {
   return (
     <div>
@@ -24,6 +25,7 @@ const DatatableNeedApproval = ({
         paginationComponentOptions={{
           noRowsPerPage: true,
         }}
+        progressPending={pending}
       />
     </div>
   );

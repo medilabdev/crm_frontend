@@ -3,8 +3,8 @@ import axios from "axios";
 export const GET_LIST_NEED_APPROVAL_ACCOUNTING =
   "GET_LIST_NEED_APPROVAL_ACCOUNTING";
 
-export const GetListNeedApprovalAccounting = (token) => {
-  return (dispatch) => {
+export const GetListNeedApprovalAccounting = (token, retryCount = 0) => {
+  return async(dispatch) => {
     dispatch({
       type: GET_LIST_NEED_APPROVAL_ACCOUNTING,
       payload: {
@@ -13,28 +13,49 @@ export const GetListNeedApprovalAccounting = (token) => {
         errorMessage: false,
       },
     });
-    axios
+    try {
+      const response = await axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/v2/deals/approval/finance`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((response) => {
-        dispatch({
-          type: GET_LIST_NEED_APPROVAL_ACCOUNTING,
-          data: response.data.data,
-          errorMessage: false,
-        });
-      })
-      .catch((error) => {
-        dispatch({
-          type: GET_LIST_NEED_APPROVAL_ACCOUNTING,
-          payload: {
-            loading: false,
-            data: error.message,
-            errorMessage: false,
-          },
-        });
+      dispatch({
+        type: GET_LIST_NEED_APPROVAL_ACCOUNTING,
+        data: response.data.data,
+        errorMessage: false,
       });
+    } catch (error) {
+      if (error.response) {
+        if (error.response.status === 401 &&
+          error.response.data.message === "Unauthenticated.") {
+          localStorage.clear();
+          window.location.href = "/login";
+        } else if (error.response.status === 429) {
+          const maxRetries = 3;
+          if (retryCount < maxRetries) {
+            setTimeout(() => {
+              dispatch(GetListNeedApprovalAccounting(token, retryCount + 1));
+            }, 2000);
+          } else {
+            console.error(
+              "Max retry attempts reached. Unable to complete the request."
+            );
+          }
+        } else {
+          console.error("Unhandled error:", error);
+        }
+      } else {
+        console.error("Network error:", error);
+      }
+      dispatch({
+        type: GET_LIST_NEED_APPROVAL_ACCOUNTING,
+        payload: {
+          loading: false,
+          data: error.message,
+          errorMessage: false,
+        },
+      });
+    }
   };
 };

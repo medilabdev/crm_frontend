@@ -93,6 +93,7 @@ const InputFDC = ({ data }) => {
           inputData.other_company_address || ""
         );
         formData.append("npwp", inputData.npwp || "");
+        formData.append("pkp_number", inputData.pkp_number || "")
         formData.append(
           "tax_invoice_number",
           inputData.tax_invoice_number || ""
