@@ -244,6 +244,7 @@ const TopButton = ({
           {position === "pRGYXVKdzCPoQ8" ||
           position === "pRGYXVKdzCPoQ1" ||
           position === "_dLjLFdH-Nw8vg8U" ? (
+            data?.need_approval?.manager_approval == 0 ?   
             <>
               <button
                 className="btn btn-success me-2"
@@ -263,6 +264,7 @@ const TopButton = ({
                 Reject
               </button>
             </>
+              : "" 
           ) : (
             ""
           )}

@@ -46,7 +46,6 @@ const NeedApprovalSecondDeals = () => {
     dispatch(GetListNeedApprovalManager(token, pagination, searchInput));
   }, [dispatch, pagination, searchInput]);
 
-  console.log(ResultNeedManager);
   return (
     <body id="body">
       <Topbar />

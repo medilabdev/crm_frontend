@@ -31,7 +31,7 @@ function Sidebar() {
         <ul className="sidebar-nav" id="sidebar-nav">
           <MenuSidebar
             type="nonCollapse"
-            name="Deals /Second"
+            name="Deals"
             icon="bi bi-coin"
             url="/deals-second"
             isActive="1"

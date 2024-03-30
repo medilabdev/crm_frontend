@@ -187,7 +187,7 @@ const ShowLPP = ({ data }) => {
         </span>
       </div>
       <div className="p-2 mb-3">
-        <TableRab />
+        {data?.lpp_document?.is_rab === "yes" ? <TableRab /> : " - "}
       </div>
       <hr />
       <div class="fw-bold">
@@ -196,14 +196,14 @@ const ShowLPP = ({ data }) => {
         </span>
       </div>
       <div className="p-2 mb-3">
-        <TableSupport />
+        {data?.lpp_document?.is_fee === "yes" ? <TableSupport /> : " - "}
       </div>
       <hr />
       <div class="fw-bold">
         <span className="fs-6 text-decoration-underline">Fee Tindakan</span>
       </div>
       <div className="p-2 mb-3">
-        <TableFee />
+        {data?.lpp_document?.is_support === "yes" ? <TableFee /> : " - "}
       </div>
       <hr />
       <div class="fw-bold">

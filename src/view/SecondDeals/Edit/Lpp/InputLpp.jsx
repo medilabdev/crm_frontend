@@ -25,7 +25,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
   const [Rab, setRab] = useState();
   const [feeAction, setFeeAction] = useState();
   const [supportKerjaSama, setSupportKerjaSama] = useState();
-  const [inputData, setInputData] = useState([]);
+  const [inputData, setInputData] = useState(data?.lpp_document);
   const [showOverlay, setShowOverlay] = useState(false);
   const [priceFormat, setPriceFormat] = useState("");
   const handleInputDataRP = (event) => {
@@ -137,12 +137,22 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
     dispatch(GetDataRegionalBpjs(token));
     dispatch(CategoryType(token));
   }, [dispatch]);
+
   const firstQty = parseFloat(inputData.operate_mkhd_first_qty);
   const secondQty = parseFloat(inputData.operate_mkhd_second_qty);
   const backUpOne = parseFloat(inputData.backup_mkhd_first_qty);
   const backUpTwo = parseFloat(inputData.backup_mkhd_second_qty);
   const resultMesin = firstQty + secondQty + backUpTwo + backUpOne;
   const actionDuringCoperationQty = (firstQty + secondQty) * 48 * 60;
+
+  const SupportData = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.startsWith("SupportKerjaSama")) {
+      const data = JSON.parse(localStorage.getItem(key));
+      SupportData.push(data);
+    }
+  }
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -240,10 +250,24 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
           "action_during_cooperation_qty",
           actionDuringCoperationQty || ""
         );
+
+        formData.append("is_support", supportKerjaSama || "");
+        // SupportData[0].forEach((support, index) => {
+        //   formData.append(`support[${index}][item_uid]`, support.item || "");
+        //   formData.append(
+        //     `support[${index}][estimated_cost]`,
+        //     support.nilai_estimasi_biaya || ""
+        //   );
+        //   formData.append(`support[${index}][qty]`, support.qty || "");
+        //   formData.append(
+        //     `support[${index}][realization_note]`,
+        //     support.note || ""
+        //   );
+        // });
+
         formData.append("postscript", inputData.postscript || "");
-        formData.append("is_rab" || Rab || "");
-        formData.append("is_fee" || feeAction || "");
-        formData.append("is_support" || supportKerjaSama || "");
+        formData.append("is_rab", Rab || "");
+        formData.append("is_fee", feeAction || "");
         for (const pair of formData.entries()) {
           console.log(pair[0] + ": " + pair[1]);
         }
@@ -307,7 +331,6 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
     }
     setTotalRab(totalPrice);
   }, [dataRab]);
-  console.log(dataRab);
   return (
     <Card.Body>
       <div class="alert alert-primary mt-2" role="alert">
@@ -324,6 +347,9 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
               type: e.type,
             })
           }
+          value={selectCompany().find(
+            (e) => e.value === inputData.customer_name_uid || ""
+          )}
           required
         />
         <button
@@ -343,6 +369,9 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
               onChange={(e) =>
                 setInputData({ ...inputData, faskes_type_uid: e.value })
               }
+              value={selectFaskes().find(
+                (e) => e.value === inputData.faskes_type_uid || ""
+              )}
             />
           </div>
           <div className="mb-3">
@@ -352,6 +381,9 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
               onChange={(e) =>
                 setInputData({ ...inputData, bpjs_regional_uid: e.value })
               }
+              value={selectBpjs().find(
+                (e) => e.value === inputData.bpjs_regional_uid || ""
+              )}
             />
           </div>
         </>
@@ -368,6 +400,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
         <select
           name="type_collaboration"
           id=""
+          value={inputData.type_collaboration || ""}
           className="form-select"
           onChange={handleChangeJenisKerjaSama}
         >
@@ -521,7 +554,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
               className="form-control"
               placeholder=""
             />
-            <label htmlFor="">Operate MKHD 1</label>
+            <label htmlFor="">Operate MKHD 1 (unit)</label>
           </div>
         </div>
         <div className="col-6">
@@ -534,7 +567,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
               className="form-control"
               placeholder=""
             />
-            <label htmlFor="">Operate MKHD 2</label>
+            <label htmlFor="">Operate MKHD 2 (unit)</label>
           </div>
         </div>
       </div>
@@ -549,7 +582,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
               className="form-control"
               placeholder=""
             />
-            <label htmlFor="">Back Up MKHD 1</label>
+            <label htmlFor="">Back Up MKHD 1 (unit)</label>
           </div>
         </div>
         <div className="col-6">
@@ -562,7 +595,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
               className="form-control"
               placeholder=""
             />
-            <label htmlFor="">Back Up MKHD 2</label>
+            <label htmlFor="">Back Up MKHD 2 (unit)</label>
           </div>
         </div>
       </div>
@@ -576,7 +609,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
           className="form-control"
           placeholder=""
         />
-        <label htmlFor="">Total Mesin</label>
+        <label htmlFor="">Total Mesin (unit)</label>
       </div>
       <div className="row">
         <div className="col-md-6">
@@ -589,7 +622,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
               className="form-control"
               placeholder=""
             />
-            <label htmlFor="">Kirim Qty Tahap 1</label>
+            <label htmlFor="">Kirim Qty Tahap 1 (unit)</label>
           </div>
         </div>
         <div className="col-md-6">

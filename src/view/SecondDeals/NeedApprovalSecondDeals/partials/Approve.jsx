@@ -48,7 +48,7 @@ export const handleApprove = async (uid) => {
         text: "Approval Successfully",
         icon: "success",
       });
-      window.location.href = "/deals-second";
+      window.location.reload();
     }
   } catch (error) {
     Swal.fire({

@@ -48,23 +48,9 @@ const SecondDeals = () => {
   } = useSelector((state) => state.DataDeals);
 
   useEffect(() => {
-    dispatch(
-      GetDataDeals(
-        token,
-        search,
-        ownerDeals,
-        formSearch,
-        pagination
-      )
-    );
+    dispatch(GetDataDeals(token, search, ownerDeals, formSearch, pagination));
     dispatch(GetStaging(token));
-  }, [
-    dispatch,
-    search,
-    ownerDeals,
-    formSearch,
-    pagination
-  ]);
+  }, [dispatch, search, ownerDeals, formSearch, pagination]);
   const handleSearchDataTable = (e) => {
     if (e.key === "Enter") {
       const value = e.target.value.toLowerCase();

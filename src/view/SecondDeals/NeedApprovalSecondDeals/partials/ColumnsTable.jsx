@@ -14,6 +14,7 @@ export const ColumnsTable = [
         className="text-decoration-none"
         style={{ whiteSpace: "normal", color: "black", fontWeight: "540" }}
       >
+        {console.log(row)}
         {row.deal?.fqp_document?.hospital?.name ?? "-"}
       </a>
     ),
@@ -24,8 +25,9 @@ export const ColumnsTable = [
     selector: (row) => (
       <div>
         <p
-           className={`btn mt-3 ${
-            row.staging?.name === "Closed Won" || row.staging?.name === "Implementation"
+          className={`btn mt-3 ${
+            row.staging?.name === "Closed Won" ||
+            row.staging?.name === "Implementation"
               ? "btn-success"
               : row.staging?.name === "Closed Lost"
                 ? "btn-danger"
@@ -76,11 +78,43 @@ export const ColumnsTable = [
   },
   {
     name: "Owner",
-    selector: (row) => (
-      <p className="mt-2" style={{ fontWeight: "600" }}>
-        {row.deal?.owner?.name ?? "-"}
-      </p>
-    ),
+    selector: (row) => {
+      // console.log(row);
+      const date = new Date(row.created_at);
+      const formatDate = {
+        year: "numeric",
+        month: "long",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      };
+      const formatResult = new Intl.DateTimeFormat("en-US", formatDate);
+      const time = formatResult.format(date);
+      return (
+        <div>
+          <p
+            className="mt-2 fw-bold"
+            style={{
+              fontSize: "0.90rem",
+              fontWeight: "bold",
+              whiteSpace: "normal",
+            }}
+          >
+            {row.deal?.owner?.name ?? "-"}
+          </p>
+          <p
+            style={{
+              fontSize: "0.70rem",
+              marginTop: "-8px",
+              whiteSpace: "normal",
+            }}
+          >
+            {time}
+          </p>
+        </div>
+      );
+    },
+    sortable: true,
   },
   {
     name: "Action",

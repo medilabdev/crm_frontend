@@ -31,6 +31,7 @@ const InputFQP = ({ data, listCompany }) => {
       data.detcractors && data.detcractors[2] ? data.detcractors[2].name : "",
     ],
   });
+  console.log(inputNps);
 
   const [showOverlay, setShowOverlay] = useState(false);
   const handleShow = () => setShowOverlay(true);
@@ -119,15 +120,22 @@ const InputFQP = ({ data, listCompany }) => {
           "procurement_or_management_contact_person",
           inputData.procurement_or_management_contact_person || ""
         );
-        formData.append(`promoters[0]`, inputData.promoters0 || "");
-        formData.append(`promoters[1]`, inputData.promoters1 || "");
-        formData.append(`promoters[2]`, inputData.promoters2 || "");
-        formData.append("neutrals[0]", inputData.neutrals0 || "");
-        formData.append("neutrals[1]", inputData.neutrals1 || "");
-        formData.append("neutrals[2]", inputData.neutrals2 || "");
-        formData.append("detcractors[0]", inputData.detcractors0 || "");
-        formData.append("detcractors[1]", inputData.detcractors1 || "");
-        formData.append("detcractors[2]", inputData.detcractors2 || "");
+        if (inputNps.promoters && inputNps.promoters.length > 0) {
+          formData.append(`promoters[0]`, inputNps.promoters[0] || "");
+          formData.append(`promoters[1]`, inputNps.promoters[1] || "");
+          formData.append(`promoters[2]`, inputNps.promoters[2] || "");
+        }
+        if (inputNps.neutrals && inputNps.neutrals.length > 0) {
+          formData.append("neutrals[0]", inputNps.neutrals[0] || "");
+          formData.append("neutrals[1]", inputNps.neutrals[1] || "");
+          formData.append("neutrals[2]", inputNps.neutrals[2] || "");
+        }
+        if (inputNps.detractors && inputNps.detractors.length > 0) {
+          formData.append("detcractors[0]", inputNps.detractors[0] || "");
+          formData.append("detcractors[1]", inputNps.detractors[1] || "");
+          formData.append("detcractors[2]", inputNps.detractors[2] || "");
+        }
+
         formData.append("existing_vendor", inputData.existing_vendor || "");
         formData.append(
           "number_of_machine_unit",
@@ -364,25 +372,54 @@ const InputFQP = ({ data, listCompany }) => {
           <h6 className="fw-bold ms-2 mt-3">Promoters</h6>
           <input
             type="text"
-            name="promoters0"
-            value=""
-            onChange={handleInputData}
+            name={`promoters[0]`}
+            value={inputNps.promoters[0] || ""}
+            onChange={(e) =>
+              setInputNps({
+                ...inputNps,
+                promoters: [
+                  e.target.value,
+                  inputNps.promoters[1] || "",
+                  inputNps.promoters[2] || "",
+                ],
+              })
+            }
             placeholder="Input Nama/Jabatan"
             className="form-control mb-2"
           />
+
           <input
             type="text"
-            name="promoters1"
-            onChange={handleInputData}
-            id=""
+            name={`promoters[1]`}
+            value={inputNps.promoters[1] || ""}
+            onChange={(e) =>
+              setInputNps({
+                ...inputNps,
+                promoters: [
+                  inputNps.promoters[0] || "",
+                  e.target.value,
+                  inputNps.promoters[2] || "",
+                ],
+              })
+            }
             placeholder="Input Nama/Jabatan"
             className="form-control mb-2"
           />
+
           <input
             type="text"
-            name="promoters2"
-            onChange={handleInputData}
-            id=""
+            name={`promoters[2]`}
+            value={inputNps.promoters[2] || ""}
+            onChange={(e) =>
+              setInputNps({
+                ...inputNps,
+                promoters: [
+                  inputNps.promoters[0] || "",
+                  inputNps.promoters[1] || "",
+                  e.target.value,
+                ],
+              })
+            }
             placeholder="Input Nama/Jabatan"
             className="form-control mb-2"
           />
@@ -391,26 +428,55 @@ const InputFQP = ({ data, listCompany }) => {
           <h6 className="fw-bold ms-2 mt-3">Neutrals</h6>
           <input
             type="text"
-            name="neutrals0"
-            onChange={handleInputData}
-            id=""
+            name={`neutrals[0]`}
+            value={inputNps.neutrals[0] || ""}
+            onChange={(e) =>
+              setInputNps({
+                ...inputNps,
+                neutrals: [
+                  e.target.value,
+                  inputNps.neutrals[1] || "",
+                  inputNps.neutrals[2] || "",
+                ],
+              })
+            }
             placeholder="Input Nama/Jabatan"
             className="form-control mb-2"
           />
+
           <input
             type="text"
-            name="neutrals1"
-            onChange={handleInputData}
+            name={`neutrals[1]`}
+            value={inputNps.neutrals[1] || ""}
+            onChange={(e) =>
+              setInputNps({
+                ...inputNps,
+                neutrals: [
+                  inputNps.neutrals[0] || "",
+                  e.target.value,
+                  inputNps.neutrals[2] || "",
+                ],
+              })
+            }
             placeholder="Input Nama/Jabatan"
-            id=""
             className="form-control mb-2"
           />
+
           <input
             type="text"
-            name="neutrals2"
-            onChange={handleInputData}
+            name={`neutrals[2]`}
+            value={inputNps.neutrals[2] || ""}
+            onChange={(e) =>
+              setInputNps({
+                ...inputNps,
+                neutrals: [
+                  inputNps.neutrals[0] || "",
+                  inputNps.neutrals[1] || "",
+                  e.target.value,
+                ],
+              })
+            }
             placeholder="Input Nama/Jabatan"
-            id=""
             className="form-control mb-2"
           />
         </div>
@@ -418,26 +484,55 @@ const InputFQP = ({ data, listCompany }) => {
           <h6 className="fw-bold ms-2 mt-3">Detractors</h6>
           <input
             type="text"
-            name="detractors0"
-            onChange={handleInputData}
+            name={`detractors[0]`}
+            value={inputNps.detractors[0] || ""}
+            onChange={(e) =>
+              setInputNps({
+                ...inputNps,
+                detractors: [
+                  e.target.value,
+                  inputNps.detractors[1] || "",
+                  inputNps.detractors[2] || "",
+                ],
+              })
+            }
             placeholder="Input Nama/Jabatan"
-            id=""
             className="form-control mb-2"
           />
+
           <input
             type="text"
-            name="detractors1"
-            onChange={handleInputData}
+            name={`detractors[1]`}
+            value={inputNps.detractors[1] || ""}
+            onChange={(e) =>
+              setInputNps({
+                ...inputNps,
+                detractors: [
+                  inputNps.detractors[0] || "",
+                  e.target.value,
+                  inputNps.detractors[2] || "",
+                ],
+              })
+            }
             placeholder="Input Nama/Jabatan"
-            id=""
             className="form-control mb-2"
           />
+
           <input
             type="text"
-            name="detractors2"
-            onChange={handleInputData}
+            name={`detractors[2]`}
+            value={inputNps.detractors[2] || ""}
+            onChange={(e) =>
+              setInputNps({
+                ...inputNps,
+                detractors: [
+                  inputNps.detractors[0] || "",
+                  inputNps.detractors[1] || "",
+                  e.target.value,
+                ],
+              })
+            }
             placeholder="Input Nama/Jabatan"
-            id=""
             className="form-control mb-2"
           />
         </div>

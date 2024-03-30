@@ -4,12 +4,11 @@ const initialstate = {
   listResultDataDeals: false,
   listLoadingDataDeals: false,
   listErrorDataDeals: false,
-  totalDataDeals:false,
-
+  totalDataDeals: false,
 
   detailDataDeals: false,
-  loadingDataDeals:false,
-  errorDataDeals:false
+  loadingDataDeals: false,
+  errorDataDeals: false,
 };
 
 const DataDeals = (state = initialstate, action) => {
@@ -18,20 +17,20 @@ const DataDeals = (state = initialstate, action) => {
       return {
         ...state,
         listResultDataDeals: action.payload.data,
-        listLoadingDataDeals: action.payload.loading,
+        listLoadingDataDeals: true,
         listErrorDataDeals: action.payload.errorMessage,
-        totalDataDeals:action.payload.totalRows
+        totalDataDeals: action.payload.totalRows,
       };
-      case GET_DATA_DEALS_DETAIL:
-        return {
-          ...state,
-          detailDataDeals: action.payload.data,
-          loadingDataDeals: action.payload.loading,
-          errorDataDeals: action.payload.errorMessage
-        }
+    case GET_DATA_DEALS_DETAIL:
+      return {
+        ...state,
+        detailDataDeals: action.payload.data,
+        loadingDataDeals: true,
+        errorDataDeals: action.payload.errorMessage,
+      };
     default:
       return state;
   }
 };
 
-export default DataDeals
+export default DataDeals;
