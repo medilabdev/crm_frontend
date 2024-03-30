@@ -10,7 +10,6 @@ import DataTableComponet from "./Datatable";
 import axios from "axios";
 import Select from "react-select";
 import Swal from "sweetalert2";
-import { getPackageProduct } from "../../context/UseContext";
 import { debounce } from "lodash";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -21,21 +20,23 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import BreadcrumbDeals from "./partials/breadcrumb";
 import TopButton from "./partials/TopButton";
+import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
+import { getListOwner } from "../../action/FormOwner";
+import { getListCompany } from "../../action/FormCompany";
+import { getListContact } from "../../action/FormContact";
 
 const Deals = () => {
   const token = localStorage.getItem("token");
   const [isSideFilter, setIsSideFilter] = useState(false);
   const [search, setSearch] = useState([]);
   const [selectUid, setSelectUid] = useState([]);
-  const [owner, setOwner] = useState([]);
   const [deals, setDataDeals] = useState([]);
   const [searchMultiple, setSearchMultiple] = useState([]);
   const [stage, setStage] = useState([]);
   const [priority, setPriority] = useState([]);
   const [searchOwner, setSearchOwner] = useState([]);
   const [searchStage, setSearchStage] = useState([]);
-  const [company, setCompany] = useState([]);
-  const [contact, setContact] = useState([]);
   const [searchCompany, setSearchCompany] = useState([]);
   const [searchContact, setSearchContact] = useState([]);
   const [searchPriority, setSearchPriority] = useState([]);
@@ -51,11 +52,8 @@ const Deals = () => {
     try {
       setPending(true);
       await getDeals(token, search, ownerDeals, formSearch);
-      await getOwnerUser();
       await getStage();
       await getPriority();
-      await getCompany();
-      await getContact();
     } catch (error) {
       console.error("error in fetch data", error);
     } finally {
@@ -63,8 +61,22 @@ const Deals = () => {
     }
   };
 
+  const dispatch = useDispatch();
+  const { listResultOwner, listLoadingOwner, listErrorOwner } = useSelector(
+    (state) => state.SelectOwner
+  );
+  const { listResult, listLoading, listError } = useSelector(
+    (state) => state.FormCompany
+  );
+
+  const { listResultContact, listLoadingContact, listErrorContact } =
+    useSelector((state) => state.SelectContact);
+
   useEffect(() => {
     fetchData();
+    dispatch(getListOwner(token));
+    dispatch(getListCompany(token));
+    dispatch(getListContact(token));
   }, [
     token,
     search,
@@ -73,76 +85,6 @@ const Deals = () => {
     pagination.page,
     pagination.limit,
   ]);
-
-  const getContact = async (retryCount = 0) => {
-    try {
-      const response = await axios.get(
-        `${process.env.REACT_APP_BACKEND_URL}/contacts/form/select`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      setContact(response.data.data);
-    } catch (error) {
-      if (
-        error.response.status === 401 &&
-        error.response.data.message === "Unauthenticated."
-      ) {
-        localStorage.clear();
-        window.location.href = "/login";
-      } else if (error.response && error.response.status === 429) {
-        const maxRetries = 3;
-        if (retryCount < maxRetries) {
-          setTimeout(() => {
-            getContact(retryCount + 1);
-          }, 2000);
-        } else {
-          console.error(
-            "Max retry attempts reached. Unable to complete the request."
-          );
-        }
-      } else {
-        console.error("Unhandled error:", error);
-      }
-    }
-  };
-
-  const getCompany = async (retryCount = 0) => {
-    try {
-      const response = await axios.get(
-        `${process.env.REACT_APP_BACKEND_URL}/companies/form/select`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      setCompany(response.data.data);
-    } catch (error) {
-      if (
-        error.response.status === 401 &&
-        error.response.data.message === "Unauthenticated."
-      ) {
-        localStorage.clear();
-        window.location.href = "/login";
-      } else if (error.response && error.response.status === 429) {
-        const maxRetries = 3;
-        if (retryCount < maxRetries) {
-          setTimeout(() => {
-            getCompany(retryCount + 1);
-          }, 2000);
-        } else {
-          console.error(
-            "Max retry attempts reached. Unable to complete the request."
-          );
-        }
-      } else {
-        console.error("Unhandled error:", error);
-      }
-    }
-  };
 
   const getStage = async (retryCount = 0) => {
     try {
@@ -167,41 +109,6 @@ const Deals = () => {
         if (retryCount < maxRetries) {
           setTimeout(() => {
             getStage(retryCount + 1);
-          }, 2000);
-        } else {
-          console.error(
-            "Max retry attempts reached. Unable to complete the request."
-          );
-        }
-      } else {
-        console.error("Unhandled error:", error);
-      }
-    }
-  };
-
-  const getOwnerUser = async (retryCount = 0) => {
-    try {
-      const response = await axios.get(
-        `${process.env.REACT_APP_BACKEND_URL}/users`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      setOwner(response.data.data);
-    } catch (error) {
-      if (
-        error.response.status === 401 &&
-        error.response.data.message === "Unauthenticated."
-      ) {
-        localStorage.clear();
-        window.location.href = "/login";
-      } else if (error.response && error.response.status === 429) {
-        const maxRetries = 3;
-        if (retryCount < maxRetries) {
-          setTimeout(() => {
-            getOwnerUser(retryCount + 1);
           }, 2000);
         } else {
           console.error(
@@ -253,7 +160,6 @@ const Deals = () => {
     const select = e.selectedRows.map((row) => row.uid);
     setSelectUid(select);
   };
-
   const getDeals = async (
     token,
     term,
@@ -412,13 +318,17 @@ const Deals = () => {
 
   const selectOwner = () => {
     const result = [];
-    owner?.map((data) => {
-      const ownRes = {
-        value: data.uid,
-        label: data.name,
-      };
-      result.push(ownRes);
-    });
+    if (Array.isArray(listResultOwner)) {
+      listResultOwner.map((data) => {
+        const finalResult = {
+          label: `${data.name}`,
+          value: data.uid,
+        };
+        result.push(finalResult);
+      });
+    } else {
+      console.error("listResult is not an array or is not yet initialized.");
+    }
     return result;
   };
 
@@ -447,27 +357,35 @@ const Deals = () => {
   };
 
   const selectCompany = () => {
-    const res = [];
-    company?.map((data) => {
-      const theme = {
-        value: data.uid,
-        label: data.name,
-      };
-      res.push(theme);
-    });
-    return res;
+    const result = [];
+    if (Array.isArray(listResult)) {
+      listResult.map((data) => {
+        const finalResult = {
+          label: `${data.name}`,
+          value: data.uid,
+        };
+        result.push(finalResult);
+      });
+    } else {
+      console.error("listResult is not an array or is not yet initialized.");
+    }
+    return result;
   };
 
   const selectContact = () => {
-    const res = [];
-    contact?.map((data) => {
-      const theme = {
-        value: data.uid,
-        label: data.name,
-      };
-      res.push(theme);
-    });
-    return res;
+    const result = [];
+    if (Array.isArray(listResultContact)) {
+      listResultContact.map((data) => {
+        const finalResult = {
+          label: `${data.name}`,
+          value: data.uid,
+        };
+        result.push(finalResult);
+      });
+    } else {
+      console.error("listResult is not an array or is not yet initialized.");
+    }
+    return result;
   };
 
   const [pending, setPending] = useState(true);
@@ -537,7 +455,9 @@ const Deals = () => {
                       <div className="col mb-2">
                         <Select
                           options={selectOwner()}
-                          onChange={(e) => setSearchOwner(e)}
+                          onChange={(e) => {
+                            setSearchOwner(e);
+                          }}
                           placeholder="Select Owner"
                         />
                       </div>

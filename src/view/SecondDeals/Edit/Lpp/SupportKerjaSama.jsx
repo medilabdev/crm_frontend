@@ -1,6 +1,6 @@
 import { faPenToSquare, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Card } from "react-bootstrap";
 import DataTable from "react-data-table-component";
 import AddModalSupport from "./modals/AddModalSupport";
@@ -27,7 +27,7 @@ const SupportKerjaSama = () => {
     setData(data);
     localStorage.setItem("SupportKerjaSama", JSON.stringify(data));
   };
-
+ 
   const handleEditSupport = (    id,
     item,
     nilai_estimasi_biaya,
@@ -44,6 +44,7 @@ const SupportKerjaSama = () => {
         })
         setEditModal(true)
     }
+ 
   const customStyle = {
     headRow: {
       style: {
@@ -115,6 +116,16 @@ const SupportKerjaSama = () => {
       ),
     },
   ];
+  useEffect(() => {
+    const clearDataSupportKerjaSamaLocalstorage = () => {
+      localStorage.removeItem("SupportKerjaSama");
+    };
+    window.addEventListener("unload", clearDataSupportKerjaSamaLocalstorage);
+    return () => {
+      window.removeEventListener("unload", clearDataSupportKerjaSamaLocalstorage);
+    };
+  }, []);
+
   return (
     <div className="row mb-2">
       <div className="col">

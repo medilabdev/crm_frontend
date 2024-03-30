@@ -32,7 +32,7 @@ const SingleDeals = () => {
   const handleCloseContact = () => setShowAddContact(false);
   const handleShowContact = () => setShowAddContact(true);
 
-  // handleSubmit 
+  // handleSubmit
   const [isButtonDisabled, setButtonDisabled] = useState(false);
   // overlay add product
   const [showAddProduct, setShowAddProduct] = useState(false);
@@ -41,6 +41,7 @@ const SingleDeals = () => {
   const [allProductData, setAllProductData] = useState([]);
   const [mentionUsers, setMentionUsers] = useState([]);
   const [dealSize, setDealSize] = useState([]);
+
   const allData = [];
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
@@ -55,6 +56,7 @@ const SingleDeals = () => {
       data.map((item) => (totalPrice += item.total_price))
     );
   }
+  console.log(totalPrice);
   const [price, setPrice] = useState(0);
   const handlePrice = (e) => {
     const value = e.target.value;
@@ -116,179 +118,216 @@ const SingleDeals = () => {
     setMentionUsers(e.map((opt) => opt.value));
   };
   // ambil data owner
-  const getOwnerUser = async(retryCount = 0) => {
+  const getOwnerUser = async (retryCount = 0) => {
     try {
-      const response = await axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      setOwner(response.data.data)
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}/users`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setOwner(response.data.data);
     } catch (error) {
-      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+      if (
+        error.response.status === 401 &&
+        error.response.data.message === "Unauthenticated."
+      ) {
         localStorage.clear();
         window.location.href = "/login";
-      }  else if(error.response && error.response.status === 429){
+      } else if (error.response && error.response.status === 429) {
         const maxRetries = 3;
         if (retryCount < maxRetries) {
           setTimeout(() => {
             getOwnerUser(retryCount + 1);
           }, 2000);
         } else {
-          console.error('Max retry attempts reached. Unable to complete the request.');
+          console.error(
+            "Max retry attempts reached. Unable to complete the request."
+          );
         }
       } else {
-        console.error('Unhandled error:', error);
+        console.error("Unhandled error:", error);
       }
     }
   };
 
   // ambil data priority
-  const getPriority = async(retryCount = 0) => {
+  const getPriority = async (retryCount = 0) => {
     try {
-      const response = await axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/priorities`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      setPriority(response.data.data)
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}/priorities`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setPriority(response.data.data);
     } catch (error) {
-      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+      if (
+        error.response.status === 401 &&
+        error.response.data.message === "Unauthenticated."
+      ) {
         localStorage.clear();
         window.location.href = "/login";
-      }
-      else if(error.response && error.response.status === 429){
+      } else if (error.response && error.response.status === 429) {
         const maxRetries = 3;
         if (retryCount < maxRetries) {
           setTimeout(() => {
             getContact(retryCount + 1);
           }, 2000);
         } else {
-          console.error('Max retry attempts reached. Unable to complete the request.');
+          console.error(
+            "Max retry attempts reached. Unable to complete the request."
+          );
         }
       } else {
-        console.error('Unhandled error:', error);
+        console.error("Unhandled error:", error);
       }
     }
   };
 
   // ambil data deal category
-    const getDealCategory = async (retryCount = 0) => {
-      try {
-        const response = await axios
-        .get(`${process.env.REACT_APP_BACKEND_URL}/deal-categories`, {
+  const getDealCategory = async (retryCount = 0) => {
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}/deal-categories`,
+        {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        })
-        setDealCategory(response.data.data)
-      } catch (error) {
-        if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
-          localStorage.clear();
-          window.location.href = "/login";
-        } else if (error.response && error.response.status === 429){
-          const maxRetries = 3;
-          if (retryCount < maxRetries) {
-            setTimeout(() => {
-              getDealCategory(retryCount + 1);
-            }, 2000);
-          } else {
-            console.error('Max retry attempts reached. Unable to complete the request.');
-          }
-        }else {
-          console.error('Unhandled error:', error);
         }
+      );
+      setDealCategory(response.data.data);
+    } catch (error) {
+      if (
+        error.response.status === 401 &&
+        error.response.data.message === "Unauthenticated."
+      ) {
+        localStorage.clear();
+        window.location.href = "/login";
+      } else if (error.response && error.response.status === 429) {
+        const maxRetries = 3;
+        if (retryCount < maxRetries) {
+          setTimeout(() => {
+            getDealCategory(retryCount + 1);
+          }, 2000);
+        } else {
+          console.error(
+            "Max retry attempts reached. Unable to complete the request."
+          );
+        }
+      } else {
+        console.error("Unhandled error:", error);
       }
-    };
+    }
+  };
   // Ambil data company
-  const getCompanies = async(retryCount = 0) => {
+  const getCompanies = async (retryCount = 0) => {
     try {
-      const response = await axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/companies/form/select`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      setCompanies(response.data.data)
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}/companies/form/select`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setCompanies(response.data.data);
     } catch (error) {
       if (error.response.data.message === "Unauthenticated") {
         localStorage.clear();
         window.location.href = "/login";
-      }else if(error.response && error.response.status === 429){
+      } else if (error.response && error.response.status === 429) {
         const maxRetries = 3;
         if (retryCount < maxRetries) {
           setTimeout(() => {
             getCompanies(retryCount + 1);
           }, 2000);
         } else {
-          console.error('Max retry attempts reached. Unable to complete the request.');
+          console.error(
+            "Max retry attempts reached. Unable to complete the request."
+          );
         }
-    }else {
-      console.error('Unhandled error:', error);
+      } else {
+        console.error("Unhandled error:", error);
+      }
     }
-   }
   };
 
-
   // ambil data contact
-  const getContact =async (retryCount = 0) => {
+  const getContact = async (retryCount = 0) => {
     try {
-      const response = await   axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/contacts/form/select`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      setContact(response.data.data)
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}/contacts/form/select`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setContact(response.data.data);
     } catch (error) {
-      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+      if (
+        error.response.status === 401 &&
+        error.response.data.message === "Unauthenticated."
+      ) {
         localStorage.clear();
         window.location.href = "/login";
-      }else if(error.response && error.response.status === 429){
+      } else if (error.response && error.response.status === 429) {
         const maxRetries = 3;
         if (retryCount < maxRetries) {
           setTimeout(() => {
             getContact(retryCount + 1);
           }, 2000);
         } else {
-          console.error('Max retry attempts reached. Unable to complete the request.');
+          console.error(
+            "Max retry attempts reached. Unable to complete the request."
+          );
         }
-    }else {
-      console.error('Unhandled error:', error);
-    }
+      } else {
+        console.error("Unhandled error:", error);
+      }
     }
   };
 
-  const getPipeline = async(retryCount = 0) => {
+  const getPipeline = async (retryCount = 0) => {
     try {
-      const response = await  axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/staging-masters`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      setPipeline(response.data.data)
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}/staging-masters`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setPipeline(response.data.data);
     } catch (error) {
-      if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
+      if (
+        error.response.status === 401 &&
+        error.response.data.message === "Unauthenticated."
+      ) {
         localStorage.clear();
         window.location.href = "/login";
-      }else if(error.response && error.response.status === 429){
+      } else if (error.response && error.response.status === 429) {
         const maxRetries = 3;
         if (retryCount < maxRetries) {
           setTimeout(() => {
             getPipeline(retryCount + 1);
           }, 2000);
         } else {
-          console.error('Max retry attempts reached. Unable to complete the request.');
+          console.error(
+            "Max retry attempts reached. Unable to complete the request."
+          );
         }
       } else {
-        console.error('Unhandled error:', error);
+        console.error("Unhandled error:", error);
       }
     }
   };
-  
+
   // select owner
   const ownerSelect = () => {
     const result = [];
@@ -447,47 +486,56 @@ const SingleDeals = () => {
     };
   }, [token, dealSize, totalPrice]);
 
-  const [selectFile, setSelectFile] = useState(null)
+  const [selectFile, setSelectFile] = useState(null);
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    setSelectFile(file)
-  }
+    setSelectFile(file);
+  };
   const handleSubmitDeals = (e) => {
     e.preventDefault();
     try {
       const formData = new FormData();
       for (const uidContact of inputContact) {
-        formData.append("contact_person[]", uidContact || '');
+        formData.append("contact_person[]", uidContact || "");
       }
       mentionUsers.forEach((ment, index) => {
         formData.append(`mention_user[${index}]`, ment);
       });
       formData.append("deal_name", inputDeals.deal_name);
-      formData.append("deal_size", price || '');
+      formData.append("deal_size", price || "");
       formData.append("deal_status", inputDeals.deal_status);
-      formData.append("priority_uid", inputDeals.priority ?? '');
-      formData.append("deal_category", inputDeals.deal_category || '');
+      formData.append("priority_uid", inputDeals.priority ?? "");
+      formData.append("deal_category", inputDeals.deal_category || "");
       formData.append("staging_uid", selectedPipeline);
       formData.append("owner_user_uid", inputDeals.owner_user_uid);
-      formData.append("company_uid", inputDeals.company_uid || '');
+      formData.append("company_uid", inputDeals.company_uid || "");
       formData.append("notes", inputDeals.notes ? inputDeals.notes : "");
       formData.append("file", selectFile || "");
       if (Array.isArray(allData[0]) && allData[0].length > 0) {
         allData[0].forEach((product, index) => {
-          formData.append(`products[${index}][product_uid]`, product.product_uid || '');
-          formData.append(`products[${index}][qty]`, product.qty || '');
+          formData.append(
+            `products[${index}][product_uid]`,
+            product.product_uid || ""
+          );
+          formData.append(`products[${index}][qty]`, product.qty || "");
           formData.append(
             `products[${index}][discount_type]`,
-            product.discount_type || ''
+            product.discount_type || ""
           );
-          formData.append(`products[${index}][discount]`, product.discount || '');
-          formData.append(`products[${index}][total_price]`, product.total_price || '');
+          formData.append(
+            `products[${index}][discount]`,
+            product.discount || ""
+          );
+          formData.append(
+            `products[${index}][total_price]`,
+            product.total_price || ""
+          );
         });
       }
       // for (const pair of formData.entries()) {
       //   console.log(pair[0] + ": " + pair[1]);
       // }
-      setButtonDisabled(true)
+      setButtonDisabled(true);
       axios
         .post(`${process.env.REACT_APP_BACKEND_URL}/deals`, formData, {
           headers: {
@@ -532,7 +580,11 @@ const SingleDeals = () => {
           <form className="row" onSubmit={handleSubmitDeals}>
             <div className="col-md-12">
               <div className="float-end mt-2 mb-2">
-                <button className="btn btn-primary me-2" type="submit" disabled={isButtonDisabled}>
+                <button
+                  className="btn btn-primary me-2"
+                  type="submit"
+                  disabled={isButtonDisabled}
+                >
                   Save Changes
                 </button>
                 <a
@@ -607,11 +659,7 @@ const SingleDeals = () => {
                     />
                   </FloatingLabel>
                   <FloatingLabel
-                    label={
-                      <span>
-                        Deal Size
-                      </span>
-                    }
+                    label={<span>Deal Size</span>}
                     className="mb-3"
                   >
                     <Form.Control
@@ -643,18 +691,14 @@ const SingleDeals = () => {
                     />
                   </Form.Group>
                   <Form.Group className="mb-3">
-                    <Form.Label>
-                      Priority
-                    </Form.Label>
+                    <Form.Label>Priority</Form.Label>
                     <Select
                       options={prioritySelect()}
                       onChange={(e) => handleInputPriority(e)}
                     />
                   </Form.Group>
                   <Form.Group className="mb-3">
-                    <Form.Label>
-                      Deal Category
-                    </Form.Label>
+                    <Form.Label>Deal Category</Form.Label>
                     <Select
                       options={dealCategorySelect()}
                       onChange={(e) => handleInputDealCategory(e)}
@@ -792,12 +836,18 @@ const SingleDeals = () => {
                       handleInputDeals({ target: { name: "notes", value } })
                     }
                   />
-                   <Form.Group as={Row} xs={2} md={4} lg={6} className="p-2">
+                  <Form.Group as={Row} xs={2} md={4} lg={6} className="p-2">
                     <Form.Label column lg={4} className="fw-semibold fs-6">
-                     File : 
+                      File :
                     </Form.Label>
                     <Col lg={8} style={{ marginLeft: "-5rem" }}>
-                      <Form.Control type="file" name="file" size="sm" className="p-2" onChange={handleFileChange}/>
+                      <Form.Control
+                        type="file"
+                        name="file"
+                        size="sm"
+                        className="p-2"
+                        onChange={handleFileChange}
+                      />
                     </Col>
                   </Form.Group>
                   <Form.Group as={Row} xs={2} md={4} lg={6} className="p-2">

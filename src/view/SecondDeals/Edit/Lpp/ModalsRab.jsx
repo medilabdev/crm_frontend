@@ -3,13 +3,31 @@ import { Button, Modal } from "react-bootstrap";
 
 const ModalsRab = ({ show, handleClose }) => {
   const [InputData, SetInputData] = useState({});
-
+  const [inputEst, setInputEst] = useState([]);
   const handleInput = (e) => {
     SetInputData({
       ...InputData,
       [e.target.name]: e.target.value,
     });
   };
+
+  const handleInputDataRP = (event) => {
+    const rawValue = event.target.value;
+    const formattedValue = formatCurrency(rawValue);
+    setInputEst(formattedValue);
+  };
+
+  const formatCurrency = (value) => {
+    const sanitizedValue = value.replace(/[^\d]/g, "");
+    const formattedValue = Number(sanitizedValue).toLocaleString("id-ID");
+    return formattedValue;
+  };
+
+  const inputWithoutSeparator =
+    inputEst.length > 0 ? inputEst.replace(/\./g, "") : "";
+  const tempOne = parseFloat(inputWithoutSeparator);
+  const tempTwo = parseFloat(InputData.qty);
+  const result_estimasi_charge = tempOne * tempTwo;
   const handleSubmit = (e) => {
     e.preventDefault();
     if (Object.keys(InputData).length > 0) {
@@ -18,13 +36,24 @@ const ModalsRab = ({ show, handleClose }) => {
       const Payload = {
         id: id,
         item: InputData.item,
-        nilai_estimasi_biaya: InputData.nilai_estimasi_biaya,
+        nilai_estimasi_biaya: tempOne,
         qty: InputData.qty,
-        total_estimasi_biaya: InputData.total_estimasi_biaya,
+        total_estimasi_biaya: result_estimasi_charge,
         note: InputData.note,
       };
       dataExist.push(Payload);
       localStorage.setItem("RAB", JSON.stringify(dataExist));
+      SetInputData({
+        item: "",
+        total_estimasi_biaya: 0,
+        note: "",
+        qty: "",
+      });
+      const valueFeeString = localStorage.getItem("valueRab");
+      let totalExistingValue = valueFeeString ? parseInt(valueFeeString) : 0;
+      totalExistingValue += result_estimasi_charge;
+      localStorage.setItem("valueRab", totalExistingValue.toString());
+      setInputEst(0);
       handleClose();
     }
   };
@@ -58,10 +87,10 @@ const ModalsRab = ({ show, handleClose }) => {
         </div>
         <div class="form-floating mb-3">
           <input
-            type="number"
+            type="text"
             class="form-control"
-            name="nilai_estimasi_biaya"
-            onChange={handleInput}
+            value={inputEst || 0}
+            onChange={handleInputDataRP}
             id="floatingInput"
             placeholder="name@example.com"
           />
@@ -80,10 +109,10 @@ const ModalsRab = ({ show, handleClose }) => {
         </div>
         <div class="form-floating mb-3">
           <input
-            type="number"
+            type="text"
             class="form-control"
             name="total_estimasi_biaya"
-            onChange={handleInput}
+            value={result_estimasi_charge || 0}
             id="floatingInput"
             placeholder="name@example.com"
           />
