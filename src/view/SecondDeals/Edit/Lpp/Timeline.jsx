@@ -7,7 +7,7 @@ const Timeline = ({ statusKerjaSama }) => {
         <caption className="fw-bold fs-5">Timeline</caption>
         <thead className="text-center table-info">
           <tr>
-            <th colSpan="13">Bulan</th>
+            <th colSpan="13">Minggu</th>
           </tr>
         </thead>
         <thead className="table-primary">
@@ -32,11 +32,11 @@ const Timeline = ({ statusKerjaSama }) => {
         <tbody>
           <tr>
             <td className="fw-semibold">
-              {statusKerjaSama === "replace"
+              {statusKerjaSama === "hs_L0YxrtdK1"
                 ? "Replace"
-                : statusKerjaSama === "new_hd"
+                : statusKerjaSama === "ls_Y7hsg13Gg"
                   ? "New HD"
-                  : statusKerjaSama === "expand"
+                  : statusKerjaSama === "jR_1YgF86Ll"
                     ? "Expand"
                     : ""}
             </td>

@@ -48,6 +48,10 @@ const DataTableRab = () => {
     setData(data);
     localStorage.setItem("RAB", JSON.stringify(data));
   };
+
+
+
+  
   const ColumnsTable = [
     {
       name: "Item",

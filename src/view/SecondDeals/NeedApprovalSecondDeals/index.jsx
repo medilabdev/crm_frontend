@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Topbar from "../../../components/Template/Topbar";
 import Sidebar from "../../../components/Template/Sidebar";
 import Main from "../../../components/Template/Main";
@@ -8,8 +8,48 @@ import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 import Card from "../../../components/Card";
 import TopButton from "./partials/TopButton";
 import DatatableNeedApproval from "./partials/Datatable";
+import { GetListNeedApprovalManager } from "../../../action/DataNeedApprovalManager";
+import { useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { GetListNeedApprovalAccounting } from "../../../action/DataNeedApprovalAccounting";
 
 const NeedApprovalSecondDeals = () => {
+  const token = localStorage.getItem("token");
+  const dispatch = useDispatch();
+  const {
+    ResultNeedManager,
+    LoadingNeedManager,
+    ErrorNeedManager,
+    totalDataManager,
+  } = useSelector((state) => state.NeedApprovalManager);
+  const [searchInput, setSearchInput] = useState([]);
+  const [pending, setPending] = useState(true);
+  const handleSearchInput = (e) => {
+    if (e.key === "Enter") {
+      const value = e.target.value.toLowerCase();
+      setSearchInput(value);
+    }
+  };
+
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+  });
+  const handleChangePage = (page) => {
+    setPagination((e) => ({ ...e, page }));
+  };
+
+  const handlePagePerChange = (pageSize, page) => {
+    setPagination((prev) => ({ ...prev, pageSize, page }));
+  };
+  useEffect(() => {
+    dispatch(GetListNeedApprovalManager(token, pagination, searchInput));
+    const timeoutId = setTimeout(() => {
+      setPending(false);
+    }, 1040);
+    return () => clearTimeout(timeoutId);
+  }, [dispatch, pagination, searchInput]);
+
   return (
     <body id="body">
       <Topbar />
@@ -43,7 +83,7 @@ const NeedApprovalSecondDeals = () => {
                     <input
                       type="text"
                       placeholder="Search Input"
-                      onKeyDown=""
+                      onKeyDown={handleSearchInput}
                       className="form-control"
                       id=""
                     />
@@ -52,9 +92,16 @@ const NeedApprovalSecondDeals = () => {
               </div>
             </div>
             <div className="row">
-                <div className="col mt-4">
-                    <DatatableNeedApproval />
-                </div>
+              <div className="col mt-4">
+                <DatatableNeedApproval
+                  NeedApprovalManager={ResultNeedManager}
+                  paginationPerPage={pagination.limit}
+                  handleChangePage={handleChangePage}
+                  handlePagePerChange={handlePagePerChange}
+                  totalRows={totalDataManager}
+                  pending={pending}
+                />
+              </div>
             </div>
           </Card>
         </div>

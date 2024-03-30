@@ -5,12 +5,12 @@ import {
   Row,
   Button,
   Col,
-  FloatingLabel,
   Offcanvas,
 } from "react-bootstrap";
 import Swal from "sweetalert2";
 import Select from "react-select";
 const OverlayAddCompany = ({ visible, onClose }) => {
+  const uid = localStorage.getItem("uid")
   const [ownerUser, setOwnerUser] = useState([]);
   const [sourceContact, setSourceContact] = useState([]);
   const [parentCompany, setParentCompany] = useState([]);
@@ -26,7 +26,7 @@ const OverlayAddCompany = ({ visible, onClose }) => {
     number_of_employee: "",
     number_of_patient: "",
     parent_company_uid: "",
-    owner_user_uid: "",
+    owner_user_uid: uid,
     company_source_uid: "",
     company_type_uid: "",
   });
@@ -276,16 +276,6 @@ const OverlayAddCompany = ({ visible, onClose }) => {
               placeholder=""
               name="website_url"
               onChange={handleInputChange}
-            />
-          </Form.Group>
-          <Form.Group className="mb-3" controlId="formBasicEmail">
-            <Form.Label>
-              Owner <span className="text-danger fs-5">*</span>
-            </Form.Label>
-            <Select
-              options={selectOwner()}
-              onChange={(e) => handleInputOwner(e)}
-              required
             />
           </Form.Group>
           <Form.Group>

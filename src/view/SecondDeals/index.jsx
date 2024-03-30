@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Topbar from "../../components/Template/Topbar";
 import Sidebar from "../../components/Template/Sidebar";
 import Main from "../../components/Template/Main";
@@ -13,8 +13,14 @@ import {
   faMagnifyingGlass,
   faX,
 } from "@fortawesome/free-solid-svg-icons";
+import { useDispatch } from "react-redux";
+import { GetDataDeals } from "../../action/DataDeals";
+import { useSelector } from "react-redux";
+import { GetStaging } from "../../action/StagingDealSecond";
+import { getListOwner } from "../../action/FormOwner";
 
 const SecondDeals = () => {
+  const token = localStorage.getItem("token");
   const [SideFilter, SetSideFilter] = useState(false);
   const ToggleSideFilter = () => {
     SetSideFilter(!SideFilter);
@@ -24,6 +30,76 @@ const SecondDeals = () => {
     : "col-md-0 d-none";
   const DatatableClass = SideFilter ? "col-md-9" : "col-md-12";
   const IconSideFilter = SideFilter ? faX : faFilter;
+
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+  });
+  const [search, setSearch] = useState([]);
+  const [ownerDeals, setOwnerDeals] = useState([]);
+  const [formSearch, setFormSearch] = useState({});
+  const [inputStage, setInputStage] = useState([]);
+  const [inputOwner, setInputOwner] = useState([]);
+  const [pending, setPending] = useState(true);
+  const dispatch = useDispatch();
+  const {
+    listResultDataDeals,
+    listLoadingDataDeals,
+    listErrorDataDeals,
+    totalDataDeals,
+  } = useSelector((state) => state.DataDeals);
+  console.log(listResultDataDeals);
+
+  useEffect(() => {
+    dispatch(GetDataDeals(token, search, ownerDeals, formSearch, pagination));
+    dispatch(GetStaging(token));
+    dispatch(getListOwner(token));
+
+    const timeoutId = setTimeout(() => {
+      setPending(false);
+    }, 1040);
+    return () => clearTimeout(timeoutId);
+  }, [dispatch, search, ownerDeals, formSearch, pagination]);
+
+  const handleSearchDataTable = (e) => {
+    if (e.key === "Enter") {
+      const value = e.target.value.toLowerCase();
+      setSearch(value);
+    }
+  };
+  const handleChangePage = (page) => {
+    setPagination((e) => ({ ...e, page }));
+  };
+
+  const handlePagePerChange = (pageSize, page) => {
+    setPagination((prev) => ({ ...prev, pageSize, page }));
+  };
+  const { ResultStageDeals } = useSelector((state) => state.DataStage);
+
+  const handleDealsType = async (e) => {
+    const target = e.target.value;
+    if (target === "my") {
+      setOwnerDeals("my");
+    } else {
+      setOwnerDeals("all");
+    }
+  };
+  const handleSearchMultiple = (e) => {
+    setFormSearch({
+      ...formSearch,
+      [e.target.name]: e.target.value,
+    });
+  };
+  const handleSearchMutiple = (e) => {
+    e.preventDefault();
+    const data = {
+      owner: inputOwner.value || "",
+      stage: inputStage.value || "",
+      created_at: formSearch.created_at || "",
+      updated_at: formSearch.updated_at || "",
+    };
+    setFormSearch(data);
+  };
   return (
     <div id="body">
       <Topbar />
@@ -35,7 +111,14 @@ const SecondDeals = () => {
           <Card className="shadow">
             <div className="row">
               <div id="filter" className={`${FilterClass}`}>
-                <FilterTable />
+                <FilterTable
+                  handleDealsType={handleDealsType}
+                  handleSearchMultiple={handleSearchMultiple}
+                  setInputOwner={setInputOwner}
+                  handleSearchMutiple={handleSearchMutiple}
+                  setInputStage={setInputStage}
+                  stage={ResultStageDeals}
+                />
               </div>
               <div className={`${DatatableClass}`}>
                 <div className="row">
@@ -46,7 +129,6 @@ const SecondDeals = () => {
                       style={{ fontSize: "0.85rem", fontWeight: "600" }}
                     >
                       <FontAwesomeIcon icon={IconSideFilter} className="fs-6" />
-                      {/* <i className={`${IconSideFilter}`}></i> */}
                     </button>
                     <div className="float-end">
                       <div
@@ -70,7 +152,7 @@ const SecondDeals = () => {
                         <input
                           type="text"
                           placeholder="Search Input"
-                          onKeyDown=""
+                          onKeyDown={handleSearchDataTable}
                           className="form-control"
                           id=""
                         />
@@ -80,7 +162,14 @@ const SecondDeals = () => {
                 </div>
                 <div className="row">
                   <div className="mt-3">
-                    <DatatableDealSecond />
+                    <DatatableDealSecond
+                      data={listResultDataDeals}
+                      paginationPerPage={pagination.limit}
+                      handleChangePage={handleChangePage}
+                      handlePagePerChange={handlePagePerChange}
+                      totalRows={totalDataDeals}
+                      pending={pending}
+                    />
                   </div>
                 </div>
               </div>

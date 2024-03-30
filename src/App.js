@@ -5,11 +5,18 @@ import "../src/assets/vendor/bootstrap/css/bootstrap.css";
 import "../src/assets/vendor/bootstrap-icons/bootstrap-icons.css";
 
 import Router from "./router";
+import { Provider } from "react-redux";
+import { createStore, compose, applyMiddleware } from "redux";
+import reducer from "./reducer";
+import { thunk } from "redux-thunk";
 
+const store = createStore(reducer, compose(applyMiddleware(thunk)));
 function App() {
   return (
     <Fragment>
-      <Router />
+      <Provider store={store}>
+        <Router />
+      </Provider>
     </Fragment>
   );
 }
