@@ -223,7 +223,7 @@ const ColumnsDataTable = ({
         paginationPerPage={paginationPerPage}
         onChangePage={onChangePage}
         onChangeRowsPerPage={onChangeRowsPerPage}
-        pending={pending}
+        progressPending={pending}
         paginationTotalRows={totalRows}
         paginationComponentOptions={{
           noRowsPerPage: true,
