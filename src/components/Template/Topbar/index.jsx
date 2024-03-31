@@ -69,7 +69,12 @@ function Topbar() {
           <img src={Image} style={{ width: "25px", marginLeft: "1rem" }} />
           <span
             className="title"
-            style={{ fontSize: "18px", marginLeft: "5px" }}
+            style={{
+              fontSize: "18px",
+              marginLeft: "5px",
+              fontFamily: "Rubik",
+              fontWeight: "500",
+            }}
           >
             HARISSA CRM
           </span>

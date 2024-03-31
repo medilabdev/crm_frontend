@@ -386,7 +386,7 @@ const Contact = () => {
                   whiteSpace: "normal",
                   fontSize: "0.85rem",
                   color: "black",
-                  fontWeight: "650",
+                  fontWeight: "500",
                 }}
               >
                 {row.name}
@@ -410,7 +410,7 @@ const Contact = () => {
     {
       name: "Contact Info",
       selector: (row) => (
-        <p style={{ fontSize: "0.85rem", fontWeight: "550" }}>
+        <p style={{ fontSize: "0.85rem", fontWeight: "450" }}>
           {row?.phone?.[0]?.number ?? "-"}
         </p>
       ),

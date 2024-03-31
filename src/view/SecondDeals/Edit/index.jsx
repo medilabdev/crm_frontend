@@ -53,6 +53,7 @@ const EditDataSecondDeals = () => {
     dispatch(GetDataDealsDetail(uid, token));
     dispatch(getListCompany(token));
   }, [dispatch]);
+  
   return (
     <body id="body">
       <Topbar />
