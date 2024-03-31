@@ -48,8 +48,11 @@ const ColumnsDataTable = ({
             /> */}
             {/* <img src={IconCompany} style={{ width: "20px" }} /> */}
             <span
-              className="fw-semibold"
-              style={{ whiteSpace: "normal", color: "black" }}
+              className="fw-medium"
+              style={{
+                whiteSpace: "normal",
+                color: "#191919",
+              }}
             >
               {row.name}
             </span>
@@ -86,7 +89,7 @@ const ColumnsDataTable = ({
                     >
                       <FontAwesomeIcon
                         icon={faPhoneVolume}
-                        style={{ width: "35px", height: "20px" }}
+                        style={{ width: "30px", height: "18px" }}
                         data-tip={item?.contact?.name}
                       />
                     </a>
@@ -116,7 +119,7 @@ const ColumnsDataTable = ({
                     >
                       <FontAwesomeIcon
                         icon={faSackDollar}
-                        style={{ width: "35px", height: "20px" }}
+                        style={{ width: "30px", height: "18px" }}
                         data-tip={item?.deals?.dealName}
                       />
                     </a>
@@ -134,7 +137,9 @@ const ColumnsDataTable = ({
       id: 3,
       name: "Type",
       selector: (row) => (
-        <div className="badge bg-primary">{row?.company_type?.name}</div>
+        <div className="badge bg-primary fw-medium">
+          {row?.company_type?.name}
+        </div>
       ),
       sortable: true,
       width: "150px",
@@ -158,8 +163,12 @@ const ColumnsDataTable = ({
         return (
           <div className="mt-2">
             <span
-              className="fw-bold"
-              style={{ fontSize: "0.85rem", whiteSpace: "normal" }}
+              className="fw-semibold"
+              style={{
+                fontSize: "0.85rem",
+                whiteSpace: "normal",
+                color: "#191919",
+              }}
             >
               {row?.owner?.name}
             </span>

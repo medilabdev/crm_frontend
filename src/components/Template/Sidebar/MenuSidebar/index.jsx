@@ -21,8 +21,10 @@ const MenuSidebar = ({ type, name, icon, url, isActive }) => {
               href={url}
               className={`nav-link ${urlActive ? "" : "collapsed"}`}
             >
-              <i className={icon} style={{ fontSize: "0.95rem" }} />
-              <span style={{ fontSize: "0.95rem" }}>{name}</span>
+              <i className={icon} style={{ fontSize: "1rem" }} />
+              <span style={{ fontSize: "1rem", fontWeight: "450" }}>
+                {name}
+              </span>
             </a>
           </li>
         </>

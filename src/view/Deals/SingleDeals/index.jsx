@@ -14,6 +14,8 @@ import OverlayAddContact from "../../../components/Overlay/addContact";
 import AddProductOverlay from "../../../components/Overlay/addProduct";
 import DataTable from "react-data-table-component";
 import Swal from "sweetalert2";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSackDollar } from "@fortawesome/free-solid-svg-icons";
 
 const SingleDeals = () => {
   const token = localStorage.getItem("token");
@@ -600,14 +602,14 @@ const SingleDeals = () => {
                 <Card.Header>
                   <h5 className="mt-2">
                     <i class="bi bi-caret-right-square-fill fs-4"></i>
-                    <span className="ms-2 fs-5 fw-bold mt-5">Pipeline</span>
+                    <span className="ms-2 fs-5 fw-semibold mt-5">Pipeline</span>
                   </h5>
                 </Card.Header>
                 <Card.Body>
                   {pipeline.map((data) => (
                     <div className="form-check form-check-inline ms-3">
                       <input
-                        type="radio"
+                        type="checkbox"
                         className="form-check-input me-2"
                         value={data.uid}
                         checked={data.uid === selectedPipeline}
@@ -634,8 +636,11 @@ const SingleDeals = () => {
               <Card className="shadow">
                 <Card.Header>
                   <h5 className="mt-2">
-                    <i class="bi bi-currency-dollar fs-4"></i>
-                    <span className="ms-2 fs-5 fw-bold mt-5">Deals</span>
+                    <FontAwesomeIcon
+                      icon={faSackDollar}
+                      className="fs-5 me-2"
+                    />
+                    <span className="ms-2 fs-5 fw-semibold mt-5">Deals</span>
                   </h5>
                 </Card.Header>
                 <Card.Body>
@@ -710,7 +715,9 @@ const SingleDeals = () => {
                 <Card.Header>
                   <h5 className="mt-2">
                     <i class="bi bi-building  fs-4"></i>
-                    <span className="ms-2 fs-5 fw-bold mt-5">Companies</span>
+                    <span className="ms-2 fs-5 fw-semibold mt-5">
+                      Companies
+                    </span>
                   </h5>
                 </Card.Header>
                 <Card.Body>
@@ -742,7 +749,7 @@ const SingleDeals = () => {
                 <Card.Header>
                   <h5 className="mt-2">
                     <i class="bi bi-person-circle fs-4"></i>
-                    <span className="ms-2 fs-5 fw-bold mt-5">Contact</span>
+                    <span className="ms-2 fs-5 fw-semibold mt-5">Contact</span>
                   </h5>
                 </Card.Header>
                 <Card.Body>
@@ -779,7 +786,7 @@ const SingleDeals = () => {
                 <Card.Header>
                   <h5 className="mt-2">
                     <i class="bi bi-box-seam-fill fs-4"></i>
-                    <span className="ms-2 fs-5 fw-bold mt-5">Product</span>
+                    <span className="ms-2 fs-5 fw-semibold mt-5">Product</span>
                   </h5>
                 </Card.Header>
                 <Card.Body>
