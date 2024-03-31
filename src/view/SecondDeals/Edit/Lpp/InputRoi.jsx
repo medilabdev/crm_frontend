@@ -8,6 +8,7 @@ import Swal from "sweetalert2";
 
 const InputRoi = ({ data }) => {
   const token = localStorage.getItem("token");
+  const position = localStorage.getItem("position");
   const [inputRoi, setInputRoi] = useState(null);
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -117,6 +118,8 @@ const InputRoi = ({ data }) => {
           ) : (
             ""
           )}
+          {position === "pRGYXVKdzCPoQ8" ? 
+          <>
           <label
             htmlFor="floatingInput"
             className="mb-2"
@@ -130,12 +133,16 @@ const InputRoi = ({ data }) => {
             name="file"
             onChange={handleFileChange}
           />
-        </div>
+       
         <div className="mt-4">
           <button className="btn btn-primary me-2" onClick={handleSubmit}>
             Simpan
           </button>
           <button className="btn btn-secondary">Kembali</button>
+        </div>
+        
+        </>
+        : "" }
         </div>
       </Card.Body>
     </Card>

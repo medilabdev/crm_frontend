@@ -716,7 +716,9 @@ const EditCompany = () => {
                   <Card.Header>
                     <h5 className="mt-2">
                       <i class="bi bi-building-fill fs-4"></i>
-                      <span className="ms-2 fs-5 fw-bold mt-2">Companies</span>
+                      <span className="ms-2 fs-5 fw-semibold mt-2">
+                        Companies
+                      </span>
                     </h5>
                   </Card.Header>
                   <Card.Body>
@@ -926,7 +928,7 @@ const EditCompany = () => {
                   <Card.Header>
                     <h5 className="mt-2">
                       <i class="bi bi-currency-dollar  fs-4"></i>
-                      <span className="ms-2 fs-5 fw-bold mt-5">Deals</span>
+                      <span className="ms-2 fs-5 fw-semibold mt-5">Deals</span>
                     </h5>
                   </Card.Header>
                   <Card.Body>
@@ -1035,7 +1037,9 @@ const EditCompany = () => {
                   <Card.Header>
                     <h5 className="mt-2">
                       <i class="bi bi-person-circle fs-4"></i>
-                      <span className="ms-2 fs-5 fw-bold mt-5">Contact</span>
+                      <span className="ms-2 fs-5 fw-semibold mt-5">
+                        Contact
+                      </span>
                     </h5>
                   </Card.Header>
                   <Card.Body>
@@ -1144,7 +1148,7 @@ const EditCompany = () => {
                   <Card.Header>
                     <h5 className="mt-2">
                       <i class="bi bi-buildings-fill fs-4"></i>
-                      <span className="ms-2 fs-5 fw-bold mt-5">
+                      <span className="ms-2 fs-5 fw-semibold mt-5">
                         Parent Company
                       </span>
                     </h5>

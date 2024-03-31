@@ -221,7 +221,9 @@ const TopButton = ({
           ) : (
             ""
           )}
-          {position === "pRGYXVKdzCPoQ8" &&
+          {(position === "pRGYXVKdzCPoQ8" ||
+            position === "_dLjLFdH-Nw8vg8U" ||
+            position === "pRGYXVKdzCPoQ1") &&
           stage !== "leads" &&
           stage !== "Approaching" ? (
             <button
@@ -235,7 +237,9 @@ const TopButton = ({
                 icon={showFormRoi ? faEyeSlash : faEye}
                 className="me-2"
               />
-              Upload ROI
+              {position === "_dLjLFdH-Nw8vg8U" || position === "pRGYXVKdzCPoQ1"
+                ? "ROI"
+                : "Upload ROI"}
             </button>
           ) : (
             ""

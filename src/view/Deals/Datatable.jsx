@@ -38,7 +38,7 @@ const DataTableComponet = ({
           href={`deals/${row.uid}/edit`}
           target="_blank"
           className="text-decoration-none"
-          style={{ whiteSpace: "normal", color: "black", fontWeight: "600" }}
+          style={{ whiteSpace: "normal", color: "#191919", fontWeight: "500" }}
         >
           {row.deal_name}
         </a>
@@ -51,14 +51,14 @@ const DataTableComponet = ({
       selector: (row) => (
         <div>
           <p
-            className={`btn ${
+            className={`btn shadow- ${
               row.staging?.name === "Closed Won"
                 ? "btn-success"
                 : row.staging?.name === "Closed Lost"
                   ? "btn-danger"
                   : "btn-primary"
             }`}
-            style={{ fontSize: "0.65rem" }}
+            style={{ fontSize: "0.65rem", fontWeight: "400" }}
           >
             {row.staging?.name}
           </p>
@@ -67,7 +67,7 @@ const DataTableComponet = ({
       sortable: true,
     },
     {
-      name: "Jumlah/Tertanggal",
+      name: "Jumlah",
       selector: (row) => `Rp. ${new Intl.NumberFormat().format(row.deal_size)}`,
       sortable: true,
       width: "150px",
@@ -82,12 +82,16 @@ const DataTableComponet = ({
               overlay={<Tooltip>{row?.company?.name}</Tooltip>}
             >
               <div>
-                <a href={`/company/${row.company?.uid}/edit`} target="_blank" className="text-dark">
-                <FontAwesomeIcon
-                  icon={faBuilding}
-                  className="fs-4"
-                  data-tip={row.company?.name}
-                />
+                <a
+                  href={`/company/${row.company?.uid}/edit`}
+                  target="_blank"
+                  className="text-dark"
+                >
+                  <FontAwesomeIcon
+                    icon={faBuilding}
+                    className="fs-4"
+                    data-tip={row.company?.name}
+                  />
                 </a>
               </div>
             </OverlayTrigger>
@@ -150,7 +154,7 @@ const DataTableComponet = ({
               className="mt-2 fw-bold"
               style={{
                 fontSize: "0.90rem",
-                fontWeight: "bold",
+                fontWeight: "500",
                 whiteSpace: "normal",
               }}
             >
@@ -161,6 +165,7 @@ const DataTableComponet = ({
                 fontSize: "0.85rem",
                 marginTop: "-8px",
                 whiteSpace: "normal",
+                color: "#191919",
               }}
             >
               {time}
