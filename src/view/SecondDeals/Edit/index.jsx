@@ -30,20 +30,40 @@ const EditDataSecondDeals = () => {
   const [showFormPks, setShowFormPks] = useState(false);
   const handleShowFQP = () => {
     setShowFQP(!ShowFQP);
+    setShowLPP(false);
+    setShowFDC(false);
+    setShowFormRoi(false);
+    setShowFormPks(false)
   };
 
   const handleShowLPP = () => {
     setShowLPP(!ShowLPP);
+    setShowFDC(false);
+    setShowFQP(false);
+    setShowFormRoi(false);
+    setShowFormPks(false)
   };
 
   const handleShowFDC = () => {
     setShowFDC(!ShowFDC);
+    setShowLPP(false);
+    setShowFQP(false);
+    setShowFormRoi(false);
+    setShowFormPks(false)
   };
   const handleShowRoi = () => {
     setShowFormRoi(!showFormRoi);
+    setShowFDC(false);
+    setShowFQP(false);
+    setShowLPP(false);
+    setShowFormPks(false)
   };
   const handleShowPks = () => {
     setShowFormPks(!showFormPks);
+    setShowFDC(false);
+    setShowFQP(false);
+    setShowLPP(false);
+    setShowFormRoi(false);
   };
   const { uid } = useParams();
   const dispatch = useDispatch();
@@ -53,7 +73,7 @@ const EditDataSecondDeals = () => {
     dispatch(GetDataDealsDetail(uid, token));
     dispatch(getListCompany(token));
   }, [dispatch]);
-  
+
   return (
     <body id="body">
       <Topbar />

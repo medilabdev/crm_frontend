@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, Modal } from "react-bootstrap";
+import { Button, Modal, Offcanvas } from "react-bootstrap";
 
 const ModalsRab = ({ show, handleClose }) => {
   const [InputData, SetInputData] = useState({});
@@ -22,12 +22,16 @@ const ModalsRab = ({ show, handleClose }) => {
     const formattedValue = Number(sanitizedValue).toLocaleString("id-ID");
     return formattedValue;
   };
-
+  const [resultValue, setResultValue] = useState();
   const inputWithoutSeparator =
     inputEst.length > 0 ? inputEst.replace(/\./g, "") : "";
   const tempOne = parseFloat(inputWithoutSeparator);
   const tempTwo = parseFloat(InputData.qty);
-  const result_estimasi_charge = tempOne * tempTwo;
+  useEffect(() => {
+    const result_estimasi_charge = tempOne * tempTwo;
+    setResultValue(result_estimasi_charge);
+  }, [tempOne, tempTwo]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (Object.keys(InputData).length > 0) {
@@ -36,9 +40,10 @@ const ModalsRab = ({ show, handleClose }) => {
       const Payload = {
         id: id,
         item: InputData.item,
+        is_alkes: InputData.is_alkes,
         nilai_estimasi_biaya: tempOne,
         qty: InputData.qty,
-        total_estimasi_biaya: result_estimasi_charge,
+        total_estimasi_biaya: resultValue,
         note: InputData.note,
       };
       dataExist.push(Payload);
@@ -49,31 +54,17 @@ const ModalsRab = ({ show, handleClose }) => {
         note: "",
         qty: "",
       });
-      const valueFeeString = localStorage.getItem("valueRab");
-      let totalExistingValue = valueFeeString ? parseInt(valueFeeString) : 0;
-      totalExistingValue += result_estimasi_charge;
-      localStorage.setItem("valueRab", totalExistingValue.toString());
       setInputEst(0);
       handleClose();
     }
   };
 
-  useEffect(() => {
-    const clearDataRABLocalstorage = () => {
-      localStorage.removeItem("RAB");
-    };
-    window.addEventListener("unload", clearDataRABLocalstorage);
-    return () => {
-      window.removeEventListener("unload", clearDataRABLocalstorage);
-    };
-  }, []);
-
   return (
-    <Modal show={show} onHide={handleClose} centered>
-      <Modal.Header closeButton>
-        <Modal.Title>Tambah Data</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
+    <Offcanvas show={show} onHide={handleClose} placement="end">
+      <Offcanvas.Header closeButton>
+        <Offcanvas.Title>Tambah Data</Offcanvas.Title>
+      </Offcanvas.Header>
+      <Offcanvas.Body>
         <div class="form-floating mb-3">
           <input
             type="text"
@@ -84,6 +75,19 @@ const ModalsRab = ({ show, handleClose }) => {
             placeholder="name@example.com"
           />
           <label for="floatingInput">Item</label>
+        </div>
+        <div className="mb-3">
+          <label htmlFor="">Apakah Alat Kesehatan</label>
+          <select
+            name="is_alkes"
+            id=""
+            className="form-control"
+            onChange={handleInput}
+          >
+            <option value="">Select Choose</option>
+            <option value="yes">Iya</option>
+            <option value="no">Tidak</option>
+          </select>
         </div>
         <div class="form-floating mb-3">
           <input
@@ -112,7 +116,7 @@ const ModalsRab = ({ show, handleClose }) => {
             type="text"
             class="form-control"
             name="total_estimasi_biaya"
-            value={result_estimasi_charge || 0}
+            value={resultValue || 0}
             id="floatingInput"
             placeholder="name@example.com"
           />
@@ -131,16 +135,16 @@ const ModalsRab = ({ show, handleClose }) => {
             className="form-control"
           ></textarea>
         </div>
-      </Modal.Body>
-      <Modal.Footer>
-        <Button variant="secondary" onClick={handleClose}>
+      </Offcanvas.Body>
+      <Modal.Footer className="mb-4">
+        <Button variant="secondary" className="me-2" onClick={handleClose}>
           Close
         </Button>
-        <Button variant="primary" onClick={handleSubmit}>
+        <Button variant="primary" className="me-3" onClick={handleSubmit}>
           Save Changes
         </Button>
       </Modal.Footer>
-    </Modal>
+    </Offcanvas>
   );
 };
 

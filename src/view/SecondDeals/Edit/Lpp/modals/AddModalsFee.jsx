@@ -49,12 +49,6 @@ const AddModalsFee = ({ show, handleClose }) => {
         qty: "",
         note: "",
       });
-
-      const valueFeeString = localStorage.getItem("valueFee");
-      let totalExistingValue = valueFeeString ? parseInt(valueFeeString) : 0;
-      totalExistingValue += result_estimasi_charge;
-      localStorage.setItem("valueFee", totalExistingValue.toString());
-
       setInputEst(0);
       handleClose();
     }

@@ -2,7 +2,7 @@ import React from "react";
 import DataTable from "react-data-table-component";
 import dummy from "../Lpp/dummy";
 
-const TableFee = () => {
+const TableFee = ({ data }) => {
   const allData = [];
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
@@ -14,11 +14,11 @@ const TableFee = () => {
   const ColumnsTable = [
     {
       name: "Nama Penerima",
-      selector: (row) => row.name,
+      selector: (row) => row.recieve_name,
     },
     {
       name: "Nilai Estimasi Biaya",
-      selector: (row) => `Rp. ` + row.nilai,
+      selector: (row) => `Rp. ` + row.value || "-",
     },
     {
       name: "Qty",
@@ -26,11 +26,11 @@ const TableFee = () => {
     },
     {
       name: "Total Estimasi Biaya",
-      selector: (row) => `Rp. ${new Intl.NumberFormat().format(row.total)}`,
+      selector: (row) => row?.total ? `Rp. ${new Intl.NumberFormat().format(row.total)}` : "",
     },
     {
       name: "Catatan Realisasi",
-      selector: (row) => row.note,
+      selector: (row) => row.note || "-",
     },
   ];
   const customStyle = {
@@ -55,7 +55,7 @@ const TableFee = () => {
   return (
     <div>
       <DataTable
-        data={allData[0]}
+        data={data?.fee || ""}
         columns={ColumnsTable}
         customStyles={customStyle}
         dense

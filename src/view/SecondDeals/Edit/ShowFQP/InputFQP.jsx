@@ -31,7 +31,6 @@ const InputFQP = ({ data, listCompany }) => {
       data.detcractors && data.detcractors[2] ? data.detcractors[2].name : "",
     ],
   });
-  console.log(inputNps);
 
   const [showOverlay, setShowOverlay] = useState(false);
   const handleShow = () => setShowOverlay(true);
@@ -214,9 +213,9 @@ const InputFQP = ({ data, listCompany }) => {
         );
         formData.append("another_notes", inputData.another_notes || "");
         formData.append("_method", "put");
-        for (const pair of formData.entries()) {
-          console.log(pair[0] + ": " + pair[1]);
-        }
+        // for (const pair of formData.entries()) {
+        //   console.log(pair[0] + ": " + pair[1]);
+        // }
         const response = await axios.post(
           `${process.env.REACT_APP_BACKEND_URL}/v2/fqp-document/${uidFQP}`,
           formData,
