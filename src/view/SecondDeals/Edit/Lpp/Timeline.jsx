@@ -1,6 +1,6 @@
 import React from "react";
 
-const Timeline = ({ statusKerjaSama }) => {
+const Timeline = ({ statusKerjaSama, handleInputTimeline }) => {
   return (
     <div>
       <table className="table table-sm caption-top table-bordered">
@@ -43,7 +43,9 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline01"
+                onChange={handleInputTimeline}
+                value="1"
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -51,7 +53,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline02"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -59,7 +62,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline03"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -67,7 +71,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline04"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -75,7 +80,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline05"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -83,7 +89,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline06"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -91,7 +98,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline07"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -99,7 +107,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline08"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -107,7 +116,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline09"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -115,7 +125,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline10"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -123,7 +134,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline11"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -131,7 +143,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline12"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -142,7 +155,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline13"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -150,7 +164,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline14"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -158,7 +173,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline15"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -166,7 +182,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline16"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -174,7 +191,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline17"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -182,7 +200,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline18"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -190,7 +209,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline19"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -198,7 +218,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline20"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -206,7 +227,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline21"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -214,7 +236,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline22"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -222,7 +245,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline23"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -230,7 +254,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline24"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -241,7 +266,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline25"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -249,7 +275,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline26"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -257,7 +284,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline27"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -265,7 +293,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline28"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -273,7 +302,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline29"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -281,7 +311,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline30"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -289,7 +320,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline31"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -297,7 +329,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline32"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -305,7 +338,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline33"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -313,7 +347,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline34"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -321,7 +356,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline35"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -329,7 +365,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline36"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -340,7 +377,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline37"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -348,7 +386,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline38"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -356,7 +395,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline39"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -364,7 +404,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline40"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -372,7 +413,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline41"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -380,7 +422,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline42"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -388,7 +431,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline43"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -396,7 +440,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline44"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -404,7 +449,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline45"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -412,7 +458,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline46"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -420,7 +467,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline47"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -428,7 +476,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline48"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -439,7 +488,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline49"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -447,7 +497,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline50"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -455,7 +506,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline51"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -463,7 +515,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline52"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -471,7 +524,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline53"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -479,7 +533,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline54"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -487,7 +542,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline55"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -495,7 +551,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline56"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -503,7 +560,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline57"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -511,7 +569,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline58"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -519,7 +578,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline59"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -527,7 +587,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline60"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -538,7 +599,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline61"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -546,7 +608,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline62"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -554,7 +617,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline63"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -562,7 +626,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline64"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -570,7 +635,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline65"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -578,7 +644,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline66"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -586,7 +653,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline67"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -594,7 +662,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline68"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -602,7 +671,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline69"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -610,7 +680,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline70"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -618,7 +689,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline71"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -626,7 +698,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline72"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -637,7 +710,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline73"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -645,7 +719,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline74"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -653,7 +728,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline75"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -661,7 +737,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline76"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -669,7 +746,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline77"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -677,7 +755,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline78"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -685,7 +764,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline79"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -693,7 +773,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline80"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -701,7 +782,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline81"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -709,7 +791,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline82"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -717,7 +800,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline83"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />
@@ -725,7 +809,8 @@ const Timeline = ({ statusKerjaSama }) => {
             <td>
               <input
                 type="checkbox"
-                name=""
+                name="timeline84"
+                onChange={handleInputTimeline}
                 id=""
                 className="form-check-input border-secondary"
               />

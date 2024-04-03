@@ -14,12 +14,13 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import ShowLPP from "./ShowLPP";
 import InputLpp from "./Lpp/InputLpp";
+import EditLpp from "./ShowLPP/EditLpp";
 
 const LPP = ({ userUid, data, listCompany, uidDeals }) => {
   const [showLpp, setShowLpp] = useState(true);
   const uid = localStorage.getItem("uid");
   const handleShowLpp = () => setShowLpp(!showLpp);
-
+  console.log(data);
   return (
     <div id="LPP">
       <div className="col-12">
@@ -40,13 +41,14 @@ const LPP = ({ userUid, data, listCompany, uidDeals }) => {
               </div>
             </div>
           </Card.Header>
-          {userUid !== uid ? (
+          {data?.lpp_document === null ? <InputLpp data={data} listCompany={listCompany} uidDeals={uidDeals} /> : userUid !== uid ? (
             <ShowLPP />
           ) : showLpp ? (
-            <InputLpp data={data} listCompany={listCompany} uidDeals={uidDeals}/>
+            <EditLpp />
           ) : (
             <ShowLPP data={data} />
           )}
+         
         </Card>
       </div>
     </div>
