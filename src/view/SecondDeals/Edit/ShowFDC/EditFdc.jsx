@@ -6,11 +6,23 @@ import {
   faPhone,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import axios from "axios";
 import React, { useState } from "react";
 import { Card } from "react-bootstrap";
+import Swal from "sweetalert2";
+import { token } from "../../partials/ColumnsTable";
+import EditBank from "./EditBank";
+import EditDireksi from "./EditDireksi";
 
 const EditFdc = ({ data }) => {
   const [editData, setEditData] = useState(data?.fdc_document);
+  const [fileKtp, setFileKtp] = useState([]);
+  const [fileNpwp, setFileNpwp] = useState([]);
+  const [sppkp, setSppkp] = useState([]);
+  const [tandaDaftarPerusahaan, setTandaDaftarPerusahaan] = useState([]);
+  const [siup, setSiup] = useState([]);
+  const [kso, setKso] = useState([]);
+  const [izinDagang, setIzinDagang] = useState([]);
 
   const handleInput = (e) => {
     const { name, value } = e.target;
@@ -18,6 +30,110 @@ const EditFdc = ({ data }) => {
       ...editData,
       [name]: value,
     });
+  };
+  const CompanyUid = data?.fdc_document?.company?.uid;
+
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+    try {
+      let timerInterval;
+      const { isConfirmed } = await Swal.fire({
+        title: "Apakah kamu yakin untuk menyimpan?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Ya",
+        cancelButtonText: "Tidak",
+      });
+      if (isConfirmed) {
+        Swal.fire({
+          title: "Loading...",
+          html: "Tolong Tunggu <b></b> Beberapa Detik.",
+          timer: 3000,
+          timerProgressBar: true,
+          didOpen: () => {
+            Swal.showLoading();
+            const timer = Swal.getPopup().querySelector("b");
+            if (timer) {
+              timerInterval = setInterval(() => {
+                if (timer.textContent) {
+                  timer.textContent = `${Swal.getTimerLeft()}`;
+                }
+              }, 100);
+            }
+          },
+          willClose: () => {
+            clearInterval(timerInterval);
+          },
+        });
+        const formData = new FormData();
+        formData.append("_method", "put");
+        formData.append("company_uid", CompanyUid);
+        formData.append("owner_company", editData.owner_company || "");
+        formData.append("founded_year_at", editData.founded_year_at || "");
+        formData.append("business_type", editData.business_type || "");
+        formData.append("website", editData.website || "");
+        formData.append(
+          "name_person_in_charge",
+          editData.name_person_in_charge || ""
+        );
+        formData.append("email", editData.email || "");
+        formData.append("phone_number", editData.phone_number || "");
+        formData.append("company_address", editData.company_address || "");
+        formData.append(
+          "other_company_address",
+          editData.other_company_address || ""
+        );
+        formData.append("npwp", editData.npwp || "");
+        formData.append("pkp_number", editData.pkp_number || "");
+        formData.append(
+          "tax_invoice_number",
+          editData.tax_invoice_number || ""
+        );
+        formData.append("ktp_file", fileKtp || "");
+        formData.append("npwp_file", fileNpwp || "");
+        formData.append("sppkp_file", sppkp || "");
+        formData.append("siup_file", siup || "");
+        formData.append("kso_file", kso || "");
+        formData.append(
+          "company_registration_file",
+          tandaDaftarPerusahaan || ""
+        );
+        formData.append("business_license_file", izinDagang || "");
+        // for (const pair of formData.entries()) {
+        //   console.log(pair[0] + ": " + pair[1]);
+        // }
+        const response = await axios.post(
+          `${process.env.REACT_APP_BACKEND_URL}/v2/fdc-document/${data.fdc_document?.uid}`,
+          formData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        Swal.close();
+        await Swal.fire({
+          title: response.data.message,
+          icon: "success",
+        }).then((res) => {
+          if (res.isConfirmed) {
+            window.location.reload();
+          }
+        });
+      }
+    } catch (error) {
+      if (error.response) {
+        Swal.fire({
+          text: error.response.data.message,
+          icon: "warning",
+        });
+      } else {
+        Swal.fire({
+          text: "Something went wrong !",
+          icon: "error",
+        });
+      }
+    }
   };
   return (
     <Card.Body>
@@ -141,7 +257,9 @@ const EditFdc = ({ data }) => {
           rows="5"
           onChange={handleInput}
           className="form-control"
-        >{editData?.other_company_address || ""}</textarea>
+        >
+          {editData?.other_company_address || ""}
+        </textarea>
       </div>
       <div class="alert alert-primary mt-2" role="alert">
         <h6 style={{ fontWeight: "700" }}>
@@ -183,7 +301,8 @@ const EditFdc = ({ data }) => {
         />
         <label htmlFor="floatingInput">Nomor Surat Pengukuhan PKP</label>
       </div>
-
+      <EditDireksi valueOld={data?.fdc_document?.direksi} />
+      <EditBank valueOld={data?.fdc_document?.bank} />
       <div class="alert alert-primary mt-2" role="alert">
         <h6 style={{ fontWeight: "700" }}>
           <FontAwesomeIcon icon={faFolderPlus} className="me-2" /> Dokumen yang
@@ -191,11 +310,11 @@ const EditFdc = ({ data }) => {
         </h6>
       </div>
       <div className="mb-3">
-      {editData?.ktp_file ? (
+        {editData?.ktp_file ? (
           <table className="mt-3">
             <tr className="fw-medium">
               <td style={{ width: "150px", fontSize: "0.9rem" }}>
-              KTP Penanggung Jawab
+                KTP Penanggung Jawab
               </td>
               <td className="px-1">:</td>
               <td>
@@ -220,15 +339,21 @@ const EditFdc = ({ data }) => {
         <label htmlFor="" className="fw-semibold mt-3 fs-6 mb-1">
           KTP Penanggung Jawab
         </label>
-        <input type="file" name="" className="form-control" id="" />
+        <input
+          type="file"
+          name=""
+          className="form-control"
+          onChange={(e) => {
+            const file = e.target.files[0];
+            setFileKtp(file);
+          }}
+        />
       </div>
       <div className="mb-3">
-      {editData?.npwp_file ? (
+        {editData?.npwp_file ? (
           <table className="mt-3">
             <tr className="fw-medium">
-              <td style={{ width: "150px", fontSize: "0.9rem" }}>
-              Kartu NPWP
-              </td>
+              <td style={{ width: "150px", fontSize: "0.9rem" }}>Kartu NPWP</td>
               <td className="px-1">:</td>
               <td>
                 <a
@@ -252,14 +377,22 @@ const EditFdc = ({ data }) => {
         <label htmlFor="" className="fw-semibold mt-3 fs-6 mb-1">
           Kartu NPWP
         </label>
-        <input type="file" name="" className="form-control" id="" />
+        <input
+          type="file"
+          name=""
+          className="form-control"
+          onChange={(e) => {
+            const file = e.target.files[0];
+            setFileNpwp(file);
+          }}
+        />
       </div>
       <div className="mb-3">
-      {editData?.npwp_file ? (
+        {editData?.npwp_file ? (
           <table className="mt-3">
             <tr className="fw-medium">
               <td style={{ width: "150px", fontSize: "0.9rem" }}>
-              Surat Pengukuhan Pengusaha Kena Pajak (SPPKP)
+                Surat Pengukuhan Pengusaha Kena Pajak (SPPKP)
               </td>
               <td className="px-1">:</td>
               <td>
@@ -284,14 +417,22 @@ const EditFdc = ({ data }) => {
         <label htmlFor="" className="fw-semibold mt-3 fs-6 mb-1">
           Surat Pengukuhan Pengusaha Kena Pajak (SPPKP)
         </label>
-        <input type="file" name="" className="form-control" id="" />
+        <input
+          type="file"
+          name=""
+          className="form-control"
+          onChange={(e) => {
+            const file = e.target.files[0];
+            setSppkp(file);
+          }}
+        />
       </div>
       <div className="mb-3">
-      {editData?.company_registration_file ? (
+        {editData?.company_registration_file ? (
           <table className="mt-3">
             <tr className="fw-medium">
               <td style={{ width: "150px", fontSize: "0.9rem" }}>
-              Tanda Daftar Perusahaan
+                Tanda Daftar Perusahaan
               </td>
               <td className="px-1">:</td>
               <td>
@@ -316,14 +457,22 @@ const EditFdc = ({ data }) => {
         <label htmlFor="" className="fw-semibold mt-3 fs-6 mb-1">
           Tanda Daftar Perusahaan
         </label>
-        <input type="file" name="" className="form-control" id="" />
+        <input
+          type="file"
+          name=""
+          className="form-control"
+          onChange={(e) => {
+            const file = e.target.files[0];
+            setTandaDaftarPerusahaan(file);
+          }}
+        />
       </div>
       <div className="mb-3">
-      {editData?.business_license_file ? (
+        {editData?.business_license_file ? (
           <table className="mt-3">
             <tr className="fw-medium">
               <td style={{ width: "150px", fontSize: "0.9rem" }}>
-              Surat Izin Usaha Perdagangan
+                Surat Izin Usaha Perdagangan
               </td>
               <td className="px-1">:</td>
               <td>
@@ -348,14 +497,23 @@ const EditFdc = ({ data }) => {
         <label htmlFor="" className="fw-semibold mt-3 fs-6 mb-1">
           Surat Izin Usaha Perdagangan
         </label>
-        <input type="file" name="" className="form-control" id="" />
+        <input
+          type="file"
+          name=""
+          className="form-control"
+          id=""
+          onChange={(e) => {
+            const file = e.target.files[0];
+            setIzinDagang(file);
+          }}
+        />
       </div>
       <div className="mb-3">
-      {editData?.siup_file ? (
+        {editData?.siup_file ? (
           <table className="mt-3">
             <tr className="fw-medium">
               <td style={{ width: "150px", fontSize: "0.9rem" }}>
-              Surat keterangan Domisili Usaha (SIUP)
+                Surat keterangan Domisili Usaha (SIUP)
               </td>
               <td className="px-1">:</td>
               <td>
@@ -380,10 +538,18 @@ const EditFdc = ({ data }) => {
         <label htmlFor="" className="fw-semibold mt-3 fs-6 mb-1">
           Surat keterangan Domisili Usaha (SIUP)
         </label>
-        <input type="file" name="" className="form-control" id="" />
+        <input
+          type="file"
+          name=""
+          className="form-control"
+          onChange={(e) => {
+            const file = e.target.files[0];
+            setSiup(file);
+          }}
+        />
       </div>
       <div className="mb-3">
-      {editData?.kso_file ? (
+        {editData?.kso_file ? (
           <table className="mt-3">
             <tr className="fw-medium">
               <td style={{ width: "150px", fontSize: "0.9rem" }}>
@@ -412,10 +578,21 @@ const EditFdc = ({ data }) => {
         <label htmlFor="" className="fw-semibold mt-3 fs-6 mb-1">
           Tanda Tangan Kontrak Kerja Sama (KSO)
         </label>
-        <input type="file" name="" className="form-control" id="" />
+        <input
+          type="file"
+          name=""
+          className="form-control"
+          id=""
+          onChange={(e) => {
+            const file = e.target.files[0];
+            setKso(file);
+          }}
+        />
       </div>
       <div className=" mt-2">
-        <button className="btn btn-primary me-2">Simpan</button>
+        <button className="btn btn-primary me-2" onClick={handleUpdate}>
+          Update
+        </button>
         <button className="btn btn-secondary">Kembali</button>
       </div>
     </Card.Body>

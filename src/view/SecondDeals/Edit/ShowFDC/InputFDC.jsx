@@ -223,9 +223,9 @@ const InputFDC = ({ data }) => {
           "direksi[14][phone_number]",
           inputData.klinik_name_no_telp || ""
         );
-        for (const pair of formData.entries()) {
-          console.log(pair[0] + ": " + pair[1]);
-        }
+        // for (const pair of formData.entries()) {
+        //   console.log(pair[0] + ": " + pair[1]);
+        // }
         const response = await axios.post(
           `${process.env.REACT_APP_BACKEND_URL}/v2/fdc-document`,
           formData,
@@ -415,17 +415,8 @@ const InputFDC = ({ data }) => {
         />
         <label htmlFor="floatingInput">Nomor Surat Pengukuhan PKP</label>
       </div>
-      {!inputData?.direksi ? (
         <FormDireksiAndPic handleInput={handleInput} />
-      ) : (
-        ""
-      )}
-
-      {!inputData?.bank ? (
         <FormDataBank handleInputChange={handleInputChange} />
-      ) : (
-        ""
-      )}
 
       <div class="alert alert-primary mt-2" role="alert">
         <h6 style={{ fontWeight: "700" }}>
@@ -541,9 +532,9 @@ const InputFDC = ({ data }) => {
       <div className=" mt-2">
         <button
           className="btn btn-primary me-2"
-          onClick={inputData === null ? handleSubmit : handleUpdate}
+          onClick={handleSubmit}
         >
-          {inputData === null ? "Simpan" : "Update"}
+          Simpan
         </button>
         <button className="btn btn-secondary">Kembali</button>
       </div>

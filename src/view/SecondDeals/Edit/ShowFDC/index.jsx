@@ -9,14 +9,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 const ShowFDC = ({ show, CompanyName }) => {
-  const [showEditBank, setShowEditBank] = useState(false);
-  const [showEditDireksi, setShowEditDireksi] = useState(false);
-  const handleShowEditBank = () => {
-    setShowEditBank(!showEditBank);
-  };
-  const handleShowEditDireksi = () => {
-    setShowEditDireksi(!showEditDireksi);
-  };
+ 
   return (
     <Card.Body>
       <div class="fw-bold mb-3">
@@ -157,15 +150,8 @@ const ShowFDC = ({ show, CompanyName }) => {
         <div class="fw-bold mb-3">
           <span className="fs-6 text-decoration-underline">Data Bank</span>
         </div>
-        <button
-          className="btn btn-primary float-end"
-          onClick={handleShowEditBank}
-        >
-          <FontAwesomeIcon icon={!showEditBank ? faPenToSquare : faEye} />
-        </button>
       </div>
-      {!showEditBank ? (
-        show?.bank.map((item) => (
+        {show?.bank.map((item) => (
           <>
             <table className="mb-2">
               <tr className="fw-medium mb-4">
@@ -217,9 +203,7 @@ const ShowFDC = ({ show, CompanyName }) => {
             <hr />
           </>
         ))
-      ) : (
-        <EditFormDataBank data={show?.bank} />
-      )}
+      }
     </Card.Body>
   );
 };
