@@ -58,7 +58,6 @@ const SingleDeals = () => {
       data.map((item) => (totalPrice += item.total_price))
     );
   }
-  console.log(totalPrice);
   const [price, setPrice] = useState(0);
   const handlePrice = (e) => {
     const value = e.target.value;

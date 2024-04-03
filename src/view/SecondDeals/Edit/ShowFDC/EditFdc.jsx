@@ -1,7 +1,3 @@
-import React, { useState } from "react";
-import FormDireksiAndPic from "../FDC/FormDireksiAndPic";
-import FormDataBank from "../FDC/FormDataBank";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBuilding,
   faEnvelopesBulk,
@@ -9,17 +5,17 @@ import {
   faPercent,
   faPhone,
 } from "@fortawesome/free-solid-svg-icons";
-import Select from "react-select";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import axios from "axios";
+import React, { useState } from "react";
 import { Card } from "react-bootstrap";
 import Swal from "sweetalert2";
-import axios from "axios";
-import EditFormDataBank from "../FDC/EditFormDataBank";
+import { token } from "../../partials/ColumnsTable";
+import EditBank from "./EditBank";
+import EditDireksi from "./EditDireksi";
 
-const InputFDC = ({ data }) => {
-  const token = localStorage.getItem("token");
-  const uidOwner = localStorage.getItem("uid");
-  const [inputData, setInputData] = useState([]);
-  const [inputBank, setInputBank] = useState([]);
+const EditFdc = ({ data }) => {
+  const [editData, setEditData] = useState(data?.fdc_document);
   const [fileKtp, setFileKtp] = useState([]);
   const [fileNpwp, setFileNpwp] = useState([]);
   const [sppkp, setSppkp] = useState([]);
@@ -29,22 +25,15 @@ const InputFDC = ({ data }) => {
   const [izinDagang, setIzinDagang] = useState([]);
 
   const handleInput = (e) => {
-    setInputData({
-      ...inputData,
-      [e.target.name]: e.target.value,
+    const { name, value } = e.target;
+    setEditData({
+      ...editData,
+      [name]: value,
     });
   };
+  const CompanyUid = data?.fdc_document?.company?.uid;
 
-  const handleInputChange = (e, index, fieldName) => {
-    const { value } = e.target;
-    setInputBank((prev) => {
-      const newData = [...prev];
-      newData[index] = { ...newData[index], [fieldName]: value };
-      return newData;
-    });
-  };
-
-  const handleSubmit = async (e) => {
+  const handleUpdate = async (e) => {
     e.preventDefault();
     try {
       let timerInterval;
@@ -77,28 +66,28 @@ const InputFDC = ({ data }) => {
           },
         });
         const formData = new FormData();
-        formData.append("deals_uid", data.uid);
-        formData.append("company_uid", data?.fqp_document?.hospital?.uid);
-        formData.append("owner_company", inputData.owner_company || "");
-        formData.append("founded_year_at", inputData.founded_year_at || "");
-        formData.append("business_type", inputData.business_type || "");
-        formData.append("website", inputData.website || "");
+        formData.append("_method", "put");
+        formData.append("company_uid", CompanyUid);
+        formData.append("owner_company", editData.owner_company || "");
+        formData.append("founded_year_at", editData.founded_year_at || "");
+        formData.append("business_type", editData.business_type || "");
+        formData.append("website", editData.website || "");
         formData.append(
           "name_person_in_charge",
-          inputData.name_person_in_charge || ""
+          editData.name_person_in_charge || ""
         );
-        formData.append("email", inputData.email || "");
-        formData.append("phone_number", inputData.phone_number || "");
-        formData.append("company_address", inputData.company_address || "");
+        formData.append("email", editData.email || "");
+        formData.append("phone_number", editData.phone_number || "");
+        formData.append("company_address", editData.company_address || "");
         formData.append(
           "other_company_address",
-          inputData.other_company_address || ""
+          editData.other_company_address || ""
         );
-        formData.append("npwp", inputData.npwp || "");
-        formData.append("pkp_number", inputData.pkp_number || "");
+        formData.append("npwp", editData.npwp || "");
+        formData.append("pkp_number", editData.pkp_number || "");
         formData.append(
           "tax_invoice_number",
-          inputData.tax_invoice_number || ""
+          editData.tax_invoice_number || ""
         );
         formData.append("ktp_file", fileKtp || "");
         formData.append("npwp_file", fileNpwp || "");
@@ -110,124 +99,11 @@ const InputFDC = ({ data }) => {
           tandaDaftarPerusahaan || ""
         );
         formData.append("business_license_file", izinDagang || "");
-        if (inputBank && inputBank.length > 0) {
-          inputBank.forEach((item, index) => {
-            formData.append(`bank[${index}][bank_name]`, item.nameBank || "");
-            formData.append(`bank[${index}][branch_bank]`, item.cabang || "");
-            formData.append(
-              `bank[${index}][account_name]`,
-              item.nameAccount || ""
-            );
-            formData.append(`bank[${index}][city]`, item.cityBank || "");
-            formData.append(
-              `bank[${index}][bank_account_number]`,
-              item.noRek || ""
-            );
-            formData.append(`bank[${index}][currency]`, item.mataUang || "");
-            formData.append(`bank[${index}][swift_code]`, item.swiftCode || "");
-          });
-        }
-        formData.append("direksi[0][name]", inputData.direktur_name || "");
-        formData.append("direksi[0][position]", "Direktur");
-        formData.append("direksi[0][email]", inputData.email_direktur || "");
-        formData.append(
-          "direksi[0][phone_number]",
-          inputData.no_telp_direktur || ""
-        );
-        formData.append("direksi[1][name]", inputData.wadik_name || "");
-        formData.append("direksi[1][position]", "Wakil Direktur");
-        formData.append("direksi[1][email]", inputData.wadik_email || "");
-        formData.append(
-          "direksi[1][phone_number]",
-          inputData.wadik_no_telp || ""
-        );
-        formData.append("direksi[2][name]", inputData.pj_name || "");
-        formData.append("direksi[2][position]", "Penanggung jawab operasional");
-        formData.append("direksi[2][email]", inputData.pj_email || "");
-        formData.append("direksi[2][phone_number]", inputData.pj_no_telp || "");
-        formData.append("direksi[3][name]", inputData.kprs_name || "");
-        formData.append("direksi[3][position]", "Kepala Rumah Sakit");
-        formData.append("direksi[3][email]", inputData.kprs_email || "");
-        formData.append(
-          "direksi[3][phone_number]",
-          inputData.kprs_no_telp || ""
-        );
-        formData.append("direksi[4][name]", inputData.kr_name || "");
-        formData.append("direksi[4][position]", "Kepala Ruang");
-        formData.append("direksi[4][email]", inputData.kr_email || "");
-        formData.append("direksi[4][phone_number]", inputData.kr_no_telp || "");
-        formData.append("direksi[5][name]", inputData.kp_hd || "");
-        formData.append("direksi[5][position]", "Kepala perawat HD");
-        formData.append("direksi[5][email]", inputData.kp_email || "");
-        formData.append("direksi[5][phone_number]", inputData.kp_no_telp || "");
-        formData.append("direksi[6][name]", inputData.dokter_sppd_name || "");
-        formData.append("direksi[6][position]", "Dokter SpPD");
-        formData.append("direksi[6][email]", inputData.dokter_sppd_email || "");
-        formData.append(
-          "direksi[6][phone_number]",
-          inputData.dokter_sppd_notelp || ""
-        );
-        formData.append("direksi[7][name]", inputData.dokter_kgh_name || "");
-        formData.append("direksi[7][position]", "Dokter Kgh");
-        formData.append("direksi[7][email]", inputData.dokter_kgh_email || "");
-        formData.append(
-          "direksi[7][phone_number]",
-          inputData.dokter_kgh_no_telp || ""
-        );
-        formData.append("direksi[8][name]", inputData.du_hd_name || "");
-        formData.append("direksi[8][position]", "Dokter umum HD");
-        formData.append("direksi[8][email]", inputData.du_email || "");
-        formData.append("direksi[8][phone_number]", inputData.du_no_telp || "");
-        formData.append("direksi[9][name]", inputData.finance_name || "");
-        formData.append("direksi[9][position]", "Finance AP");
-        formData.append("direksi[9][email]", inputData.finance_email || "");
-        formData.append(
-          "direksi[9][phone_number]",
-          inputData.finance_no_telp || ""
-        );
-        formData.append("direksi[10][name]", inputData.acc_tax_name || "");
-        formData.append("direksi[10][position]", "Accounting & tax");
-        formData.append("direksi[10][email]", inputData.acc_tax_email || "");
-        formData.append(
-          "direksi[10][phone_number]",
-          inputData.acc_tax_telp || ""
-        );
-        formData.append("direksi[11][name]", inputData.purchase_name || "");
-        formData.append("direksi[11][position]", "Purchasing");
-        formData.append("direksi[11][email]", inputData.purchase_email || "");
-        formData.append(
-          "direksi[11][phone_number]",
-          inputData.purchase_no_telp || ""
-        );
-        formData.append("direksi[12][name]", inputData.logistik_name || "");
-        formData.append("direksi[12][position]", "Logistik");
-        formData.append("direksi[12][email]", inputData.logistik_email || "");
-        formData.append(
-          "direksi[12][phone_number]",
-          inputData.logistik_no_telp || ""
-        );
-        formData.append("direksi[13][name]", inputData.teknisi_name || "");
-        formData.append("direksi[13][position]", "Teknisi");
-        formData.append("direksi[13][email]", inputData.teknisi_email || "");
-        formData.append(
-          "direksi[13][phone_number]",
-          inputData.teknisi_no_telp || ""
-        );
-        formData.append("direksi[14][name]", inputData.klinik_name || "");
-        formData.append("direksi[14][position]", "Klinikal");
-        formData.append(
-          "direksi[14][email]",
-          inputData.klinik_name_email || ""
-        );
-        formData.append(
-          "direksi[14][phone_number]",
-          inputData.klinik_name_no_telp || ""
-        );
         // for (const pair of formData.entries()) {
         //   console.log(pair[0] + ": " + pair[1]);
         // }
         const response = await axios.post(
-          `${process.env.REACT_APP_BACKEND_URL}/v2/fdc-document`,
+          `${process.env.REACT_APP_BACKEND_URL}/v2/fdc-document/${data.fdc_document?.uid}`,
           formData,
           {
             headers: {
@@ -259,10 +135,6 @@ const InputFDC = ({ data }) => {
       }
     }
   };
-
-  const handleUpdate = (event) => {
-    event.prefentDefault();
-  };
   return (
     <Card.Body>
       <div class="alert alert-primary mt-2" role="alert">
@@ -286,6 +158,7 @@ const InputFDC = ({ data }) => {
             type="text"
             className="form-control"
             name="owner_company"
+            value={editData?.owner_company || ""}
             onChange={handleInput}
           />
         </div>
@@ -295,6 +168,7 @@ const InputFDC = ({ data }) => {
             type="text"
             className="form-control"
             name="founded_year_at"
+            value={editData?.founded_year_at || ""}
             onChange={handleInput}
           />
         </div>
@@ -306,6 +180,7 @@ const InputFDC = ({ data }) => {
             type="text"
             className="form-control"
             name="business_type"
+            value={editData?.business_type || ""}
             onChange={handleInput}
           />
         </div>
@@ -315,6 +190,7 @@ const InputFDC = ({ data }) => {
             type="text"
             className="form-control"
             name="website"
+            value={editData?.website || ""}
             onChange={handleInput}
           />
         </div>
@@ -325,6 +201,7 @@ const InputFDC = ({ data }) => {
           placeholder="Input in here"
           className="form-control"
           name="name_person_in_charge"
+          value={editData?.name_person_in_charge || ""}
           onChange={handleInput}
         />
         <label htmlFor="floatingInput">Nama Penanggung Jawab & Jabatan</label>
@@ -335,6 +212,7 @@ const InputFDC = ({ data }) => {
           name="email"
           placeholder="Input in here"
           className="form-control"
+          value={editData?.email || ""}
           onChange={handleInput}
         />
         <label htmlFor="floatingInput">
@@ -346,8 +224,9 @@ const InputFDC = ({ data }) => {
           type="number"
           name="phone_number"
           placeholder="Input in here"
-          onChange={handleInput}
           className="form-control"
+          value={editData?.phone_number || ""}
+          onChange={handleInput}
         />
         <label htmlFor="floatingInput">
           <FontAwesomeIcon icon={faPhone} /> No. Telepon kantor
@@ -360,9 +239,11 @@ const InputFDC = ({ data }) => {
           id=""
           cols="15"
           rows="5"
-          className="form-control"
           onChange={handleInput}
-        ></textarea>
+          className="form-control"
+        >
+          {editData?.company_address || ""}
+        </textarea>
       </div>
       <div className="mb-3">
         <label htmlFor="">
@@ -371,12 +252,14 @@ const InputFDC = ({ data }) => {
         </label>
         <textarea
           name="other_company_address"
-          onChange={handleInput}
           id=""
           cols="15"
           rows="5"
+          onChange={handleInput}
           className="form-control"
-        ></textarea>
+        >
+          {editData?.other_company_address || ""}
+        </textarea>
       </div>
       <div class="alert alert-primary mt-2" role="alert">
         <h6 style={{ fontWeight: "700" }}>
@@ -387,9 +270,10 @@ const InputFDC = ({ data }) => {
         <input
           type="text"
           name="npwp"
-          onChange={handleInput}
           placeholder="Input in here"
           className="form-control"
+          onChange={handleInput}
+          value={editData?.npwp || ""}
         />
         <label htmlFor="floatingInput">
           Nomor NPWP (Sesuai dengan Faktur Pajak)
@@ -400,8 +284,9 @@ const InputFDC = ({ data }) => {
           type="text"
           placeholder="Input in here"
           name="tax_invoice_number"
-          onChange={handleInput}
           className="form-control"
+          value={editData?.tax_invoice_number || ""}
+          onChange={handleInput}
         />
         <label htmlFor="floatingInput">Nomor Serial Faktur Pajak</label>
       </div>
@@ -411,13 +296,13 @@ const InputFDC = ({ data }) => {
           placeholder="Input in here"
           className="form-control"
           name="pkp_number"
+          value={editData?.pkp_number || ""}
           onChange={handleInput}
         />
         <label htmlFor="floatingInput">Nomor Surat Pengukuhan PKP</label>
       </div>
-        <FormDireksiAndPic handleInput={handleInput} />
-        <FormDataBank handleInputChange={handleInputChange} />
-
+      <EditDireksi valueOld={data?.fdc_document?.direksi} />
+      <EditBank valueOld={data?.fdc_document?.bank} />
       <div class="alert alert-primary mt-2" role="alert">
         <h6 style={{ fontWeight: "700" }}>
           <FontAwesomeIcon icon={faFolderPlus} className="me-2" /> Dokumen yang
@@ -425,21 +310,70 @@ const InputFDC = ({ data }) => {
         </h6>
       </div>
       <div className="mb-3">
+        {editData?.ktp_file ? (
+          <table className="mt-3">
+            <tr className="fw-medium">
+              <td style={{ width: "150px", fontSize: "0.9rem" }}>
+                KTP Penanggung Jawab
+              </td>
+              <td className="px-1">:</td>
+              <td>
+                <a
+                  className="btn btn-primary"
+                  href={`https://api-crm-iss.medilabjakarta.id/storage/file/deals/${editData.ktp_file}`}
+                  target="_blank"
+                  style={{
+                    whiteSpace: "normal",
+                    fontSize: "0.75rem",
+                    fontWeight: "600",
+                  }}
+                >
+                  {editData?.ktp_file || "-"}
+                </a>
+              </td>
+            </tr>
+          </table>
+        ) : (
+          ""
+        )}
         <label htmlFor="" className="fw-semibold mt-3 fs-6 mb-1">
           KTP Penanggung Jawab
         </label>
         <input
           type="file"
           name=""
+          className="form-control"
           onChange={(e) => {
             const file = e.target.files[0];
             setFileKtp(file);
           }}
-          className="form-control"
-          id=""
         />
       </div>
       <div className="mb-3">
+        {editData?.npwp_file ? (
+          <table className="mt-3">
+            <tr className="fw-medium">
+              <td style={{ width: "150px", fontSize: "0.9rem" }}>Kartu NPWP</td>
+              <td className="px-1">:</td>
+              <td>
+                <a
+                  className="btn btn-primary"
+                  href={`https://api-crm-iss.medilabjakarta.id/storage/file/deals/${editData.npwp_file}`}
+                  target="_blank"
+                  style={{
+                    whiteSpace: "normal",
+                    fontSize: "0.75rem",
+                    fontWeight: "600",
+                  }}
+                >
+                  {editData?.npwp_file || "-"}
+                </a>
+              </td>
+            </tr>
+          </table>
+        ) : (
+          ""
+        )}
         <label htmlFor="" className="fw-semibold mt-3 fs-6 mb-1">
           Kartu NPWP
         </label>
@@ -447,7 +381,6 @@ const InputFDC = ({ data }) => {
           type="file"
           name=""
           className="form-control"
-          id=""
           onChange={(e) => {
             const file = e.target.files[0];
             setFileNpwp(file);
@@ -455,6 +388,32 @@ const InputFDC = ({ data }) => {
         />
       </div>
       <div className="mb-3">
+        {editData?.npwp_file ? (
+          <table className="mt-3">
+            <tr className="fw-medium">
+              <td style={{ width: "150px", fontSize: "0.9rem" }}>
+                Surat Pengukuhan Pengusaha Kena Pajak (SPPKP)
+              </td>
+              <td className="px-1">:</td>
+              <td>
+                <a
+                  className="btn btn-primary"
+                  href={`https://api-crm-iss.medilabjakarta.id/storage/file/deals/${editData.sppkp_file}`}
+                  target="_blank"
+                  style={{
+                    whiteSpace: "normal",
+                    fontSize: "0.75rem",
+                    fontWeight: "600",
+                  }}
+                >
+                  {editData?.sppkp_file || "-"}
+                </a>
+              </td>
+            </tr>
+          </table>
+        ) : (
+          ""
+        )}
         <label htmlFor="" className="fw-semibold mt-3 fs-6 mb-1">
           Surat Pengukuhan Pengusaha Kena Pajak (SPPKP)
         </label>
@@ -462,7 +421,6 @@ const InputFDC = ({ data }) => {
           type="file"
           name=""
           className="form-control"
-          id=""
           onChange={(e) => {
             const file = e.target.files[0];
             setSppkp(file);
@@ -470,6 +428,32 @@ const InputFDC = ({ data }) => {
         />
       </div>
       <div className="mb-3">
+        {editData?.company_registration_file ? (
+          <table className="mt-3">
+            <tr className="fw-medium">
+              <td style={{ width: "150px", fontSize: "0.9rem" }}>
+                Tanda Daftar Perusahaan
+              </td>
+              <td className="px-1">:</td>
+              <td>
+                <a
+                  className="btn btn-primary"
+                  href={`https://api-crm-iss.medilabjakarta.id/storage/file/deals/${editData.company_registration_file}`}
+                  target="_blank"
+                  style={{
+                    whiteSpace: "normal",
+                    fontSize: "0.75rem",
+                    fontWeight: "600",
+                  }}
+                >
+                  {editData?.company_registration_file || "-"}
+                </a>
+              </td>
+            </tr>
+          </table>
+        ) : (
+          ""
+        )}
         <label htmlFor="" className="fw-semibold mt-3 fs-6 mb-1">
           Tanda Daftar Perusahaan
         </label>
@@ -477,7 +461,6 @@ const InputFDC = ({ data }) => {
           type="file"
           name=""
           className="form-control"
-          id=""
           onChange={(e) => {
             const file = e.target.files[0];
             setTandaDaftarPerusahaan(file);
@@ -485,6 +468,32 @@ const InputFDC = ({ data }) => {
         />
       </div>
       <div className="mb-3">
+        {editData?.business_license_file ? (
+          <table className="mt-3">
+            <tr className="fw-medium">
+              <td style={{ width: "150px", fontSize: "0.9rem" }}>
+                Surat Izin Usaha Perdagangan
+              </td>
+              <td className="px-1">:</td>
+              <td>
+                <a
+                  className="btn btn-primary"
+                  href={`https://api-crm-iss.medilabjakarta.id/storage/file/deals/${editData.business_license_file}`}
+                  target="_blank"
+                  style={{
+                    whiteSpace: "normal",
+                    fontSize: "0.75rem",
+                    fontWeight: "600",
+                  }}
+                >
+                  {editData?.business_license_file || "-"}
+                </a>
+              </td>
+            </tr>
+          </table>
+        ) : (
+          ""
+        )}
         <label htmlFor="" className="fw-semibold mt-3 fs-6 mb-1">
           Surat Izin Usaha Perdagangan
         </label>
@@ -500,6 +509,32 @@ const InputFDC = ({ data }) => {
         />
       </div>
       <div className="mb-3">
+        {editData?.siup_file ? (
+          <table className="mt-3">
+            <tr className="fw-medium">
+              <td style={{ width: "150px", fontSize: "0.9rem" }}>
+                Surat keterangan Domisili Usaha (SIUP)
+              </td>
+              <td className="px-1">:</td>
+              <td>
+                <a
+                  className="btn btn-primary"
+                  href={`https://api-crm-iss.medilabjakarta.id/storage/file/deals/${editData.siup_file}`}
+                  target="_blank"
+                  style={{
+                    whiteSpace: "normal",
+                    fontSize: "0.75rem",
+                    fontWeight: "600",
+                  }}
+                >
+                  {editData?.siup_file || "-"}
+                </a>
+              </td>
+            </tr>
+          </table>
+        ) : (
+          ""
+        )}
         <label htmlFor="" className="fw-semibold mt-3 fs-6 mb-1">
           Surat keterangan Domisili Usaha (SIUP)
         </label>
@@ -507,7 +542,6 @@ const InputFDC = ({ data }) => {
           type="file"
           name=""
           className="form-control"
-          id=""
           onChange={(e) => {
             const file = e.target.files[0];
             setSiup(file);
@@ -515,6 +549,32 @@ const InputFDC = ({ data }) => {
         />
       </div>
       <div className="mb-3">
+        {editData?.kso_file ? (
+          <table className="mt-3">
+            <tr className="fw-medium">
+              <td style={{ width: "150px", fontSize: "0.9rem" }}>
+                Tanda Tangan Kontrak Kerja Sama (KSO)
+              </td>
+              <td className="px-1">:</td>
+              <td>
+                <a
+                  className="btn btn-primary"
+                  href={`https://api-crm-iss.medilabjakarta.id/storage/file/deals/${editData.kso_file}`}
+                  target="_blank"
+                  style={{
+                    whiteSpace: "normal",
+                    fontSize: "0.75rem",
+                    fontWeight: "600",
+                  }}
+                >
+                  {editData?.kso_file || "-"}
+                </a>
+              </td>
+            </tr>
+          </table>
+        ) : (
+          ""
+        )}
         <label htmlFor="" className="fw-semibold mt-3 fs-6 mb-1">
           Tanda Tangan Kontrak Kerja Sama (KSO)
         </label>
@@ -530,11 +590,8 @@ const InputFDC = ({ data }) => {
         />
       </div>
       <div className=" mt-2">
-        <button
-          className="btn btn-primary me-2"
-          onClick={handleSubmit}
-        >
-          Simpan
+        <button className="btn btn-primary me-2" onClick={handleUpdate}>
+          Update
         </button>
         <button className="btn btn-secondary">Kembali</button>
       </div>
@@ -542,4 +599,4 @@ const InputFDC = ({ data }) => {
   );
 };
 
-export default InputFDC;
+export default EditFdc;

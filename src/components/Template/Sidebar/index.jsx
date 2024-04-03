@@ -28,7 +28,7 @@ function Sidebar() {
               />
             ))}
         </ul>
-        {/* <ul className="sidebar-nav" id="sidebar-nav">
+        <ul className="sidebar-nav" id="sidebar-nav">
           <MenuSidebar
             type="nonCollapse"
             name="Deals"
@@ -36,7 +36,7 @@ function Sidebar() {
             url="/deals-second"
             isActive="1"
           />
-        </ul> */}
+        </ul>
       </aside>
     </>
   );

@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import DataTable from "react-data-table-component";
 
-const DataTableRekapBiaya = () => {
+const DataTableRekapBiaya = ({ priceRab}) => {
 
   const data = [
     {
       name: "RAB Bangunan & Lainnya Terkain",
-      // nilai_estimasi: ValueRab,
+      nilai_estimasi: priceRab,
     },
     {
       name: "Support Selama Kerja Sama",

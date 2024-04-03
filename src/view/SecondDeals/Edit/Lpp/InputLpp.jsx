@@ -21,16 +21,22 @@ import axios from "axios";
 
 const InputLpp = ({ data, listCompany, uidDeals }) => {
   const uidPerson = localStorage.getItem("uid");
-  const [inputData, setInputData] = useState(data?.lpp_document);
+  const [inputData, setInputData] = useState(
+    data?.lpp_document ? data.lpp_document : []
+  );
   const [jenisKerjasama, setJenisKerjaSama] = useState();
-  const [Rab, setRab] = useState(inputData.is_rab || "");
-  const [feeAction, setFeeAction] = useState(inputData.is_fee || "");
+  const [Rab, setRab] = useState(inputData !== null ? inputData.is_rab : "");
+  const [feeAction, setFeeAction] = useState(
+    inputData !== null ? inputData.is_fee : ""
+  );
   const [supportKerjaSama, setSupportKerjaSama] = useState(
-    inputData.is_support || ""
+    inputData !== null ? inputData.is_support : ""
   );
 
   const [showOverlay, setShowOverlay] = useState(false);
-  const [priceFormat, setPriceFormat] = useState(inputData.price || "");
+  const [priceFormat, setPriceFormat] = useState(
+    inputData !== null ? inputData.price : ""
+  );
   const handleInputDataRP = (event) => {
     const rawValue = event.target.value;
     const formattedValue = formatCurrency(rawValue);
@@ -40,9 +46,9 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
   const formatCurrency = (value) => {
     const sanitizedValue = value.replace(/[^\d]/g, "");
     const formattedValue = Number(sanitizedValue).toLocaleString("id-ID");
-
     return formattedValue;
   };
+
   const handleShow = () => setShowOverlay(true);
   const handleClose = () => setShowOverlay(false);
   const handleChangeJenisKerjaSama = (e) => {
@@ -84,6 +90,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
     }
     return result;
   };
+
   const { fasksesData } = useSelector((state) => state.DataFaskes);
   const { BpjsData } = useSelector((state) => state.BpjsRegional);
   const { CategoryTypeData } = useSelector((state) => state.CategoryType);
@@ -135,27 +142,72 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
   };
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    dispatch(GetDataFaskes(token));
-    dispatch(GetDataRegionalBpjs(token));
-    dispatch(CategoryType(token));
-  }, [dispatch]);
-
-  const firstQty = parseFloat(inputData.operate_mkhd_first_qty);
-  const secondQty = parseFloat(inputData.operate_mkhd_second_qty);
-  const backUpOne = parseFloat(inputData.backup_mkhd_first_qty);
-  const backUpTwo = parseFloat(inputData.backup_mkhd_second_qty);
+  const firstQty = parseFloat(
+    inputData && inputData.operate_mkhd_first_qty !== null
+      ? inputData.operate_mkhd_first_qty
+      : ""
+  );
+  const secondQty = parseFloat(
+    inputData && inputData.operate_mkhd_second_qty !== null
+      ? inputData.operate_mkhd_second_qty
+      : ""
+  );
+  const backUpOne = parseFloat(
+    inputData && inputData.backup_mkhd_first_qty !== null
+      ? inputData.backup_mkhd_first_qty
+      : ""
+  );
+  const backUpTwo = parseFloat(
+    inputData && inputData.backup_mkhd_second_qty !== null
+      ? inputData.backup_mkhd_second_qty
+      : ""
+  );
   const resultMesin = firstQty + secondQty + backUpTwo + backUpOne;
   const actionDuringCoperationQty = (firstQty + secondQty) * 48 * 60;
 
-  const SupportData = [];
+  const tempSupport = [];
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
     if (key.startsWith("SupportKerjaSama")) {
       const data = JSON.parse(localStorage.getItem(key));
-      SupportData.push(data);
+      tempSupport.push(data);
     }
   }
+
+  const FeeData = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.startsWith("FeeTindakan")) {
+      const data = JSON.parse(localStorage.getItem(key));
+      FeeData.push(data);
+    }
+  }
+  let RabData = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.startsWith("RAB")) {
+      const data = JSON.parse(localStorage.getItem(key));
+      RabData.push(data);
+    }
+  }
+
+  const NoAlkes = [];
+  const Alkes = [];
+
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.startsWith("RAB")) {
+      const data = JSON.parse(localStorage.getItem(key));
+      data.forEach((item) => {
+        if (item.is_alkes === "no") {
+          NoAlkes.push({ ...item });
+        } else if (item.is_alkes === "yes") {
+          Alkes.push({ ...item });
+        }
+      });
+    }
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -181,7 +233,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
                 if (timer.textContent) {
                   timer.textContent = `${Swal.getTimerLeft()}`;
                 }
-              }, 100);
+              }, 200);
             }
           },
           willClose: () => {
@@ -253,24 +305,57 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
           "action_during_cooperation_qty",
           actionDuringCoperationQty || ""
         );
-
+        formData.append("is_rab", Rab || "");
+        if (Array.isArray(RabData[0]) && RabData[0].length > 0) {
+          RabData[0].forEach((rab, index) => {
+            formData.append(`rab[${index}][item_uid]`, rab.item || "");
+            formData.append(`rab[${index}][is_alkes]`, rab.is_alkes || "");
+            formData.append(
+              `rab[${index}][estimated_cost]`,
+              rab.nilai_estimasi_biaya || ""
+            );
+            formData.append(`rab[${index}][qty]`, rab.qty || "");
+            formData.append(
+              `rab[${index}][total_price]`,
+              rab.total_estimasi_biaya || ""
+            );
+            formData.append(`rab[${index}][realization_note]`, rab.note || "");
+          });
+        }
         formData.append("is_support", supportKerjaSama || "");
-        // SupportData[0].forEach((support, index) => {
-        //   formData.append(`support[${index}][item_uid]`, support.item || "");
-        //   formData.append(
-        //     `support[${index}][estimated_cost]`,
-        //     support.nilai_estimasi_biaya || ""
-        //   );
-        //   formData.append(`support[${index}][qty]`, support.qty || "");
-        //   formData.append(
-        //     `support[${index}][realization_note]`,
-        //     support.note || ""
-        //   );
-        // });
+        if (Array.isArray(tempSupport[0]) && tempSupport[0].length > 0) {
+          tempSupport[0].forEach((support, index) => {
+            formData.append(`support[${index}][item_uid]`, support.item || "");
+            formData.append(
+              `support[${index}][estimated_cost]`,
+              support.nilai_estimasi_biaya || ""
+            );
+            formData.append(`support[${index}][qty]`, support.qty || "");
+            formData.append(
+              `support[${index}][total_price]`,
+              support.total_estimasi_biaya || ""
+            );
+            formData.append(
+              `support[${index}][realization_note]`,
+              support.note || ""
+            );
+          });
+        }
+
+        formData.append("is_fee", feeAction || "");
+        if (Array.isArray(FeeData[0]) && FeeData[0].length > 0) {
+          FeeData[0].forEach((fee, index) => {
+            formData.append(`fee[${index}][recieve_name]`, fee.name || "");
+            const valueFee = fee.nilai.replace(/\./g, "");
+            formData.append(`fee[${index}][value]`, valueFee || "");
+            formData.append(`fee[${index}][qty]`, fee.qty || "");
+            formData.append(`fee[${index}][total_price]`, fee.total || "");
+            formData.append(`fee[${index}][realization_note]`, fee.note || "");
+          });
+        }
 
         formData.append("postscript", inputData.postscript || "");
-        formData.append("is_rab", Rab || "");
-        formData.append("is_fee", feeAction || "");
+
         for (const pair of formData.entries()) {
           console.log(pair[0] + ": " + pair[1]);
         }
@@ -308,11 +393,41 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
       }
     }
   };
-  // useEffect akan dijalankan ketika localStorage berubah
+  useEffect(() => {
+    dispatch(GetDataFaskes(token));
+    dispatch(GetDataRegionalBpjs(token));
+    dispatch(CategoryType(token));
+    const clearDataSupportKerjaSamaLocalstorage = () => {
+      localStorage.removeItem("SupportKerjaSama");
+    };
+    window.addEventListener("unload", clearDataSupportKerjaSamaLocalstorage);
+    return () => {
+      window.removeEventListener(
+        "unload",
+        clearDataSupportKerjaSamaLocalstorage
+      );
+    };
+  }, [dispatch]);
 
-  const handelUpdate = async(e) => {
-    e.preventDefault()
-  } 
+  useEffect(() => {
+    const clearFeeTindakan = () => {
+      localStorage.removeItem("FeeTindakan");
+    };
+    window.addEventListener("unload", clearFeeTindakan);
+    return () => {
+      window.removeEventListener("unload", clearFeeTindakan);
+    };
+  }, []);
+
+  useEffect(() => {
+    const ClearRAB = () => {
+      localStorage.removeItem("RAB");
+    };
+    window.addEventListener("unload", ClearRAB);
+    return () => {
+      window.removeEventListener("unload", ClearRAB);
+    };
+  }, []);
   return (
     <Card.Body>
       <div class="alert alert-primary mt-2" role="alert">
@@ -329,9 +444,6 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
               type: e.type,
             })
           }
-          value={selectCompany().find(
-            (e) => e.value === inputData.customer_name_uid || ""
-          )}
           required
         />
         <button
@@ -342,7 +454,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
         </button>
         <OverlayAddCompany visible={showOverlay} onClose={handleClose} />
       </div>
-      {inputData.type !== "D8iidh2341sf_kJ" ? (
+      {inputData && inputData.type !== "D8iidh2341sf_kJ" ? (
         <>
           <div className="mb-3">
             <Select
@@ -351,9 +463,6 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
               onChange={(e) =>
                 setInputData({ ...inputData, faskes_type_uid: e.value })
               }
-              value={selectFaskes().find(
-                (e) => e.value === inputData.faskes_type_uid || ""
-              )}
             />
           </div>
           <div className="mb-3">
@@ -363,9 +472,6 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
               onChange={(e) =>
                 setInputData({ ...inputData, bpjs_regional_uid: e.value })
               }
-              value={selectBpjs().find(
-                (e) => e.value === inputData.bpjs_regional_uid || ""
-              )}
             />
           </div>
         </>
@@ -382,7 +488,6 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
         <select
           name="type_collaboration"
           id=""
-          value={inputData.type_collaboration || ""}
           className="form-select"
           onChange={handleChangeJenisKerjaSama}
         >
@@ -399,7 +504,6 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
               <input
                 type="number"
                 name="revenue_sharing_iss"
-                value={inputData.revenue_sharing_iss || ""}
                 onChange={handleInputData}
                 id=""
                 className="form-control"
@@ -413,7 +517,6 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
               <input
                 type="number"
                 name="revenue_sharing_customer"
-                value={inputData.revenue_sharing_customer || ""}
                 onChange={handleInputData}
                 placeholder="%"
                 id=""
@@ -430,7 +533,6 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
           </label>
           <select
             name="sell_disconect"
-            value={inputData.sell_disconect || ""}
             id=""
             onChange={handleInputData}
             className="form-select"
@@ -447,9 +549,6 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
         <Select
           options={SelectCategory()}
           placeholder="Select Status"
-          value={SelectCategory().find(
-            (e) => e.value === inputData.category_type_uid || ""
-          )}
           onChange={(e) =>
             setInputData({ ...inputData, category_type_uid: e.value })
           }
@@ -462,7 +561,6 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
         <input
           type="text"
           name="collaboration_period"
-          value={inputData.collaboration_period || ""}
           id=""
           onChange={handleInputData}
           className="form-control"
@@ -509,7 +607,6 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
         </label>
         <select
           name="shipping_cost"
-          value={inputData.shipping_cost || ""}
           onChange={handleInputData}
           id=""
           className="form-select"
@@ -526,7 +623,6 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
         <input
           type="number"
           name="ro"
-          value={inputData.ro || ""}
           id=""
           onChange={handleInputData}
           className="form-control"
@@ -540,7 +636,6 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
             <input
               type="number"
               name="operate_mkhd_first_qty"
-              value={inputData.operate_mkhd_first_qty || ""}
               onChange={handleInputData}
               id=""
               className="form-control"
@@ -554,7 +649,6 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
             <input
               type="number"
               name="operate_mkhd_second_qty"
-              value={inputData.operate_mkhd_second_qty || ""}
               onChange={handleInputData}
               id=""
               className="form-control"
@@ -570,7 +664,6 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
             <input
               type="number"
               name="backup_mkhd_first_qty"
-              value={inputData.backup_mkhd_first_qty || ""}
               onChange={handleInputData}
               id=""
               className="form-control"
@@ -584,7 +677,6 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
             <input
               type="number"
               name="backup_mkhd_second_qty"
-              value={inputData.backup_mkhd_second_qty || ""}
               onChange={handleInputData}
               id=""
               className="form-control"
@@ -612,7 +704,6 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
             <input
               type="number"
               name="total_mesin_qty"
-              value={inputData.total_mesin_qty || ""}
               id=""
               onChange={handleInputData}
               className="form-control"
@@ -627,7 +718,6 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
             <input
               type="date"
               name="date_first_delivery"
-              value={inputData.date_first_delivery || ""}
               onChange={handleInputData}
               id=""
               className="form-control"
@@ -639,7 +729,6 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
             <input
               type="number"
               name="delivery_mkhd_first_qty"
-              value={inputData.delivery_mkhd_first_qty || ""}
               onChange={handleInputData}
               id=""
               className="form-control"
@@ -653,7 +742,6 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
             <input
               type="number"
               name="delivery_mkhd_second_qty"
-              value={inputData.delivery_mkhd_second_qty || ""}
               onChange={handleInputData}
               id=""
               className="form-control"
@@ -694,27 +782,19 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
         <label htmlFor="" className="mb-1 fw-bold">
           RAB Bangunan & Lainnya terkait pembiayaan awal (Optional)
         </label>
-        <select
-          name=""
-          id=""
-          className="form-select"
-          value={Rab || ""}
-          onChange={handleRab}
-        >
+        <select name="" id="" className="form-select" onChange={handleRab}>
           <option value="">Select Chose</option>
           <option value="yes">Ya</option>
           <option value="no">Tidak</option>
         </select>
       </div>
-      {Rab === "yes" ? <DataTableRab /> : ""}
+      {Rab === "yes" ? <DataTableRab Alkes={Alkes} NoAlkes={NoAlkes} /> : ""}
       <div className="mb-3">
         <label htmlFor="" className="mb-1 fw-bold">
-          Support Selama Kerja Sama (Optional)
+          Support Selama Kerja Sama (Optional) 
         </label>
         <select
           name="support"
-          id=""
-          value={supportKerjaSama || ""}
           className="form-select"
           onChange={handleSupportKerjaSama}
         >
@@ -732,7 +812,6 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
           name="fee"
           id=""
           className="form-select"
-          value={feeAction || ""}
           onChange={handleFeeAction}
         >
           <option value="">Select Chose</option>
@@ -771,8 +850,8 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
         className="mb-3"
       />
       <div className=" mt-2">
-        <button className="btn btn-primary me-2" onClick={data?.lpp_document !== null ? handelUpdate : handleSubmit}>
-          {data?.lpp_document !== null ? `Update` : `Simpan`}
+        <button className="btn btn-primary me-2" onClick={handleSubmit}>
+          Simpan
         </button>
         <button className="btn btn-secondary">Kembali</button>
       </div>

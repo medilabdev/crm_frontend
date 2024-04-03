@@ -5,12 +5,13 @@ import { Card } from "react-bootstrap";
 
 import ShowFDC from "./ShowFDC";
 import InputFDC from "./ShowFDC/InputFDC";
+import EditFdc from "./ShowFDC/EditFdc";
 
 const FDC = ({ userUid, data }) => {
   const [showFDC, setShowFDC] = useState(true);
   const handleShowFDC = () => setShowFDC(!showFDC);
   const uid = localStorage.getItem("uid");
-  console.log(data);
+
   return (
     <div id="FDC" className="col-12">
       <Card className="shadow-sm">
@@ -28,19 +29,21 @@ const FDC = ({ userUid, data }) => {
             </div>
           </div>
         </Card.Header>
-        {userUid !== uid ? (
+      
+        {data?.fdc_document === null ? <InputFDC data={data} /> : userUid !== uid ? (
           <ShowFDC
             show={data?.fdc_document}
             CompanyName={data?.lpp_document?.customer?.name}
           />
         ) : showFDC ? (
-          <InputFDC data={data} />
+          <EditFdc data={data} />
         ) : (
           <ShowFDC
             show={data?.fdc_document}
             CompanyName={data?.lpp_document?.customer?.name}
           />
-        )}
+        )} 
+      
       </Card>
     </div>
   );

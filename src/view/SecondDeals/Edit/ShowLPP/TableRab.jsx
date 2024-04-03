@@ -2,7 +2,7 @@ import React from "react";
 import DataTable from "react-data-table-component";
 import dummy from "../Lpp/dummy";
 
-const TableRab = () => {
+const TableRab = ({ data }) => {
   const customStyle = {
     headRow: {
       style: {
@@ -22,43 +22,44 @@ const TableRab = () => {
       },
     },
   };
-  const allData = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key.startsWith("RAB")) {
-      const data = JSON.parse(localStorage.getItem(key));
-      allData.push(data);
-    }
-  }
+
   const ColumnsTable = [
     {
       name: "Item",
-      selector: (row) => row.item,
+      selector: (row) => row.item_uid || "",
+    },
+    {
+      name: "Is Alkes",
+      selector: (row) => (row.is_alkes === "yes" ? "Iya" : "Tidak"),
     },
     {
       name: "Nilai Estimasi Biaya",
       selector: (row) =>
-        `Rp. ${new Intl.NumberFormat().format(row.nilai_estimasi_biaya)}`,
+        row.estimated_cost
+          ? `Rp. ${new Intl.NumberFormat().format(row.estimated_cost)}`
+          : "",
     },
     {
       name: "Qty",
-      selector: (row) => row.qty,
+      selector: (row) => (row.qty ? row.qty : ""),
     },
     {
       name: "Total Estimasi Biaya",
       selector: (row) =>
-        `Rp. ${new Intl.NumberFormat().format(row.total_estimasi_biaya)}`,
+        row.total_estimated_cost
+          ? `Rp. ${new Intl.NumberFormat().format(row.total_estimated_cost)}`
+          : "-",
     },
     {
       name: "Catatan Realisasi",
-      selector: (row) => row.note,
+      selector: (row) => (row.note ? row.note : ""),
     },
   ];
   return (
     <div>
       <DataTable
         columns={ColumnsTable}
-        data={allData[0]}
+        data={data?.support}
         customStyles={customStyle}
         dense
       />

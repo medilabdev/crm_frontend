@@ -19,7 +19,6 @@ const AddModalSupport = ({ show, handleClose }) => {
   const formatCurrency = (value) => {
     const sanitizedValue = value.replace(/[^\d]/g, "");
     const formattedValue = Number(sanitizedValue).toLocaleString("id-ID");
-
     return formattedValue;
   };
 
@@ -50,11 +49,6 @@ const AddModalSupport = ({ show, handleClose }) => {
         note: "",
         qty: "",
       });
-
-      const valueFeeString = localStorage.getItem("valueSupport");
-      let totalExistingValue = valueFeeString ? parseInt(valueFeeString) : 0;
-      totalExistingValue += result_estimasi_charge;
-      localStorage.setItem("valueSupport", totalExistingValue.toString());
       setInputEst(0);
       handleClose();
     }
