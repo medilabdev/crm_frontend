@@ -1,8 +1,9 @@
 import React from "react";
 import DataTable from "react-data-table-component";
 import dummy from "../Lpp/dummy";
+import { ro } from "@faker-js/faker";
 
-const TableSupport = () => {
+const TableSupport = ({ data }) => {
   const allData = [];
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
@@ -14,25 +15,29 @@ const TableSupport = () => {
   const ColumnsTable = [
     {
       name: "Item",
-      selector: (row) => row.item,
+      selector: (row) => row.item_uid || "",
     },
     {
       name: "Nilai Estimasi Biaya",
       selector: (row) =>
-        `Rp. ${new Intl.NumberFormat().format(row.nilai_estimasi_biaya)}`,
+        row?.estimated_cost
+          ? `Rp. ${new Intl.NumberFormat().format(row.estimated_cost)}`
+          : "",
     },
     {
       name: "Qty",
-      selector: (row) => row.qty,
+      selector: (row) => row.qty || "",
     },
     {
       name: "Total Estimasi Biaya",
       selector: (row) =>
-        `Rp. ${new Intl.NumberFormat().format(row.total_estimasi_biaya)}`,
+        row?.total_estimated_cost
+          ? `Rp. ${new Intl.NumberFormat().format(row.total_estimated_cost)}`
+          : "",
     },
     {
       name: "Catatan Realisasi",
-      selector: (row) => row.note,
+      selector: (row) => row.note || "-",
     },
   ];
   const customStyle = {
@@ -59,7 +64,7 @@ const TableSupport = () => {
       <div>
         <DataTable
           columns={ColumnsTable}
-          data={allData[0]}
+          data={data?.support || ""}
           customStyles={customStyle}
           dense
         />

@@ -116,15 +116,6 @@ const SupportKerjaSama = () => {
       ),
     },
   ];
-  useEffect(() => {
-    const clearDataSupportKerjaSamaLocalstorage = () => {
-      localStorage.removeItem("SupportKerjaSama");
-    };
-    window.addEventListener("unload", clearDataSupportKerjaSamaLocalstorage);
-    return () => {
-      window.removeEventListener("unload", clearDataSupportKerjaSamaLocalstorage);
-    };
-  }, []);
 
   return (
     <div className="row mb-2">

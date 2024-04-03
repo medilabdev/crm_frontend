@@ -7,7 +7,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPenToSquare, faTrash } from "@fortawesome/free-solid-svg-icons";
 import EditModalsRab from "./EditModalsRab";
 
-const DataTableRab = () => {
+const DataTableRab = ({ NoAlkes, Alkes }) => {
   const [ShowModal, setShowModal] = useState(false);
   const [data, setData] = useState([]);
   const handleShow = () => setShowModal(true);
@@ -43,15 +43,13 @@ const DataTableRab = () => {
       allData.push(data);
     }
   }
-  const handleDeleteRAB = (id) => {
+
+  const handleDeleteItem = (id) => {
     const data = allData[0].filter((rab) => rab.id !== id);
     setData(data);
     localStorage.setItem("RAB", JSON.stringify(data));
   };
 
-
-
-  
   const ColumnsTable = [
     {
       name: "Item",
@@ -79,7 +77,7 @@ const DataTableRab = () => {
       name: "Action",
       selector: (row) => (
         <>
-          <button
+          {/* <button
             style={{ border: "none", backgroundColor: "white" }}
             onClick={() =>
               handleEditRab(
@@ -93,10 +91,10 @@ const DataTableRab = () => {
             }
           >
             <FontAwesomeIcon icon={faPenToSquare} />
-          </button>
+          </button> */}
           <button
             style={{ border: "none", backgroundColor: "white" }}
-            onClick={() => handleDeleteRAB(row.id)}
+            onClick={() => handleDeleteItem(row.id, true)}
           >
             <FontAwesomeIcon icon={faTrash} />
           </button>
@@ -123,7 +121,7 @@ const DataTableRab = () => {
       },
     },
   };
-
+  console.log(Alkes);
   return (
     <div className="row mb-2">
       <div className="col">
@@ -140,13 +138,26 @@ const DataTableRab = () => {
             </div>
           </Card.Header>
           <DataTable
-            className="p-2"
+            className="p-2 mb-2"
             columns={ColumnsTable}
-            data={allData[0]}
+            data={Alkes}
             customStyles={customStyle}
+            dense
+          />
+          <DataTable
+            className="mb-2 p-2"
+            columns={ColumnsTable}
+            data={NoAlkes}
+            customStyles={customStyle}
+            dense
           />
           <ModalsRab show={ShowModal} handleClose={handleClose} />
-          <EditModalsRab show={editDataModal} handleClose={handleCloseEdit} data={editDataRab} dataOld={allData[0]} />
+          {/* <EditModalsRab
+            show={editDataModal}
+            handleClose={handleCloseEdit}
+            data={editDataRab}
+            dataOld={allData[0]}
+          /> */}
         </Card>
       </div>
     </div>
