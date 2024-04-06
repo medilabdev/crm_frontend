@@ -20,7 +20,6 @@ const LPP = ({ userUid, data, listCompany, uidDeals }) => {
   const [showLpp, setShowLpp] = useState(true);
   const uid = localStorage.getItem("uid");
   const handleShowLpp = () => setShowLpp(!showLpp);
-  console.log(data);
   return (
     <div id="LPP">
       <div className="col-12">
@@ -28,7 +27,9 @@ const LPP = ({ userUid, data, listCompany, uidDeals }) => {
           <Card.Header>
             <div className="">
               <span className="fs-5 fw-semibold">
-                Lembar Persetujuan Project
+                {data?.lpp_document === null
+                  ? "Lembar Persetujuan Project"
+                  : "Edit Lembar Persetujuan Project"}
               </span>
               <div className="float-end">
                 <button className="btn btn-primary" onClick={handleShowLpp}>
@@ -41,14 +42,19 @@ const LPP = ({ userUid, data, listCompany, uidDeals }) => {
               </div>
             </div>
           </Card.Header>
-          {data?.lpp_document === null ? <InputLpp data={data} listCompany={listCompany} uidDeals={uidDeals} /> : userUid !== uid ? (
-            <ShowLPP />
+          {data?.lpp_document === null ? (
+            <InputLpp
+              data={data}
+              listCompany={listCompany}
+              uidDeals={uidDeals}
+            />
+          ) : userUid !== uid ? (
+            <ShowLPP data={data} />
           ) : showLpp ? (
-            <EditLpp />
+            <EditLpp data={data?.lpp_document} listCompany={listCompany}  uidDeals={uidDeals} />
           ) : (
             <ShowLPP data={data} />
           )}
-         
         </Card>
       </div>
     </div>

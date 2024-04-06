@@ -1,16 +1,10 @@
 import React from "react";
 import DataTable from "react-data-table-component";
 import dummy from "../Lpp/dummy";
+import { Card } from "react-bootstrap"
 
 const TableFee = ({ data }) => {
-  const allData = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key.startsWith("FeeTindakan")) {
-      const data = JSON.parse(localStorage.getItem(key));
-      allData.push(data);
-    }
-  }
+
   const ColumnsTable = [
     {
       name: "Nama Penerima",
@@ -53,13 +47,25 @@ const TableFee = ({ data }) => {
     },
   };
   return (
-    <div>
-      <DataTable
+    <div className="row mb-2">
+      <div className="col">
+      <Card>
+          <Card.Header>
+          <span style={{fontSize:"0.85rem", fontWeight:"500"}}>
+          Fee Tindakan (bila ada)
+                </span>
+          </Card.Header>
+          <Card.Body>
+          <DataTable
         data={data?.fee || ""}
         columns={ColumnsTable}
         customStyles={customStyle}
         dense
       />
+          </Card.Body>
+          </ Card>
+      </div>
+     
     </div>
   );
 };

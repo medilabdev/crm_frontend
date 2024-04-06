@@ -121,7 +121,7 @@ const DataTableRab = ({ NoAlkes, Alkes }) => {
       },
     },
   };
-  console.log(Alkes);
+
   return (
     <div className="row mb-2">
       <div className="col">

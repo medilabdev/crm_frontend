@@ -7,6 +7,7 @@ import RekapBiaya from "./RekapBiaya";
 import Timeline from "./Timeline";
 
 const ShowLPP = ({ data }) => {
+
   return (
     <Card.Body>
       <div class="fw-bold mb-3">
@@ -44,22 +45,41 @@ const ShowLPP = ({ data }) => {
             Jenis Kerja Sama
           </td>
           <td className="px-1">:</td>
-          <td>Example</td>
+          <td>
+            {data?.lpp_document?.type_collaboration === "RevenueSharing"
+              ? "Revenue Sharing"
+              : data?.lpp_document?.type_collaboration === "JualPutus"
+                ? "Jual Putus"
+                : "KSO"}
+          </td>
         </tr>
-        <tr className="fw-medium">
-          <td style={{ width: "300px", fontSize: "0.9rem" }}>Customer</td>
-          <td className="px-1">:</td>
-          <td>{data?.lpp_document?.revenue_sharing_customer || "-"} %</td>
-        </tr>
-        <tr className="fw-medium">
-          <td style={{ width: "300px", fontSize: "0.9rem" }}>ISS</td>
-          <td className="px-1">:</td>
-          <td>{data?.lpp_document?.revenue_sharing_iss || "-"} %</td>
-        </tr>
+        {data?.lpp_document?.type_collaboration === "RevenueSharing" ? (
+          <>
+            <tr className="fw-medium">
+              <td style={{ width: "300px", fontSize: "0.9rem" }}>Customer</td>
+              <td className="px-1">:</td>
+              <td>{data?.lpp_document?.revenue_sharing_customer || "-"} %</td>
+            </tr>
+            <tr className="fw-medium">
+              <td style={{ width: "300px", fontSize: "0.9rem" }}>ISS</td>
+              <td className="px-1">:</td>
+              <td>{data?.lpp_document?.revenue_sharing_iss || "-"} %</td>
+            </tr>
+          </>
+        ) : data?.lpp_document?.type_collaboration === "JualPutus" ? (
+          <tr className="fw-medium">
+            <td style={{ width: "300px", fontSize: "0.9rem" }}>Jual Putus </td>
+            <td className="px-1">:</td>
+            <td>{data?.lpp_document?.sell_disconect || "-"} %</td>
+          </tr>
+        ) : (
+          ""
+        )}
+
         <tr className="fw-medium">
           <td style={{ width: "300px", fontSize: "0.9rem" }}>Status</td>
           <td className="px-1">:</td>
-          <td>Replace</td>
+          <td>{data?.lpp_document?.category_type_uid || ""}</td>
         </tr>
       </table>
       <div class="fw-bold mb-3">
@@ -178,24 +198,17 @@ const ShowLPP = ({ data }) => {
             Tindakan selama kerjasama
           </td>
           <td className="px-1">:</td>
-          <td>Example</td>
+          <td>{data?.lpp_document?.action_during_cooperation_qty || ""}</td>
         </tr>
       </table>
-      <div class="fw-bold ">
-        <span className="fs-6 text-decoration-underline">
-          RAB dan Lainnya terkait Pembiayan Diawal
-        </span>
-      </div>
       <div className="p-2 mb-3">
-        {data?.lpp_document?.rab !== null  ? <TableRab data={data?.lpp_document || ""} />  : "-" }
-     
+        {data?.lpp_document?.rab !== null ? (
+          <TableRab data={data?.lpp_document || ""} />
+        ) : (
+          "-"
+        )}
       </div>
       <hr />
-      <div class="fw-bold">
-        <span className="fs-6 text-decoration-underline">
-          Support selama masa kerjasama
-        </span>
-      </div>
       <div className="p-2 mb-3">
         {data?.lpp_document?.support !== null ? (
           <TableSupport data={data?.lpp_document || ""} />
@@ -204,9 +217,6 @@ const ShowLPP = ({ data }) => {
         )}
       </div>
       <hr />
-      <div class="fw-bold">
-        <span className="fs-6 text-decoration-underline">Fee Tindakan</span>
-      </div>
       <div className="p-2 mb-3">
         {data?.lpp_document?.fee !== null ? (
           <TableFee data={data?.lpp_document || ""} />
@@ -215,17 +225,24 @@ const ShowLPP = ({ data }) => {
         )}
       </div>
       <hr />
-      <div class="fw-bold">
-        <span className="fs-6 text-decoration-underline">Rekap Biaya</span>
-      </div>
-      <RekapBiaya />
+
+      <RekapBiaya data={data?.lpp_document || ""} />
       <hr />
       <div class="fw-bold">
         <span className="fs-6 text-decoration-underline">Catatan</span>
       </div>
       <table className="mb-4">
         <tr className="fw-medium">
-          <td>{data?.lpp_document?.postscript || ""}</td>
+          <td>
+          {data && data.lpp_document?.postscript ? (
+              <span
+                dangerouslySetInnerHTML={{
+                  __html: data.lpp_document?.postscript,
+                }}
+              />
+            ) : (
+              "-"
+            )}</td>
         </tr>
       </table>
 
@@ -235,10 +252,11 @@ const ShowLPP = ({ data }) => {
             Start Date Timeline
           </td>
           <td className="px-1">:</td>
-          <td>12 Januari 2025</td>
+          
+          <td>{data?.lpp_document?.timeline[0]?.year_period || "-"}</td>
         </tr>
       </table>
-      <Timeline />
+      <Timeline data={data?.lpp_document} />
     </Card.Body>
   );
 };

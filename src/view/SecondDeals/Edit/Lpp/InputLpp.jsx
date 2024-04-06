@@ -25,13 +25,9 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
     data?.lpp_document ? data.lpp_document : []
   );
   const [jenisKerjasama, setJenisKerjaSama] = useState();
-  const [Rab, setRab] = useState(inputData !== null ? inputData.is_rab : "");
-  const [feeAction, setFeeAction] = useState(
-    inputData !== null ? inputData.is_fee : ""
-  );
-  const [supportKerjaSama, setSupportKerjaSama] = useState(
-    inputData !== null ? inputData.is_support : ""
-  );
+  const [Rab, setRab] = useState([]);
+  const [feeAction, setFeeAction] = useState([]);
+  const [supportKerjaSama, setSupportKerjaSama] = useState([]);
 
   const [showOverlay, setShowOverlay] = useState(false);
   const [priceFormat, setPriceFormat] = useState(
@@ -332,36 +328,36 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
         formData.append("is_rab", Rab || "");
         if (Array.isArray(RabData[0]) && RabData[0].length > 0) {
           RabData[0].forEach((rab, index) => {
-            formData.append(`rab[${index}][item_uid]`, rab.item || "");
-            formData.append(`rab[${index}][is_alkes]`, rab.is_alkes || "");
+            formData.append(`rab[${index}][item_uid]`, rab?.item || "");
+            formData.append(`rab[${index}][is_alkes]`, rab?.is_alkes || "");
             formData.append(
               `rab[${index}][estimated_cost]`,
-              rab.nilai_estimasi_biaya || ""
+              rab?.nilai_estimasi_biaya || ""
             );
-            formData.append(`rab[${index}][qty]`, rab.qty || "");
+            formData.append(`rab[${index}][qty]`, rab?.qty || "");
             formData.append(
               `rab[${index}][total_price]`,
-              rab.total_estimasi_biaya || ""
+              rab?.total_estimasi_biaya || ""
             );
-            formData.append(`rab[${index}][realization_note]`, rab.note || "");
+            formData.append(`rab[${index}][realization_note]`, rab?.note || "");
           });
         }
         formData.append("is_support", supportKerjaSama || "");
         if (Array.isArray(tempSupport[0]) && tempSupport[0].length > 0) {
           tempSupport[0].forEach((support, index) => {
-            formData.append(`support[${index}][item_uid]`, support.item || "");
+            formData.append(`support[${index}][item_uid]`, support?.item || "");
             formData.append(
               `support[${index}][estimated_cost]`,
-              support.nilai_estimasi_biaya || ""
+              support?.nilai_estimasi_biaya || ""
             );
-            formData.append(`support[${index}][qty]`, support.qty || "");
+            formData.append(`support[${index}][qty]`, support?.qty || "");
             formData.append(
               `support[${index}][total_price]`,
-              support.total_estimasi_biaya || ""
+              support?.total_estimasi_biaya || ""
             );
             formData.append(
               `support[${index}][realization_note]`,
-              support.note || ""
+              support?.note || ""
             );
           });
         }
@@ -369,12 +365,12 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
         formData.append("is_fee", feeAction || "");
         if (Array.isArray(FeeData[0]) && FeeData[0].length > 0) {
           FeeData[0].forEach((fee, index) => {
-            formData.append(`fee[${index}][recieve_name]`, fee.name || "");
-            const valueFee = fee.nilai.replace(/\./g, "");
+            formData.append(`fee[${index}][recieve_name]`, fee?.name || "");
+            const valueFee = fee?.nilai.replace(/\./g, "");
             formData.append(`fee[${index}][value]`, valueFee || "");
-            formData.append(`fee[${index}][qty]`, fee.qty || "");
-            formData.append(`fee[${index}][total_price]`, fee.total || "");
-            formData.append(`fee[${index}][realization_note]`, fee.note || "");
+            formData.append(`fee[${index}][qty]`, fee?.qty || "");
+            formData.append(`fee[${index}][total_price]`, fee?.total || "");
+            formData.append(`fee[${index}][realization_note]`, fee?.note || "");
           });
         }
         formData.append("postscript", inputData.postscript || "");
@@ -417,59 +413,60 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
         formData.append("timeline[2][9]", inputTimeline.timeline33 || 0);
         formData.append("timeline[2][10]", inputTimeline.timeline34 || 0);
         formData.append("timeline[2][11]", inputTimeline.timeline35 || 0);
-        formData.append("timeline[2][12]", inputTimeline.timeline36 || 0); 
-        formData.append("timeline[3][name]", "Install Mesin"); 
-        formData.append("timeline[3][1]", inputTimeline.timeline37 || 0); 
-        formData.append("timeline[3][2]", inputTimeline.timeline38 || 0); 
-        formData.append("timeline[3][3]", inputTimeline.timeline39 || 0); 
-        formData.append("timeline[3][4]", inputTimeline.timeline40 || 0); 
-        formData.append("timeline[3][5]", inputTimeline.timeline41 || 0); 
-        formData.append("timeline[3][6]", inputTimeline.timeline42 || 0); 
-        formData.append("timeline[3][7]", inputTimeline.timeline43 || 0); 
-        formData.append("timeline[3][8]", inputTimeline.timeline44 || 0); 
-        formData.append("timeline[3][9]", inputTimeline.timeline45 || 0); 
-        formData.append("timeline[3][10]", inputTimeline.timeline46 || 0); 
-        formData.append("timeline[3][11]", inputTimeline.timeline47 || 0); 
-        formData.append("timeline[3][12]", inputTimeline.timeline48 || 0); 
-        formData.append("timeline[4][name]", "Izin HD & BPJS"); 
-        formData.append("timeline[4][1]", inputTimeline.timeline49 || 0); 
-        formData.append("timeline[4][2]", inputTimeline.timeline50 || 0); 
-        formData.append("timeline[4][3]", inputTimeline.timeline51 || 0); 
-        formData.append("timeline[4][4]", inputTimeline.timeline52 || 0); 
-        formData.append("timeline[4][5]", inputTimeline.timeline53 || 0); 
-        formData.append("timeline[4][6]", inputTimeline.timeline54 || 0); 
-        formData.append("timeline[4][7]", inputTimeline.timeline55 || 0); 
-        formData.append("timeline[4][8]", inputTimeline.timeline56 || 0); 
-        formData.append("timeline[4][9]", inputTimeline.timeline57 || 0); 
-        formData.append("timeline[4][10]", inputTimeline.timeline58 || 0); 
-        formData.append("timeline[4][11]", inputTimeline.timeline59 || 0); 
-        formData.append("timeline[4][12]", inputTimeline.timeline60 || 0); 
-        formData.append("timeline[5][name]", "Training"); 
-        formData.append("timeline[5][1]", inputTimeline.timeline61 || 0); 
-        formData.append("timeline[5][2]", inputTimeline.timeline62 || 0); 
-        formData.append("timeline[5][3]", inputTimeline.timeline63 || 0); 
-        formData.append("timeline[5][4]", inputTimeline.timeline64 || 0); 
-        formData.append("timeline[5][5]", inputTimeline.timeline65 || 0); 
-        formData.append("timeline[5][6]", inputTimeline.timeline66 || 0); 
-        formData.append("timeline[5][7]", inputTimeline.timeline67 || 0); 
-        formData.append("timeline[5][8]", inputTimeline.timeline68 || 0); 
-        formData.append("timeline[5][9]", inputTimeline.timeline69 || 0); 
-        formData.append("timeline[5][10]", inputTimeline.timeline70 || 0); 
-        formData.append("timeline[5][11]", inputTimeline.timeline71 || 0); 
-        formData.append("timeline[5][12]", inputTimeline.timeline72 || 0); 
-        formData.append("timeline[6][name]", "1st Running Patient"); 
-        formData.append("timeline[6][1]", inputTimeline.timeline73 || 0); 
-        formData.append("timeline[6][2]", inputTimeline.timeline74 || 0); 
-        formData.append("timeline[6][3]", inputTimeline.timeline75 || 0); 
-        formData.append("timeline[6][4]", inputTimeline.timeline76 || 0); 
-        formData.append("timeline[6][5]", inputTimeline.timeline77 || 0); 
-        formData.append("timeline[6][6]", inputTimeline.timeline78 || 0); 
-        formData.append("timeline[6][7]", inputTimeline.timeline79 || 0); 
-        formData.append("timeline[6][8]", inputTimeline.timeline80 || 0); 
-        formData.append("timeline[6][9]", inputTimeline.timeline81 || 0); 
-        formData.append("timeline[6][10]", inputTimeline.timeline82 || 0); 
-        formData.append("timeline[6][11]", inputTimeline.timeline83 || 0); 
-        formData.append("timeline[6][12]", inputTimeline.timeline84 || 0); 
+        formData.append("timeline[2][12]", inputTimeline.timeline36 || 0);
+        formData.append("timeline[3][name]", "Install Mesin");
+        formData.append("timeline[3][1]", inputTimeline.timeline37 || 0);
+        formData.append("timeline[3][2]", inputTimeline.timeline38 || 0);
+        formData.append("timeline[3][3]", inputTimeline.timeline39 || 0);
+        formData.append("timeline[3][4]", inputTimeline.timeline40 || 0);
+        formData.append("timeline[3][5]", inputTimeline.timeline41 || 0);
+        formData.append("timeline[3][6]", inputTimeline.timeline42 || 0);
+        formData.append("timeline[3][7]", inputTimeline.timeline43 || 0);
+        formData.append("timeline[3][8]", inputTimeline.timeline44 || 0);
+        formData.append("timeline[3][9]", inputTimeline.timeline45 || 0);
+        formData.append("timeline[3][10]", inputTimeline.timeline46 || 0);
+        formData.append("timeline[3][11]", inputTimeline.timeline47 || 0);
+        formData.append("timeline[3][12]", inputTimeline.timeline48 || 0);
+        formData.append("timeline[4][name]", "Izin HD & BPJS");
+        formData.append("timeline[4][1]", inputTimeline.timeline49 || 0);
+        formData.append("timeline[4][2]", inputTimeline.timeline50 || 0);
+        formData.append("timeline[4][3]", inputTimeline.timeline51 || 0);
+        formData.append("timeline[4][4]", inputTimeline.timeline52 || 0);
+        formData.append("timeline[4][5]", inputTimeline.timeline53 || 0);
+        formData.append("timeline[4][6]", inputTimeline.timeline54 || 0);
+        formData.append("timeline[4][7]", inputTimeline.timeline55 || 0);
+        formData.append("timeline[4][8]", inputTimeline.timeline56 || 0);
+        formData.append("timeline[4][9]", inputTimeline.timeline57 || 0);
+        formData.append("timeline[4][10]", inputTimeline.timeline58 || 0);
+        formData.append("timeline[4][11]", inputTimeline.timeline59 || 0);
+        formData.append("timeline[4][12]", inputTimeline.timeline60 || 0);
+        formData.append("timeline[5][name]", "Training");
+        formData.append("timeline[5][1]", inputTimeline.timeline61 || 0);
+        formData.append("timeline[5][2]", inputTimeline.timeline62 || 0);
+        formData.append("timeline[5][3]", inputTimeline.timeline63 || 0);
+        formData.append("timeline[5][4]", inputTimeline.timeline64 || 0);
+        formData.append("timeline[5][5]", inputTimeline.timeline65 || 0);
+        formData.append("timeline[5][6]", inputTimeline.timeline66 || 0);
+        formData.append("timeline[5][7]", inputTimeline.timeline67 || 0);
+        formData.append("timeline[5][8]", inputTimeline.timeline68 || 0);
+        formData.append("timeline[5][9]", inputTimeline.timeline69 || 0);
+        formData.append("timeline[5][10]", inputTimeline.timeline70 || 0);
+        formData.append("timeline[5][11]", inputTimeline.timeline71 || 0);
+        formData.append("timeline[5][12]", inputTimeline.timeline72 || 0);
+        formData.append("timeline[6][name]", "1st Running Patient");
+        formData.append("timeline[6][1]", inputTimeline.timeline73 || 0);
+        formData.append("timeline[6][2]", inputTimeline.timeline74 || 0);
+        formData.append("timeline[6][3]", inputTimeline.timeline75 || 0);
+        formData.append("timeline[6][4]", inputTimeline.timeline76 || 0);
+        formData.append("timeline[6][5]", inputTimeline.timeline77 || 0);
+        formData.append("timeline[6][6]", inputTimeline.timeline78 || 0);
+        formData.append("timeline[6][7]", inputTimeline.timeline79 || 0);
+        formData.append("timeline[6][8]", inputTimeline.timeline80 || 0);
+        formData.append("timeline[6][9]", inputTimeline.timeline81 || 0);
+        formData.append("timeline[6][10]", inputTimeline.timeline82 || 0);
+        formData.append("timeline[6][11]", inputTimeline.timeline83 || 0);
+        formData.append("timeline[6][12]", inputTimeline.timeline84 || 0);
+        formData.append("date_period", inputData.date_period || "");
         // for (const pair of formData.entries()) {
         //   console.log(pair[0] + ": " + pair[1]);
         // }
@@ -538,12 +535,27 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
     const ClearRAB = () => {
       localStorage.removeItem("RAB");
     };
-    window.addEventListener("unload", ClearRAB);
+    const ClearEditRab = () => {
+      localStorage.removeItem("rabEdit")
+    }
+    const ClearEditFee = () => {
+      localStorage.removeItem("feeEdit")
+    }
+    const ClearEditSupport = () => {
+      localStorage.removeItem("supportEdit")
+
+    }
+    window.addEventListener("beforeunload", ClearRAB);
+    window.addEventListener("beforeunload", ClearEditRab);
+    window.addEventListener("beforeunload", ClearEditFee);
+    window.addEventListener("beforeunload", ClearEditSupport);
     return () => {
-      window.removeEventListener("unload", ClearRAB);
+      window.removeEventListener("beforeunload", ClearRAB);
+      window.addEventListener("beforeunload", ClearEditRab);
+      window.addEventListener("beforeunload", ClearEditFee);
+      window.addEventListener("beforeunload", ClearEditSupport);
     };
   }, []);
-
   return (
     <Card.Body>
       <div class="alert alert-primary mt-2" role="alert">
@@ -955,7 +967,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
         <label htmlFor="">Start Date</label>
         <input
           type="date"
-          name=""
+          name="date_period"
           onChange={handleInputData}
           id=""
           className="form-control"
@@ -971,7 +983,6 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
         </button>
         <button className="btn btn-secondary">Kembali</button>
       </div>
-      {console.log(inputTimeline)}
     </Card.Body>
   );
 };
