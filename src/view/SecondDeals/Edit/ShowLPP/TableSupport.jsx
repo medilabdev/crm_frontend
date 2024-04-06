@@ -1,8 +1,7 @@
 import React from "react";
 import DataTable from "react-data-table-component";
 import dummy from "../Lpp/dummy";
-import { ro } from "@faker-js/faker";
-
+import { Card } from "react-bootstrap"
 const TableSupport = ({ data }) => {
   const allData = [];
   for (let i = 0; i < localStorage.length; i++) {
@@ -60,14 +59,24 @@ const TableSupport = ({ data }) => {
     },
   };
   return (
-    <div>
-      <div>
-        <DataTable
+    <div className="row mb-2">
+      <div className="col">
+        <Card>
+          <Card.Header>
+          <span style={{fontSize:"0.85rem", fontWeight:"500"}}>
+                Support selama masa kerjasama (bila ada)
+                </span>
+          </Card.Header>
+          <Card.Body>
+          <DataTable
           columns={ColumnsTable}
           data={data?.support || ""}
           customStyles={customStyle}
           dense
         />
+          </Card.Body>
+        </Card>
+        
       </div>
     </div>
   );

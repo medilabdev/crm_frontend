@@ -1,8 +1,23 @@
 import React from "react";
 import DataTable from "react-data-table-component";
 import dummy from "../Lpp/dummy";
-
+import { Card } from "react-bootstrap"
 const TableRab = ({ data }) => {
+
+  const alkes = []
+  const noAlkse = []
+  if(data?.rab?.length > 0){
+    data?.rab.forEach((item) => {
+      if(item?.is_alkes === "yes"){
+        alkes.push({ ...item})
+      }else if(item?.is_alkes === "no"){
+        noAlkse.push({ ...item})
+      }
+    })
+  }
+   
+    
+
   const customStyle = {
     headRow: {
       style: {
@@ -29,10 +44,6 @@ const TableRab = ({ data }) => {
       selector: (row) => row.item_uid || "",
     },
     {
-      name: "Is Alkes",
-      selector: (row) => (row.is_alkes === "yes" ? "Iya" : "Tidak"),
-    },
-    {
       name: "Nilai Estimasi Biaya",
       selector: (row) =>
         row.estimated_cost
@@ -56,13 +67,33 @@ const TableRab = ({ data }) => {
     },
   ];
   return (
-    <div>
-      <DataTable
+    <div className="row mb-2">
+      <div className="col">
+        <Card>
+          <Card.Header>
+          <span style={{fontSize:"0.85rem", fontWeight:"500"}}>
+                RAB Bangunan & Lainnya terkait pembiayaan di awal
+                </span>
+          </Card.Header>
+          <Card.Body>
+          <DataTable
+      className="mb-2"
         columns={ColumnsTable}
-        data={data?.support}
+        data={alkes}
         customStyles={customStyle}
         dense
       />
+      <DataTable
+      className="mb-2"
+        columns={ColumnsTable}
+        data={noAlkse}
+        customStyles={customStyle}
+        dense
+      />
+          </Card.Body>
+        </Card>
+      </div>
+      
     </div>
   );
 };

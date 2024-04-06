@@ -60,11 +60,11 @@ const ModalsRab = ({ show, handleClose }) => {
   };
 
   return (
-    <Offcanvas show={show} onHide={handleClose} placement="end">
-      <Offcanvas.Header closeButton>
-        <Offcanvas.Title>Tambah Data</Offcanvas.Title>
-      </Offcanvas.Header>
-      <Offcanvas.Body>
+    <Modal show={show} onHide={handleClose} placement="end">
+      <Modal.Header closeButton>
+        <Modal.Title>Tambah Data</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
         <div class="form-floating mb-3">
           <input
             type="text"
@@ -135,7 +135,7 @@ const ModalsRab = ({ show, handleClose }) => {
             className="form-control"
           ></textarea>
         </div>
-      </Offcanvas.Body>
+      </Modal.Body>
       <Modal.Footer className="mb-4">
         <Button variant="secondary" className="me-2" onClick={handleClose}>
           Close
@@ -144,7 +144,7 @@ const ModalsRab = ({ show, handleClose }) => {
           Save Changes
         </Button>
       </Modal.Footer>
-    </Offcanvas>
+    </Modal>
   );
 };
 

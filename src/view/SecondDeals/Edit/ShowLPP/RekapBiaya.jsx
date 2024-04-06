@@ -1,12 +1,30 @@
 import React from "react";
 import DataTable from "react-data-table-component";
-import dummy from "../Lpp/dummy";
+import { Card } from 'react-bootstrap'
 
-const RekapBiaya = () => {
-  const valueFee = localStorage.getItem("valueFee")
-  const valueSupport = localStorage.getItem("valueSupport")
-  const valueRab = localStorage.getItem("valueRab")
-  const data = [
+const RekapBiaya = ({data}) => {
+  let valueFee = 0;
+  if(data?.fee?.length > 0) {
+    data?.fee.map((item) => (valueFee += item?.total)) 
+  } 
+  
+  let valueSupport = 0
+  if(data?.support?.length > 0){
+    data?.support?.map((item) => (valueSupport += item?.total_estimated_cost))
+  }
+
+  let valueRab = 0
+
+  if(data?.rab?.length > 0){
+    data?.rab?.map((item) =>{
+      if(item?.is_alkes === "no"){
+        valueRab += item?.total_estimated_cost
+      }
+    }
+  )
+  }
+
+  const datas = [
     {
       name: "RAB Bangunan & Lainnya Terkain",
       nilai_estimasi: valueRab,
@@ -51,13 +69,25 @@ const RekapBiaya = () => {
     },
   };
   return (
-    <div>
-      <DataTable
-        data={data}
+    <div className="row mb-2">
+      <div className="col">
+        <Card>
+          <Card.Header>
+          <span style={{fontSize:"0.85rem", fontWeight:"500"}}>
+                Rekapitulasi Biaya
+                </span>
+          </Card.Header>
+          <Card.Body>
+          <DataTable
+         data={datas}
         columns={ColumnsTable}
         customStyles={customStyle}
         dense
       />
+          </Card.Body>
+        </Card>
+      </div>
+      
     </div>
   );
 };

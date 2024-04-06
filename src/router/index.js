@@ -56,9 +56,7 @@ import EditTaskFix from "../view/Task/EditTask";
 import SecondDeals from "../view/SecondDeals";
 import CreateSecondDeals from "../view/SecondDeals/create";
 import NeedApprovalSecondDeals from "../view/SecondDeals/NeedApprovalSecondDeals";
-import LembarPersetujuanProject from "../view/SecondDeals/LembarPersetujuanProject";
 import DealsVersion from "../view/Properties/DealsVersion";
-import FormulirDataCustomer from "../view/SecondDeals/FormulirDataCustomer";
 import EditDataSecondDeals from "../view/SecondDeals/Edit";
 
 const Login = ({ children }) => {
@@ -482,15 +480,7 @@ function Router() {
             </Login>
           }
         />
-        <Route
-          exact
-          path="/deals-second/lpp"
-          element={
-            <Login>
-              <LembarPersetujuanProject />
-            </Login>
-          }
-        />
+
         <Route
           exact
           path="/properties/deals-version"
@@ -500,7 +490,6 @@ function Router() {
             </Login>
           }
         />
-        <Route exact path="/deals-second/fdc" element={<Login><FormulirDataCustomer /></Login>} />
         <Route exact path="/deals-second/:uid/edit" element={<Login><EditDataSecondDeals/></Login>} />
       </Routes>
     </BrowserRouter>
