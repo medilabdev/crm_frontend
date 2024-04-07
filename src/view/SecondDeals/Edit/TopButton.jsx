@@ -286,7 +286,8 @@ const TopButton = ({
             />
             {ShowFQP ? "Closed" : "Open"} FQP
           </a>
-          {stage !== "leads" ? (
+          {stage !== "leads" ? 
+            (position === "pRGYXVKdzCPoQ8" && data?.lpp_document !== null) || position === "_dLjLFdH-Nw8vg" || position === "pRGYXVKdzCPoQ1" || position === "_dLjLFdH-Nw8vg8U" ? (
             <a
               id={isVisible ? `floatingButtonLPP` : ""}
               className={`btn ${
@@ -302,10 +303,10 @@ const TopButton = ({
               />
               {ShowLPP ? "Closed" : "Open"} LPP
             </a>
-          ) : (
+          ) : "" : (
             ""
           )}
-          {stage !== "leads" && stage !== "Approaching" ? (
+          {stage !== "leads" && stage !== "Approaching" ?  (
             <a
               id={isVisible ? `floatingButtonFDC` : ""}
               className={`btn ${

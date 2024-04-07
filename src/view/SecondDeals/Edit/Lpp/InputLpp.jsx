@@ -556,6 +556,8 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
       window.addEventListener("beforeunload", ClearEditSupport);
     };
   }, []);
+
+  
   return (
     <Card.Body>
       <div class="alert alert-primary mt-2" role="alert">

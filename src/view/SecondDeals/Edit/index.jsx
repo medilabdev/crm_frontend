@@ -18,11 +18,11 @@ import { getListCompany } from "../../../action/FormCompany";
 import InputRoi from "./Lpp/InputRoi";
 import FormPks from "./FormPks";
 import HistoryDeals from "./ShowLPP/history";
+import CloseLost from "./CloseLost";
 
 const EditDataSecondDeals = () => {
   const token = localStorage.getItem("token");
   const { detailDataDeals } = useSelector((state) => state.DataDeals);
-  const stage = detailDataDeals?.staging?.name;
   const [ShowFQP, setShowFQP] = useState(true);
   const [ShowLPP, setShowLPP] = useState(false);
   const [ShowFDC, setShowFDC] = useState(false);
@@ -73,7 +73,6 @@ const EditDataSecondDeals = () => {
     dispatch(GetDataDealsDetail(uid, token));
     dispatch(getListCompany(token));
   }, [dispatch]);
-
   return (
     <body id="body">
       <Topbar />
@@ -81,7 +80,8 @@ const EditDataSecondDeals = () => {
       <Main>
         <div className="container">
           <BreadcrumbEdit />
-          <TopButton
+          {detailDataDeals?.staging_uid !== "M-s3254fdg" ? (
+            <TopButton
             handleShowFQP={handleShowFQP}
             ShowFQP={ShowFQP}
             handleShowLPP={handleShowLPP}
@@ -95,7 +95,11 @@ const EditDataSecondDeals = () => {
             handleShowPks={handleShowPks}
             showFormPks={showFormPks}
           />
+          ) : ""}
+          
           <div className="row mt-3">
+            {detailDataDeals?.staging_uid === "M-s3254fdg" ? 
+            <CloseLost  data={detailDataDeals} /> : ""}
             {showFormPks ? <FormPks data={detailDataDeals} /> : ""}
             {showFormRoi ? <InputRoi data={detailDataDeals} /> : ""}
             {ShowFDC ? (
