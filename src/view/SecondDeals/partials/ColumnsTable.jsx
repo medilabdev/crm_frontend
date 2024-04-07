@@ -13,7 +13,14 @@ export const uid = localStorage.getItem("uid");
 export const ColumnsTable = [
   {
     name: "Name",
-    selector: (row) => (
+    selector: (row) =>{ 
+      const createdDate = new Date(row?.created_at)
+      const currentDate = new Date();
+      const twoDaysAgo = new Date(currentDate)
+      twoDaysAgo?.setDate(currentDate.getDate() - 2)
+      const isNew = createdDate > twoDaysAgo; 
+      return (
+      <div>
       <a
         href={`/deals-second/${row.uid}/edit`}
         target="_blank"
@@ -22,7 +29,9 @@ export const ColumnsTable = [
       >
         {row?.fqp_document?.hospital?.name ?? "-"}
       </a>
-    ),
+        {isNew && <span className="badge bg-primary ms-2">New</span> }
+      </div>
+    )},
     sortable: true,
   },
   {

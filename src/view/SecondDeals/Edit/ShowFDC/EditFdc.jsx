@@ -478,7 +478,7 @@ const EditFdc = ({ data }) => {
               <td>
                 <a
                   className="btn btn-primary"
-                  href={`https://api-crm-iss.medilabjakarta.id/storage/file/deals/${editData.business_license_file}`}
+                  href={`https://api-crm-iss.medilabjakarta.id/storage/file/deals/${editData?.business_license_file}`}
                   target="_blank"
                   style={{
                     whiteSpace: "normal",

@@ -10,6 +10,7 @@ import Swal from "sweetalert2";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 const InputFQP = ({ data, listCompany }) => {
+  console.log(data);
   const token = localStorage.getItem("token");
   const uid = localStorage.getItem("uid");
   const uidDeals = useParams();
@@ -31,7 +32,7 @@ const InputFQP = ({ data, listCompany }) => {
       data.detcractors && data.detcractors[2] ? data.detcractors[2].name : "",
     ],
   });
-
+  console.log(inputNps);
   const [showOverlay, setShowOverlay] = useState(false);
   const handleShow = () => setShowOverlay(true);
   const handleClose = () => setShowOverlay(false);
@@ -56,7 +57,7 @@ const InputFQP = ({ data, listCompany }) => {
       [e.target.name]: e.target.value,
     });
   };
-  const [inputPrice, setInputPrice] = useState(data.existing_bhp_price);
+  const [inputPrice, setInputPrice] = useState(data?.existing_bhp_price);
   const handleInputDataRP = (e) => {
     const value = e.target.value;
     const formated = formatCurrency(value);
@@ -156,9 +157,12 @@ const InputFQP = ({ data, listCompany }) => {
           "status_contract_unit",
           inputData.status_contract_unit || ""
         );
-        if (inputPrice) {
+
+        if (typeof inputPrice === 'string') {
           const inputValueWithoutDot = inputPrice.replace(/\./g, "");
           formData.append("existing_bhp_price", inputValueWithoutDot || "");
+        }else {
+          formData.append("existing_bhp_price", data?.existing_bhp_price  || "")
         }
         formData.append(
           "expired_hd_permit_period",
@@ -213,9 +217,9 @@ const InputFQP = ({ data, listCompany }) => {
         );
         formData.append("another_notes", inputData.another_notes || "");
         formData.append("_method", "put");
-        // for (const pair of formData.entries()) {
-        //   console.log(pair[0] + ": " + pair[1]);
-        // }
+        for (const pair of formData.entries()) {
+          console.log(pair[0] + ": " + pair[1]);
+        }
         const response = await axios.post(
           `${process.env.REACT_APP_BACKEND_URL}/v2/fqp-document/${uidFQP}`,
           formData,
@@ -228,7 +232,6 @@ const InputFQP = ({ data, listCompany }) => {
         Swal.close();
         await Swal.fire({
           title: response.data.message,
-          text: "Successfully Created Data",
           icon: "success",
         }).then((res) => {
           if (res.isConfirmed) {
@@ -244,7 +247,7 @@ const InputFQP = ({ data, listCompany }) => {
         });
       } else {
         Swal.fire({
-          text: "Something went wrong !",
+          text: error.message,
           icon: "error",
         });
       }
