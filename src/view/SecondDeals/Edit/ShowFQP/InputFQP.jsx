@@ -10,7 +10,6 @@ import Swal from "sweetalert2";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 const InputFQP = ({ data, listCompany }) => {
-  console.log(data);
   const token = localStorage.getItem("token");
   const uid = localStorage.getItem("uid");
   const uidDeals = useParams();
@@ -32,7 +31,7 @@ const InputFQP = ({ data, listCompany }) => {
       data.detcractors && data.detcractors[2] ? data.detcractors[2].name : "",
     ],
   });
-  console.log(inputNps);
+
   const [showOverlay, setShowOverlay] = useState(false);
   const handleShow = () => setShowOverlay(true);
   const handleClose = () => setShowOverlay(false);
@@ -70,7 +69,7 @@ const InputFQP = ({ data, listCompany }) => {
     return formattedValue;
   };
 
-  const uidFQP = data.uid;
+  const uidFQP = data?.uid;
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {

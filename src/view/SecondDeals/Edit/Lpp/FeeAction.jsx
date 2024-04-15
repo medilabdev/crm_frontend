@@ -120,7 +120,10 @@ const DataTableFeeAction = () => {
       window.removeEventListener("unload", clearDataFeeTindakanLocalstorage);
     };
   }, []);
-
+  let totalPrice = 0
+  if(allData[0]){
+  allData[0]?.map((data) => totalPrice += data?.total)
+  } 
   return (
     <div className="row mb-2">
       <div className="col">
@@ -136,12 +139,27 @@ const DataTableFeeAction = () => {
               </button>
             </div>
           </Card.Header>
+          <Card.Body>
           <DataTable
             className="p-2"
             columns={ColumnsTable}
             data={allData[0]}
             customStyles={customStyle}
           />
+                <div className="row">
+                    <div className="mt-3 me-3">
+                      <span
+                        className="float-end"
+                        style={{ fontWeight: 400, fontSize: "0.80rem" }}
+                      >
+                        Total Price:
+                        <span className="ms-3 me-2" style={{ fontWeight: 600 }}>
+                          Rp. {new Intl.NumberFormat().format(totalPrice)}
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+          </Card.Body>
           <AddModalsFee show={showAdd} handleClose={handleClose} />
           <EditModalFee
             show={editDataModal}

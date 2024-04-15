@@ -26,7 +26,6 @@ export const ColumnsTable = [
       {isNew && <span className="badge bg-primary ms-2">New</span> }
       </div>
     )},
-    sortable: true,
   },
   {
     name: "Request To Stage",
@@ -122,7 +121,6 @@ export const ColumnsTable = [
         </div>
       );
     },
-    sortable: true,
   },
   {
     name: "Action",
