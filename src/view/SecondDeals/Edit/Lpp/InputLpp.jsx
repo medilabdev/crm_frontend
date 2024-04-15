@@ -187,22 +187,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
     }
   }
 
-  const NoAlkes = [];
-  const Alkes = [];
-
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key.startsWith("RAB")) {
-      const data = JSON.parse(localStorage.getItem(key));
-      data.forEach((item) => {
-        if (item.is_alkes === "no") {
-          NoAlkes.push({ ...item });
-        } else if (item.is_alkes === "yes") {
-          Alkes.push({ ...item });
-        }
-      });
-    }
-  }
+ 
   const [inputTimeline, setInputTimeline] = useState([]);
   const handleInputTimeline = (e) => {
     if (e.target.checked) {
@@ -908,51 +893,9 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
         />
         <label htmlFor="">Tindakan Selama Bekerja Sama</label>
       </div>
-      <div className="mb-3">
-        <label htmlFor="" className="mb-1 fw-bold">
-          RAB Bangunan & Lainnya terkait pembiayaan awal (Optional)
-        </label>
-        <select name="" id="" className="form-select" onChange={handleRab}>
-          <option value="">Select Chose</option>
-          <option value="yes">Ya</option>
-          <option value="no">Tidak</option>
-        </select>
-      </div>
-      {Rab === "yes" ? <DataTableRab Alkes={Alkes} NoAlkes={NoAlkes} /> : ""}
-      <div className="mb-3">
-        <label htmlFor="" className="mb-1 fw-bold">
-          Support Selama Kerja Sama (Optional)
-        </label>
-        <select
-          name="support"
-          className="form-select"
-          onChange={handleSupportKerjaSama}
-        >
-          <option value="">Select Chose</option>
-          <option value="yes">Ya</option>
-          <option value="no">Tidak</option>
-        </select>
-      </div>
-      {supportKerjaSama === "yes" ? <SupportKerjaSama /> : ""}
-      <div className="mb-3">
-        <label htmlFor="" className="mb-1 fw-bold">
-          Fee Tindakan (Optional)
-        </label>
-        <select
-          name="fee"
-          id=""
-          className="form-select"
-          onChange={handleFeeAction}
-        >
-          <option value="">Select Chose</option>
-          <option value="yes">Ya</option>
-          <option value="no">Tidak</option>
-        </select>
-      </div>
-      {feeAction === "yes" ? <DataTableFeeAction /> : ""}
-      <div className="mb-3">
-        <DataTableRekapBiaya />
-      </div>
+     
+      <DataTableRab rab={Rab} handleRab={handleRab} supportKerjaSama={supportKerjaSama} handleSupportKerjaSama={handleSupportKerjaSama} feeAction={feeAction} handleFeeAction={handleFeeAction}/>
+ 
       <div className="mb-2">
         <h6 className="fw-bold ms-2 mt-3">Catatan Tambahan</h6>
         <ReactQuill
