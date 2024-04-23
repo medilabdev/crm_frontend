@@ -597,14 +597,12 @@ const EditDeals = () => {
     {
       name: "Created By",
       selector: (row) => row.created_by?.name,
-      sortable: true,
       width: "120px",
     },
     {
       name: "Mention to",
       selector: (row) =>
         row.mention?.map((data) => data.mention_user?.name).join(", "),
-      sortable: true,
       wrap: true,
       format: (row) =>
         row.mention?.map((data) => data.mention_user?.name).join(", ") || "-",
