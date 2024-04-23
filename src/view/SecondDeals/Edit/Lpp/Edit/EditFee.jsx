@@ -6,21 +6,21 @@ import { faTrash } from '@fortawesome/free-solid-svg-icons'
 import Swal from "sweetalert2"
 import EditModalFee from './EditModalFee'
 const EditFee = ({ data }) => {
-  const [showAdd, setShowAdd] = useState(false);
-  const handleClose = () => setShowAdd(false);
-  const handleOpen = () => setShowAdd(true);
+  const [showAddFee, setShowAdd] = useState(false);
+  const handleCloseFee = () => setShowAdd(false);
+  const handleOpenFee = () => setShowAdd(true);
     const [stateFee, setStateFee] = useState([])
     if(!localStorage.getItem("feeEdit")){
         const dataFee = JSON.stringify(data)
         localStorage.setItem("feeEdit", dataFee)
     }
 
-    const allData = [];
+    const allDataFee = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key.startsWith("feeEdit")) {
         const data = JSON.parse(localStorage.getItem(key));
-        allData.push(data);
+        allDataFee.push(data);
       }
     }
 
@@ -43,7 +43,7 @@ const EditFee = ({ data }) => {
           },
         },
       };
-      const handleDeleteItem = (uid) => {
+      const handleDeleteItemFee = (uid) => {
         Swal.fire({
         title: "Apakah kamu yakin untuk Menghapus?",
         icon: "question",
@@ -52,16 +52,14 @@ const EditFee = ({ data }) => {
         cancelButtonText: "Tidak",
          }).then((res) => {
             if(res.isConfirmed){
-                const fee = allData[0].filter((rab) =>rab.uid !== uid);
+                const fee = allDataFee[0].filter((rab) =>rab.uid !== uid);
                 setStateFee(fee);
                 localStorage.setItem("feeEdit", JSON.stringify(fee));
                 Swal.fire("Berhasil!", "Item berhasil dihapus.", "success");
             }
          })
-
-       
       };
-      const ColumnsTable = [
+      const ColumnsTableFee = [
         {
           name: "Nama Penerima",
           selector: (row) => row.recieve_name,
@@ -104,7 +102,7 @@ const EditFee = ({ data }) => {
               </button> */}
               <button
                 type="button"
-                onClick={() => handleDeleteItem(row.uid)}
+                onClick={() => handleDeleteItemFee(row.uid)}
                 style={{ border: "none", backgroundColor: "white" }}
               >
                 <FontAwesomeIcon icon={faTrash} />
@@ -114,23 +112,23 @@ const EditFee = ({ data }) => {
         },
       ];
   return (
-    <div className='raw mb-2'>
+    <div className='row mb-2'>
         <div className="col">
             <Card>
                 <Card.Header>
                 <span style={{fontSize:"0.85rem", fontWeight:"500"}}>
                 Fee Tindakan (bila ada)
                 </span>
-                <button type="button" className="btn btn-primary float-end" style={{fontSize:"0.85rem"}} onClick={handleOpen}>
+                <button type="button" className="btn btn-primary float-end" style={{fontSize:"0.85rem"}} onClick={handleOpenFee}>
                     Tambah
                 </button>
                 </Card.Header>
                 <Card.Body>
-                    <DataTable className="p-2 mb-2" data={allData[0]} dense customStyles={customStyle} columns={ColumnsTable} />
+                    <DataTable className="p-2 mb-2" data={allDataFee[0]} dense customStyles={customStyle} columns={ColumnsTableFee} />
                     
                 </Card.Body>
             </Card>
-            <EditModalFee show={showAdd} handleClose={handleClose}/>
+            <EditModalFee show={showAddFee} Fee={handleCloseFee}/>
         </div>
     </div>
   )

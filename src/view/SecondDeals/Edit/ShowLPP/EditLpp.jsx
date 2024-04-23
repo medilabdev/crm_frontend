@@ -16,6 +16,8 @@ import EditFee from "../Lpp/Edit/EditFee";
 import EditRekap from "../Lpp/Edit/EditRekap";
 import EditTimeline from "../Lpp/Edit/EditTimeline";
 import Swal from "sweetalert2"
+import AddRegBPJS from "../Lpp/modals/addRegBPJS";
+import AddTipeFaskes from "../Lpp/modals/AddTipeFaskes";
 
 const EditLpp = ({ data, listCompany, uidDeals }) => {
   const uidLpp = data?.uid;
@@ -23,6 +25,14 @@ const EditLpp = ({ data, listCompany, uidDeals }) => {
   const [showOverlay, setShowOverlay] = useState(false);
   const handleShow = () => setShowOverlay(true);
   const handleClose = () => setShowOverlay(false);
+
+  const [showModalBpjs, setShowModalBpjs] = useState(false)
+  const handleShowBpjs = () => setShowModalBpjs(true)
+  const handleCloseBpjs = () => setShowModalBpjs(false)
+
+  const [showModalFaskes, setShowModalFaskes] = useState(false)
+  const handleShowFaskes = () => setShowModalFaskes(true)
+  const handleCloseFaskes = () => setShowModalFaskes(false)
   const token = localStorage.getItem("token");
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -56,7 +66,7 @@ const EditLpp = ({ data, listCompany, uidDeals }) => {
     if (Array.isArray(fasksesData)) {
       fasksesData.map((data) => {
         const finalResult = {
-          label: `${data.name}`,
+          label: `${data.name}` ,
           value: data.uid,
           type: data.company_type_uid,
         };
@@ -72,7 +82,7 @@ const EditLpp = ({ data, listCompany, uidDeals }) => {
     if (Array.isArray(BpjsData)) {
       BpjsData.map((data) => {
         const finalResult = {
-          label: `${data.name_location} `,
+          label: `${data.name_location} - (${data?.regional}) `,
           value: data.uid,
         };
         result.push(finalResult);
@@ -431,6 +441,17 @@ const EditLpp = ({ data, listCompany, uidDeals }) => {
                 setDataLpp({ ...dataLpp, faskes_type_uid: e.value })
               }
             />
+            <div className="form-text">
+            Jika Data Tidak Ada Tipe Faskes Klik 
+            <button
+          className="form-text text-primary fw-semibold border-0 "
+          onClick={handleShowFaskes}
+        >
+          Tambah Tipe Faskes
+        </button>
+        <AddTipeFaskes show={showModalFaskes} handleClose={handleCloseFaskes} />
+            </div>
+             
           </div>
           <div className="mb-3">
             <Select
@@ -443,6 +464,16 @@ const EditLpp = ({ data, listCompany, uidDeals }) => {
                 setDataLpp({ ...dataLpp, bpjs_regional_uid: e.value })
               }
             />
+            <div className="form-text">
+            Jika Data Tidak Ada BPJS Regional Klik 
+            <button
+          className="form-text text-primary fw-semibold border-0 "
+          onClick={handleShowBpjs}
+        >
+          Tambah BPJS Regional
+        </button>
+        <AddRegBPJS show={showModalBpjs} handleClose={handleCloseBpjs} />
+            </div>
           </div>
         </>
       ) : (
@@ -520,6 +551,7 @@ const EditLpp = ({ data, listCompany, uidDeals }) => {
         ""
       )}
       <div className="mb-5">
+      {console.log(dataLpp)}
         <Select
           options={SelectCategory()}
           placeholder="Select Status"
@@ -759,17 +791,17 @@ const EditLpp = ({ data, listCompany, uidDeals }) => {
         <label htmlFor="">Tindakan Selama Bekerja Sama</label>
       </div>
       <div className="mb-2">
-      <EditRab data={dataLpp?.rab} />
+      <EditRab data={dataLpp?.rab} dataSupport={dataLpp?.support} dataFee={dataLpp?.fee} />
       </div>
-      <div className="mb-2">
+      {/* <div className="mb-2">
       <EditSupport data={dataLpp?.support} />
       </div>
       <div className="mb-2">
       <EditFee data={dataLpp?.fee} />
-      </div>
-      <div className="mb-2">
+      </div> */}
+      {/* <div className="mb-2">
         <EditRekap />
-      </div>
+      </div> */}
       <div className="mb-2">
         <h6 className="fw-bold ms-2 mt-3">Catatan Tambahan</h6>
         <ReactQuill

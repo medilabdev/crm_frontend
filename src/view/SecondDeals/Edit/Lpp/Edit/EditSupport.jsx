@@ -7,21 +7,21 @@ import Swal from 'sweetalert2'
 import EditModalSupport from './EditModalSupport'
 
 const EditSupport = ({ data }) => {
-  const [ShowModal, setShowModal] = useState(false);
-  const handleShow = () => setShowModal(true);
-  const handleClose = () => setShowModal(false);
+  const [ShowModalSupport, setShowModalSupport] = useState(false);
+  const handleShowSupport = () => setShowModalSupport(true);
+  const handleCloseSupport = () => setShowModalSupport(false);
     const [stateSupport, setStateSupport] = useState([]);
     if(!localStorage.getItem("supportEdit")){
-      const dataRab = JSON.stringify(data)
-      localStorage.setItem("supportEdit", dataRab)
+      const dataSupport = JSON.stringify(data)
+      localStorage.setItem("supportEdit", dataSupport)
   }
     
-    const allData = [];
+    const allDataSupport = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key.startsWith("supportEdit")) {
         const data = JSON.parse(localStorage.getItem(key));
-        allData.push(data);
+        allDataSupport.push(data);
       }
     }
 
@@ -44,7 +44,7 @@ const EditSupport = ({ data }) => {
           },
         },
       };
-      const handleDeleteItem = (uid) => {
+      const handleDeleteItemSupport = (uid) => {
         Swal.fire({
             title: "Apakah kamu yakin untuk Menghapus?",
             icon: "question",
@@ -53,7 +53,7 @@ const EditSupport = ({ data }) => {
             cancelButtonText: "Tidak",
         }).then((result) => {
             if (result.isConfirmed) {
-                const sup = allData[0].filter((rab) => rab.uid !== uid);
+                const sup = allDataSupport[0].filter((rab) => rab.uid !== uid);
                 setStateSupport(sup);
                 localStorage.setItem("supportEdit", JSON.stringify(sup));
                 Swal.fire("Berhasil!", "Item berhasil dihapus.", "success");
@@ -62,7 +62,7 @@ const EditSupport = ({ data }) => {
     };
     
     
-      const ColumnsTable = [
+      const ColumnsTableSupport = [
         {
           name: "Item",
           selector: (row) => row.item_uid,
@@ -106,7 +106,7 @@ const EditSupport = ({ data }) => {
               </button> */}
               <button
                 style={{ border: "none", backgroundColor: "white" }}
-                onClick={() => handleDeleteItem(row.uid)}
+                onClick={() => handleDeleteItemSupport(row.uid)}
               >
                 <FontAwesomeIcon icon={faTrash} />
               </button>
@@ -115,23 +115,22 @@ const EditSupport = ({ data }) => {
         },
       ];
   return (
-    <div className='raw mb-2'>
+    <div className='row mb-2'>
     <div className="col">
         <Card>
             <Card.Header>
                 <span style={{fontSize:"0.85rem", fontWeight:"500"}}>
                 Support selama masa kerjasama (bila ada)
                 </span>
-                <button type="button" className="btn btn-primary float-end" style={{fontSize:"0.85rem"}} onClick={handleShow}>
+                <button type="button" className="btn btn-primary float-end" style={{fontSize:"0.85rem"}} onClick={handleShowSupport}>
                     Tambah
                 </button>
             </Card.Header>
             <Card.Body>
-                <DataTable className="p-2 mb-2" data={allData[0]} dense customStyles={customStyle} columns={ColumnsTable} />
-                
+                <DataTable className="p-2 mb-2" data={allDataSupport[0]} dense customStyles={customStyle} columns={ColumnsTableSupport} />
             </Card.Body>
         </Card>
-        <EditModalSupport show={ShowModal} handleClose={handleClose} />
+        <EditModalSupport show={ShowModalSupport} handleClose={handleCloseSupport} />
     </div>
 </div>
   )

@@ -196,17 +196,14 @@ const CreateSecondDeals = () => {
         formData.append("cooperation_system", inputData.sistem_kerjasama || "");
         formData.append("human_resources", inputData.sdm || "");
         formData.append(
-          "hd_unit_count_distance_from_faskes",
+          "hd_health_facilities_arround",
           inputData.faskes_hd_lima_km || ""
         );
         formData.append(
-          "hd_health_facilities_arround",
+          "hd_health_facilities_capacity_approximately",
           inputData.kapasistas_faskes_hd_sekitar_unit || ""
         );
-        formData.append(
-          "hd_health_facilities_capacity_approximately",
-          inputData.jumlah_unit_hd_kurang_dua_pulu_km || ""
-        );
+     
         formData.append("cataclysm", inputData.is_banjir || "");
         formData.append("near_the_sea", inputData.dekat_laut || "");
         formData.append(
@@ -226,9 +223,9 @@ const CreateSecondDeals = () => {
           inputData.jumlah_mesin_unit_hd || ""
         );
         formData.append("another_notes", inputData.another_notes || "");
-        // for (const pair of formData.entries()) {
-        //   console.log(pair[0] + ": " + pair[1]);
-        // }
+        for (const pair of formData.entries()) {
+          console.log(pair[0] + ": " + pair[1]);
+        }
         setButtonBlocked(true);
         const response = await axios.post(
           `${process.env.REACT_APP_BACKEND_URL}/v2/deals`,
@@ -765,6 +762,7 @@ const CreateSecondDeals = () => {
                   <input
                     type="number"
                     name="jumlah_unit_hd_kurang_dua_pulu_km"
+                    onChange={handleInputData}
                     id=""
                     className="form-control"
                     placeholder=""
