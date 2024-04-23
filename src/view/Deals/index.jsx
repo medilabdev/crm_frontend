@@ -51,7 +51,6 @@ const Deals = () => {
   const fetchData = async () => {
     try {
       setPending(true);
-      await getDeals(token, search, ownerDeals, formSearch, pagination);
       await getStage();
       await getPriority();
     } catch (error) {
@@ -60,6 +59,18 @@ const Deals = () => {
       setPending(false);
     }
   };
+
+  useEffect(() => {
+      try {
+        setPending(true);
+         getDeals(token, search, ownerDeals, formSearch, pagination);
+      } catch (error) {
+        console.error("error in fetch data", error);
+      } finally {
+        setPending(false);
+      }
+  }, [token, search, ownerDeals, formSearch, pagination])
+
 
   const dispatch = useDispatch();
   const { listResultOwner, listLoadingOwner, listErrorOwner } = useSelector(
@@ -79,12 +90,7 @@ const Deals = () => {
     dispatch(getListContact(token));
   }, [
     dispatch,
-    token,
-    search,
-    ownerDeals,
-    formSearch,
-    pagination.page,
-    pagination.limit,
+    token
   ]);
 
   const getStage = async (retryCount = 0) => {
