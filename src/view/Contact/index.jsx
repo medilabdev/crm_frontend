@@ -331,7 +331,6 @@ const Contact = () => {
   const fetchData = async () => {
     try {
       setPending(true);
-      await getContactAll(TokenAuth, search, ownerContact, formSearch);
       await getAllUser();
       await getSource();
       await getCompany();
@@ -345,14 +344,23 @@ const Contact = () => {
 
   useEffect(() => {
     fetchData();
-  }, [
-    TokenAuth,
+  }, [TokenAuth]);
+
+  useEffect(() => {
+    try {
+      setPending(true)
+      getContactAll(TokenAuth, search, ownerContact, formSearch);
+    } catch (error) {
+      console.error("Error in fetchData:", error);
+    }finally{
+      setPending(false); 
+    }
+  },[ TokenAuth,
     search,
     ownerContact,
     formSearch,
     pagination.page,
-    pagination.limit,
-  ]);
+    pagination.limit,])
 
   const handleChangePage = (page) => {
     setPagination((e) => ({ ...e, page }));
