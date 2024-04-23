@@ -51,7 +51,7 @@ const Deals = () => {
   const fetchData = async () => {
     try {
       setPending(true);
-      await getDeals(token, search, ownerDeals, formSearch);
+      await getDeals(token, search, ownerDeals, formSearch, pagination);
       await getStage();
       await getPriority();
     } catch (error) {
@@ -78,6 +78,7 @@ const Deals = () => {
     dispatch(getListCompany(token));
     dispatch(getListContact(token));
   }, [
+    dispatch,
     token,
     search,
     ownerDeals,
@@ -165,6 +166,7 @@ const Deals = () => {
     term,
     ownerDeals,
     formSearch,
+    pagination,
     retryCount = 0
   ) => {
     try {
@@ -199,8 +201,8 @@ const Deals = () => {
         }
       );
 
-      setDataDeals(response.data.data);
-      setTotalRows(response.data.pagination.totalData);
+      setDataDeals(response.data?.data);
+      setTotalRows(response.data?.pagination?.totalData);
       setPending(false);
     } catch (error) {
       if (
