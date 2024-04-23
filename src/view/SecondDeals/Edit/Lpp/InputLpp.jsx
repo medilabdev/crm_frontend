@@ -18,6 +18,8 @@ import SupportKerjaSama from "./SupportKerjaSama";
 import { CategoryType } from "../../../../action/CategoryType";
 import Swal from "sweetalert2";
 import axios from "axios";
+import AddRegBPJS from "./modals/addRegBPJS";
+import AddTipeFaskes from "./modals/AddTipeFaskes";
 
 const InputLpp = ({ data, listCompany, uidDeals }) => {
   const uidPerson = localStorage.getItem("uid");
@@ -33,6 +35,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
   const [priceFormat, setPriceFormat] = useState(
     inputData !== null ? inputData.price : ""
   );
+  
   const handleInputDataRP = (event) => {
     const rawValue = event.target.value;
     const formattedValue = formatCurrency(rawValue);
@@ -45,6 +48,14 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
     return formattedValue;
   };
 
+  const [showModalBpjs, setShowModalBpjs] = useState(false)
+  const handleShowBpjs = () => setShowModalBpjs(true)
+  const handleCloseBpjs = () => setShowModalBpjs(false)
+
+  const [showModalFaskes, setShowModalFaskes] = useState(false)
+  const handleShowFaskes = () => setShowModalFaskes(true)
+  const handleCloseFaskes = () => setShowModalFaskes(false)
+  
   const handleShow = () => setShowOverlay(true);
   const handleClose = () => setShowOverlay(false);
   const handleChangeJenisKerjaSama = (e) => {
@@ -111,7 +122,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
     if (Array.isArray(BpjsData)) {
       BpjsData.map((data) => {
         const finalResult = {
-          label: `${data.name_location} `,
+          label: `${data.name_location} - (${data?.regional})`,
           value: data.uid,
         };
         result.push(finalResult);
@@ -579,6 +590,16 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
                 setInputData({ ...inputData, faskes_type_uid: e.value })
               }
             />
+             <div className="form-text">
+            Jika Data Tidak Ada Tipe Faskes Klik 
+            <button
+          className="form-text text-primary fw-semibold border-0 "
+          onClick={handleShowFaskes}
+        >
+          Tambah Tipe Faskes
+        </button>
+        <AddTipeFaskes show={showModalFaskes} handleClose={handleCloseFaskes} />
+            </div>
           </div>
           <div className="mb-3">
             <Select
@@ -588,7 +609,18 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
                 setInputData({ ...inputData, bpjs_regional_uid: e.value })
               }
             />
+            <div className="form-text">
+            Jika Data Tidak Ada BPJS Regional Klik 
+            <button
+          className="form-text text-primary fw-semibold border-0 "
+          onClick={handleShowBpjs}
+        >
+          Tambah BPJS Regional
+        </button>
+        <AddRegBPJS show={showModalBpjs} handleClose={handleCloseBpjs} />
+            </div>
           </div>
+          
         </>
       ) : (
         ""

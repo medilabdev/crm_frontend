@@ -45,8 +45,6 @@ const EditRekap = () => {
             selector: (row) =>
               `Rp. ${new Intl.NumberFormat().format(row.nilai_estimasi)}`,
         },
-
-
       ];
     const customStyle = {
         headRow: {
