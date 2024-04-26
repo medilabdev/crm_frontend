@@ -159,8 +159,8 @@ const ShowFQP = ({ data }) => {
           </td>
           <td className="px-1">:</td>
           <td>
-            {data && data.expired_hd_permit_period
-              ? data.expired_hd_permit_period
+            {data && data.average_total_actions_last_six_months
+              ? data.average_total_actions_last_six_months
               : "-"}
           </td>
         </tr>
