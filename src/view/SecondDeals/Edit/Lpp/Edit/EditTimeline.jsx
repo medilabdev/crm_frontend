@@ -1,7 +1,6 @@
 import React from 'react'
 
 const EditTimeline = ({ data, handleChangeTimeline, CategoryData}) => {
-    console.log(data);
   return (
     <div>
       <table className="table table-sm caption-top table-bordered">
