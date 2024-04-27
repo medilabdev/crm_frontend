@@ -54,7 +54,7 @@ const EditLpp = ({ data, listCompany, uidDeals }) => {
         result.push(finalResult);
       });
     } else {
-      console.error("listResult is not an array or is not yet initialized.");
+      // console.error("listResult is not an array or is not yet initialized.");
     }
     return result;
   };
@@ -73,7 +73,7 @@ const EditLpp = ({ data, listCompany, uidDeals }) => {
         result.push(finalResult);
       });
     } else {
-      console.error("listResult is not an array or is not yet initialized.");
+      // console.error("listResult is not an array or is not yet initialized.");  
     }
     return result;
   };
@@ -88,7 +88,7 @@ const EditLpp = ({ data, listCompany, uidDeals }) => {
         result.push(finalResult);
       });
     } else {
-      console.error("listResult is not an array or is not yet initialized.");
+      // console.error("listResult is not an array or is not yet initialized.");
     }
     return result;
   };
@@ -103,7 +103,7 @@ const EditLpp = ({ data, listCompany, uidDeals }) => {
         result.push(finalResult);
       });
     } else {
-      console.error("listResult is not an array or is not yet initialized.");
+      // console.error("listResult is not an array or is not yet initialized.");
     }
     return result;
   };
@@ -134,15 +134,27 @@ const EditLpp = ({ data, listCompany, uidDeals }) => {
   const backUpOne = parseFloat(
     dataLpp && dataLpp?.backup_mkhd_first_qty !== null
       ? dataLpp.backup_mkhd_first_qty
-      : ""
+      : 0 
   );
   const backUpTwo = parseFloat(
     dataLpp && dataLpp?.backup_mkhd_second_qty !== null
       ? dataLpp?.backup_mkhd_second_qty
-      : ""
+      : 0
   );
-  const resultMesin = firstQty + secondQty + backUpTwo + backUpOne;
+  function isNumeric(value) {
+    return !isNaN(parseFloat(value)) && isFinite(value);
+  }
+  function validateAndSetDefault(value, defaultValue) {
+    return isNumeric(value) ? value : defaultValue;
+  }
+  const defaultQty = 0;
+
+ const resultMesin = validateAndSetDefault(firstQty, defaultQty) + 
+                    validateAndSetDefault(secondQty, defaultQty) + 
+                    validateAndSetDefault(backUpTwo, defaultQty) + 
+                    validateAndSetDefault(backUpOne, defaultQty);
   const actionDuringCoperationQty = (firstQty + secondQty) * 48 * 60;
+
   useEffect(() => {
     dispatch(GetDataRegionalBpjs(token));
     dispatch(GetDataFaskes(token));
@@ -551,7 +563,6 @@ const EditLpp = ({ data, listCompany, uidDeals }) => {
         ""
       )}
       <div className="mb-5">
-      {console.log(dataLpp)}
         <Select
           options={SelectCategory()}
           placeholder="Select Status"

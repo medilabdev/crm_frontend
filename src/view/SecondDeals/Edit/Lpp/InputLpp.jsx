@@ -169,7 +169,16 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
       ? inputData.backup_mkhd_second_qty
       : ""
   );
-  const resultMesin = firstQty + secondQty + backUpTwo + backUpOne;
+  function isNumeric(value){
+    return !isNaN(parseFloat(value)) && isFinite(value)
+  }
+  function validateAndSetDefault(value, defaultValue){
+    return isNumeric(value) ? value : defaultValue
+  }
+  const defaultQty = 0
+  const resultMesin = validateAndSetDefault(firstQty, defaultQty) + validateAndSetDefault(secondQty, defaultQty) + validateAndSetDefault(backUpOne, defaultQty) + validateAndSetDefault(backUpTwo, defaultQty) 
+
+  
   const actionDuringCoperationQty = (firstQty + secondQty) * 48 * 60;
 
   const tempSupport = [];
@@ -463,9 +472,9 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
         formData.append("timeline[6][11]", inputTimeline.timeline83 || 0);
         formData.append("timeline[6][12]", inputTimeline.timeline84 || 0);
         formData.append("date_period", inputData.date_period || "");
-        // for (const pair of formData.entries()) {
-        //   console.log(pair[0] + ": " + pair[1]);
-        // }
+        for (const pair of formData.entries()) {
+          console.log(pair[0] + ": " + pair[1]);
+        }
         const response = await axios.post(
           `${process.env.REACT_APP_BACKEND_URL}/v2/lpp-document`,
           formData,
