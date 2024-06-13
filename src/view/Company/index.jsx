@@ -480,8 +480,7 @@ const Company = () => {
 
   const fetchData = async () => {
     try {
-      setPending(true);
-      await getAllCompany(token, search, ownerCompany, formSearch);
+      setPending(true)
       await getOwnerUser();
       await getSource();
       await getAlltypeCompany();
@@ -495,15 +494,22 @@ const Company = () => {
   };
 
   useEffect(() => {
+    try {
+      setPending(true);
+      getAllCompany(token, search, ownerCompany, formSearch);
+    } catch (error) {
+      console.error("error in fetch data", error);
+    }finally {
+      setPending(false);
+    }
+  }, [token, search, ownerCompany, formSearch, pagination.page, pagination.limit,])
+
+  
+  useEffect(() => {
     fetchData();
-  }, [
-    token,
-    search,
-    ownerCompany,
-    formSearch,
-    pagination.page,
-    pagination.limit,
-  ]);
+  }, [token]);
+
+
   const handleChangePage = (page) => {
     setPagination((prev) => ({ ...prev, page }));
   };

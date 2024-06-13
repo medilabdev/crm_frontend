@@ -116,7 +116,10 @@ const SupportKerjaSama = () => {
       ),
     },
   ];
-
+  let totalPrice = 0
+  if(allData[0]){
+  allData[0]?.map((data) => totalPrice += data?.total_estimasi_biaya)
+  } 
   return (
     <div className="row mb-2">
       <div className="col">
@@ -132,12 +135,27 @@ const SupportKerjaSama = () => {
               </button>
             </div>
           </Card.Header>
+          <Card.Body>
           <DataTable
             className="p-2"
             columns={ColumnsTable}
             customStyles={customStyle}
             data={allData[0]}
           />
+                <div className="row">
+                    <div className="mt-3 me-3">
+                      <span
+                        className="float-end"
+                        style={{ fontWeight: 400, fontSize: "0.80rem" }}
+                      >
+                        Total Price:
+                        <span className="ms-3 me-2" style={{ fontWeight: 600 }}>
+                          Rp. {new Intl.NumberFormat().format(totalPrice)}
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+          </Card.Body>
           <AddModalSupport show={ShowModal} handleClose={handleClose} />
           <EditModalSupport  show={editModal} handleClose={handleCloseEditModal} data={editDataSupport} dataOld={allData[0]}/>
         </Card>

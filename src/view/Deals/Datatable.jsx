@@ -32,8 +32,18 @@ const DataTableComponet = ({
   const navigate = useNavigate();
   const columns = [
     {
+      
       name: "Name",
-      cell: (row) => (
+      cell: (row) => {
+        const createdDate = new Date(row?.created_at)
+        const currentDate = new Date();
+        const twoDaysAgo = new Date(currentDate)
+        twoDaysAgo?.setDate(currentDate.getDate() - 2)
+        const isNew = createdDate > twoDaysAgo;   
+        const updatedDate = new Date(row?.updated_at)
+        const isUpdate = updatedDate > twoDaysAgo;
+       return (
+        <div>
         <a
           href={`deals/${row.uid}/edit`}
           target="_blank"
@@ -42,7 +52,9 @@ const DataTableComponet = ({
         >
           {row.deal_name}
         </a>
-      ),
+        { isNew ?  isNew && <span className="badge bg-primary ms-2">New</span> : isUpdate ?  isUpdate && <span className="badge bg-success ms-2">Update</span> : "" }
+        </div>
+      )},
       sortable: true,
       width: "150px",
     },

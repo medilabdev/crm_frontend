@@ -18,7 +18,6 @@ import { GetDataDeals } from "../../action/DataDeals";
 import { useSelector } from "react-redux";
 import { GetStaging } from "../../action/StagingDealSecond";
 import { getListOwner } from "../../action/FormOwner";
-
 const SecondDeals = () => {
   const token = localStorage.getItem("token");
   const [SideFilter, SetSideFilter] = useState(false);
@@ -48,10 +47,8 @@ const SecondDeals = () => {
     listErrorDataDeals,
     totalDataDeals,
   } = useSelector((state) => state.DataDeals);
-  console.log(listResultDataDeals);
 
   useEffect(() => {
-    dispatch(GetDataDeals(token, search, ownerDeals, formSearch, pagination));
     dispatch(GetStaging(token));
     dispatch(getListOwner(token));
 
@@ -59,8 +56,13 @@ const SecondDeals = () => {
       setPending(false);
     }, 1040);
     return () => clearTimeout(timeoutId);
-  }, [dispatch, search, ownerDeals, formSearch, pagination]);
+  }, [dispatch]);
 
+
+  useEffect(() => {
+  dispatch(GetDataDeals(token, search, ownerDeals, formSearch, pagination))
+  }, [dispatch, search, ownerDeals, formSearch, pagination])
+  
   const handleSearchDataTable = (e) => {
     if (e.key === "Enter") {
       const value = e.target.value.toLowerCase();

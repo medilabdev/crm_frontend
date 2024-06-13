@@ -69,9 +69,9 @@ const ModalBank = ({ data, show, handleClose }) => {
         formData.append("currency", editBank?.currency || "");
         formData.append("swift_code", editBank?.swift_code || "");
         formData.append("_method", "put");
-        for (const pair of formData.entries()) {
-          console.log(pair[0] + ": " + pair[1]);
-        }
+        // for (const pair of formData.entries()) {
+        //   console.log(pair[0] + ": " + pair[1]);
+        // }
         const response = await axios.post(
           `${process.env.REACT_APP_BACKEND_URL}/v2/fdc-document/bank/${uidBank}`,
           formData,

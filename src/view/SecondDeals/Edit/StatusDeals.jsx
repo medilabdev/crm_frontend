@@ -17,50 +17,77 @@ const StatusDeals = ({ show, handleClose, data, uid }) => {
     });
   };
   const { ResultStageDeals } = useSelector((state) => state.DataStage);
-  const handleSubmit = (e) => {
+
+  const handleSubmit = async(e) => {
     e.preventDefault();
-    const formData = new FormData();
-    formData.append("staging_uid", inputData.status_deals || "");
-    formData.append("_method", "put");
-    axios
-      .post(`${process.env.REACT_APP_BACKEND_URL}/v2/deals/${uid}`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => {
-        Swal.fire({
-          title: res.data.message,
-          text: "Successfully Created Data",
-          icon: "success",
-        }).then((res) => {
-          if (res.isConfirmed) {
-            window.location.reload();
-          }
-        });
-      })
-      .catch((err) => {
-        if (err.response) {
-          Swal.fire({
-            text: err.response.data.message,
-            icon: "warning",
-          });
-        } else {
-          Swal.fire({
-            text: "Something went wrong !",
-            icon: "error",
-          });
-        }
+    let timerInterval;
+    try {
+      const confirmationResult = await Swal.fire({
+        title: "Apakah Kamu yakin untuk Close Lost?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Approve",
+        cancelButtonText: "Close",
       });
+      if (confirmationResult.isConfirmed) {
+        Swal.fire({
+          title: "Loading...",
+          html: "Tolong Tunggu <b></b> Beberapa Detik.",
+          timer: 2500,
+          timerProgressBar: true,
+          didOpen: () => {
+            Swal.showLoading();
+            const timer = Swal.getPopup().querySelector("b");
+            timerInterval = setInterval(() => {
+              timer.textContent = `${Swal.getTimerLeft()}`;
+            }, 100);
+          },
+          willClose: () => {
+            clearInterval(timerInterval);
+          },
+        });
+        const formData = new FormData();
+        formData.append("staging_uid", inputData.status_deals || "");
+        formData.append("lost_reason", inputData?.lost_reason || "")
+        formData.append("lost_competitor", inputData?.lost_competitor || "")
+        formData.append("lost_machine_qty", inputData?.lost_machine_qty || "")
+        formData.append("_method", "put");
+        const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/v2/deals/${uid}`, formData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        Swal.close();
+        await Swal.fire({
+          title: response.data.message,
+          icon: "success",
+        });
+        window.location.reload();
+      }
+    } catch (error) {
+      if (error.response) {
+        Swal.fire({
+          text: error.response.data.message,
+          icon: "warning",
+        });
+      } else {
+        Swal.fire({
+          text: "Something went wrong !",
+          icon: "error",
+        });
+      }
+    }
   };
+
   const dispatch = useDispatch();
   useEffect(() => {
     dispatch(GetStaging(token));
   }, [dispatch]);
+
   return (
     <Modal show={show} onHide={handleClose} centered>
       <Modal.Header closeButton>
-        <Modal.Title>Modal heading</Modal.Title>
+        <Modal.Title>Pilih Stage</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <div className="mb-3">
@@ -72,6 +99,7 @@ const StatusDeals = ({ show, handleClose, data, uid }) => {
             id=""
             className="form-select"
             onClick={handleInput}
+            required
           >
             <option value="">Select Choose</option>
             {Array.isArray(ResultStageDeals)
@@ -89,15 +117,15 @@ const StatusDeals = ({ show, handleClose, data, uid }) => {
           <>
             <div className="mb-3">
               <h6 className="fw-bold ms-2 mt-3">Alasan</h6>
-              <ReactQuill className="p-2" theme="snow" />
+              <ReactQuill className="p-2" theme="snow" onChange={(value) => handleInput({ target: {name: "lost_reason", value}})} />
             </div>
             <div className="mb-3">
               <h6 className="fw-bold ms-2 mt-3">Kompetitor</h6>
-              <ReactQuill className="p-2" theme="snow" />
+              <ReactQuill className="p-2" theme="snow" onChange={(value) => handleInput({ target: {name:"lost_competitor", value}})} />
             </div>
             <div className="mb-3">
-              <h6 className="fw-bold ms-2 mt-3">Qty Mesin</h6>
-              <ReactQuill className="p-2" theme="snow" />
+              <h6 className="fw-bold ms-2 mt-3">Kompetitor Quantity / Quality Mesin</h6>
+              <ReactQuill className="p-2" theme="snow" onChange={(value) => handleInput({ target: {name:"lost_machine_qty", value}})} />
             </div>
           </>
         ) : (

@@ -30,6 +30,7 @@ import {
 import Breadcrumb from "./Partials/Breadcrumb";
 import TopButton from "./Partials/TopButton";
 
+
 const Contact = () => {
   const token = localStorage.getItem("token");
   const [isSidebarToggleCard, setSidebarToggled] = useState(false);
@@ -331,7 +332,6 @@ const Contact = () => {
   const fetchData = async () => {
     try {
       setPending(true);
-      await getContactAll(TokenAuth, search, ownerContact, formSearch);
       await getAllUser();
       await getSource();
       await getCompany();
@@ -345,14 +345,23 @@ const Contact = () => {
 
   useEffect(() => {
     fetchData();
-  }, [
-    TokenAuth,
+  }, [TokenAuth]);
+
+  useEffect(() => {
+    try {
+      setPending(true)
+      getContactAll(TokenAuth, search, ownerContact, formSearch);
+    } catch (error) {
+      console.error("Error in fetchData:", error);
+    }finally{
+      setPending(false); 
+    }
+  },[ TokenAuth,
     search,
     ownerContact,
     formSearch,
     pagination.page,
-    pagination.limit,
-  ]);
+    pagination.limit,])
 
   const handleChangePage = (page) => {
     setPagination((e) => ({ ...e, page }));
@@ -372,7 +381,15 @@ const Contact = () => {
   const columns = [
     {
       name: "Name",
-      selector: (row) => (
+      selector: (row) => { 
+        const createdDate = new Date(row?.created_at)
+        const currentDate = new Date();
+        const twoDaysAgo = new Date(currentDate)
+        twoDaysAgo?.setDate(currentDate.getDate() - 2)
+        const isNew = createdDate > twoDaysAgo;   
+        const updatedDate = new Date(row?.updated_at)
+        const isUpdate = updatedDate > twoDaysAgo;
+        return(
         <a
           href={`/contact/${row.uid}/edit`}
           target="_blank"
@@ -391,6 +408,7 @@ const Contact = () => {
               >
                 {row.name}
               </span>
+              { isNew ?  isNew && <span className="badge bg-primary ms-2">New</span> : isUpdate ?  isUpdate && <span className="badge bg-success ms-2">Update</span> : "" }
               <p
                 className="mt-1"
                 style={{
@@ -402,8 +420,9 @@ const Contact = () => {
               </p>
             </div>
           </div>
+        
         </a>
-      ),
+      )},
       left: true,
       width: "160px",
     },

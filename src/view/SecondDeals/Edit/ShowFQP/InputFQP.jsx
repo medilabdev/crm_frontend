@@ -9,28 +9,23 @@ import OverlayAddCompany from "../../../../components/Overlay/addCompany";
 import Swal from "sweetalert2";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+
+const getNames = (items) => {
+  return [0,1,2].map(index => items && items[index] ? items[index].name : '')
+}
 const InputFQP = ({ data, listCompany }) => {
   const token = localStorage.getItem("token");
   const uid = localStorage.getItem("uid");
   const uidDeals = useParams();
   const [inputData, setInputData] = useState(data);
+  
   const [inputNps, setInputNps] = useState({
-    promoters: [
-      data.promoters && data.promoters[0] ? data.promoters[0].name : "",
-      data.promoters && data.promoters[1] ? data.promoters[1].name : "",
-      data.promoters && data.promoters[2] ? data.promoters[2].name : "",
-    ],
-    neutrals: [
-      data.neutrals && data.neutrals[0] ? data.neutrals[0].name : "",
-      data.neutrals && data.neutrals[1] ? data.neutrals[1].name : "",
-      data.neutrals && data.neutrals[2] ? data.neutrals[2].name : "",
-    ],
-    detractors: [
-      data.detcractors && data.detcractors[0] ? data.detcractors[0].name : "",
-      data.detcractors && data.detcractors[1] ? data.detcractors[1].name : "",
-      data.detcractors && data.detcractors[2] ? data.detcractors[2].name : "",
-    ],
+    promoters: getNames(data.promoters),
+    neutrals: getNames(data.neutrals),
+    detractors: getNames(data.detcractors) 
   });
+
+  const categoriesNps = ['promoters', 'neutrals', 'detractors'];
 
   const [showOverlay, setShowOverlay] = useState(false);
   const handleShow = () => setShowOverlay(true);
@@ -56,7 +51,7 @@ const InputFQP = ({ data, listCompany }) => {
       [e.target.name]: e.target.value,
     });
   };
-  const [inputPrice, setInputPrice] = useState(data.existing_bhp_price);
+  const [inputPrice, setInputPrice] = useState(data?.existing_bhp_price);
   const handleInputDataRP = (e) => {
     const value = e.target.value;
     const formated = formatCurrency(value);
@@ -69,7 +64,7 @@ const InputFQP = ({ data, listCompany }) => {
     return formattedValue;
   };
 
-  const uidFQP = data.uid;
+  const uidFQP = data?.uid;
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -119,21 +114,13 @@ const InputFQP = ({ data, listCompany }) => {
           "procurement_or_management_contact_person",
           inputData.procurement_or_management_contact_person || ""
         );
-        if (inputNps.promoters && inputNps.promoters.length > 0) {
-          formData.append(`promoters[0]`, inputNps.promoters[0] || "");
-          formData.append(`promoters[1]`, inputNps.promoters[1] || "");
-          formData.append(`promoters[2]`, inputNps.promoters[2] || "");
-        }
-        if (inputNps.neutrals && inputNps.neutrals.length > 0) {
-          formData.append("neutrals[0]", inputNps.neutrals[0] || "");
-          formData.append("neutrals[1]", inputNps.neutrals[1] || "");
-          formData.append("neutrals[2]", inputNps.neutrals[2] || "");
-        }
-        if (inputNps.detractors && inputNps.detractors.length > 0) {
-          formData.append("detcractors[0]", inputNps.detractors[0] || "");
-          formData.append("detcractors[1]", inputNps.detractors[1] || "");
-          formData.append("detcractors[2]", inputNps.detractors[2] || "");
-        }
+        categoriesNps.forEach(category => {
+          if (inputNps[category] && inputNps[category].length > 0) {
+            inputNps[category].forEach((item, index) => {
+              formData.append(`${category}[${index}]`, item || "");
+            });
+          }
+        });
 
         formData.append("existing_vendor", inputData.existing_vendor || "");
         formData.append(
@@ -156,9 +143,12 @@ const InputFQP = ({ data, listCompany }) => {
           "status_contract_unit",
           inputData.status_contract_unit || ""
         );
-        if (inputPrice) {
+
+        if (typeof inputPrice === 'string') {
           const inputValueWithoutDot = inputPrice.replace(/\./g, "");
           formData.append("existing_bhp_price", inputValueWithoutDot || "");
+        }else {
+          formData.append("existing_bhp_price", data?.existing_bhp_price  || "")
         }
         formData.append(
           "expired_hd_permit_period",
@@ -213,9 +203,9 @@ const InputFQP = ({ data, listCompany }) => {
         );
         formData.append("another_notes", inputData.another_notes || "");
         formData.append("_method", "put");
-        // for (const pair of formData.entries()) {
-        //   console.log(pair[0] + ": " + pair[1]);
-        // }
+        for (const pair of formData.entries()) {
+          console.log(pair[0] + ": " + pair[1]);
+        }
         const response = await axios.post(
           `${process.env.REACT_APP_BACKEND_URL}/v2/fqp-document/${uidFQP}`,
           formData,
@@ -228,7 +218,6 @@ const InputFQP = ({ data, listCompany }) => {
         Swal.close();
         await Swal.fire({
           title: response.data.message,
-          text: "Successfully Created Data",
           icon: "success",
         }).then((res) => {
           if (res.isConfirmed) {
@@ -244,7 +233,7 @@ const InputFQP = ({ data, listCompany }) => {
         });
       } else {
         Swal.fire({
-          text: "Something went wrong !",
+          text: error.message,
           icon: "error",
         });
       }
@@ -367,8 +356,9 @@ const InputFQP = ({ data, listCompany }) => {
         <div class="alert alert-primary mt-4" role="alert">
           <h6 style={{ fontWeight: "700" }}>NPS Customer</h6>
         </div>
-        <div className="mb-2">
-          <h6 className="fw-bold ms-2 mt-3">Promoters</h6>
+        <div className="row">
+        <h6 className="fw-bold ms-2 mt-3">Promoters</h6>
+          <div className="col-md-4 ">
           <input
             type="text"
             name={`promoters[0]`}
@@ -386,7 +376,8 @@ const InputFQP = ({ data, listCompany }) => {
             placeholder="Input Nama/Jabatan"
             className="form-control mb-2"
           />
-
+          </div>
+          <div className="col-md-4">
           <input
             type="text"
             name={`promoters[1]`}
@@ -404,7 +395,8 @@ const InputFQP = ({ data, listCompany }) => {
             placeholder="Input Nama/Jabatan"
             className="form-control mb-2"
           />
-
+          </div>
+          <div className="col-md-4 ">
           <input
             type="text"
             name={`promoters[2]`}
@@ -422,9 +414,9 @@ const InputFQP = ({ data, listCompany }) => {
             placeholder="Input Nama/Jabatan"
             className="form-control mb-2"
           />
-        </div>
-        <div className="mb-2">
+          </div>
           <h6 className="fw-bold ms-2 mt-3">Neutrals</h6>
+          <div className="col-md-4">
           <input
             type="text"
             name={`neutrals[0]`}
@@ -442,8 +434,10 @@ const InputFQP = ({ data, listCompany }) => {
             placeholder="Input Nama/Jabatan"
             className="form-control mb-2"
           />
-
-          <input
+          </div>
+          
+            <div className="col-md-4">
+            <input
             type="text"
             name={`neutrals[1]`}
             value={inputNps.neutrals[1] || ""}
@@ -460,8 +454,9 @@ const InputFQP = ({ data, listCompany }) => {
             placeholder="Input Nama/Jabatan"
             className="form-control mb-2"
           />
-
-          <input
+            </div>
+            <div className="col-md-4">
+            <input
             type="text"
             name={`neutrals[2]`}
             value={inputNps.neutrals[2] || ""}
@@ -478,10 +473,10 @@ const InputFQP = ({ data, listCompany }) => {
             placeholder="Input Nama/Jabatan"
             className="form-control mb-2"
           />
-        </div>
-        <div className="mb-2">
-          <h6 className="fw-bold ms-2 mt-3">Detractors</h6>
-          <input
+            </div> 
+            <h6 className="fw-bold ms-2 mt-3">Detractors</h6>
+            <div className="col-md-4">
+            <input
             type="text"
             name={`detractors[0]`}
             value={inputNps.detractors[0] || ""}
@@ -498,8 +493,9 @@ const InputFQP = ({ data, listCompany }) => {
             placeholder="Input Nama/Jabatan"
             className="form-control mb-2"
           />
-
-          <input
+            </div>
+            <div className="col-md-4">
+            <input
             type="text"
             name={`detractors[1]`}
             value={inputNps.detractors[1] || ""}
@@ -516,8 +512,9 @@ const InputFQP = ({ data, listCompany }) => {
             placeholder="Input Nama/Jabatan"
             className="form-control mb-2"
           />
-
-          <input
+            </div>
+            <div className="col-md-4">
+            <input
             type="text"
             name={`detractors[2]`}
             value={inputNps.detractors[2] || ""}
@@ -534,7 +531,8 @@ const InputFQP = ({ data, listCompany }) => {
             placeholder="Input Nama/Jabatan"
             className="form-control mb-2"
           />
-        </div>
+            </div>
+          </div>
         <div class="alert alert-primary mt-4" role="alert">
           <h6 style={{ fontWeight: "700" }}>Existing Unit</h6>
         </div>

@@ -51,7 +51,6 @@ const Deals = () => {
   const fetchData = async () => {
     try {
       setPending(true);
-      await getDeals(token, search, ownerDeals, formSearch);
       await getStage();
       await getPriority();
     } catch (error) {
@@ -60,6 +59,18 @@ const Deals = () => {
       setPending(false);
     }
   };
+
+  useEffect(() => {
+      try {
+        setPending(true);
+         getDeals(token, search, ownerDeals, formSearch, pagination);
+      } catch (error) {
+        console.error("error in fetch data", error);
+      } finally {
+        setPending(false);
+      }
+  }, [token, search, ownerDeals, formSearch, pagination])
+
 
   const dispatch = useDispatch();
   const { listResultOwner, listLoadingOwner, listErrorOwner } = useSelector(
@@ -78,12 +89,8 @@ const Deals = () => {
     dispatch(getListCompany(token));
     dispatch(getListContact(token));
   }, [
-    token,
-    search,
-    ownerDeals,
-    formSearch,
-    pagination.page,
-    pagination.limit,
+    dispatch,
+    token
   ]);
 
   const getStage = async (retryCount = 0) => {
@@ -165,6 +172,7 @@ const Deals = () => {
     term,
     ownerDeals,
     formSearch,
+    pagination,
     retryCount = 0
   ) => {
     try {
@@ -199,8 +207,8 @@ const Deals = () => {
         }
       );
 
-      setDataDeals(response.data.data);
-      setTotalRows(response.data.pagination.totalData);
+      setDataDeals(response.data?.data);
+      setTotalRows(response.data?.pagination?.totalData);
       setPending(false);
     } catch (error) {
       if (
@@ -590,7 +598,7 @@ const Deals = () => {
                 <div className="row">
                   <div className="col">
                     <button
-                      className="btn btn-primary mt-3"
+                    className="btn btn-primary mt-3"
                       onClick={toggleSideFilter}
                       style={{ fontSize: "0.85rem" }}
                     >

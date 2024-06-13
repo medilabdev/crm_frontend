@@ -12,6 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { getListCompany } from "../../../action/FormCompany";
 import axios from "axios";
 import Swal from "sweetalert2";
+import InputNps from "./InputNps";
 
 const CreateSecondDeals = () => {
   const token = localStorage.getItem("token");
@@ -196,17 +197,14 @@ const CreateSecondDeals = () => {
         formData.append("cooperation_system", inputData.sistem_kerjasama || "");
         formData.append("human_resources", inputData.sdm || "");
         formData.append(
-          "hd_unit_count_distance_from_faskes",
+          "hd_health_facilities_arround",
           inputData.faskes_hd_lima_km || ""
         );
         formData.append(
-          "hd_health_facilities_arround",
+          "hd_health_facilities_capacity_approximately",
           inputData.kapasistas_faskes_hd_sekitar_unit || ""
         );
-        formData.append(
-          "hd_health_facilities_capacity_approximately",
-          inputData.jumlah_unit_hd_kurang_dua_pulu_km || ""
-        );
+     
         formData.append("cataclysm", inputData.is_banjir || "");
         formData.append("near_the_sea", inputData.dekat_laut || "");
         formData.append(
@@ -391,86 +389,9 @@ const CreateSecondDeals = () => {
                 <div class="alert alert-primary mt-4" role="alert">
                   <h6 style={{ fontWeight: "700" }}>NPS Customer</h6>
                 </div>
-                <div className="mb-2">
-                  <h6 className="fw-bold ms-2 mt-3">Promoters</h6>
-                  <input
-                    type="text"
-                    name={`promoters[0]`}
-                    onChange={handleInputNps}
-                    placeholder="Input Nama/Jabatan"
-                    className="form-control mb-2"
-                  />
-                  <input
-                    type="text"
-                    name={`promoters[1]`}
-                    onChange={handleInputNps}
-                    id=""
-                    placeholder="Input Nama/Jabatan"
-                    className="form-control mb-2"
-                  />
-                  <input
-                    type="text"
-                    name={`promoters[2]`}
-                    onChange={handleInputNps}
-                    id=""
-                    placeholder="Input Nama/Jabatan"
-                    className="form-control mb-2"
-                  />
-                </div>
-                <div className="mb-2">
-                  <h6 className="fw-bold ms-2 mt-3">Neutrals</h6>
-                  <input
-                    type="text"
-                    name={`neutrals[0]`}
-                    onChange={handleInputNps}
-                    id=""
-                    placeholder="Input Nama/Jabatan"
-                    className="form-control mb-2"
-                  />
-                  <input
-                    type="text"
-                    name={`neutrals[1]`}
-                    onChange={handleInputNps}
-                    placeholder="Input Nama/Jabatan"
-                    id=""
-                    className="form-control mb-2"
-                  />
-                  <input
-                    type="text"
-                    name={`neutrals[2]`}
-                    onChange={handleInputNps}
-                    placeholder="Input Nama/Jabatan"
-                    id=""
-                    className="form-control mb-2"
-                  />
-                </div>
-                <div className="mb-2">
-                  <h6 className="fw-bold ms-2 mt-3">Detractors</h6>
-                  <input
-                    type="text"
-                    name={`detractors[0]`}
-                    onChange={handleInputNps}
-                    placeholder="Input Nama/Jabatan"
-                    id=""
-                    className="form-control mb-2"
-                  />
-                  <input
-                    type="text"
-                    name={`detractors[1]`}
-                    onChange={handleInputNps}
-                    placeholder="Input Nama/Jabatan"
-                    id=""
-                    className="form-control mb-2"
-                  />
-                  <input
-                    type="text"
-                    name={`detractors[2]`}
-                    onChange={handleInputNps}
-                    placeholder="Input Nama/Jabatan"
-                    id=""
-                    className="form-control mb-2"
-                  />
-                </div>
+                <InputNps title="Promoters" groupName="promoters" handleInputNps={handleInputNps} />
+                <InputNps title="Neutrals" groupName="neutrals" handleInputNps={handleInputNps} />
+                <InputNps title="Detractors" groupName="detractors" handleInputNps={handleInputNps} />
                 <div class="alert alert-primary mt-4" role="alert">
                   <h6 style={{ fontWeight: "700" }}>Existing Unit</h6>
                 </div>
@@ -765,6 +686,7 @@ const CreateSecondDeals = () => {
                   <input
                     type="number"
                     name="jumlah_unit_hd_kurang_dua_pulu_km"
+                    onChange={handleInputData}
                     id=""
                     className="form-control"
                     placeholder=""

@@ -302,7 +302,6 @@ const Task = () => {
   const fetchData = async () => {
     try {
       setPending(true)
-      await getTask(search, searchForm)
       await getOwner(token)
       await getCompany(token)
       await getContact(token)
@@ -318,8 +317,18 @@ const Task = () => {
 
   useEffect(() => {
     fetchData();
-  }, [token, search, searchForm, pagination.page, pagination.limit ]);
-
+  }, [token]);
+  
+  useEffect(() => {
+    try {
+      setPending(true)
+      getTask(search, searchForm)
+    } catch (error) {
+      console.error('error in fetch data', error);
+    }finally{
+      setPending(false)
+    }
+  }, [token, search, searchForm, pagination.page, pagination.limit])
   const selectUidDataTable = (e) => {
     const select = e.selectedRows.map((row) => row.uid);
     setSelectUid(select);

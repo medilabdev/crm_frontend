@@ -150,7 +150,7 @@ const ShowFQP = ({ data }) => {
           </td>
           <td className="px-1">:</td>
           <td>
-            {data && data.existing_bhp_price ? data.existing_bhp_price : "-"}
+            {data && data.number_of_machine_unit ? data.number_of_machine_unit : "-"}
           </td>
         </tr>
         <tr className="fw-medium ">
@@ -159,8 +159,8 @@ const ShowFQP = ({ data }) => {
           </td>
           <td className="px-1">:</td>
           <td>
-            {data && data.expired_hd_permit_period
-              ? data.expired_hd_permit_period
+            {data && data.average_total_actions_last_six_months
+              ? data.average_total_actions_last_six_months
               : "-"}
           </td>
         </tr>
@@ -170,9 +170,9 @@ const ShowFQP = ({ data }) => {
           </td>
           <td className="px-1">:</td>
           <td>
-            {data && data.number_of_machine_unit
-              ? data.number_of_machine_unit
-              : "-"}
+            {data && data.number_of_existing_patients
+              ? data.number_of_existing_patients
+              : "-"} 
           </td>
         </tr>
         <tr className="fw-medium">

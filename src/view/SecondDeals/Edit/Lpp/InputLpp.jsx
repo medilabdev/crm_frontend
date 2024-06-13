@@ -18,6 +18,8 @@ import SupportKerjaSama from "./SupportKerjaSama";
 import { CategoryType } from "../../../../action/CategoryType";
 import Swal from "sweetalert2";
 import axios from "axios";
+import AddRegBPJS from "./modals/addRegBPJS";
+import AddTipeFaskes from "./modals/AddTipeFaskes";
 
 const InputLpp = ({ data, listCompany, uidDeals }) => {
   const uidPerson = localStorage.getItem("uid");
@@ -25,18 +27,15 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
     data?.lpp_document ? data.lpp_document : []
   );
   const [jenisKerjasama, setJenisKerjaSama] = useState();
-  const [Rab, setRab] = useState(inputData !== null ? inputData.is_rab : "");
-  const [feeAction, setFeeAction] = useState(
-    inputData !== null ? inputData.is_fee : ""
-  );
-  const [supportKerjaSama, setSupportKerjaSama] = useState(
-    inputData !== null ? inputData.is_support : ""
-  );
+  const [Rab, setRab] = useState([]);
+  const [feeAction, setFeeAction] = useState([]);
+  const [supportKerjaSama, setSupportKerjaSama] = useState([]);
 
   const [showOverlay, setShowOverlay] = useState(false);
   const [priceFormat, setPriceFormat] = useState(
     inputData !== null ? inputData.price : ""
   );
+  
   const handleInputDataRP = (event) => {
     const rawValue = event.target.value;
     const formattedValue = formatCurrency(rawValue);
@@ -49,6 +48,14 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
     return formattedValue;
   };
 
+  const [showModalBpjs, setShowModalBpjs] = useState(false)
+  const handleShowBpjs = () => setShowModalBpjs(true)
+  const handleCloseBpjs = () => setShowModalBpjs(false)
+
+  const [showModalFaskes, setShowModalFaskes] = useState(false)
+  const handleShowFaskes = () => setShowModalFaskes(true)
+  const handleCloseFaskes = () => setShowModalFaskes(false)
+  
   const handleShow = () => setShowOverlay(true);
   const handleClose = () => setShowOverlay(false);
   const handleChangeJenisKerjaSama = (e) => {
@@ -115,7 +122,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
     if (Array.isArray(BpjsData)) {
       BpjsData.map((data) => {
         const finalResult = {
-          label: `${data.name_location} `,
+          label: `${data.name_location} - (${data?.regional})`,
           value: data.uid,
         };
         result.push(finalResult);
@@ -162,10 +169,19 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
       ? inputData.backup_mkhd_second_qty
       : ""
   );
-  const resultMesin = firstQty + secondQty + backUpTwo + backUpOne;
+  function isNumeric(value){
+    return !isNaN(parseFloat(value)) && isFinite(value)
+  }
+  function validateAndSetDefault(value, defaultValue){
+    return isNumeric(value) ? value : defaultValue
+  }
+  const defaultQty = 0
+  const resultMesin = validateAndSetDefault(firstQty, defaultQty) + validateAndSetDefault(secondQty, defaultQty) + validateAndSetDefault(backUpOne, defaultQty) + validateAndSetDefault(backUpTwo, defaultQty) 
+
+  
   const actionDuringCoperationQty = (firstQty + secondQty) * 48 * 60;
 
-  const tempSupport = [];
+  let tempSupport = [];
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
     if (key.startsWith("SupportKerjaSama")) {
@@ -191,25 +207,42 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
     }
   }
 
-  const NoAlkes = [];
-  const Alkes = [];
-
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key.startsWith("RAB")) {
-      const data = JSON.parse(localStorage.getItem(key));
-      data.forEach((item) => {
-        if (item.is_alkes === "no") {
-          NoAlkes.push({ ...item });
-        } else if (item.is_alkes === "yes") {
-          Alkes.push({ ...item });
-        }
+ 
+  const [inputTimeline, setInputTimeline] = useState([]);
+  const handleInputTimeline = (e) => {
+    if (e.target.checked) {
+      setInputTimeline({
+        ...inputTimeline,
+        [e.target.name]: "1",
       });
+    } else {
+      const updatedInputTimeline = { ...inputTimeline };
+      delete updatedInputTimeline[e.target.name];
+      setInputTimeline(updatedInputTimeline);
     }
-  }
+  };
+  const [categoryType, setCategoryType] = useState("");
+
+  useEffect(() => {
+    const newCategoryType =
+      inputData.category_type_uid === "hs_L0YxrtdK1"
+        ? "Replace"
+        : inputData.category_type_uid === "ls_Y7hsg13Gg"
+          ? "New HD"
+          : "Expand";
+    setCategoryType(newCategoryType);
+  }, [inputData.category_type_uid]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if(!inputData.category_type_uid){
+      Swal.fire({
+        text: "Category Jenis Kerja Sama Wajib Diisi ",
+        icon: "warning",
+      });
+      return;
+    }
     try {
       let timerInterval;
       const { isConfirmed } = await Swal.fire({
@@ -308,54 +341,145 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
         formData.append("is_rab", Rab || "");
         if (Array.isArray(RabData[0]) && RabData[0].length > 0) {
           RabData[0].forEach((rab, index) => {
-            formData.append(`rab[${index}][item_uid]`, rab.item || "");
-            formData.append(`rab[${index}][is_alkes]`, rab.is_alkes || "");
+            formData.append(`rab[${index}][item_uid]`, rab?.item || "");
+            formData.append(`rab[${index}][is_alkes]`, rab?.is_alkes || "");
             formData.append(
               `rab[${index}][estimated_cost]`,
-              rab.nilai_estimasi_biaya || ""
+              rab?.nilai_estimasi_biaya || ""
             );
-            formData.append(`rab[${index}][qty]`, rab.qty || "");
+            formData.append(`rab[${index}][qty]`, rab?.qty || "");
             formData.append(
               `rab[${index}][total_price]`,
-              rab.total_estimasi_biaya || ""
+              rab?.total_estimasi_biaya || ""
             );
-            formData.append(`rab[${index}][realization_note]`, rab.note || "");
+            formData.append(`rab[${index}][realization_note]`, rab?.note || "");
           });
         }
         formData.append("is_support", supportKerjaSama || "");
         if (Array.isArray(tempSupport[0]) && tempSupport[0].length > 0) {
           tempSupport[0].forEach((support, index) => {
-            formData.append(`support[${index}][item_uid]`, support.item || "");
+            formData.append(`support[${index}][item_uid]`, support?.item || "");
             formData.append(
               `support[${index}][estimated_cost]`,
-              support.nilai_estimasi_biaya || ""
+              support?.nilai_estimasi_biaya || ""
             );
-            formData.append(`support[${index}][qty]`, support.qty || "");
+            formData.append(`support[${index}][qty]`, support?.qty || "");
             formData.append(
               `support[${index}][total_price]`,
-              support.total_estimasi_biaya || ""
+              support?.total_estimasi_biaya || ""
             );
             formData.append(
               `support[${index}][realization_note]`,
-              support.note || ""
+              support?.note || ""
             );
           });
         }
 
         formData.append("is_fee", feeAction || "");
-        if (Array.isArray(FeeData[0]) && FeeData[0].length > 0) {
+        if (Array.isArray(FeeData[0])) {
           FeeData[0].forEach((fee, index) => {
-            formData.append(`fee[${index}][recieve_name]`, fee.name || "");
-            const valueFee = fee.nilai.replace(/\./g, "");
+            formData.append(`fee[${index}][recieve_name]`, fee?.name || "");
+            const valueFee = fee?.nilai.replace(/\./g, "");
             formData.append(`fee[${index}][value]`, valueFee || "");
-            formData.append(`fee[${index}][qty]`, fee.qty || "");
-            formData.append(`fee[${index}][total_price]`, fee.total || "");
-            formData.append(`fee[${index}][realization_note]`, fee.note || "");
+            formData.append(`fee[${index}][qty]`, fee?.qty || "");
+            formData.append(`fee[${index}][total_price]`, fee?.total || "");
+            formData.append(`fee[${index}][realization_note]`, fee?.note || "");
           });
         }
-
         formData.append("postscript", inputData.postscript || "");
 
+        formData.append("timeline[0][name]", categoryType || "");
+        formData.append("timeline[0][1]", inputTimeline.timeline01 || 0);
+        formData.append("timeline[0][2]", inputTimeline.timeline02 || 0);
+        formData.append("timeline[0][3]", inputTimeline.timeline03 || 0);
+        formData.append("timeline[0][4]", inputTimeline.timeline04 || 0);
+        formData.append("timeline[0][5]", inputTimeline.timeline05 || 0);
+        formData.append("timeline[0][6]", inputTimeline.timeline06 || 0);
+        formData.append("timeline[0][7]", inputTimeline.timeline07 || 0);
+        formData.append("timeline[0][8]", inputTimeline.timeline08 || 0);
+        formData.append("timeline[0][9]", inputTimeline.timeline09 || 0);
+        formData.append("timeline[0][10]", inputTimeline.timeline10 || 0);
+        formData.append("timeline[0][11]", inputTimeline.timeline11 || 0);
+        formData.append("timeline[0][12]", inputTimeline.timeline12 || 0);
+        formData.append("timeline[1][name]", "Renovasi");
+        formData.append("timeline[1][1]", inputTimeline.timeline13 || 0);
+        formData.append("timeline[1][2]", inputTimeline.timeline14 || 0);
+        formData.append("timeline[1][3]", inputTimeline.timeline15 || 0);
+        formData.append("timeline[1][4]", inputTimeline.timeline16 || 0);
+        formData.append("timeline[1][5]", inputTimeline.timeline17 || 0);
+        formData.append("timeline[1][6]", inputTimeline.timeline18 || 0);
+        formData.append("timeline[1][7]", inputTimeline.timeline19 || 0);
+        formData.append("timeline[1][8]", inputTimeline.timeline20 || 0);
+        formData.append("timeline[1][9]", inputTimeline.timeline21 || 0);
+        formData.append("timeline[1][10]", inputTimeline.timeline22 || 0);
+        formData.append("timeline[1][11]", inputTimeline.timeline23 || 0);
+        formData.append("timeline[1][12]", inputTimeline.timeline24 || 0);
+        formData.append("timeline[2][name]", "Kirim Mesin");
+        formData.append("timeline[2][1]", inputTimeline.timeline25 || 0);
+        formData.append("timeline[2][2]", inputTimeline.timeline26 || 0);
+        formData.append("timeline[2][3]", inputTimeline.timeline27 || 0);
+        formData.append("timeline[2][4]", inputTimeline.timeline28 || 0);
+        formData.append("timeline[2][5]", inputTimeline.timeline29 || 0);
+        formData.append("timeline[2][6]", inputTimeline.timeline30 || 0);
+        formData.append("timeline[2][7]", inputTimeline.timeline31 || 0);
+        formData.append("timeline[2][8]", inputTimeline.timeline32 || 0);
+        formData.append("timeline[2][9]", inputTimeline.timeline33 || 0);
+        formData.append("timeline[2][10]", inputTimeline.timeline34 || 0);
+        formData.append("timeline[2][11]", inputTimeline.timeline35 || 0);
+        formData.append("timeline[2][12]", inputTimeline.timeline36 || 0);
+        formData.append("timeline[3][name]", "Install Mesin");
+        formData.append("timeline[3][1]", inputTimeline.timeline37 || 0);
+        formData.append("timeline[3][2]", inputTimeline.timeline38 || 0);
+        formData.append("timeline[3][3]", inputTimeline.timeline39 || 0);
+        formData.append("timeline[3][4]", inputTimeline.timeline40 || 0);
+        formData.append("timeline[3][5]", inputTimeline.timeline41 || 0);
+        formData.append("timeline[3][6]", inputTimeline.timeline42 || 0);
+        formData.append("timeline[3][7]", inputTimeline.timeline43 || 0);
+        formData.append("timeline[3][8]", inputTimeline.timeline44 || 0);
+        formData.append("timeline[3][9]", inputTimeline.timeline45 || 0);
+        formData.append("timeline[3][10]", inputTimeline.timeline46 || 0);
+        formData.append("timeline[3][11]", inputTimeline.timeline47 || 0);
+        formData.append("timeline[3][12]", inputTimeline.timeline48 || 0);
+        formData.append("timeline[4][name]", "Izin HD & BPJS");
+        formData.append("timeline[4][1]", inputTimeline.timeline49 || 0);
+        formData.append("timeline[4][2]", inputTimeline.timeline50 || 0);
+        formData.append("timeline[4][3]", inputTimeline.timeline51 || 0);
+        formData.append("timeline[4][4]", inputTimeline.timeline52 || 0);
+        formData.append("timeline[4][5]", inputTimeline.timeline53 || 0);
+        formData.append("timeline[4][6]", inputTimeline.timeline54 || 0);
+        formData.append("timeline[4][7]", inputTimeline.timeline55 || 0);
+        formData.append("timeline[4][8]", inputTimeline.timeline56 || 0);
+        formData.append("timeline[4][9]", inputTimeline.timeline57 || 0);
+        formData.append("timeline[4][10]", inputTimeline.timeline58 || 0);
+        formData.append("timeline[4][11]", inputTimeline.timeline59 || 0);
+        formData.append("timeline[4][12]", inputTimeline.timeline60 || 0);
+        formData.append("timeline[5][name]", "Training");
+        formData.append("timeline[5][1]", inputTimeline.timeline61 || 0);
+        formData.append("timeline[5][2]", inputTimeline.timeline62 || 0);
+        formData.append("timeline[5][3]", inputTimeline.timeline63 || 0);
+        formData.append("timeline[5][4]", inputTimeline.timeline64 || 0);
+        formData.append("timeline[5][5]", inputTimeline.timeline65 || 0);
+        formData.append("timeline[5][6]", inputTimeline.timeline66 || 0);
+        formData.append("timeline[5][7]", inputTimeline.timeline67 || 0);
+        formData.append("timeline[5][8]", inputTimeline.timeline68 || 0);
+        formData.append("timeline[5][9]", inputTimeline.timeline69 || 0);
+        formData.append("timeline[5][10]", inputTimeline.timeline70 || 0);
+        formData.append("timeline[5][11]", inputTimeline.timeline71 || 0);
+        formData.append("timeline[5][12]", inputTimeline.timeline72 || 0);
+        formData.append("timeline[6][name]", "1st Running Patient");
+        formData.append("timeline[6][1]", inputTimeline.timeline73 || 0);
+        formData.append("timeline[6][2]", inputTimeline.timeline74 || 0);
+        formData.append("timeline[6][3]", inputTimeline.timeline75 || 0);
+        formData.append("timeline[6][4]", inputTimeline.timeline76 || 0);
+        formData.append("timeline[6][5]", inputTimeline.timeline77 || 0);
+        formData.append("timeline[6][6]", inputTimeline.timeline78 || 0);
+        formData.append("timeline[6][7]", inputTimeline.timeline79 || 0);
+        formData.append("timeline[6][8]", inputTimeline.timeline80 || 0);
+        formData.append("timeline[6][9]", inputTimeline.timeline81 || 0);
+        formData.append("timeline[6][10]", inputTimeline.timeline82 || 0);
+        formData.append("timeline[6][11]", inputTimeline.timeline83 || 0);
+        formData.append("timeline[6][12]", inputTimeline.timeline84 || 0);
+        formData.append("date_period", inputData.date_period || "");
         for (const pair of formData.entries()) {
           console.log(pair[0] + ": " + pair[1]);
         }
@@ -393,6 +517,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
       }
     }
   };
+
   useEffect(() => {
     dispatch(GetDataFaskes(token));
     dispatch(GetDataRegionalBpjs(token));
@@ -423,11 +548,29 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
     const ClearRAB = () => {
       localStorage.removeItem("RAB");
     };
-    window.addEventListener("unload", ClearRAB);
+    const ClearEditRab = () => {
+      localStorage.removeItem("rabEdit")
+    }
+    const ClearEditFee = () => {
+      localStorage.removeItem("feeEdit")
+    }
+    const ClearEditSupport = () => {
+      localStorage.removeItem("supportEdit")
+
+    }
+    window.addEventListener("beforeunload", ClearRAB);
+    window.addEventListener("beforeunload", ClearEditRab);
+    window.addEventListener("beforeunload", ClearEditFee);
+    window.addEventListener("beforeunload", ClearEditSupport);
     return () => {
-      window.removeEventListener("unload", ClearRAB);
+      window.removeEventListener("beforeunload", ClearRAB);
+      window.addEventListener("beforeunload", ClearEditRab);
+      window.addEventListener("beforeunload", ClearEditFee);
+      window.addEventListener("beforeunload", ClearEditSupport);
     };
   }, []);
+
+  
   return (
     <Card.Body>
       <div class="alert alert-primary mt-2" role="alert">
@@ -464,6 +607,16 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
                 setInputData({ ...inputData, faskes_type_uid: e.value })
               }
             />
+             <div className="form-text">
+            Jika Data Tidak Ada Tipe Faskes Klik 
+            <button
+          className="form-text text-primary fw-semibold border-0 "
+          onClick={handleShowFaskes}
+        >
+          Tambah Tipe Faskes
+        </button>
+        <AddTipeFaskes show={showModalFaskes} handleClose={handleCloseFaskes} />
+            </div>
           </div>
           <div className="mb-3">
             <Select
@@ -473,7 +626,18 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
                 setInputData({ ...inputData, bpjs_regional_uid: e.value })
               }
             />
+            <div className="form-text">
+            Jika Data Tidak Ada BPJS Regional Klik 
+            <button
+          className="form-text text-primary fw-semibold border-0 "
+          onClick={handleShowBpjs}
+        >
+          Tambah BPJS Regional
+        </button>
+        <AddRegBPJS show={showModalBpjs} handleClose={handleCloseBpjs} />
+            </div>
           </div>
+          
         </>
       ) : (
         ""
@@ -778,51 +942,9 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
         />
         <label htmlFor="">Tindakan Selama Bekerja Sama</label>
       </div>
-      <div className="mb-3">
-        <label htmlFor="" className="mb-1 fw-bold">
-          RAB Bangunan & Lainnya terkait pembiayaan awal (Optional)
-        </label>
-        <select name="" id="" className="form-select" onChange={handleRab}>
-          <option value="">Select Chose</option>
-          <option value="yes">Ya</option>
-          <option value="no">Tidak</option>
-        </select>
-      </div>
-      {Rab === "yes" ? <DataTableRab Alkes={Alkes} NoAlkes={NoAlkes} /> : ""}
-      <div className="mb-3">
-        <label htmlFor="" className="mb-1 fw-bold">
-          Support Selama Kerja Sama (Optional) 
-        </label>
-        <select
-          name="support"
-          className="form-select"
-          onChange={handleSupportKerjaSama}
-        >
-          <option value="">Select Chose</option>
-          <option value="yes">Ya</option>
-          <option value="no">Tidak</option>
-        </select>
-      </div>
-      {supportKerjaSama === "yes" ? <SupportKerjaSama /> : ""}
-      <div className="mb-3">
-        <label htmlFor="" className="mb-1 fw-bold">
-          Fee Tindakan (Optional)
-        </label>
-        <select
-          name="fee"
-          id=""
-          className="form-select"
-          onChange={handleFeeAction}
-        >
-          <option value="">Select Chose</option>
-          <option value="yes">Ya</option>
-          <option value="no">Tidak</option>
-        </select>
-      </div>
-      {feeAction === "yes" ? <DataTableFeeAction /> : ""}
-      <div className="mb-3">
-        <DataTableRekapBiaya />
-      </div>
+     
+      <DataTableRab rab={Rab} handleRab={handleRab} supportKerjaSama={supportKerjaSama} handleSupportKerjaSama={handleSupportKerjaSama} feeAction={feeAction} handleFeeAction={handleFeeAction}/>
+ 
       <div className="mb-2">
         <h6 className="fw-bold ms-2 mt-3">Catatan Tambahan</h6>
         <ReactQuill
@@ -839,7 +961,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
         <label htmlFor="">Start Date</label>
         <input
           type="date"
-          name=""
+          name="date_period"
           onChange={handleInputData}
           id=""
           className="form-control"
@@ -847,7 +969,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
       </div>
       <Timeline
         statusKerjaSama={inputData.category_type_uid}
-        className="mb-3"
+        handleInputTimeline={handleInputTimeline}
       />
       <div className=" mt-2">
         <button className="btn btn-primary me-2" onClick={handleSubmit}>

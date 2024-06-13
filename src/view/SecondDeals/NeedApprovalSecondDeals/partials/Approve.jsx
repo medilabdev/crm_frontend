@@ -104,7 +104,6 @@ export const handleReject = async (uid) => {
       Swal.close();
       await Swal.fire({
         title: response.data.message,
-        text: "Pengajuan Berhasil Ditolak",
         icon: "error",
       });
       window.location.href = "/deals-second";

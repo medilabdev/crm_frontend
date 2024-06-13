@@ -34,33 +34,31 @@ const ColumnsDataTable = ({
     {
       id: 1,
       name: "Company Name",
-      selector: (row) => (
+      selector: (row) => {
+        const createdDate = new Date(row?.created_at)
+        const currentDate = new Date();
+        const twoDaysAgo = new Date(currentDate)
+        twoDaysAgo?.setDate(currentDate.getDate() - 2)
+        const isNew = createdDate > twoDaysAgo;   
+        const updatedDate = new Date(row?.updated_at)
+        const isUpdate = updatedDate > twoDaysAgo;
+      return (
+       <div>  
         <a
           href={`/company/${row.uid}/edit`}
           target="_blank"
-          className="image-name text-decoration-none"
+          className="image-name text-decoration-none fw-semibold"  
+          style={{
+            whiteSpace: "normal",
+            color: "#191919",
+          }}
         >
-          <div className="d-flex">
-            {/* <FontAwesomeIcon
-              icon={faBuilding}
-              style={{ width: "35px", height: "20px" }}
-              className="text-black"
-            /> */}
-            {/* <img src={IconCompany} style={{ width: "20px" }} /> */}
-            <span
-              className="fw-medium"
-              style={{
-                whiteSpace: "normal",
-                color: "#191919",
-              }}
-            >
               {row.name}
-            </span>
-          </div>
-        </a>
-      ),
+          
+        </a>{ isNew ?  isNew && <span className="badge bg-primary ms-2">New</span> : isUpdate ?  isUpdate && <span className="badge bg-success ms-2">Update</span> : "" }</div>
+      )},
       left: true,
-      width: "160px",
+      width: "200px",
       sortable: true,
     },
     {

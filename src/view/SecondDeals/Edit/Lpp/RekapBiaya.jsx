@@ -3,10 +3,35 @@ import DataTable from "react-data-table-component";
 
 const DataTableRekapBiaya = ({ priceRab}) => {
 
+
+  let totalPriceRab = 0
+  
+  useEffect(() => {
+    let NoAlkes = [];
+    let Alkes = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key.startsWith("RAB")) {
+        const data = JSON.parse(localStorage.getItem(key));
+        data.forEach((item) => {
+          if (item.is_alkes === "no") {
+            NoAlkes.push({ ...item });
+          } else if (item.is_alkes === "yes") {
+            Alkes.push({ ...item });
+          }
+        });
+      }
+    }
+    if(NoAlkes){
+     NoAlkes.map((data) => totalPriceRab += data?.total_estimasi_biaya)
+    } 
+  },[])
+
+
   const data = [
     {
       name: "RAB Bangunan & Lainnya Terkain",
-      nilai_estimasi: priceRab,
+      nilai_estimasi: totalPriceRab,
     },
     {
       name: "Support Selama Kerja Sama",

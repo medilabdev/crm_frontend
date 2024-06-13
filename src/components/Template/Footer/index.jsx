@@ -4,7 +4,7 @@ const Footer = () => {
   return (
     <div>
       <div>
-        &copy; 2023 Copyright
+        &copy; 2024 Copyright
         <strong>
           <span> Team IT Medilab</span>
         </strong>
