@@ -12,6 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { getListCompany } from "../../../action/FormCompany";
 import axios from "axios";
 import Swal from "sweetalert2";
+import InputNps from "./InputNps";
 
 const CreateSecondDeals = () => {
   const token = localStorage.getItem("token");
@@ -223,9 +224,9 @@ const CreateSecondDeals = () => {
           inputData.jumlah_mesin_unit_hd || ""
         );
         formData.append("another_notes", inputData.another_notes || "");
-        for (const pair of formData.entries()) {
-          console.log(pair[0] + ": " + pair[1]);
-        }
+        // for (const pair of formData.entries()) {
+        //   console.log(pair[0] + ": " + pair[1]);
+        // }
         setButtonBlocked(true);
         const response = await axios.post(
           `${process.env.REACT_APP_BACKEND_URL}/v2/deals`,
@@ -388,86 +389,9 @@ const CreateSecondDeals = () => {
                 <div class="alert alert-primary mt-4" role="alert">
                   <h6 style={{ fontWeight: "700" }}>NPS Customer</h6>
                 </div>
-                <div className="mb-2">
-                  <h6 className="fw-bold ms-2 mt-3">Promoters</h6>
-                  <input
-                    type="text"
-                    name={`promoters[0]`}
-                    onChange={handleInputNps}
-                    placeholder="Input Nama/Jabatan"
-                    className="form-control mb-2"
-                  />
-                  <input
-                    type="text"
-                    name={`promoters[1]`}
-                    onChange={handleInputNps}
-                    id=""
-                    placeholder="Input Nama/Jabatan"
-                    className="form-control mb-2"
-                  />
-                  <input
-                    type="text"
-                    name={`promoters[2]`}
-                    onChange={handleInputNps}
-                    id=""
-                    placeholder="Input Nama/Jabatan"
-                    className="form-control mb-2"
-                  />
-                </div>
-                <div className="mb-2">
-                  <h6 className="fw-bold ms-2 mt-3">Neutrals</h6>
-                  <input
-                    type="text"
-                    name={`neutrals[0]`}
-                    onChange={handleInputNps}
-                    id=""
-                    placeholder="Input Nama/Jabatan"
-                    className="form-control mb-2"
-                  />
-                  <input
-                    type="text"
-                    name={`neutrals[1]`}
-                    onChange={handleInputNps}
-                    placeholder="Input Nama/Jabatan"
-                    id=""
-                    className="form-control mb-2"
-                  />
-                  <input
-                    type="text"
-                    name={`neutrals[2]`}
-                    onChange={handleInputNps}
-                    placeholder="Input Nama/Jabatan"
-                    id=""
-                    className="form-control mb-2"
-                  />
-                </div>
-                <div className="mb-2">
-                  <h6 className="fw-bold ms-2 mt-3">Detractors</h6>
-                  <input
-                    type="text"
-                    name={`detractors[0]`}
-                    onChange={handleInputNps}
-                    placeholder="Input Nama/Jabatan"
-                    id=""
-                    className="form-control mb-2"
-                  />
-                  <input
-                    type="text"
-                    name={`detractors[1]`}
-                    onChange={handleInputNps}
-                    placeholder="Input Nama/Jabatan"
-                    id=""
-                    className="form-control mb-2"
-                  />
-                  <input
-                    type="text"
-                    name={`detractors[2]`}
-                    onChange={handleInputNps}
-                    placeholder="Input Nama/Jabatan"
-                    id=""
-                    className="form-control mb-2"
-                  />
-                </div>
+                <InputNps title="Promoters" groupName="promoters" handleInputNps={handleInputNps} />
+                <InputNps title="Neutrals" groupName="neutrals" handleInputNps={handleInputNps} />
+                <InputNps title="Detractors" groupName="detractors" handleInputNps={handleInputNps} />
                 <div class="alert alert-primary mt-4" role="alert">
                   <h6 style={{ fontWeight: "700" }}>Existing Unit</h6>
                 </div>
