@@ -181,7 +181,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
   
   const actionDuringCoperationQty = (firstQty + secondQty) * 48 * 60;
 
-  const tempSupport = [];
+  let tempSupport = [];
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
     if (key.startsWith("SupportKerjaSama")) {
@@ -235,6 +235,14 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if(!inputData.category_type_uid){
+      Swal.fire({
+        text: "Category Jenis Kerja Sama Wajib Diisi ",
+        icon: "warning",
+      });
+      return;
+    }
     try {
       let timerInterval;
       const { isConfirmed } = await Swal.fire({
@@ -368,7 +376,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
         }
 
         formData.append("is_fee", feeAction || "");
-        if (Array.isArray(FeeData[0]) && FeeData[0].length > 0) {
+        if (Array.isArray(FeeData[0])) {
           FeeData[0].forEach((fee, index) => {
             formData.append(`fee[${index}][recieve_name]`, fee?.name || "");
             const valueFee = fee?.nilai.replace(/\./g, "");

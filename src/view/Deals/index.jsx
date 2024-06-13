@@ -598,7 +598,7 @@ const Deals = () => {
                 <div className="row">
                   <div className="col">
                     <button
-                      className="btn btn-primary mt-3"
+                    className="btn btn-primary mt-3"
                       onClick={toggleSideFilter}
                       style={{ fontSize: "0.85rem" }}
                     >

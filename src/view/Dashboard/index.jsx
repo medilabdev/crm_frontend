@@ -38,7 +38,7 @@ function Dashboard() {
               </Card>
             </div>
           </div>
-          {/* <div className="row">
+          <div className="row">
             <div className="col-md-6">
              
             </div>
@@ -62,7 +62,7 @@ function Dashboard() {
                 <ChartWinLose />
               </Card>
             </div>
-          </div> */}
+          </div>
         </div>
         <Footer />
       </Main>

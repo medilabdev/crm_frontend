@@ -18,7 +18,6 @@ import { GetDataDeals } from "../../action/DataDeals";
 import { useSelector } from "react-redux";
 import { GetStaging } from "../../action/StagingDealSecond";
 import { getListOwner } from "../../action/FormOwner";
-
 const SecondDeals = () => {
   const token = localStorage.getItem("token");
   const [SideFilter, SetSideFilter] = useState(false);
