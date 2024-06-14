@@ -377,7 +377,7 @@ const ShowFQP = ({ data }) => {
           <td className="px-1">:</td>
           <td>
             {data && data.access_to_transportation
-              ? data.access_to_transportation ==="difficult" ? "Mudah" : "Sulit"
+              ? data.access_to_transportation ==="easy" ? "Mudah" : "Sulit"
               : "-"}
           </td>
         </tr>
