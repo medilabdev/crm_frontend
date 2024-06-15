@@ -5,7 +5,7 @@ import Swal from 'sweetalert2'
 
 const AddRegBPJS = ({show, handleClose}) => {
     const token = localStorage.getItem('token')
-    const [inputData, setInputData] = useState([])
+    const [inputData, setInputData] = useState({})
     const handleInput = (e) => {
         setInputData({
             ...inputData,
@@ -13,7 +13,7 @@ const AddRegBPJS = ({show, handleClose}) => {
         })
     }
     const handleSubmit = async (e) => {
-        e.preventDefault()
+        e.preventDefault()    
         try {
             const formData = new FormData()
             formData.append("name_location", inputData.name || "")
@@ -65,7 +65,7 @@ const AddRegBPJS = ({show, handleClose}) => {
         </div>
     <div class="form-floating mb-3">
           <input
-            type="text"
+            type="number"
             class="form-control"
             id="floatingInput"
             name="regional"
