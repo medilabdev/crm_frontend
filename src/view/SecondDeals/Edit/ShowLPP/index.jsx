@@ -79,7 +79,7 @@ const ShowLPP = ({ data }) => {
         <tr className="fw-medium">
           <td style={{ width: "300px", fontSize: "0.9rem" }}>Status</td>
           <td className="px-1">:</td>
-          <td>{data?.lpp_document?.category_type_uid || ""}</td>
+          <td>{data?.lpp_document?.timeline[0].category?.name || ""}</td>
         </tr>
       </table>
       <div class="fw-bold mb-3">
