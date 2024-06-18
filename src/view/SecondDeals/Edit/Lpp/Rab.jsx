@@ -358,15 +358,22 @@ const ColumnsTableFee = [
           </div>
         </Card.Header>
         <Card.Body>
+        <div style={{fontSize:"1rem" }}>
+         Alat Kesehatan
+        </div>
         <DataTable
-          className="p-2 mb-2"
+          className="mb-3"
           columns={ColumnsTable}
           data={Alkes}
           customStyles={customStyle}
           dense
         />
+        <hr />
+        <div style={{fontSize:"1rem"}}>
+         Bukan Alat Kesehatan
+        </div>
         <DataTable
-          className="mb-2 p-2"
+          className="mb-2"
           columns={ColumnsTable}
           data={NoAlkes}
           customStyles={customStyle}

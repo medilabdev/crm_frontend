@@ -357,9 +357,15 @@ const EditRab = ({data, dataSupport, dataFee}) => {
                 </button>
                 </Card.Header>
                 <Card.Body>
-                    <DataTable className="p-2 mb-2" dense customStyles={customStyle} columns={ColumnsTableRab} data={Alkes}/>
-
-                    <DataTable className="p-2 mb-2" dense customStyles={customStyle} columns={ColumnsTableRab} data={NoAlkes}/>
+                  <div style={{fontSize:"1rem" }}>
+                  Alat Kesehatan
+                  </div>
+                  <DataTable className="mb-2" dense customStyles={customStyle} columns={ColumnsTableRab} data={Alkes}/>
+                    <hr />
+                  <div style={{fontSize:"1rem"}}>
+                  Bukan Alat Kesehatan
+                  </div>
+                    <DataTable className="mb-2" dense customStyles={customStyle} columns={ColumnsTableRab} data={NoAlkes}/>
                     <div className="row">
                   <div className="mt-3 me-3">
                     <span
