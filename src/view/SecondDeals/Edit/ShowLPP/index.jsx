@@ -252,7 +252,6 @@ const ShowLPP = ({ data }) => {
             Start Date Timeline
           </td>
           <td className="px-1">:</td>
-          
           <td>{data?.lpp_document?.timeline[0]?.year_period || "-"}</td>
         </tr>
       </table>

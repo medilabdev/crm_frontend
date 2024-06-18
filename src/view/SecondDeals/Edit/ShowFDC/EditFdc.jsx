@@ -320,7 +320,7 @@ const EditFdc = ({ data }) => {
               <td>
                 <a
                   className="btn btn-primary"
-                  href={`https://api-crm-iss.medilabjakarta.id/storage/file/deals/${editData.ktp_file}`}
+                  href={`https://api-crm-iss.medilabjakarta.id/storage/file/deals/fdc/${editData.ktp_file}`}
                   target="_blank"
                   style={{
                     whiteSpace: "normal",
@@ -358,7 +358,7 @@ const EditFdc = ({ data }) => {
               <td>
                 <a
                   className="btn btn-primary"
-                  href={`https://api-crm-iss.medilabjakarta.id/storage/file/deals/${editData.npwp_file}`}
+                  href={`https://api-crm-iss.medilabjakarta.id/storage/file/deals/fdc/${editData.npwp_file}`}
                   target="_blank"
                   style={{
                     whiteSpace: "normal",
@@ -398,7 +398,7 @@ const EditFdc = ({ data }) => {
               <td>
                 <a
                   className="btn btn-primary"
-                  href={`https://api-crm-iss.medilabjakarta.id/storage/file/deals/${editData.sppkp_file}`}
+                  href={`https://api-crm-iss.medilabjakarta.id/storage/file/deals/fdc/${editData.sppkp_file}`}
                   target="_blank"
                   style={{
                     whiteSpace: "normal",
@@ -438,7 +438,7 @@ const EditFdc = ({ data }) => {
               <td>
                 <a
                   className="btn btn-primary"
-                  href={`https://api-crm-iss.medilabjakarta.id/storage/file/deals/${editData.company_registration_file}`}
+                  href={`https://api-crm-iss.medilabjakarta.id/storage/file/deals/fdc/${editData.company_registration_file}`}
                   target="_blank"
                   style={{
                     whiteSpace: "normal",
@@ -478,7 +478,7 @@ const EditFdc = ({ data }) => {
               <td>
                 <a
                   className="btn btn-primary"
-                  href={`https://api-crm-iss.medilabjakarta.id/storage/file/deals/${editData?.business_license_file}`}
+                  href={`https://api-crm-iss.medilabjakarta.id/storage/file/deals/fdc/${editData?.business_license_file}`}
                   target="_blank"
                   style={{
                     whiteSpace: "normal",
@@ -519,7 +519,7 @@ const EditFdc = ({ data }) => {
               <td>
                 <a
                   className="btn btn-primary"
-                  href={`https://api-crm-iss.medilabjakarta.id/storage/file/deals/${editData.siup_file}`}
+                  href={`https://api-crm-iss.medilabjakarta.id/storage/file/deals/fdc/${editData.siup_file}`}
                   target="_blank"
                   style={{
                     whiteSpace: "normal",
@@ -559,7 +559,7 @@ const EditFdc = ({ data }) => {
               <td>
                 <a
                   className="btn btn-primary"
-                  href={`https://api-crm-iss.medilabjakarta.id/storage/file/deals/${editData.kso_file}`}
+                  href={`https://api-crm-iss.medilabjakarta.id/storage/file/deals/fdc/${editData.kso_file}`}
                   target="_blank"
                   style={{
                     whiteSpace: "normal",

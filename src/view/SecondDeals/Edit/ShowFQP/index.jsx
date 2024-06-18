@@ -271,7 +271,7 @@ const ShowFQP = ({ data }) => {
           </td>
           <td className="px-1">:</td>
           <td>
-            {data && data.cooperation_system ? data.cooperation_system : "-"}
+            {data && data?.cooperation_system === "etc" ? "lainnya" : data?.cooperation_system ?? "-"}
           </td>
         </tr>
 
@@ -293,10 +293,10 @@ const ShowFQP = ({ data }) => {
           </td>
           <td className="px-1">:</td>
           <td>
-            {data && data.hd_unit_count_distance_from_faskes ? (
+            {data && data.hd_health_facilities_arround ? (
               <div
                 dangerouslySetInnerHTML={{
-                  __html: data.hd_unit_count_distance_from_faskes,
+                  __html: data.hd_health_facilities_arround,
                 }}
               />
             ) : (
@@ -311,10 +311,10 @@ const ShowFQP = ({ data }) => {
           </td>
           <td className="px-1">:</td>
           <td>
-            {data && data.hd_health_facilities_arround ? (
+            {data && data.hd_health_facilities_capacity_approximately ? (
               <span
                 dangerouslySetInnerHTML={{
-                  __html: data.hd_health_facilities_arround,
+                  __html: data.hd_health_facilities_capacity_approximately,
                 }}
               />
             ) : (
