@@ -563,7 +563,6 @@ const EditLpp = ({ data, listCompany, uidDeals }) => {
         ""
       )}
       <div className="mb-5">
-        {console.log(dataLpp)}
         <Select
           options={SelectCategory()}
           placeholder="Select Status"
