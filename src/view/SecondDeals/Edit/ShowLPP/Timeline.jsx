@@ -33,7 +33,6 @@ const Timeline = ({ data }) => {
         <tbody> 
           {data?.timeline?.map((item) => (
             <tr>
-              {console.log(item)}
               <td className="fw-semibold">{item?.name}</td>
               <td><input type="checkbox" checked={item?.[0] == 1} className="form-check-input border-secondary" /></td>
               <td><input type="checkbox" checked={item?.[1] == 1} className="form-check-input border-secondary" /></td>
