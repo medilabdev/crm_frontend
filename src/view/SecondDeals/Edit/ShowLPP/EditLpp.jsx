@@ -33,6 +33,9 @@ const EditLpp = ({ data, listCompany, uidDeals }) => {
   const [showModalFaskes, setShowModalFaskes] = useState(false)
   const handleShowFaskes = () => setShowModalFaskes(true)
   const handleCloseFaskes = () => setShowModalFaskes(false)
+
+  const [actionMachinePerMonthQty, setActionMachinePerMonthQty] = useState(dataLpp?.action_machine_per_month_qty)
+
   const token = localStorage.getItem("token");
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -41,6 +44,11 @@ const EditLpp = ({ data, listCompany, uidDeals }) => {
       [name]: value,
     });
   };
+  function handleInputTindakanPerbulan(e) {
+    const newValue = parseInt(e.target.value, 10)
+    setActionMachinePerMonthQty(newValue);
+  }
+  console.log(actionMachinePerMonthQty);
   const dispatch = useDispatch();
   const selectCompany = () => {
     const result = [];
@@ -141,6 +149,7 @@ const EditLpp = ({ data, listCompany, uidDeals }) => {
       ? dataLpp?.backup_mkhd_second_qty
       : 0
   );
+  
   function isNumeric(value) {
     return !isNaN(parseFloat(value)) && isFinite(value);
   }
@@ -153,7 +162,7 @@ const EditLpp = ({ data, listCompany, uidDeals }) => {
                     validateAndSetDefault(secondQty, defaultQty) + 
                     validateAndSetDefault(backUpTwo, defaultQty) + 
                     validateAndSetDefault(backUpOne, defaultQty);
-  const actionDuringCoperationQty = (firstQty + secondQty) * 48 * 60;
+  const actionDuringCoperationQty = (firstQty + secondQty) *  actionMachinePerMonthQty * 60;
 
   useEffect(() => {
     dispatch(GetDataRegionalBpjs(token));
@@ -223,6 +232,13 @@ const EditLpp = ({ data, listCompany, uidDeals }) => {
 
   const handleUpdate = async(e) => {
     e.preventDefault()
+    if(actionMachinePerMonthQty < 48){
+      Swal.fire({
+        text: "Value Tindakan per mesin/bulan harus lebih atau sama dengan 48 ",
+        icon: "warning",
+      });
+      return;
+    }
     try {
       let timerInterval
       const { isConfirmed } = await Swal.fire({
@@ -300,7 +316,7 @@ const EditLpp = ({ data, listCompany, uidDeals }) => {
         );
         formData.append("total_mesin_qty", dataLpp?.total_mesin_qty || "")
         formData.append("date_first_delivery", dataLpp?.date_first_delivery || "")
-        formData.append("action_machine_per_month_qty", dataLpp?.action_machine_per_month_qty || "")
+        formData.append("action_machine_per_month_qty", actionMachinePerMonthQty|| "")
         formData.append("action_during_cooperation_qty", actionDuringCoperationQty)
         formData.append("postscript", dataLpp?.postscript || "")
 
@@ -783,7 +799,8 @@ const EditLpp = ({ data, listCompany, uidDeals }) => {
         <input
           type="number"
           name="action_machine_per_month_qty"
-          value={dataLpp?.action_machine_per_month_qty}
+          onChange={handleInputTindakanPerbulan}
+          value={actionMachinePerMonthQty}
           id=""
           className="form-control"
           placeholder=""
@@ -794,7 +811,7 @@ const EditLpp = ({ data, listCompany, uidDeals }) => {
         <input
           type="number"
           name="action_during_cooperation_qty"
-          value={dataLpp?.action_during_cooperation_qty}
+          value={actionDuringCoperationQty}
           id=""
           className="form-control"
           placeholder=""
