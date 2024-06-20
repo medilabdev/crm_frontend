@@ -783,7 +783,7 @@ const EditLpp = ({ data, listCompany, uidDeals }) => {
         <input
           type="number"
           name="action_machine_per_month_qty"
-          value={48}
+          value={dataLpp?.action_machine_per_month_qty}
           id=""
           className="form-control"
           placeholder=""
@@ -794,7 +794,7 @@ const EditLpp = ({ data, listCompany, uidDeals }) => {
         <input
           type="number"
           name="action_during_cooperation_qty"
-          value={actionDuringCoperationQty}
+          value={dataLpp?.action_during_cooperation_qty}
           id=""
           className="form-control"
           placeholder=""
