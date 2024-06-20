@@ -26,6 +26,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
   const [inputData, setInputData] = useState(
     data?.lpp_document ? data.lpp_document : []
   );
+  const [tindakanPerbulan, setTindakanPerbulan ] = useState(48)
   const [jenisKerjasama, setJenisKerjaSama] = useState();
   const [Rab, setRab] = useState([]);
   const [feeAction, setFeeAction] = useState([]);
@@ -81,6 +82,11 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
       [e.target.name]: e.target.value,
     });
   };
+
+  function handleInputTindakanPerbulan(e) {
+    const newValue = parseInt(e.target.value, 10)
+      setTindakanPerbulan(newValue);
+  }
   const selectCompany = () => {
     const result = [];
     if (Array.isArray(listCompany)) {
@@ -179,7 +185,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
   const resultMesin = validateAndSetDefault(firstQty, defaultQty) + validateAndSetDefault(secondQty, defaultQty) + validateAndSetDefault(backUpOne, defaultQty) + validateAndSetDefault(backUpTwo, defaultQty) 
 
   
-  const actionDuringCoperationQty = (firstQty + secondQty) * 48 * 60;
+  const actionDuringCoperationQty = (firstQty + secondQty) * tindakanPerbulan * 60;
 
   let tempSupport = [];
   for (let i = 0; i < localStorage.length; i++) {
@@ -235,7 +241,13 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    if(tindakanPerbulan < 48){
+      Swal.fire({
+        text: "Value Tindakan per mesin/bulan harus lebih atau sama dengan 48 ",
+        icon: "warning",
+      });
+      return;
+    }
     if(!inputData.category_type_uid){
       Swal.fire({
         text: "Category Jenis Kerja Sama Wajib Diisi ",
@@ -243,6 +255,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
       });
       return;
     }
+ 
     try {
       let timerInterval;
       const { isConfirmed } = await Swal.fire({
@@ -332,7 +345,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
         );
         formData.append(
           "action_machine_per_month_qty",
-          inputData.action_machine_per_month_qty || ""
+          tindakanPerbulan || ""
         );
         formData.append(
           "action_during_cooperation_qty",
@@ -480,9 +493,9 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
         formData.append("timeline[6][11]", inputTimeline.timeline83 || 0);
         formData.append("timeline[6][12]", inputTimeline.timeline84 || 0);
         formData.append("date_period", inputData.date_period || "");
-        for (const pair of formData.entries()) {
-          console.log(pair[0] + ": " + pair[1]);
-        }
+        // for (const pair of formData.entries()) {
+        //   console.log(pair[0] + ": " + pair[1]);
+        // }
         const response = await axios.post(
           `${process.env.REACT_APP_BACKEND_URL}/v2/lpp-document`,
           formData,
@@ -922,8 +935,8 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
         <input
           type="number"
           name="action_machine_per_month_qty"
-          onChange={handleInputData}
-          value={48}
+          onChange={handleInputTindakanPerbulan}
+          value={tindakanPerbulan}
           id=""
           className="form-control"
           placeholder=""
