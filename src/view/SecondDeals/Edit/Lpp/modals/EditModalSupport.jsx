@@ -3,12 +3,34 @@ import { Button, Modal } from 'react-bootstrap';
 
 const EditModalSupport = ({show, handleClose, data, dataOld}) => {
     const [inputData, setInputData] = useState([])
+    const [inputRp, setInputRp] = useState("")
+    const [resultValue, setResultValue] = useState("")
     const handleInput = (e) => {
         setInputData({
           ...inputData,
           [e.target.name]: e.target.value,
         });
       };
+
+      const handleInputDataRP =(event) => {
+        const rawValue = event.target.value
+        const formatedValue = formatCurrency(rawValue)
+        setInputRp(formatedValue)
+      }
+      
+      const formatCurrency = (value) => {
+        const sanitizedValue = value.replace(/[^\d]/g, "")
+        return new Intl.NumberFormat('id-ID').format(parseInt(sanitizedValue));
+      }
+
+      let inputRpResult = parseInt(inputRp.replace(/\./g, ""), 10);
+      let inputQty = parseFloat(inputData.qty)
+
+      useEffect(()=>{
+        const result_price = inputQty * inputRpResult
+        setResultValue(result_price)
+      },[inputRpResult, inputQty])
+
       const handleSubmit = (e) => {
         e.preventDefault();
         const dataUpdate = dataOld.map((item) => {
@@ -16,9 +38,9 @@ const EditModalSupport = ({show, handleClose, data, dataOld}) => {
               return {
                 id: inputData.id,
                 item: inputData.item,
-                nilai_estimasi_biaya: inputData.nilai_estimasi_biaya,
+                nilai_estimasi_biaya: inputRpResult,
                 qty: inputData.qty,
-                total_estimasi_biaya: inputData.total_estimasi_biaya,
+                total_estimasi_biaya: resultValue,
                 note: inputData.note,
               };
             }
@@ -29,8 +51,8 @@ const EditModalSupport = ({show, handleClose, data, dataOld}) => {
       }
       useEffect(() => {
         setInputData(data);
+        setInputRp(data?.nilai_estimasi_biaya ? data.nilai_estimasi_biaya.toString() : "")
       }, [data]);
-
   return (
     <Modal show={show} onHide={handleClose} centered>
     <Modal.Header closeButton>
@@ -51,11 +73,11 @@ const EditModalSupport = ({show, handleClose, data, dataOld}) => {
       </div>
       <div class="form-floating mb-3">
         <input
-          type="number"
+          type="text"
           class="form-control"
           name="nilai_estimasi_biaya"
-          value={inputData.nilai_estimasi_biaya || ""}
-          onChange={handleInput}
+          value={inputRp || 0}
+          onChange={handleInputDataRP}
           id="floatingInput"
           placeholder="name@example.com"
         />
@@ -78,8 +100,7 @@ const EditModalSupport = ({show, handleClose, data, dataOld}) => {
           type="number"
           class="form-control"
           name="total_estimasi_biaya"
-          value={inputData.total_estimasi_biaya || ""}
-          onChange={handleInput}
+          value={resultValue || ""}
           id="floatingInput"
           placeholder="name@example.com"
         />

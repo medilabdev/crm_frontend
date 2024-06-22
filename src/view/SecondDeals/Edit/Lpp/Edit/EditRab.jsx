@@ -1,12 +1,15 @@
-import { faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faPenToSquare, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Card}  from 'react-bootstrap'
 import  DataTable  from 'react-data-table-component'
 import Swal from "sweetalert2"
 import EditModalRab from './EditModalRab';
 import EditModalSupport from './EditModalSupport';
 import EditModalFee from './EditModalFee';
+import UpdateModalFee from '../modals/UpdateModalFee';
+
+
 const EditRab = ({data, dataSupport, dataFee}) => {
   const [ShowModal, setShowModal] = useState(false);
   const handleShow = () => setShowModal(true);
@@ -63,6 +66,23 @@ const EditRab = ({data, dataSupport, dataFee}) => {
   if(NoAlkes){
    NoAlkes.map((data) => totalPriceRab += data?.total_estimated_cost)
   } 
+
+  const [editDataRab, setEditDataRab] = useState({})
+  const [editModalRab, setEditModalRab] = useState(false)
+  const handleCloseEditRab = () => setEditModalRab(false)
+  const handleOpenEditRab = (id, item_uid, estimated_cost, is_alkes, qty, total_estimated_cost, realization_note) => {
+    setEditDataRab({
+      id:id, 
+      item_uid:item_uid,
+      estimated_cost:estimated_cost,
+      is_alkes:is_alkes,
+      qty:qty,
+      total_estimated_cost:total_estimated_cost,
+      realization_note:realization_note
+    })
+    setEditModalRab(true)
+  }
+
   const handleDeleteItemRab = (uid) => {
     Swal.fire({
     title: "Apakah kamu yakin untuk Menghapus?",
@@ -108,21 +128,22 @@ const EditRab = ({data, dataSupport, dataFee}) => {
           name: "Action",
           selector: (row) => (
             <>
-              {/* <button
+              <button
                 style={{ border: "none", backgroundColor: "white" }}
                 onClick={() =>
-                  handleEditRab(
+                  handleOpenEditRab(
                     row.id,
-                    row.item,
-                    row.nilai_estimasi_biaya,
+                    row.item_uid,
+                    row.estimated_cost,
+                    row.is_alkes,
                     row.qty,
-                    row.total_estimasi_biaya,
-                    row.note
+                    row.total_estimated_cost,
+                    row.realization_note
                   )
                 }
               >
                 <FontAwesomeIcon icon={faPenToSquare} />
-              </button> */}
+              </button>
               <button
                 style={{ border: "none", backgroundColor: "white" }}
                 onClick={() => handleDeleteItemRab(row.uid)}
@@ -159,10 +180,29 @@ const EditRab = ({data, dataSupport, dataFee}) => {
             }
         });
     };
+
+
+    const [editDataSupport, setEditDataSupport] = useState({})
+    const [editModalSupport, setEditModalSupport] = useState(false)
+
+    const handleCloseEditSupport = () => setEditModalSupport(false)
+    const handleOpenEditSupport = (id, item_uid, estimated_cost, qty, total_estimated_cost, realization_note) => {
+      setEditDataSupport({
+        id:id,
+        item_uid:item_uid,
+        estimated_cost:estimated_cost,
+        qty:qty,
+        total_estimated_cost:total_estimated_cost,
+        realization_note:realization_note
+      })
+      setEditModalSupport(true)
+    }
+
+    
     let totalPriceSupport = 0
-  if(allDataSupport[0]){
-  allDataSupport[0]?.map((data) => totalPriceSupport += data?.total_estimated_cost)
-  } 
+    if(allDataSupport[0]){
+    allDataSupport[0]?.map((data) => totalPriceSupport += data?.total_estimated_cost)
+    } 
      const ColumnsTableSupport = [
         {
           name: "Item",
@@ -190,21 +230,21 @@ const EditRab = ({data, dataSupport, dataFee}) => {
           name: "Action",
           selector: (row) => (
             <>
-              {/* <button
+              <button
                 style={{ border: "none", backgroundColor: "white" }}
                 onClick={() =>
-                  handleEditRab(
+                  handleOpenEditSupport(
                     row.id,
-                    row.item,
-                    row.nilai_estimasi_biaya,
+                    row.item_uid,
+                    row.estimated_cost,
                     row.qty,
-                    row.total_estimasi_biaya,
-                    row.note
+                    row.total_estimated_cost,
+                    row.realization_note
                   )
                 }
               >
                 <FontAwesomeIcon icon={faPenToSquare} />
-              </button> */}
+              </button>
               <button
                 style={{ border: "none", backgroundColor: "white" }}
                 onClick={() => handleDeleteItemSupport(row.uid)}
@@ -216,6 +256,21 @@ const EditRab = ({data, dataSupport, dataFee}) => {
         },
       ];
 
+
+      const [editDataFee, setEditDataFee] = useState({})
+      const [editModalFee, setEditModalFee] = useState(false)
+      const handleCloseEditFee = () => setEditModalFee(false)
+      const handleOpenEditFee = (id, recieve_name, value, qty, total, realization_note) => {
+        setEditDataFee({
+          id:id,
+          recieve_name:recieve_name,
+          value:value,
+          qty:qty,
+          total:total,
+          realization_note:realization_note
+        })
+        setEditModalFee(true)
+      }
       const allDataFee = [];
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
@@ -240,10 +295,12 @@ const EditRab = ({data, dataSupport, dataFee}) => {
             }
          })
       };
+
       let totalPriceFee = 0
       if(allDataFee[0]){
       allDataFee[0]?.map((data) => totalPriceFee += data?.total)
       } 
+
       const ColumnsTableFee = [
         {
           name: "Nama Penerima",
@@ -269,22 +326,22 @@ const EditRab = ({data, dataSupport, dataFee}) => {
           name: "Action",
           selector: (row) => (
             <>
-              {/* <button
+              <button
                 type="button"
                 style={{ border: "none", backgroundColor: "white" }}
                 onClick={() =>
-                  handleEditFee(
+                  handleOpenEditFee(
                     row.id,
-                    row.name,
-                    row.nilai,
+                    row.recieve_name,
+                    row.value,
                     row.qty,
                     row.total,
-                    row.note
+                    row.realization_note
                   )
                 }
               >
                 <FontAwesomeIcon icon={faPenToSquare} />
-              </button> */}
+              </button>
               <button
                 type="button"
                 onClick={() => handleDeleteItemFee(row.uid)}
@@ -381,7 +438,7 @@ const EditRab = ({data, dataSupport, dataFee}) => {
                 </div>
                 </Card.Body>
             </Card>
-            <EditModalRab show={ShowModal} handleClose={handleClose} />
+            <EditModalRab show={editModalRab} handleClose={handleCloseEditRab} data={editDataRab} dataAll={allDataRab[0]}/>
         </div>
     </div>
     {/* support */}
@@ -413,7 +470,7 @@ const EditRab = ({data, dataSupport, dataFee}) => {
                 </div>
             </Card.Body>
         </Card>
-        <EditModalSupport show={ShowModalSupport} handleClose={handleCloseSupport} />
+        <EditModalSupport show={editModalSupport} handleClose={handleCloseEditSupport} data={editDataSupport} dataAll={allDataSupport[0]}/>
     </div>
 </div>
 
@@ -446,7 +503,7 @@ const EditRab = ({data, dataSupport, dataFee}) => {
                 </div>
                 </Card.Body>
             </Card>
-            <EditModalFee show={showAddFee} handleClose={handleCloseFee}/>
+            <UpdateModalFee show={editModalFee} handleClose={handleCloseEditFee} data={editDataFee} dataAll={allDataFee[0]}/>
         </div>
     </div>
 

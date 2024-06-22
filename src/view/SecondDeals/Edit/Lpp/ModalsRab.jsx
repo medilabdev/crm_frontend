@@ -22,11 +22,13 @@ const ModalsRab = ({ show, handleClose }) => {
     const formattedValue = Number(sanitizedValue).toLocaleString("id-ID");
     return formattedValue;
   };
+
   const [resultValue, setResultValue] = useState();
-  const inputWithoutSeparator =
-    inputEst.length > 0 ? inputEst.replace(/\./g, "") : "";
+
+  const inputWithoutSeparator = inputEst.length > 0 ? inputEst.replace(/\./g, "") : "";
   const tempOne = parseFloat(inputWithoutSeparator);
   const tempTwo = parseFloat(InputData.qty);
+
   useEffect(() => {
     const result_estimasi_charge = tempOne * tempTwo;
     setResultValue(result_estimasi_charge);

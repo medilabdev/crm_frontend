@@ -1,56 +1,57 @@
 import React, { useEffect, useState } from 'react'
-import { Button, Modal } from "react-bootstrap"
-const EditModalFee = ({show, handleClose, data, dataOld}) => {
-    const [inputData, setInputData] = useState({});
-    const [inputRp, setInputRp] = useState("")
-    const [resultValue, setResultValue] = useState("")
+import { Button, Modal } from 'react-bootstrap'
+
+const UpdateModalFee = ({show, handleClose, data, dataAll}) => {
+    const [inputData, setInputData] = useState({})
+    const [inputEst, setInputEst] = useState("")
+    const [resultValue, setResultValue] = useState("");
     const handleInput = (e) => {
-      setInputData({
-        ...inputData,
-        [e.target.name]: e.target.value,
-      });
-    };
-    const handleInputDataRP =(event) => {
-      const rawValue = event.target.value
-      const formatedValue = formatCurrency(rawValue)
-      setInputRp(formatedValue)
-    }
-    
+        setInputData({
+          ...inputData,
+          [e.target.name]: e.target.value,
+        });
+      };
+
+      const handleInputDataRP = (event) => {
+        const rawValue = event.target.value;
+        const formattedValue = formatCurrency(rawValue);
+        setInputEst(formattedValue);
+      };
+
     const formatCurrency = (value) => {
       const sanitizedValue = value.replace(/[^\d]/g, "")
       return new Intl.NumberFormat('id-ID').format(parseInt(sanitizedValue));
-    }
+      };
 
-    let inputRpResult = parseInt(inputRp.replace(/\./g, ""), 10);
+    let DataEst = parseInt(inputEst.replace(/\./g, ""), 10)
     let inputQty = parseFloat(inputData.qty)
-
-    useEffect(()=>{
-      const result_price = inputQty * inputRpResult
-      setResultValue(result_price)
-    },[inputRpResult, inputQty])
-
-  useEffect(() => {
-    setInputData(data)
-    setInputRp(data?.nilai ? data.nilai.toString() : "")
-  }, [data])
-    const handleSubmit = (e) => {
+    useEffect(() => {
+        const result_price = DataEst * inputQty
+        setResultValue(result_price)
+      }, [DataEst, inputQty])
+      const handleSubmit =(e) => {
         e.preventDefault()
-      const dataUpdate = dataOld.map((item) => {
-        if(item.id === inputData.id){
-          return {
-            id:inputData.id,
-            name: inputData.name,
-            nilai: inputRpResult,
-            qty: inputData.qty,
-            total: resultValue,
-            note: inputData.note
-          }
-        }
-        return item;
-      })
-      localStorage.setItem("FeeTindakan", JSON.stringify(dataUpdate));
+        const dataUpdate = dataAll.map((item) => {
+            if (item.id === inputData.id) {
+              return {
+                id: inputData.id,
+                recieve_name: inputData.recieve_name,
+                value: DataEst,
+                qty: inputData.qty,
+                total: resultValue,
+                realization_note: inputData.realization_note,
+              };
+            }
+            return item;
+          });
+          localStorage.setItem("feeEdit", JSON.stringify(dataUpdate));
           handleClose()
-    }
+      }
+
+      useEffect(() => {
+        setInputData(data)
+        setInputEst(data?.value ? data?.value.toString() : "")
+      }, [data])
   return (
     <Modal show={show} onHide={handleClose} centered>
     <Modal.Header closeButton>
@@ -62,8 +63,8 @@ const EditModalFee = ({show, handleClose, data, dataOld}) => {
           type="text"
           class="form-control"
           id="floatingInput"
-          name="name"
-          value={inputData.name || ""}
+          name="recieve_name"
+          value={inputData.recieve_name|| ""}
           onChange={handleInput}
           placeholder="name@example.com"
         />
@@ -73,8 +74,8 @@ const EditModalFee = ({show, handleClose, data, dataOld}) => {
         <input
           type="text"
           class="form-control"
-          name="nilai"
-          value={inputRp || 0}
+          name="value"
+          value={inputEst || ""}
           onChange={handleInputDataRP}
           id="floatingInput"
           placeholder="name@example.com"
@@ -86,19 +87,20 @@ const EditModalFee = ({show, handleClose, data, dataOld}) => {
           type="number"
           class="form-control"
           name="qty"
-          value={inputData.qty || ''}
+          value={inputData.qty || ""}
           onChange={handleInput}
           id="floatingInput"
           placeholder="name@example.com"
         />
         <label for="floatingInput">Qty</label>
       </div>
+
       <div class="form-floating mb-3">
         <input
           type="number"
           class="form-control"
           name="total"
-          value={resultValue}
+          value={resultValue || ""}
           id="floatingInput"
           placeholder="name@example.com"
         />
@@ -112,12 +114,10 @@ const EditModalFee = ({show, handleClose, data, dataOld}) => {
           id=""
           cols="30"
           rows="5"
-          name="note"
+          name="realization_note"
           onChange={handleInput}
           className="form-control"
-        >
-          {inputData.note}
-        </textarea>
+        >{inputData.realization_note || ""}</textarea>
       </div>
     </Modal.Body>
     <Modal.Footer>
@@ -132,4 +132,4 @@ const EditModalFee = ({show, handleClose, data, dataOld}) => {
   )
 }
 
-export default EditModalFee
+export default UpdateModalFee

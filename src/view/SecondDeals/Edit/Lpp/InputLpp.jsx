@@ -71,7 +71,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
     const target = e.target.value;
     setFeeAction(target);
   };
-
+  console.log(feeAction);
   const handleSupportKerjaSama = (e) => {
     const target = e.target.value;
     setSupportKerjaSama(target);
@@ -196,7 +196,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
     }
   }
 
-  const FeeData = [];
+  let FeeData = [];
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
     if (key.startsWith("FeeTindakan")) {
@@ -389,16 +389,17 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
         }
 
         formData.append("is_fee", feeAction || "");
-        if (Array.isArray(FeeData[0])) {
+        if (Array.isArray(FeeData[0]) && FeeData[0].length > 0) {
           FeeData[0].forEach((fee, index) => {
             formData.append(`fee[${index}][recieve_name]`, fee?.name || "");
-            const valueFee = fee?.nilai.replace(/\./g, "");
+            let valueFee = (fee?.nilai ? fee.nilai.toString().replace(/\./g, "") : "");
             formData.append(`fee[${index}][value]`, valueFee || "");
             formData.append(`fee[${index}][qty]`, fee?.qty || "");
             formData.append(`fee[${index}][total_price]`, fee?.total || "");
             formData.append(`fee[${index}][realization_note]`, fee?.note || "");
           });
         }
+        
         formData.append("postscript", inputData.postscript || "");
 
         formData.append("timeline[0][name]", categoryType || "");
@@ -493,9 +494,9 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
         formData.append("timeline[6][11]", inputTimeline.timeline83 || 0);
         formData.append("timeline[6][12]", inputTimeline.timeline84 || 0);
         formData.append("date_period", inputData.date_period || "");
-        // for (const pair of formData.entries()) {
-        //   console.log(pair[0] + ": " + pair[1]);
-        // }
+        for (const pair of formData.entries()) {
+          console.log(pair[0] + ": " + pair[1]);
+        }
         const response = await axios.post(
           `${process.env.REACT_APP_BACKEND_URL}/v2/lpp-document`,
           formData,
