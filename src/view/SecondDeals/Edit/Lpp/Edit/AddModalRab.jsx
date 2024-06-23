@@ -1,68 +1,69 @@
-import React, { useEffect, useState } from "react";
-import { Button, Modal, Offcanvas } from "react-bootstrap";
+import React, { useEffect, useState } from 'react'
+import { Button, Modal, ModalHeader } from 'react-bootstrap'
 
-const ModalsRab = ({ show, handleClose }) => {
-  const [InputData, SetInputData] = useState({});
-  const [inputEst, setInputEst] = useState([]);
-  const handleInput = (e) => {
-    SetInputData({
-      ...InputData,
-      [e.target.name]: e.target.value,
-    });
-  };
+const AddModalRab = ({show, handleClose}) => {
+    const [inputData, setInputData] = useState({})
+    const [inputEst, setInputEst] = useState("");
 
-  const handleInputDataRP = (event) => {
-    const rawValue = event.target.value;
-    const formattedValue = formatCurrency(rawValue);
-    setInputEst(formattedValue);
-  };
-
-  const formatCurrency = (value) => {
-    const sanitizedValue = value.replace(/[^\d]/g, "");
-    const formattedValue = Number(sanitizedValue).toLocaleString("id-ID");
-    return formattedValue;
-  };
-
-  const [resultValue, setResultValue] = useState();
-
-  const inputWithoutSeparator = inputEst.length > 0 ? inputEst.replace(/\./g, "") : "";
-  const tempOne = parseFloat(inputWithoutSeparator);
-  const tempTwo = parseFloat(InputData.qty);
-
-  useEffect(() => {
-    const result_estimasi_charge = tempOne * tempTwo;
-    setResultValue(result_estimasi_charge);
-  }, [tempOne, tempTwo]);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (Object.keys(InputData).length > 0) {
-      const dataExist = JSON.parse(localStorage.getItem("RAB")) || [];
-      const id = `data_${Date.now()}`;
-      const Payload = {
-        id: id,
-        item: InputData.item,
-        is_alkes: InputData.is_alkes,
-        nilai_estimasi_biaya: tempOne,
-        qty: InputData.qty,
-        total_estimasi_biaya: resultValue,
-        note: InputData.note,
-      };
-      dataExist.push(Payload);
-      localStorage.setItem("RAB", JSON.stringify(dataExist));
-      SetInputData({
-        item: "",
-        total_estimasi_biaya: 0,
-        note: "",
-        qty: "",
-      });
-      setInputEst(0);
-      handleClose();
+    const handleInput = (e) => {
+        setInputData({
+            ...inputData,
+            [e.target.name]:e.target.value
+        })
     }
-  };
 
+    const handleInputDataRP = (event) => {
+        const rawValue = event.target.value;
+        const formattedValue = formatCurrency(rawValue);
+        setInputEst(formattedValue);
+      };
+    
+      const formatCurrency = (value) => {
+        const sanitizedValue = value.replace(/[^\d]/g, "");
+        const formattedValue = Number(sanitizedValue).toLocaleString("id-ID");
+        return formattedValue;
+      };
+      const [resultValue, setResultValue] = useState();
+
+      const inputWithoutSeparator = inputEst.length > 0 ? inputEst.replace(/\./g, "") : "";
+      const tempOne = parseFloat(inputWithoutSeparator);
+      const tempTwo = parseFloat(inputData.qty);
+    
+      useEffect(() => {
+        const result_estimasi_charge = tempOne * tempTwo;
+        setResultValue(result_estimasi_charge);
+      }, [tempOne, tempTwo]);
+
+      const handleSubmit = (e) => {
+        e.preventDefault();
+        if (Object.keys(inputData).length > 0) {
+          const dataExist = JSON.parse(localStorage.getItem("rabEdit")) || [];
+          const id = `data_${Date.now()}`;
+          const Payload = {
+            id: id,
+            item_uid: inputData.item_uid,
+            is_alkes: inputData.is_alkes,
+            estimated_cost: tempOne,
+            qty: inputData.qty,
+            total_estimated_cost: resultValue,
+            realization_note: inputData.realization_note,
+          };
+          dataExist.push(Payload);
+          localStorage.setItem("rabEdit", JSON.stringify(dataExist));
+          setInputData({
+            item_uid: "",
+            estimated_cost: 0,
+            realization_note: "",
+            qty: "",
+          });
+          setInputEst(0);
+          handleClose();
+        }
+      };
+    
   return (
-    <Modal show={show} onHide={handleClose} placement="end">
+  <>
+ <Modal show={show} onHide={handleClose} placement="end">
       <Modal.Header closeButton>
         <Modal.Title>Tambah Data</Modal.Title>
       </Modal.Header>
@@ -72,7 +73,7 @@ const ModalsRab = ({ show, handleClose }) => {
             type="text"
             class="form-control"
             id="floatingInput"
-            name="item"
+            name="item_uid"
             onChange={handleInput}
             placeholder="name@example.com"
           />
@@ -132,7 +133,7 @@ const ModalsRab = ({ show, handleClose }) => {
             id=""
             cols="30"
             rows="5"
-            name="note"
+            name="realization_note"
             onChange={handleInput}
             className="form-control"
           ></textarea>
@@ -147,7 +148,8 @@ const ModalsRab = ({ show, handleClose }) => {
         </Button>
       </Modal.Footer>
     </Modal>
-  );
-};
+  </>
+  )
+}
 
-export default ModalsRab;
+export default AddModalRab

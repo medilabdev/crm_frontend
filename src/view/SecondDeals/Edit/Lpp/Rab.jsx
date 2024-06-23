@@ -9,6 +9,7 @@ import EditModalsRab from "./EditModalsRab";
 import AddModalSupport from "./modals/AddModalSupport";
 import EditModalSupport from "./modals/EditModalSupport";
 import AddModalsFee from "./modals/AddModalsFee";
+import EditModalFee from "./Edit/EditModalFee";
 
 const DataTableRab = ({rab, handleRab, supportKerjaSama, handleSupportKerjaSama, feeAction, handleFeeAction}) => {
   let NoAlkes = [];
@@ -33,10 +34,13 @@ const DataTableRab = ({rab, handleRab, supportKerjaSama, handleSupportKerjaSama,
   const handleCloseRab = () => setShowModalRab(false);
   const [editDataModal, setEditDataModal] = useState(false);
   const [editDataRab, setEditDataRab] = useState({});
+
+
   const handleCloseEdit = () => setEditDataModal(false);
   const handleEditRab = (
     id,
     item,
+    is_alkes,
     nilai_estimasi_biaya,
     qty,
     total_estimasi_biaya,
@@ -45,6 +49,7 @@ const DataTableRab = ({rab, handleRab, supportKerjaSama, handleSupportKerjaSama,
     setEditDataRab({
       id: id,
       item: item,
+      is_alkes: is_alkes,
       nilai_estimasi_biaya: nilai_estimasi_biaya,
       qty: qty,
       total_estimasi_biaya: total_estimasi_biaya,
@@ -61,10 +66,12 @@ const DataTableRab = ({rab, handleRab, supportKerjaSama, handleSupportKerjaSama,
       allDataRab.push(data);
     }
   }
+
  let totalPriceRab = 0
  if(NoAlkes){
   NoAlkes.map((data) => totalPriceRab += data?.total_estimasi_biaya)
  } 
+
   const handleDeleteItem = (id) => {
     const data = allDataRab[0].filter((rab) => rab.id !== id);
     setData(data);
@@ -98,12 +105,13 @@ const DataTableRab = ({rab, handleRab, supportKerjaSama, handleSupportKerjaSama,
       name: "Action",
       selector: (row) => (
         <>
-          {/* <button
+          <button
             style={{ border: "none", backgroundColor: "white" }}
             onClick={() =>
               handleEditRab(
                 row.id,
                 row.item,
+                row.is_alkes,
                 row.nilai_estimasi_biaya,
                 row.qty,
                 row.total_estimasi_biaya,
@@ -112,7 +120,7 @@ const DataTableRab = ({rab, handleRab, supportKerjaSama, handleSupportKerjaSama,
             }
           >
             <FontAwesomeIcon icon={faPenToSquare} />
-          </button> */}
+          </button>
           <button
             style={{ border: "none", backgroundColor: "white" }}
             onClick={() => handleDeleteItem(row.id, true)}
@@ -146,9 +154,32 @@ const DataTableRab = ({rab, handleRab, supportKerjaSama, handleSupportKerjaSama,
 
 // support 
 
-const [ShowModalSupport, setShowModalSupport] = useState(false);
+  const [ShowModalSupport, setShowModalSupport] = useState(false);
   const handleShowSupport = () => setShowModalSupport(true);
   const handleCloseSupport = () => setShowModalSupport(false);
+
+  const [editSupportModal, setEditSuportModal] = useState(false)
+  const [editSupport, setEditSupport] = useState({})
+  const handleCloseEditSupport = () => setEditSuportModal(false)
+  const handleEditSupport = (
+    id, 
+    item,
+    nilai_estimasi_biaya,
+    qty,
+    total_estimasi_biaya,
+    note
+  ) => {
+    setEditSupport({
+      id : id, 
+      item : item,
+      nilai_estimasi_biaya : nilai_estimasi_biaya,
+      qty : qty,
+      total_estimasi_biaya : total_estimasi_biaya,
+      note: note
+    })
+    setEditSuportModal(true)
+  }
+  
   const allDataSupport = [];
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
@@ -191,7 +222,7 @@ const [ShowModalSupport, setShowModalSupport] = useState(false);
       name: "Action",
       selector: (row) => (
         <>
-          {/* <button
+          <button
             style={{ border: "none", backgroundColor: "white" }}
             onClick={() =>
               handleEditSupport(
@@ -205,7 +236,7 @@ const [ShowModalSupport, setShowModalSupport] = useState(false);
             }
           >
             <FontAwesomeIcon icon={faPenToSquare} />
-          </button> */}
+          </button>
           <button
             style={{ border: "none", backgroundColor: "white" }}
             onClick={() => handleDeleteSupport(row.id)}
@@ -229,6 +260,22 @@ const [ShowModalSupport, setShowModalSupport] = useState(false);
 const [showAddFee, setShowAddFee] = useState(false);
 const handleCloseFee = () => setShowAddFee(false);
 const handleOpenFee = () => setShowAddFee(true);
+
+const [editFeeModal, setEditFeeModal] = useState(false)
+const [editDataFee, setEditDataFee] = useState({})
+
+const handleCloseEditFee =() => setEditFeeModal(false)
+const handleEditFee =(id, name, nilai, qty, total, note) => {
+  setEditDataFee({
+    id:id,
+    name:name,
+    nilai:nilai,
+    qty:qty,
+    total:total,
+    note: note,
+  })
+  setEditFeeModal(true)
+}
 const allDataFee = [];
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
@@ -254,7 +301,7 @@ const ColumnsTableFee = [
   },
   {
     name: "Nilai Estimasi Biaya",
-    selector: (row) => `Rp. ` + row.nilai,
+    selector: (row) => `Rp. ${new Intl.NumberFormat().format(row.nilai)}`,
   },
   {
     name: "Qty",
@@ -272,7 +319,7 @@ const ColumnsTableFee = [
     name: "Action",
     selector: (row) => (
       <>
-        {/* <button
+        <button
           type="button"
           style={{ border: "none", backgroundColor: "white" }}
           onClick={() =>
@@ -287,7 +334,7 @@ const ColumnsTableFee = [
           }
         >
           <FontAwesomeIcon icon={faPenToSquare} />
-        </button> */}
+        </button>
         <button
           type="button"
           onClick={() => handleDeleteFE(row.id)}
@@ -394,12 +441,12 @@ const ColumnsTableFee = [
                 </div>
         </Card.Body>
         <ModalsRab show={ShowModalRab} handleClose={handleCloseRab} />
-        {/* <EditModalsRab
+        <EditModalsRab
           show={editDataModal}
           handleClose={handleCloseEdit}
           data={editDataRab}
-          dataOld={allData[0]}
-        /> */}
+          dataOld={allDataRab[0]}
+        />
       </Card>
     </div>
   </div>
@@ -458,7 +505,7 @@ const ColumnsTableFee = [
                   </div>
           </Card.Body>
           <AddModalSupport show={ShowModalSupport} handleClose={handleCloseSupport} />
-          {/* <EditModalSupport  show={editModal} handleClose={handleCloseEditModal} data={editDataSupport} dataOld={allData[0]}/> */}
+          <EditModalSupport  show={editSupportModal} handleClose={handleCloseEditSupport} data={editSupport} dataOld={allDataSupport[0]}/>
         </Card>
       </div>
     </div> : ""}
@@ -518,12 +565,12 @@ const ColumnsTableFee = [
                    </div>
            </Card.Body>
            <AddModalsFee show={showAddFee} handleClose={handleCloseFee} />
-           {/* <EditModalFee
-             show={editDataModal}
-             handleClose={handleCloseEdit}
-             data={editData}
-             dataOld={allData[0]}
-           /> */}
+           <EditModalFee
+             show={editFeeModal}
+             handleClose={handleCloseEditFee}
+             data={editDataFee}
+             dataOld={allDataFee[0]}
+           />
          </Card>
        </div>
      </div>  

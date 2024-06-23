@@ -1,61 +1,69 @@
 import React, { useEffect, useState } from 'react'
 import { Button, Modal, Offcanvas } from "react-bootstrap";
+import { json } from 'react-router-dom';
 
-const EditModalRab = ({ show, handleClose}) => {
+const EditModalRab = ({ show, handleClose, data, dataAll}) => {
     const [InputData, SetInputData] = useState({});
-    const [inputEst, setInputEst] = useState([]);
-  const [resultValue, setResultValue] = useState();
-    const handleInput = (e) => {
-      SetInputData({
-        ...InputData,
-        [e.target.name]: e.target.value,
-      });
-    };
+    const [isAlkes, setIsAlkes] = useState({})
+    const [inputEst, setInputEst] = useState("");
+    const [resultValue, setResultValue] = useState("");
+    
+    useEffect(() => {
+      SetInputData(data);
+      setIsAlkes(data?.is_alkes)
+      setInputEst(data?.estimated_cost ? data?.estimated_cost.toString() : "")
+    }, [data])
+      const handleInput = (e) => {
+        SetInputData({
+          ...InputData,
+          [e.target.name]: e.target.value,
+        });
+      };
+
+      const handleAlkes = (e) => {
+        setIsAlkes(e.target.value)
+      }
+
     const handleInputDataRP = (event) => {
         const rawValue = event.target.value;
         const formattedValue = formatCurrency(rawValue);
         setInputEst(formattedValue);
       };
-      const formatCurrency = (value) => {
-        const sanitizedValue = value.replace(/[^\d]/g, "");
-        const formattedValue = Number(sanitizedValue).toLocaleString("id-ID");
-        return formattedValue;
+
+    const formatCurrency = (value) => {
+      const sanitizedValue = value.replace(/[^\d]/g, "")
+      return new Intl.NumberFormat('id-ID').format(parseInt(sanitizedValue));
       };
-      const inputWithoutSeparator =
-    inputEst.length > 0 ? inputEst.replace(/\./g, "") : "";
-  const tempOne = parseFloat(inputWithoutSeparator);
-  const tempTwo = parseFloat(InputData.qty);
-  useEffect(() => {
-    const result_estimasi_charge = tempOne * tempTwo;
-    setResultValue(result_estimasi_charge);
-  }, [tempOne, tempTwo]);
+
+    let DataEst = parseInt(inputEst.replace(/\./g, ""), 10)
+    let inputQty = parseFloat(InputData.qty)
+
+    useEffect(() => {
+      const result_price = DataEst * inputQty
+      setResultValue(result_price)
+    }, [DataEst, inputQty])
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (Object.keys(InputData).length > 0) {
-      const dataExist = JSON.parse(localStorage.getItem("rabEdit")) || [];
-      const uid = `data_${Date.now()}`;
-      const Payload = {
-        uid: uid,
-        item_uid: InputData.item,
-        is_alkes: InputData.is_alkes,
-        estimated_cost: tempOne,
-        qty: InputData.qty,
-        total_estimated_cost: resultValue,
-        realization_note: InputData.realization_note,
-      };
-      dataExist.push(Payload);
-      localStorage.setItem("rabEdit", JSON.stringify(dataExist));
-      SetInputData({
-        item_uid: "",
-        total_estimated_cost: 0,
-        realization_note: "",
-        qty: "",
-      });
-      setInputEst(0);
-      handleClose();
-    }
+    const dataUpdate = dataAll.map((item) => {
+      if(item.id == data.id){
+        return{
+          ...item, 
+          id:InputData.id,
+          item_uid: InputData.item_uid,
+          is_alkes:isAlkes,
+          estimated_cost: DataEst,
+          qty:InputData.qty,
+          total_estimated_cost:resultValue, 
+          realization_note:InputData.realization_note
+        }
+      }
+      return item
+    })
+    localStorage.setItem('rabEdit', JSON.stringify(dataUpdate))
+    handleClose()
   };
+
   return (
     <Modal show={show} onHide={handleClose} placement="end">
     <Modal.Header closeButton>
@@ -67,7 +75,8 @@ const EditModalRab = ({ show, handleClose}) => {
           type="text"
           class="form-control"
           id="floatingInput"
-          name="item"
+          name="item_uid"
+          value={InputData.item_uid}
           onChange={handleInput}
           placeholder="name@example.com"
         />
@@ -78,7 +87,8 @@ const EditModalRab = ({ show, handleClose}) => {
         <select
           name="is_alkes"
           id=""
-          onChange={handleInput}
+          onChange={handleAlkes}
+          value={isAlkes}
           className="form-control"
         >
           <option value="">Select Choose</option>
@@ -102,6 +112,7 @@ const EditModalRab = ({ show, handleClose}) => {
           type="number"
           class="form-control"
           name="qty"
+          value={InputData.qty || ""}
           onChange={handleInput}
           id="floatingInput"
           placeholder="name@example.com"
@@ -130,7 +141,7 @@ const EditModalRab = ({ show, handleClose}) => {
           name="realization_note"
           onChange={handleInput}
           className="form-control"
-        ></textarea>
+        >{InputData.realization_note}</textarea>
       </div>
     </Modal.Body>
     <Modal.Footer className="mb-4">
