@@ -8,12 +8,15 @@ import EditModalRab from './EditModalRab';
 import EditModalSupport from './EditModalSupport';
 import EditModalFee from './EditModalFee';
 import UpdateModalFee from '../modals/UpdateModalFee';
+import AddModalRab from './AddModalRab';
+import AddModalSupport from './AddModalSupport';
+import AddModalFee from './AddModalFee';
 
 
 const EditRab = ({data, dataSupport, dataFee}) => {
-  const [ShowModal, setShowModal] = useState(false);
-  const handleShow = () => setShowModal(true);
-  const handleClose = () => setShowModal(false);
+  const [ShowModalRab, setShowModalRab] = useState(false);
+  const handleShowRab = () => setShowModalRab(true);
+  const handleCloseRab = () => setShowModalRab(false);
     const [stateRab, setStateRab] = useState([])
     if(!localStorage.getItem("rabEdit")){
         const dataRab = JSON.stringify(data)
@@ -409,7 +412,7 @@ const EditRab = ({data, dataSupport, dataFee}) => {
                 <span style={{fontSize:"0.85rem", fontWeight:"500"}}>
                 RAB Bangunan & Lainnya terkait pembiayaan di awal (bila ada)
                 </span>
-                <button type="button" className="btn btn-primary float-end" style={{fontSize:"0.85rem"}}  onClick={handleShow}>
+                <button type="button" className="btn btn-primary float-end" style={{fontSize:"0.85rem"}}  onClick={handleShowRab}>
                     Tambah
                 </button>
                 </Card.Header>
@@ -438,6 +441,7 @@ const EditRab = ({data, dataSupport, dataFee}) => {
                 </div>
                 </Card.Body>
             </Card>
+            <AddModalRab show={ShowModalRab} handleClose={handleCloseRab} />
             <EditModalRab show={editModalRab} handleClose={handleCloseEditRab} data={editDataRab} dataAll={allDataRab[0]}/>
         </div>
     </div>
@@ -470,6 +474,7 @@ const EditRab = ({data, dataSupport, dataFee}) => {
                 </div>
             </Card.Body>
         </Card>
+        <AddModalSupport show={ShowModalSupport} handleClose={handleCloseSupport} />
         <EditModalSupport show={editModalSupport} handleClose={handleCloseEditSupport} data={editDataSupport} dataAll={allDataSupport[0]}/>
     </div>
 </div>
@@ -503,6 +508,7 @@ const EditRab = ({data, dataSupport, dataFee}) => {
                 </div>
                 </Card.Body>
             </Card>
+            <AddModalFee show={showAddFee} handleClose={handleCloseFee} />
             <UpdateModalFee show={editModalFee} handleClose={handleCloseEditFee} data={editDataFee} dataAll={allDataFee[0]}/>
         </div>
     </div>
