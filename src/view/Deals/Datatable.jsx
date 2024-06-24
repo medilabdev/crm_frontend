@@ -11,11 +11,14 @@ import IconPhone from "../../assets/img/telephone-call.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBuilding,
+  faChevronDown,
+  faChevronRight,
   faPenToSquare,
   faPhone,
   faPhoneVolume,
   faTrash,
 } from "@fortawesome/free-solid-svg-icons";
+import { useMediaQuery } from "react-responsive";
 
 const DataTableComponet = ({
   data,
@@ -30,6 +33,68 @@ const DataTableComponet = ({
   const uid = localStorage.getItem("uid");
   const role = localStorage.getItem("role");
   const navigate = useNavigate();
+
+  const isMobile = useMediaQuery({ maxWidth: 767 })
+  const ExpandedComponent = ({ data }) => {
+    const associatedCompanies = data?.associate?.slice(0, 3)
+    .map((item) => item?.company?.name)
+    .filter((name) => name)
+    .join(" & ")
+
+    const associatedContact = data?.associate?.slice(0, 3)
+    .map((item) => item?.contact?.name)
+    .filter((name) => name)
+    .join(" & ")
+
+    const date = new Date(data.created_at);
+    const update = new Date(data.updated_at);
+    const formatOptions = {
+      year: "numeric",
+      month: "long",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    };
+    const formate = new Intl.DateTimeFormat("en-US", formatOptions);
+    const time = formate.format(date);
+    const updated = formate.format(update);
+  return (
+    <>
+    <div>
+        <div className="mt-3 " style={{ marginLeft: "1rem", marginBottom: "1rem", fontWeight:600, whiteSpace:"nowrap"}}> 
+          <span style={{ fontWeight : 400}}>Stage : </span>  
+          {data?.staging?.name}
+        </div>
+        <div className="mt-3 " style={{ marginLeft: "1rem", marginBottom: "1rem", fontWeight:600, whiteSpace:"nowrap"}}> 
+          <span style={{ fontWeight : 400}}>Jumlah : </span>  
+          Rp. {new Intl.NumberFormat().format(data?.deal_size)}
+        </div>
+        <div className="mt-3 " style={{ marginLeft: "1rem", marginBottom: "1rem", fontWeight:600, whiteSpace:"nowrap"}}> 
+          <span style={{ fontWeight : 400}}>Assosiasi Perusahaan : </span>  
+          {associatedCompanies}
+        </div>
+        <div className="mt-3 " style={{ marginLeft: "1rem", marginBottom: "1rem", fontWeight:600, whiteSpace:"nowrap"}}> 
+          <span style={{ fontWeight : 400}}>Assosiasi Kontak : </span>  
+          {associatedContact}
+        </div>
+        <div className="mt-3 " style={{ marginLeft: "1rem", marginBottom: "1rem", fontWeight:600, whiteSpace:"nowrap"}}> 
+          <span style={{ fontWeight : 400}}>Owner : </span>  
+          {data?.owner?.name}
+        </div>
+        <div className="mt-3 " style={{ marginLeft: "1rem", marginBottom: "1rem", fontWeight:600, whiteSpace:"nowrap"}}> 
+          <span style={{ fontWeight : 400}}>Dibuat : </span>  
+          {time}
+        </div>
+        {data?.created_at !== data?.updated_at ?  
+        <div className="mt-3 " style={{ marginLeft: "1rem", marginBottom: "1rem", fontWeight:600, whiteSpace:"nowrap"}}> 
+          <span style={{ fontWeight : 400}}>Diperbarui : </span>  
+          {updated}
+        </div>
+        :""}
+    </div>
+    </>
+  )
+  }
   const columns = [
     {
       
@@ -77,12 +142,14 @@ const DataTableComponet = ({
         </div>
       ),
       sortable: true,
+      hide:"sm"
     },
     {
       name: "Jumlah",
       selector: (row) => `Rp. ${new Intl.NumberFormat().format(row.deal_size)}`,
       sortable: true,
       width: "150px",
+      hide:"sm"
     },
     {
       name: "Associated with",
@@ -144,6 +211,7 @@ const DataTableComponet = ({
       ),
       sortable: true,
       width: "150px",
+      hide:"sm"
     },
 
     {
@@ -187,6 +255,7 @@ const DataTableComponet = ({
       },
       sortable: true,
       width: "150px",
+      hide:"sm"
     },
     {
       name: "Action",
@@ -282,6 +351,16 @@ const DataTableComponet = ({
         paginationTotalRows={paginationTotalRows}
         onChangePage={handleChangePage}
         onChangeRowsPerPage={handlePagePerChange}
+        responsive
+        highlightOnHover
+        expandableRows={isMobile}
+        expandableRowsComponent={isMobile ? ExpandedComponent : null}
+        expandableIcon={
+          isMobile ? {
+            collapsed: <FontAwesomeIcon icon={faChevronRight} />,
+            expanded: <FontAwesomeIcon icon={faChevronDown} isExpanded/>
+          } : null
+        }
       />
     </div>
   );

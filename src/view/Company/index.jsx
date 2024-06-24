@@ -30,6 +30,7 @@ import ColumnsDataTable, {
   ColumnsTableCompany,
   CustomStyles,
 } from "./partials/ColumnsDataTable";
+import { useMediaQuery } from "react-responsive";
 
 const Company = () => {
   const uid = localStorage.getItem("uid");
@@ -524,6 +525,7 @@ const Company = () => {
       setSearch(value);
     }
   }
+
 
   return (
     <>

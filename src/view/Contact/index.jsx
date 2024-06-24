@@ -20,6 +20,8 @@ import { debounce } from "lodash";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBuilding,
+  faChevronDown,
+  faChevronRight,
   faFilter,
   faMagnifyingGlass,
   faPenToSquare,
@@ -29,6 +31,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import Breadcrumb from "./Partials/Breadcrumb";
 import TopButton from "./Partials/TopButton";
+import { useMediaQuery } from "react-responsive";
 
 
 const Contact = () => {
@@ -378,240 +381,312 @@ const Contact = () => {
     }
   };
 
-  const columns = [
-    {
-      name: "Name",
-      selector: (row) => { 
-        const createdDate = new Date(row?.created_at)
-        const currentDate = new Date();
-        const twoDaysAgo = new Date(currentDate)
-        twoDaysAgo?.setDate(currentDate.getDate() - 2)
-        const isNew = createdDate > twoDaysAgo;   
-        const updatedDate = new Date(row?.updated_at)
-        const isUpdate = updatedDate > twoDaysAgo;
-        return(
-        <a
-          href={`/contact/${row.uid}/edit`}
-          target="_blank"
-          className="image-name text-decoration-none "
-        >
-          <div className="align-items-center">
-            {/* <img src={IconImage} className="rounded-circle" /> */}
-            <div className="mt-3">
-              <span
-                style={{
-                  whiteSpace: "normal",
-                  fontSize: "0.85rem",
-                  color: "black",
-                  fontWeight: "500",
-                }}
-              >
-                {row.name}
-              </span>
-              { isNew ?  isNew && <span className="badge bg-primary ms-2">New</span> : isUpdate ?  isUpdate && <span className="badge bg-success ms-2">Update</span> : "" }
-              <p
-                className="mt-1"
-                style={{
-                  fontSize: "0.75rem",
-                  color: "#163020",
-                }}
-              >
-                {row.position ? row.position : "-"}
-              </p>
-            </div>
-          </div>
-        
-        </a>
-      )},
-      left: true,
-      width: "160px",
-    },
-    {
-      name: "Contact Info",
-      selector: (row) => (
-        <p style={{ fontSize: "0.85rem", fontWeight: "450" }}>
-          {row?.phone?.[0]?.number ?? "-"}
-        </p>
-      ),
-      sortable: true,
-      width: "150px",
-    },
-    {
-      name: "Associated With",
-      selector: (row) => (
-        <div className="d-flex">
-          {row?.associate?.slice(0, 3).map((item, index) => (
-            <div key={index} className="d-flex">
-              <OverlayTrigger
-                placement="top"
-                overlay={
-                  <Tooltip>
-                    {item?.company?.name ? item?.company?.name : null}
-                  </Tooltip>
-                }
-              >
-                <div>
-                  {item?.company ? (
-                    <a
-                      href={`/company/${item?.company?.uid}/edit`}
-                      target="_blank"
-                      className="text-dark"
-                    >
-                      <FontAwesomeIcon
-                        icon={faBuilding}
-                        style={{ width: "35px", height: "20px" }}
-                        data-tip={item?.company?.name}
-                      />
-                    </a>
-                  ) : // <img
-                  //   className="ms-1"
-                  //   src={IconCompany}
-                  //   style={{ width: "18px" }}
-                  //   data-tip={item?.company?.name}
-                  // />
-                  null}
-                </div>
-              </OverlayTrigger>
-              <OverlayTrigger
-                placement="top"
-                overlay={
-                  <Tooltip>
-                    {item?.deals?.deal_name ?? null}
-                    <br />
-                    {item?.deals?.deal_size
-                      ? `Rp. ${new Intl.NumberFormat().format(
-                          item?.deals?.deal_size
-                        )}`
-                      : null}
-                  </Tooltip>
-                }
-              >
-                <div>
-                  {item?.deals ? (
-                    <a
-                      href={`deals/${item?.deals?.uid}/edit`}
-                      target="_blank"
-                      className="text-dark"
-                    >
-                      <FontAwesomeIcon
-                        icon={faSackDollar}
-                        data-tip={item?.deals?.dealName}
-                        className=""
-                        style={{ width: "35px", height: "20px" }}
-                      />
-                    </a>
-                  ) : // <img
-                  //   className="ms-1"
-                  //   src={IconMoney}
-                  //   style={{ width: "18px" }}
-                  //   data-tip={item?.deals?.dealName}
-                  // />
-                  null}
-                </div>
-              </OverlayTrigger>
-            </div>
-          ))}
+
+  const isMobile = useMediaQuery({ maxWidth : 767 })
+  const ExpandedComponent = ({ data }) => {
+    const associatedCompanies = data?.associate?.slice(0, 3)
+    .map((item) => item?.company?.name)
+    .filter((name) => name)
+    .join(" & ");
+
+    const associatedDeals = data?.associate?.slice(0, 3)
+    .map((item) => item?.deals?.deal_name)
+    .filter((name) => name)
+    .join(" & ");
+
+    const createdAt = new Date(data.created_at);
+    const updatedAt = new Date(data.updated_at);
+    const formatOptions = {
+      year: "numeric",
+      month: "long",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    };
+    const formatter = new Intl.DateTimeFormat("en-US", formatOptions);
+    const createdDateTime = formatter.format(createdAt);
+    const updatedDateTime = formatter.format(updatedAt);
+    return (
+      <>
+      <div>
+        <div className="mt-3 " style={{ marginLeft: "1rem", marginBottom: "1rem", fontWeight:600, whiteSpace:"nowrap"}}> 
+          <span style={{ fontWeight : 400}}>Contact :</span>  
+          {data?.phone?.[0]?.number ?? '-'}
         </div>
-      ),
-      sortable: true,
-      width: "150px",
-    },
-    {
-      name: "Owner (Created/Updated)",
-      selector: (row) => {
-        const createdAt = new Date(row.created_at);
-        const updatedAt = new Date(row.updated_at);
-        const formatOptions = {
-          year: "numeric",
-          month: "long",
-          day: "2-digit",
-          hour: "2-digit",
-          minute: "2-digit",
-        };
-        const formatter = new Intl.DateTimeFormat("en-US", formatOptions);
-        const createdDateTime = formatter.format(createdAt);
-        const updatedDateTime = formatter.format(updatedAt);
-        // console.log(row);
-        return (
-          <div className="mt-1">
-            <p className="fw-bold mt-2">{row?.owner?.name}</p>
-            <p
-              style={{
-                fontSize: "0.85rem",
-                whiteSpace: "normal",
-                marginTop: "-12px",
-              }}
-            >
-              {createdDateTime}
-            </p>
-            <p
-              style={{
-                marginTop: "-12px",
-                fontSize: "0.75rem",
-                whiteSpace: "normal",
-              }}
-            >
-              {createdDateTime === updatedDateTime ? "-" : updatedDateTime}
-              {/* {updatedDateTime} */}
-            </p>
-          </div>
-        );
-      },
-      sortable: true,
-      width: "200px",
-    },
-    // {
-    //   name: "Owner",
-    //   selector: (row) => (
-    //     <OverlayTrigger
-    //       placement="top"
-    //       overlay={
-    //         <Tooltip id={`tooltip-${row?.owner?.name}`}>
-    //           {row?.owner?.name}
-    //         </Tooltip>
-    //       }
-    //     >
-    //       <div className="image-name">
-    //         <img
-    //           src={IconImage}
-    //           className="rounded-circle"
-    //           data-tip={row.name}
-    //         />
-    //       </div>
-    //     </OverlayTrigger>
-    //   ),
-    //   sortable: true,
-    // },
-    {
-      name: "Action",
-      selector: (row) => (
-        <div className="action-icon">
+
+
+        <div className="mt-3 " style={{ marginLeft: "1rem", marginBottom: "1rem", fontWeight:600, whiteSpace:"nowrap"}}> 
+          <span style={{ fontWeight : 400}}>Assosiasi Perusahaan : </span>  
+         {associatedCompanies}
+        </div>
+
+        <div className="mt-3 " style={{ marginLeft: "1rem", marginBottom: "1rem", fontWeight:600, whiteSpace:"nowrap"}}> 
+          <span style={{ fontWeight : 400}}>Assosiasi Deals : </span>  
+         {associatedDeals}
+        </div>
+
+        <div className="mt-3 " style={{ marginLeft: "1rem", marginBottom: "1rem", fontWeight:600, whiteSpace:"nowrap"}}> 
+          <span style={{ fontWeight : 400}}>Owner : </span>  
+          {data?.owner?.name ?? '-'}
+        </div>
+        <div className="mt-3 " style={{ marginLeft: "1rem", marginBottom: "1rem", fontWeight:600, whiteSpace:"nowrap"}}> 
+          <span style={{ fontWeight : 400}}>Dibuat : </span>  
+          {createdDateTime}
+        </div>
+        {data?.created_at !== data?.updated_at ?  
+        <div className="mt-3 " style={{ marginLeft: "1rem", marginBottom: "1rem", fontWeight:600, whiteSpace:"nowrap"}}> 
+          <span style={{ fontWeight : 400}}>Diperbarui : </span>  
+          {updatedDateTime}
+        </div>
+        : ""}
+      </div>
+      </>
+    );
+  };
+
+
+  
+    const columns = [
+      {
+        name: "Name",
+        selector: (row) => { 
+          const createdDate = new Date(row?.created_at)
+          const currentDate = new Date();
+          const twoDaysAgo = new Date(currentDate)
+          twoDaysAgo?.setDate(currentDate.getDate() - 2)
+          const isNew = createdDate > twoDaysAgo;   
+          const updatedDate = new Date(row?.updated_at)
+          const isUpdate = updatedDate > twoDaysAgo;
+          return(
           <a
             href={`/contact/${row.uid}/edit`}
             target="_blank"
-            className="icon-button text-dark"
-            title="edit"
+            className="image-name text-decoration-none "
           >
-            <FontAwesomeIcon
-              icon={faPenToSquare}
-              style={{ width: "23px", height: "13px" }}
-            />
+            <div className="align-items-center">
+              {/* <img src={IconImage} className="rounded-circle" /> */}
+              <div className="mt-3">
+                <span
+                  style={{
+                    whiteSpace: "normal",
+                    fontSize: "0.85rem",
+                    color: "black",
+                    fontWeight: "500",
+                  }}
+                >
+                  {row.name}
+                </span>
+                { isNew ?  isNew && <span className="badge bg-primary ms-2">New</span> : isUpdate ?  isUpdate && <span className="badge bg-success ms-2">Update</span> : "" }
+                <p
+                  className="mt-1"
+                  style={{
+                    fontSize: "0.75rem",
+                    color: "#163020",
+                  }}
+                >
+                  {row.position ? row.position : "-"}
+                </p>
+              </div>
+            </div>
+                  
           </a>
-          <button
-            className="ms-2 icon-button"
-            title="delete"
-            onClick={() => setDeleteContact(row.uid)}
-          >
-            <FontAwesomeIcon
-              icon={faTrash}
-              style={{ width: "23px", height: "13px" }}
-            />
-          </button>
-        </div>
-      ),
-      width: "150px",
-    },
-  ];
+        )},
+        left: true,
+        width: "160px",
+        wrap:true,
+      },
+      {
+        name: "Contact Info",
+        selector: (row) => (
+          <p style={{ fontSize: "0.85rem", fontWeight: "450" }}>
+            {row?.phone?.[0]?.number ?? "-"}
+          </p>
+        ),
+        sortable: true,
+        width: "150px",
+        right: true,
+        hide: 'md'
+      },
+      {
+        name: "Associated With",
+        selector: (row) => (
+          <div className="d-flex">
+            {row?.associate?.slice(0, 3).map((item, index) => (
+              <div key={index} className="d-flex">
+                <OverlayTrigger
+                  placement="top"
+                  overlay={
+                    <Tooltip>
+                      {item?.company?.name ? item?.company?.name : null}
+                    </Tooltip>
+                  }
+                >
+                  <div>
+                    {item?.company ? (
+                      <a
+                        href={`/company/${item?.company?.uid}/edit`}
+                        target="_blank"
+                        className="text-dark"
+                      >
+                        <FontAwesomeIcon
+                          icon={faBuilding}
+                          style={{ width: "35px", height: "20px" }}
+                          data-tip={item?.company?.name}
+                        />
+                      </a>
+                    ) : // <img
+                    //   className="ms-1"
+                    //   src={IconCompany}
+                    //   style={{ width: "18px" }}
+                    //   data-tip={item?.company?.name}
+                    // />
+                    null}
+                  </div>
+                </OverlayTrigger>
+                <OverlayTrigger
+                  placement="top"
+                  overlay={
+                    <Tooltip>
+                      {item?.deals?.deal_name ?? null}
+                      <br />
+                      {item?.deals?.deal_size
+                        ? `Rp. ${new Intl.NumberFormat().format(
+                            item?.deals?.deal_size
+                          )}`
+                        : null}
+                    </Tooltip>
+                  }
+                >
+                  <div>
+                    {item?.deals ? (
+                      <a
+                        href={`deals/${item?.deals?.uid}/edit`}
+                        target="_blank"
+                        className="text-dark"
+                      >
+                        <FontAwesomeIcon
+                          icon={faSackDollar}
+                          data-tip={item?.deals?.dealName}
+                          className=""
+                          style={{ width: "35px", height: "20px" }}
+                        />
+                      </a>
+                    ) : // <img
+                    //   className="ms-1"
+                    //   src={IconMoney}
+                    //   style={{ width: "18px" }}
+                    //   data-tip={item?.deals?.dealName}
+                    // />
+                    null}
+                  </div>
+                </OverlayTrigger>
+              </div>
+            ))}
+          </div>
+        ),
+        sortable: true,
+        width: "150px",
+        right: true,
+        hide: 'md'
+      },
+      {
+        name: "Owner (Created/Updated)",
+        selector: (row) => {
+          const createdAt = new Date(row.created_at);
+          const updatedAt = new Date(row.updated_at);
+          const formatOptions = {
+            year: "numeric",
+            month: "long",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+          };
+          const formatter = new Intl.DateTimeFormat("en-US", formatOptions);
+          const createdDateTime = formatter.format(createdAt);
+          const updatedDateTime = formatter.format(updatedAt);
+          // console.log(row);
+          return (
+            <div className="mt-1">
+              <p className="fw-bold mt-2">{row?.owner?.name}</p>
+              <p
+                style={{
+                  fontSize: "0.85rem",
+                  whiteSpace: "normal",
+                  marginTop: "-12px",
+                }}
+              >
+                {createdDateTime}
+              </p>
+              <p
+                style={{
+                  marginTop: "-12px",
+                  fontSize: "0.75rem",
+                  whiteSpace: "normal",
+                }}
+              >
+                {createdDateTime === updatedDateTime ? "-" : updatedDateTime}
+                {/* {updatedDateTime} */}
+              </p>
+            </div>
+          );
+        },
+        sortable: true,
+        width: "200px",
+        right: true,
+        hide: 'md'
+      },
+      // {
+      //   name: "Owner",
+      //   selector: (row) => (
+      //     <OverlayTrigger
+      //       placement="top"
+      //       overlay={
+      //         <Tooltip id={`tooltip-${row?.owner?.name}`}>
+      //           {row?.owner?.name}
+      //         </Tooltip>
+      //       }
+      //     >
+      //       <div className="image-name">
+      //         <img
+      //           src={IconImage}
+      //           className="rounded-circle"
+      //           data-tip={row.name}
+      //         />
+      //       </div>
+      //     </OverlayTrigger>
+      //   ),
+      //   sortable: true,
+      // },
+      {
+        name: "Action",
+        selector: (row) => (
+          <div className="action-icon">
+            <a
+              href={`/contact/${row.uid}/edit`}
+              target="_blank"
+              className="icon-button text-dark"
+              title="edit"
+            >
+              <FontAwesomeIcon
+                icon={faPenToSquare}
+                style={{ width: "23px", height: "13px" }}
+              />
+            </a>
+            <button
+              className="ms-2 icon-button"
+              title="delete"
+              onClick={() => setDeleteContact(row.uid)}
+            >
+              <FontAwesomeIcon
+                icon={faTrash}
+                style={{ width: "23px", height: "13px" }}
+              />
+            </button>
+          </div>
+        ),
+        width: "140px",
+      },
+    ];
 
   const handleContactMyOrPerson = (e) => {
     const target = e.target.value;
@@ -924,6 +999,7 @@ const Contact = () => {
                   pagination
                   paginationServer
                   selectableRows
+                  responsive
                   onSelectedRowsChange={selectUidDataTable}
                   paginationPerPage={pagination.limit}
                   onChangePage={handleChangePage}
@@ -933,6 +1009,15 @@ const Contact = () => {
                   paginationComponentOptions={{
                     noRowsPerPage: true,
                   }}
+                  highlightOnHover
+                  expandableRows={isMobile}
+                  expandableRowsComponent={isMobile ? ExpandedComponent : null}
+                  expandableIcon={
+                    isMobile ? {
+                    collapsed: <FontAwesomeIcon icon={faChevronRight} />,
+                    expanded: <FontAwesomeIcon icon={faChevronDown} isExpanded />
+                    } : null
+                  }
                 />
               </div>
             </div>

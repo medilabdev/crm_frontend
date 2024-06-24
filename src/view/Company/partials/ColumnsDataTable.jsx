@@ -1,5 +1,7 @@
 import {
   faBuilding,
+  faChevronDown,
+  faChevronRight,
   faPenToSquare,
   faPhoneVolume,
   faSackDollar,
@@ -11,6 +13,7 @@ import { OverlayTrigger, Tooltip } from "react-bootstrap";
 import DataTable from "react-data-table-component";
 
 import React from "react";
+import { useMediaQuery } from "react-responsive";
 
 export const CustomStyles = {
   head: {
@@ -59,6 +62,7 @@ const ColumnsDataTable = ({
       )},
       left: true,
       width: "200px",
+      wrap:true,
       sortable: true,
     },
     {
@@ -129,6 +133,8 @@ const ColumnsDataTable = ({
         </div>
       ),
       sortable: true,
+      right: true,
+      hide: 'md'
       // width: "130px",
     },
     {
@@ -141,6 +147,7 @@ const ColumnsDataTable = ({
       ),
       sortable: true,
       width: "150px",
+      hide: 'md'
     },
     {
       id: 4,
@@ -181,6 +188,7 @@ const ColumnsDataTable = ({
       },
       sortable: true,
       width: "200px",
+      hide:"md",
     },
 
     {
@@ -208,6 +216,61 @@ const ColumnsDataTable = ({
       // width: "150px",
     },
   ];
+  const ExpandedComponent = ({data}) => {
+    const associatedContact = data?.associate?.slice(0, 3)
+    .map((item) => item?.contact?.name)
+    .filter((name) => name)
+    .join(" & ")
+    const associatedDeals = data?.associate?.slice(0, 3)
+    .map((item) => item?.deals?.deal_name)
+    .filter((name) => name)
+    .join(" & ");
+    const date = new Date(data.created_at);
+    const update = new Date(data.updated_at);
+    const formatOptions = {
+      year: "numeric",
+      month: "long",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    };
+    const formate = new Intl.DateTimeFormat("en-US", formatOptions);
+    const time = formate.format(date);
+    const updated = formate.format(update);
+   return (
+    <>
+    <div>
+        <div className="mt-3 " style={{ marginLeft: "1rem", marginBottom: "1rem", fontWeight:600, whiteSpace:"nowrap"}}> 
+          <span style={{ fontWeight : 400}}>Assosiasi Contact : </span>  
+          {associatedContact}
+        </div>
+        <div className="mt-3 " style={{ marginLeft: "1rem", marginBottom: "1rem", fontWeight:600, whiteSpace:"nowrap"}}> 
+          <span style={{ fontWeight : 400}}>Assosiasi Deals : </span>  
+          {associatedDeals}
+        </div>
+        <div className="mt-3 " style={{ marginLeft: "1rem", marginBottom: "1rem", fontWeight:600, whiteSpace:"nowrap"}}> 
+          <span style={{ fontWeight : 400}}>Tipe : </span>  
+          {data?.company_type?.name}
+        </div>
+        <div className="mt-3 " style={{ marginLeft: "1rem", marginBottom: "1rem", fontWeight:600, whiteSpace:"nowrap"}}> 
+          <span style={{ fontWeight : 400}}>Owner : </span>  
+          {data?.owner?.name}
+        </div>
+        <div className="mt-3 " style={{ marginLeft: "1rem", marginBottom: "1rem", fontWeight:600, whiteSpace:"nowrap"}}> 
+          <span style={{ fontWeight : 400}}>Dibuat : </span>  
+          {time}
+        </div>
+        {data?.created_at !== data?.updated_at ?  
+        <div className="mt-3 " style={{ marginLeft: "1rem", marginBottom: "1rem", fontWeight:600, whiteSpace:"nowrap"}}> 
+          <span style={{ fontWeight : 400}}>Diperbarui : </span>  
+          {updated}
+        </div>
+        :""}
+    </div>
+    </>
+   )
+  }
+  const isMobile = useMediaQuery({ maxWidth:767 })
   return (
     <>
       <DataTable
@@ -226,6 +289,17 @@ const ColumnsDataTable = ({
         paginationComponentOptions={{
           noRowsPerPage: true,
         }}
+        responsive
+        highlightOnHover
+        expandableRows={isMobile}
+        expandableRowsComponent={isMobile ?ExpandedComponent : null}
+        expandableIcon={
+          isMobile ? {
+            collapsed: <FontAwesomeIcon icon={faChevronRight} />,
+            expanded: <FontAwesomeIcon icon={faChevronDown} isExpanded />
+          } : null
+        }
+        
       />
     </>
   );

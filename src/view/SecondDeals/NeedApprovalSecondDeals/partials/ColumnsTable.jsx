@@ -26,6 +26,7 @@ export const ColumnsTable = [
       {isNew && <span className="badge bg-primary ms-2">New</span> }
       </div>
     )},
+    width:"180px"
   },
   {
     name: "Request To Stage",
@@ -46,6 +47,7 @@ export const ColumnsTable = [
         </p>
       </div>
     ),
+    hide:'sm'
   },
   {
     name: "Status",
@@ -82,6 +84,7 @@ export const ColumnsTable = [
         </>
       );
     },
+    hide:'sm'
   },
   {
     name: "Owner",
@@ -121,6 +124,7 @@ export const ColumnsTable = [
         </div>
       );
     },
+    hide:'sm'
   },
   {
     name: "Action",

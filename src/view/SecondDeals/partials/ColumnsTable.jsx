@@ -51,6 +51,7 @@ export const ColumnsTable = [
         </p>
       </div>
     ),
+    hide:'sm'
   },
   {
     name: "Owner",
@@ -90,6 +91,8 @@ export const ColumnsTable = [
         </div>
       );
     },
+      hide:'sm'
+    
   },
   {
     name: "Action",
