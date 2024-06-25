@@ -33,7 +33,7 @@ const ShowLPP = ({ data }) => {
         <tr className="fw-medium">
           <td style={{ width: "200px", fontSize: "0.9rem" }}>Regional BPJS</td>
           <td className="px-1">:</td>
-          <td>{data?.lpp_document?.bpjs_regional?.name_location || "-"}</td>
+          <td>{data?.lpp_document?.bpjs_regional?.regional || "-"}</td>
         </tr>
       </table>
       <div class="fw-bold mb-3">
@@ -191,7 +191,7 @@ const ShowLPP = ({ data }) => {
             Tindakan per mesin/ bulan
           </td>
           <td className="px-1">:</td>
-          <td>48</td>
+          <td>{data?.lpp_document?.action_machine_per_month_qty || ""}</td>
         </tr>
         <tr className="fw-medium">
           <td style={{ width: "300px", fontSize: "0.9rem" }}>
