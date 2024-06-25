@@ -123,8 +123,7 @@ const SecondDeals = () => {
                 />
               </div>
               <div className={`${DatatableClass}`}>
-                <div className="row">
-                  <div className="col">
+                  <div className="col-md">
                     <button
                       className="btn btn-primary mt-3"
                       onClick={ToggleSideFilter}
@@ -132,10 +131,9 @@ const SecondDeals = () => {
                     >
                       <FontAwesomeIcon icon={IconSideFilter} className="fs-6" />
                     </button>
-                    <div className="float-end">
+                    <div className="col-md-4 float-end">
                       <div
                         className="input-group shadow-sm mt-3 me-3"
-                        style={{ width: "20rem" }}
                       >
                         <div className="input-group-prepend">
                           <span
@@ -175,7 +173,6 @@ const SecondDeals = () => {
                   </div>
                 </div>
               </div>
-            </div>
           </Card>
         </div>
       </Main>

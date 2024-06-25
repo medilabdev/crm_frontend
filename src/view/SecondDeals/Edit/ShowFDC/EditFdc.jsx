@@ -23,7 +23,7 @@ const EditFdc = ({ data }) => {
   const [siup, setSiup] = useState([]);
   const [kso, setKso] = useState([]);
   const [izinDagang, setIzinDagang] = useState([]);
-
+  const [error, setError] = useState('')
   const handleInput = (e) => {
     const { name, value } = e.target;
     setEditData({
@@ -35,6 +35,15 @@ const EditFdc = ({ data }) => {
 
   const handleUpdate = async (e) => {
     e.preventDefault();
+
+    if(!editData.is_validate){
+      setError('Wajib Memilih apakah membutuhkan approval manager atau tidak!')
+      Swal.fire({
+        text:'Ada Form yang belum diisi',
+        icon:'warning'
+      })
+     return
+    }
     try {
       let timerInterval;
       const { isConfirmed } = await Swal.fire({
@@ -99,6 +108,7 @@ const EditFdc = ({ data }) => {
           tandaDaftarPerusahaan || ""
         );
         formData.append("business_license_file", izinDagang || "");
+        formData.append('is_validate', editData.is_validate)
         // for (const pair of formData.entries()) {
         //   console.log(pair[0] + ": " + pair[1]);
         // }
@@ -589,6 +599,22 @@ const EditFdc = ({ data }) => {
           }}
         />
       </div>
+      <div className="mb-3">
+          <label htmlFor="" className="mb-1">
+           <span className="text-danger fw-bold">*</span> Apakah membutuhkan approval untuk ke stage selanjutnya ? 
+          </label>
+          <select
+            name="is_validate"
+            id=""
+            onChange={handleInput}
+            className={`form-select ${error ? 'is-invalid' :''}`}
+          >
+            <option value="">Select Choose</option>
+            <option value="yes">Iya</option>
+            <option value="no">Tidak</option>
+          </select>
+          {error && <div className="invalid-feedback">{error}</div>}
+        </div>
       <div className=" mt-2">
         <button className="btn btn-primary me-2" onClick={handleUpdate}>
           Update

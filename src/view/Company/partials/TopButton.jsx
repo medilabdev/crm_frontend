@@ -5,7 +5,7 @@ import React from "react";
 const TopButton = ({ handleSubmitDeleteSelect }) => {
   return (
     <div className="row mb-2">
-      <div className="col  mb-2">
+      <div className="col ms-4 mb-2">
         <div className="float-end d-flex">
           <div class="dropdown button-flex">
             <button

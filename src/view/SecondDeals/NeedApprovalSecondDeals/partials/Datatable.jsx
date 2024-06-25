@@ -1,6 +1,9 @@
 import React, { useEffect } from "react";
 import DataTable from "react-data-table-component";
-import { ColumnsTable } from "./ColumnsTable";
+import { ColumnsTable, ExpandedComponent } from "./ColumnsTable";
+import { useMediaQuery } from "react-responsive";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChevronDown, faChevronRight } from "@fortawesome/free-solid-svg-icons";
 
 const DatatableNeedApproval = ({
   NeedApprovalManager,
@@ -10,6 +13,10 @@ const DatatableNeedApproval = ({
   totalRows,
   pending,
 }) => {
+
+  const isMobile = useMediaQuery({ maxWidth:767 })
+  const position = localStorage.getItem("position");
+ 
   return (
     <div>
       <DataTable
@@ -26,6 +33,16 @@ const DatatableNeedApproval = ({
           noRowsPerPage: true,
         }}
         progressPending={pending}
+        responsive
+        highlightOnHover
+        expandableRows={isMobile}
+        expandableRowsComponent={isMobile ? ExpandedComponent : null}
+        expandableIcon={
+          isMobile ? {
+            collapsed : <FontAwesomeIcon icon={faChevronRight} />,
+            expanded : <FontAwesomeIcon icon={faChevronDown} isExpanded />
+          } : null
+        }
       />
     </div>
   );

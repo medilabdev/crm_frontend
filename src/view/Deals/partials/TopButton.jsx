@@ -9,9 +9,9 @@ import { Link } from "react-router-dom";
 const TopButton = ({ handleDeleteSelect }) => {
   return (
     <div className="row mb-2">
-      <div className="col mb-2">
+      <div className="col ms-3 mb-2 ms-4">
         <div className="d-flex float-end">
-          <div className="dropdown button-flex">
+          <div className="dropdown float-end">
             <button
               className="btn btn-primary dropdown-toggle"
               type="button"
@@ -35,35 +35,8 @@ const TopButton = ({ handleDeleteSelect }) => {
                   Upload Deals
                 </a>
               </li>
-              {/* <li>
-              <Link className="dropdown-item" to="">
-                Upload Product
-              </Link>
-            </li> */}
             </ul>
           </div>
-          {/* <div className="dropdown button-flex">
-          <button
-            className="btn btn-outline-primary dropdown-toggle ms-2"
-            type="button"
-            data-bs-toggle="dropdown"
-            aria-expanded="false"
-          >
-            Donwload
-          </button>
-          <ul class="dropdown-menu">
-            <li>
-              <a class="dropdown-item" href="#">
-                Donwload Selected
-              </a>
-            </li>
-            <li>
-              <a class="dropdown-item" href="#">
-                Donwload All
-              </a>
-            </li>
-          </ul>
-        </div> */}
           <Link
             to="/deals/need-approval"
             className="btn btn-primary ms-2"
@@ -88,8 +61,8 @@ const TopButton = ({ handleDeleteSelect }) => {
             Delete
           </button>
         </div>
+        </div>
       </div>
-    </div>
   );
 };
 

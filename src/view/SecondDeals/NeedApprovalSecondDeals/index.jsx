@@ -56,15 +56,13 @@ const NeedApprovalSecondDeals = () => {
       <Sidebar />
       <Main>
         <div className="container">
+          <div className="row">
           <BreadcrumbNeedApproval />
           <Card className="shadow-sm">
             <TopButton />
-            <div className="row">
-              <div className="col">
-                <div className="float-end">
-                  <div
-                    className="input-group shadow-sm mt-3 me-3"
-                    style={{ width: "25rem" }}
+              <div className="col-md-5 float-end">
+              <div
+                    className="input-group shadow mt-3"
                   >
                     <div className="input-group-prepend">
                       <span
@@ -87,12 +85,9 @@ const NeedApprovalSecondDeals = () => {
                       className="form-control"
                       id=""
                     />
-                  </div>
-                </div>
               </div>
-            </div>
-            <div className="row">
-              <div className="col mt-4">
+              </div>
+            <div className="col-12">
                 <DatatableNeedApproval
                   NeedApprovalManager={ResultNeedManager}
                   paginationPerPage={pagination.limit}
@@ -100,10 +95,10 @@ const NeedApprovalSecondDeals = () => {
                   handlePagePerChange={handlePagePerChange}
                   totalRows={totalDataManager}
                   pending={pending}
-                />
-              </div>
-            </div>
+                  />
+                  </div>
           </Card>
+                  </div>
         </div>
       </Main>
     </body>

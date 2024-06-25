@@ -9,6 +9,7 @@ import OverlayAddCompany from "../../../../components/Overlay/addCompany";
 import Swal from "sweetalert2";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+import Feedback from "react-bootstrap/esm/Feedback";
 
 const getNames = (items) => {
   return [0,1,2].map(index => items && items[index] ? items[index].name : '')
@@ -18,6 +19,7 @@ const InputFQP = ({ data, listCompany }) => {
   const uid = localStorage.getItem("uid");
   const uidDeals = useParams();
   const [inputData, setInputData] = useState(data);
+  const [error, setError] =useState('')
   
   const [inputNps, setInputNps] = useState({
     promoters: getNames(data.promoters),
@@ -66,6 +68,14 @@ const InputFQP = ({ data, listCompany }) => {
 
   const uidFQP = data?.uid;
   const handleSubmit = async (e) => {
+    if(!inputData.is_validate){
+     setError('Wajib Memilih apakah membutuhkan approval manager atau tidak!')
+     Swal.fire({
+      text:'Ada Form yang belum diisi',
+      icon:'warning'
+     })
+     return
+    }
     e.preventDefault();
     try {
       let timerInterval;
@@ -202,6 +212,7 @@ const InputFQP = ({ data, listCompany }) => {
           inputData.hd_machine_unit_count || ""
         );
         formData.append("another_notes", inputData.another_notes || "");
+        formData.append('is_validate', inputData.is_validate);
         formData.append("_method", "put");
         for (const pair of formData.entries()) {
           console.log(pair[0] + ": " + pair[1]);
@@ -872,6 +883,22 @@ const InputFQP = ({ data, listCompany }) => {
               })
             }
           />
+        </div>
+        <div className="mb-3">
+          <label htmlFor="" className="mb-1">
+           <span className="text-danger fw-bold">*</span> Apakah membutuhkan approval untuk ke stage selanjutnya ? 
+          </label>
+          <select
+            name="is_validate"
+            id=""
+            onChange={handleInputData}
+            className={`form-select ${error ? 'is-invalid' :''}`}
+          >
+            <option value="">Select Choose</option>
+            <option value="yes">Iya</option>
+            <option value="no">Tidak</option>
+          </select>
+          {error && <div className="invalid-feedback">{error}</div>}
         </div>
         <div className=" mt-2">
           <button className="btn btn-primary me-2" onClick={handleSubmit}>

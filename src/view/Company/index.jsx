@@ -30,6 +30,7 @@ import ColumnsDataTable, {
   ColumnsTableCompany,
   CustomStyles,
 } from "./partials/ColumnsDataTable";
+import { useMediaQuery } from "react-responsive";
 
 const Company = () => {
   const uid = localStorage.getItem("uid");
@@ -525,6 +526,7 @@ const Company = () => {
     }
   }
 
+
   return (
     <>
       <body id="body">
@@ -708,10 +710,9 @@ const Company = () => {
                       <FontAwesomeIcon icon={iconFilter} className="fs-5" />
                     </button>
                   </OverlayTrigger>
-                  <div className="float-end mb-4">
+                  <div className="col-md-5 float-end mb-4">
                     <div
-                      className="input-group mt-3 shadow-sm search-users"
-                      style={{ height: "2.5rem", width: "19rem" }}
+                      className="input-group mt-3 search-users"
                     >
                       <div className="input-group-prepend">
                         <span
