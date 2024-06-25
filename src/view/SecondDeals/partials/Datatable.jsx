@@ -39,6 +39,16 @@ const DatatableDealSecond = ({
           <span style={{ fontWeight : 400}}>Dibuat : </span>  
           {time}
         </div>
+        <div className="mt-3 d-flex" style={{ marginLeft: "1rem", marginBottom: "1rem", fontWeight:600, whiteSpace:"nowrap"}}> 
+          <span style={{ fontWeight : 400}}>Action : </span>  
+          <a
+            href={`/deals-second/${data.uid}/edit`}
+            className="me-2 btn btn-primary"
+            target="_blank"
+          >
+            Lihat Detail
+          </a>
+        </div>
       </div>
     )
   }

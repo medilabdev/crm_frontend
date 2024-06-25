@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 const TopButton = ({ handleDeleteSelected }) => {
   return (
     <div className="row button-contact mb-3">
-      <div className="colmb-2">
+      <div className="col ms-3 mb-2">
         <div className="d-flex float-end">
           <div class="dropdown button-flex">
             <button

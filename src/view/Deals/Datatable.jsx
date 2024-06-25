@@ -34,17 +34,19 @@ const DataTableComponet = ({
   const role = localStorage.getItem("role");
   const navigate = useNavigate();
 
-  const isMobile = useMediaQuery({ maxWidth: 767 })
+  const isMobile = useMediaQuery({ maxWidth: 767 });
   const ExpandedComponent = ({ data }) => {
-    const associatedCompanies = data?.associate?.slice(0, 3)
-    .map((item) => item?.company?.name)
-    .filter((name) => name)
-    .join(" & ")
+    const associatedCompanies = data?.associate
+      ?.slice(0, 3)
+      .map((item) => item?.company?.name)
+      .filter((name) => name)
+      .join(" & ");
 
-    const associatedContact = data?.associate?.slice(0, 3)
-    .map((item) => item?.contact?.name)
-    .filter((name) => name)
-    .join(" & ")
+    const associatedContact = data?.associate
+      ?.slice(0, 3)
+      .map((item) => item?.contact?.name)
+      .filter((name) => name)
+      .join(" & ");
 
     const date = new Date(data.created_at);
     const update = new Date(data.updated_at);
@@ -58,68 +60,219 @@ const DataTableComponet = ({
     const formate = new Intl.DateTimeFormat("en-US", formatOptions);
     const time = formate.format(date);
     const updated = formate.format(update);
-  return (
-    <>
-    <div>
-        <div className="mt-3 " style={{ marginLeft: "1rem", marginBottom: "1rem", fontWeight:600, whiteSpace:"nowrap"}}> 
-          <span style={{ fontWeight : 400}}>Stage : </span>  
-          {data?.staging?.name}
+    return (
+      <>
+        <div>
+          <div
+            className="mt-3 "
+            style={{
+              marginLeft: "1rem",
+              marginBottom: "1rem",
+              fontWeight: 600,
+              whiteSpace: "nowrap",
+            }}
+          >
+            <span style={{ fontWeight: 400 }}>Stage : </span>
+            {data?.staging?.name}
+          </div>
+          <div
+            className="mt-3 "
+            style={{
+              marginLeft: "1rem",
+              marginBottom: "1rem",
+              fontWeight: 600,
+              whiteSpace: "nowrap",
+            }}
+          >
+            <span style={{ fontWeight: 400 }}>Jumlah : </span>
+            Rp. {new Intl.NumberFormat().format(data?.deal_size)}
+          </div>
+          <div
+            className="mt-3 "
+            style={{
+              marginLeft: "1rem",
+              marginBottom: "1rem",
+              fontWeight: 600,
+              whiteSpace: "nowrap",
+            }}
+          >
+            <span style={{ fontWeight: 400 }}>Assosiasi Perusahaan : </span>
+            {associatedCompanies}
+          </div>
+          <div
+            className="mt-3 "
+            style={{
+              marginLeft: "1rem",
+              marginBottom: "1rem",
+              fontWeight: 600,
+              whiteSpace: "nowrap",
+            }}
+          >
+            <span style={{ fontWeight: 400 }}>Assosiasi Kontak : </span>
+            {associatedContact}
+          </div>
+          <div
+            className="mt-3 "
+            style={{
+              marginLeft: "1rem",
+              marginBottom: "1rem",
+              fontWeight: 600,
+              whiteSpace: "nowrap",
+            }}
+          >
+            <span style={{ fontWeight: 400 }}>Owner : </span>
+            {data?.owner?.name}
+          </div>
+          <div
+            className="mt-3 "
+            style={{
+              marginLeft: "1rem",
+              marginBottom: "1rem",
+              fontWeight: 600,
+              whiteSpace: "nowrap",
+            }}
+          >
+            <span style={{ fontWeight: 400 }}>Dibuat : </span>
+            {time}
+          </div>
+          {data?.created_at !== data?.updated_at ? (
+            <div
+              className="mt-3 "
+              style={{
+                marginLeft: "1rem",
+                marginBottom: "1rem",
+                fontWeight: 600,
+                whiteSpace: "nowrap",
+              }}
+            >
+              <span style={{ fontWeight: 400 }}>Diperbarui : </span>
+              {updated}
+            </div>
+          ) : (
+            ""
+          )}
+           <div
+            className="mt-3 d-flex"
+            style={{
+              marginLeft: "1rem",
+              marginBottom: "1rem",
+              fontWeight: 600,
+              whiteSpace: "nowrap",
+            }}
+          >
+            <span style={{ fontWeight: 400 }}>Action : </span>
+            <div className="ms-3">
+            {data?.owner_user_uid === uid || role === "hG5sy_dytt95" ? (
+              <>
+                <a
+                  href={`/deals/${data.uid}/edit`}
+                  className=" btn btn-primary "
+                  title="edit"
+                  target="_blank"
+                >
+                  Edit
+                </a>
+
+                <button
+                  className="btn btn-danger ms-2"
+                  title="delete"
+                  onClick={() => {
+                    Swal.fire({
+                      title: "Konfirmasi",
+                      text: "Apakah kamu yakin ingin menghapus ini deals ini?",
+                      icon: "warning",
+                      showCancelButton: true,
+                      confirmButtonColor: "#3085d6",
+                      cancelButtonColor: "#d33",
+                      confirmButtonText: "Ya, Hapus!",
+                      cancelButtonText: "Batal",
+                    }).then((res) => {
+                      if (res.isConfirmed) {
+                        const formData = new FormData();
+                        formData.append("deals_uid[]", data.uid);
+                        // console.log("FormData:", Object.fromEntries(formData.entries()));
+                        axios
+                          .post(
+                            `${process.env.REACT_APP_BACKEND_URL}/deals/item/delete`,
+                            formData,
+                            {
+                              headers: {
+                                Authorization: `Bearer ${token}`,
+                              },
+                            }
+                          )
+                          .then((res) => {
+                            Swal.fire({
+                              title: res.data.message,
+                              text: "Successfully delete deals",
+                              icon: "success",
+                            }).then((res) => {
+                              if (res.isConfirmed) {
+                                window.location.reload();
+                              }
+                            });
+                          })
+                          .catch((err) => {
+                            if (
+                              err.response.data.message === "Delete failed!"
+                            ) {
+                              Swal.fire({
+                                title: "Delete Failed",
+                                text: "Tidak dapat menghapus, data master ini terkait dengan data lainnya",
+                                icon: "warning",
+                              });
+                            }
+                          });
+                      }
+                    });
+                  }}
+                >
+                  Delete
+                </button>
+              </>
+            ) : null}
+          </div>
+          </div>
+          
         </div>
-        <div className="mt-3 " style={{ marginLeft: "1rem", marginBottom: "1rem", fontWeight:600, whiteSpace:"nowrap"}}> 
-          <span style={{ fontWeight : 400}}>Jumlah : </span>  
-          Rp. {new Intl.NumberFormat().format(data?.deal_size)}
-        </div>
-        <div className="mt-3 " style={{ marginLeft: "1rem", marginBottom: "1rem", fontWeight:600, whiteSpace:"nowrap"}}> 
-          <span style={{ fontWeight : 400}}>Assosiasi Perusahaan : </span>  
-          {associatedCompanies}
-        </div>
-        <div className="mt-3 " style={{ marginLeft: "1rem", marginBottom: "1rem", fontWeight:600, whiteSpace:"nowrap"}}> 
-          <span style={{ fontWeight : 400}}>Assosiasi Kontak : </span>  
-          {associatedContact}
-        </div>
-        <div className="mt-3 " style={{ marginLeft: "1rem", marginBottom: "1rem", fontWeight:600, whiteSpace:"nowrap"}}> 
-          <span style={{ fontWeight : 400}}>Owner : </span>  
-          {data?.owner?.name}
-        </div>
-        <div className="mt-3 " style={{ marginLeft: "1rem", marginBottom: "1rem", fontWeight:600, whiteSpace:"nowrap"}}> 
-          <span style={{ fontWeight : 400}}>Dibuat : </span>  
-          {time}
-        </div>
-        {data?.created_at !== data?.updated_at ?  
-        <div className="mt-3 " style={{ marginLeft: "1rem", marginBottom: "1rem", fontWeight:600, whiteSpace:"nowrap"}}> 
-          <span style={{ fontWeight : 400}}>Diperbarui : </span>  
-          {updated}
-        </div>
-        :""}
-    </div>
-    </>
-  )
-  }
+      </>
+    );
+  };
   const columns = [
     {
-      
       name: "Name",
       cell: (row) => {
-        const createdDate = new Date(row?.created_at)
+        const createdDate = new Date(row?.created_at);
         const currentDate = new Date();
-        const twoDaysAgo = new Date(currentDate)
-        twoDaysAgo?.setDate(currentDate.getDate() - 2)
-        const isNew = createdDate > twoDaysAgo;   
-        const updatedDate = new Date(row?.updated_at)
+        const twoDaysAgo = new Date(currentDate);
+        twoDaysAgo?.setDate(currentDate.getDate() - 2);
+        const isNew = createdDate > twoDaysAgo;
+        const updatedDate = new Date(row?.updated_at);
         const isUpdate = updatedDate > twoDaysAgo;
-       return (
-        <div>
-        <a
-          href={`deals/${row.uid}/edit`}
-          target="_blank"
-          className="text-decoration-none"
-          style={{ whiteSpace: "normal", color: "#191919", fontWeight: "500" }}
-        >
-          {row.deal_name}
-        </a>
-        { isNew ?  isNew && <span className="badge bg-primary ms-2">New</span> : isUpdate ?  isUpdate && <span className="badge bg-success ms-2">Update</span> : "" }
-        </div>
-      )},
+        return (
+          <div>
+            <a
+              href={`deals/${row.uid}/edit`}
+              target="_blank"
+              className="text-decoration-none"
+              style={{
+                whiteSpace: "normal",
+                color: "#191919",
+                fontWeight: "500",
+              }}
+            >
+              {row.deal_name}
+            </a>
+            {isNew
+              ? isNew && <span className="badge bg-primary ms-2">New</span>
+              : isUpdate
+                ? isUpdate && (
+                    <span className="badge bg-success ms-2">Update</span>
+                  )
+                : ""}
+          </div>
+        );
+      },
       sortable: true,
       width: "150px",
     },
@@ -142,14 +295,14 @@ const DataTableComponet = ({
         </div>
       ),
       sortable: true,
-      hide:"sm"
+      hide: "sm",
     },
     {
       name: "Jumlah",
       selector: (row) => `Rp. ${new Intl.NumberFormat().format(row.deal_size)}`,
       sortable: true,
       width: "150px",
-      hide:"sm"
+      hide: "sm",
     },
     {
       name: "Associated with",
@@ -210,8 +363,9 @@ const DataTableComponet = ({
         </div>
       ),
       sortable: true,
+      left:true,
       width: "150px",
-      hide:"sm"
+      hide: "sm",
     },
 
     {
@@ -255,7 +409,6 @@ const DataTableComponet = ({
       },
       sortable: true,
       width: "150px",
-      hide:"sm"
     },
     {
       name: "Action",
@@ -331,6 +484,7 @@ const DataTableComponet = ({
         </div>
       ),
       width: "120px",
+      hide:'sm'
     },
   ];
   return (
@@ -356,10 +510,12 @@ const DataTableComponet = ({
         expandableRows={isMobile}
         expandableRowsComponent={isMobile ? ExpandedComponent : null}
         expandableIcon={
-          isMobile ? {
-            collapsed: <FontAwesomeIcon icon={faChevronRight} />,
-            expanded: <FontAwesomeIcon icon={faChevronDown} isExpanded/>
-          } : null
+          isMobile
+            ? {
+                collapsed: <FontAwesomeIcon icon={faChevronRight} />,
+                expanded: <FontAwesomeIcon icon={faChevronDown} isExpanded />,
+              }
+            : null
         }
       />
     </div>

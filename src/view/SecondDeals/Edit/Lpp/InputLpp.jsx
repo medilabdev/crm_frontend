@@ -31,6 +31,10 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
   const [Rab, setRab] = useState([]);
   const [feeAction, setFeeAction] = useState([]);
   const [supportKerjaSama, setSupportKerjaSama] = useState([]);
+  const [error, setError] = useState({
+    tindakanPerbulan:'',
+    categoryType:''
+  })
 
   const [showOverlay, setShowOverlay] = useState(false);
   const [priceFormat, setPriceFormat] = useState(
@@ -239,23 +243,39 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
     setCategoryType(newCategoryType);
   }, [inputData.category_type_uid]);
 
+
+  const customStyles = (error) => ({
+    control: (provided) => ({
+      ...provided,
+      borderColor: error ? 'red' : provided.borderColor,
+      '&:hover': {
+        borderColor: error ? 'red' : provided['&:hover'].borderColor,
+      },
+    }),
+  });
   const handleSubmit = async (e) => {
     e.preventDefault();
+    let valid = true;
+    const newError = {tindakanPerbulan:'', categoryType:''}
     if(tindakanPerbulan < 48){
+      newError.tindakanPerbulan = 'tindakan harus lebih atau sama dengan 48'
       Swal.fire({
         text: "Value Tindakan per mesin/bulan harus lebih atau sama dengan 48 ",
         icon: "warning",
       });
-      return;
+      valid = false;
     }
     if(!inputData.category_type_uid){
+      newError.categoryType = 'Status Wajib dipilih'
       Swal.fire({
         text: "Category Jenis Kerja Sama Wajib Diisi ",
         icon: "warning",
       });
-      return;
+      valid = false;
     }
- 
+    setError(newError);
+    if(!valid) return;
+
     try {
       let timerInterval;
       const { isConfirmed } = await Swal.fire({
@@ -724,13 +744,19 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
         ""
       )}
       <div className="mb-5">
+      <label htmlFor="" className="mb-1">
+           <span className="text-danger">*</span> Pilih Status
+          </label>
         <Select
           options={SelectCategory()}
           placeholder="Select Status"
           onChange={(e) =>
             setInputData({ ...inputData, category_type_uid: e.value })
           }
+          className={error.categoryType ? 'is-invalid' : ''}
+          styles={customStyles(!!error.categoryType)}
         />
+         {error && <div className="invalid-feedback">{error.categoryType}</div>}
       </div>
       <div class="alert alert-primary mt-4" role="alert">
         <h6 style={{ fontWeight: "700" }}>Term Kerjasama</h6>
@@ -939,10 +965,11 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
           onChange={handleInputTindakanPerbulan}
           value={tindakanPerbulan}
           id=""
-          className="form-control"
+          className={`form-control ${error.tindakanPerbulan ? 'is-invalid' : ''}`}
           placeholder=""
         />
         <label htmlFor="">Tindakan per mesin/ bulan</label>
+        {error && <div className="invalid-feedback">{error.tindakanPerbulan}</div>}
       </div>
       <div className="form-floating mb-3">
         <input
@@ -954,6 +981,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
           className="form-control"
           placeholder=""
         />
+
         <label htmlFor="">Tindakan Selama Bekerja Sama</label>
       </div>
      

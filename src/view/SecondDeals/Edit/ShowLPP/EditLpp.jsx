@@ -22,6 +22,11 @@ import AddTipeFaskes from "../Lpp/modals/AddTipeFaskes";
 const EditLpp = ({ data, listCompany, uidDeals }) => {
   const uidLpp = data?.uid;
   const [dataLpp, setDataLpp] = useState(data);
+  const [error, setError] = useState({
+    categoryType:'',
+    tindakanPerbulan:'',
+    needApproval:''
+  })
   const [showOverlay, setShowOverlay] = useState(false);
   const handleShow = () => setShowOverlay(true);
   const handleClose = () => setShowOverlay(false);
@@ -48,7 +53,17 @@ const EditLpp = ({ data, listCompany, uidDeals }) => {
     const newValue = parseInt(e.target.value, 10)
     setActionMachinePerMonthQty(newValue);
   }
-  console.log(actionMachinePerMonthQty);
+  
+  const customStyles = (error) => ({
+    control: (provided) => ({
+      ...provided,
+      borderColor: error ? 'red' : provided.borderColor,
+      '&:hover': {
+        borderColor: error ? 'red' : provided['&:hover'].borderColor,
+      },
+    }),
+  });
+
   const dispatch = useDispatch();
   const selectCompany = () => {
     const result = [];
@@ -232,13 +247,34 @@ const EditLpp = ({ data, listCompany, uidDeals }) => {
 
   const handleUpdate = async(e) => {
     e.preventDefault()
+    let valid = true
+    const newErrors = {categoryType:'', tindakanPerbulan:'', needApproval:''}
     if(actionMachinePerMonthQty < 48){
+      newErrors.tindakanPerbulan = 'tindakan harus lebih atau sama dengan 48'
       Swal.fire({
         text: "Value Tindakan per mesin/bulan harus lebih atau sama dengan 48 ",
         icon: "warning",
       });
-      return;
+      valid=false
     }
+    if(!dataLpp.category_type_uid){
+      newErrors.categoryType = 'Status Wajib Dipilih'
+      Swal.fire({
+        text: "Status Wajib Dipilih",
+        icon: "warning",
+      });
+      valid=false
+    }
+    if(!dataLpp.is_validate){
+      newErrors.needApproval = 'Wajib Dipilih!'
+      Swal.fire({
+        text: "Terdapat Form yang belum diisi",
+        icon: "warning",
+      })
+      valid=false
+    }
+    setError(newErrors)
+    if(!valid) return;
     try {
       let timerInterval
       const { isConfirmed } = await Swal.fire({
@@ -393,6 +429,7 @@ const EditLpp = ({ data, listCompany, uidDeals }) => {
             formData.append(`timeline[${index}][12]`, time?.[11] || 0)
           })
         }
+        formData.append('is_validate', dataLpp.is_validate)
         formData.append("_method", "put")
         for (const pair of formData.entries()) {
           console.log(pair[0] + ": " + pair[1]);
@@ -579,6 +616,9 @@ const EditLpp = ({ data, listCompany, uidDeals }) => {
         ""
       )}
       <div className="mb-5">
+          <label htmlFor="" className="mb-1">
+            <span className="text-danger">*</span>Pilih Status
+          </label>
         <Select
           options={SelectCategory()}
           placeholder="Select Status"
@@ -588,7 +628,10 @@ const EditLpp = ({ data, listCompany, uidDeals }) => {
           onChange={(e) =>
             setDataLpp({ ...dataLpp, category_type_uid: e.value })
           }
+          styles={customStyles(!!error.categoryType)}
+          className={error.categoryType ? 'is-invalid' : ''}
         />
+          {error && <div className="invalid-feedback">{error.categoryType}</div>}
       </div>
       <div class="alert alert-primary mt-4" role="alert">
         <h6 style={{ fontWeight: "700" }}>Term Kerjasama</h6>
@@ -802,10 +845,11 @@ const EditLpp = ({ data, listCompany, uidDeals }) => {
           onChange={handleInputTindakanPerbulan}
           value={actionMachinePerMonthQty}
           id=""
-          className="form-control"
+          className={`form-control ${error.tindakanPerbulan ? 'is-invalid' : ''}`}
           placeholder=""
         />
         <label htmlFor="">Tindakan per mesin/ bulan</label>
+        {error.tindakanPerbulan && <div className="invalid-feedback">{error.tindakanPerbulan}</div>}
       </div>
       <div className="form-floating mb-3">
         <input
@@ -855,6 +899,22 @@ const EditLpp = ({ data, listCompany, uidDeals }) => {
         />
       </div>
       <EditTimeline data={dataLpp?.timeline} handleChangeTimeline={handleChangeTimeline}  CategoryData={dataLpp?.category_type_uid} />
+      <div className="mb-3">
+          <label htmlFor="" className="mb-1">
+           <span className="text-danger fw-bold">*</span> Apakah membutuhkan approval untuk ke stage selanjutnya ? 
+          </label>
+          <select
+            name="is_validate"
+            id=""
+            onChange={handleChange}
+            className={`form-select ${error.needApproval ? 'is-invalid' :''}`}
+          >
+            <option value="">Select Choose</option>
+            <option value="yes">Iya</option>
+            <option value="no">Tidak</option>
+          </select>
+          {error.needApproval && <div className="invalid-feedback">{error.needApproval}</div>}
+        </div>
       <div className=" mt-2">
         <button className="btn btn-primary me-2" onClick={handleUpdate}>Update</button>
         <a className="btn btn-secondary" href="/">Kembali</a>

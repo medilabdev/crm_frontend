@@ -605,10 +605,9 @@ const Deals = () => {
                       <FontAwesomeIcon icon={IconFilter} className="fs-5" />
                       {/* <i className={`${IconFilter}`}></i> */}
                     </button>
-                    <div className="float-end">
+                    <div className="col-md-5 float-end">
                       <div
                         className="input-group mt-3 me-3"
-                        style={{ height: "2.5rem", width: "18rem" }}
                       >
                         <div className="input-group-prepend">
                           <span

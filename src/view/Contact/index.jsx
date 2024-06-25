@@ -439,6 +439,26 @@ const Contact = () => {
           {updatedDateTime}
         </div>
         : ""}
+        <div className="mt-3 d-flex" style={{ marginLeft: "1rem", marginBottom: "1rem", fontWeight:600, whiteSpace:"nowrap"}}> 
+          <span style={{ fontWeight : 400}}>Action : </span>  
+          <div className="ms-2">
+            <a
+              href={`/contact/${data.uid}/edit`}
+              target="_blank"
+              className="btn btn-primary"
+              title="edit"
+            >
+              Edit
+            </a>
+            <button
+              className="ms-2 btn btn-danger"
+              title="delete"
+              onClick={() => setDeleteContact(data.uid)}
+            >
+              Hapus
+            </button>
+          </div>
+        </div>
       </div>
       </>
     );

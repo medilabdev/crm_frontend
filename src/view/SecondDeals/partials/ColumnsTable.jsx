@@ -24,14 +24,16 @@ export const ColumnsTable = [
       <a
         href={`/deals-second/${row.uid}/edit`}
         target="_blank"
-        className="text-decoration-none"
-        style={{ whiteSpace: "normal", color: "black", fontWeight: "540" }}
+        className="text-decoration-none fw-semibold"
+        style={{ whiteSpace: "normal", color: "black" }}
       >
         {row?.fqp_document?.hospital?.name ?? "-"}
       </a>
         {isNew && <span className="badge bg-primary ms-2">New</span> }
       </div>
     )},
+    width:'200px',
+    left:true
   },
   {
     name: "Stage",
@@ -51,7 +53,8 @@ export const ColumnsTable = [
         </p>
       </div>
     ),
-    hide:'sm'
+    hide:'sm',
+    left:true
   },
   {
     name: "Owner",
@@ -91,7 +94,8 @@ export const ColumnsTable = [
         </div>
       );
     },
-      hide:'sm'
+      hide:'sm',
+      left:true
     
   },
   {
@@ -168,6 +172,7 @@ export const ColumnsTable = [
         )}
       </div>
     ),
+    left:true
   },
 ];
 

@@ -214,3 +214,140 @@ export const CustomStyles = {
     },
   },
 };
+
+export  const ExpandedComponent = ({ data }) => {
+  const date = new Date(data.created_at);
+  const formatDate = {
+    year: "numeric",
+    month: "long",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  };
+  const formatResult = new Intl.DateTimeFormat("en-US", formatDate);
+  const time = formatResult.format(date);
+  return (
+    <div>
+       <div className="mt-2" style={{ marginLeft: "1rem", marginBottom: "1rem", fontWeight:600, whiteSpace:"nowrap"}}> 
+        <span style={{ fontWeight : 400}}>Permintaan ke Stage : </span>  
+        {data?.staging?.name}
+      </div>
+       <div className="mt-3 " style={{ marginLeft: "1rem", marginBottom: "1rem", fontWeight:600, whiteSpace:"nowrap"}}> 
+        <span style={{ fontWeight : 400}}>Status : </span>  
+        {position === "pRGYXVKdzCPoQ8" ? (
+          data.manager_approval == 0 ? (
+            <span style={{ fontWeight: "600" }}>Waiting</span>
+          ) : (
+            <span style={{ fontWeight: "600" }}>Approved</span>
+          )
+        ) : data.manager_approval == 2 ? (
+          <span style={{ fontWeight: "600" }}>Reject</span>
+        ) : position === "_dLjLFdH-Nw8vg8U" ? (
+          data.finance_approval == 0 ? (
+            <span style={{ fontWeight: "600" }}>Waiting</span>
+          ) : (
+            <span style={{ fontWeight: "600" }}>Approved</span>
+          )
+        ) : data.finance_approval == 2 ? (
+          <span style={{ fontWeight: "600" }}>Reject</span>
+        ) : position === "pRGYXVKdzCPoQ1" ? (
+          data.director_approval == 0 ? (
+            <span style={{ fontWeight: "600" }}>Waiting</span>
+          ) : (
+            <span style={{ fontWeight: "600" }}>Approved</span>
+          )
+        ) : data.director_approval == 2 ? (
+          <span style={{ fontWeight: "600" }}>Reject</span>
+        ) : (
+          ""
+        )}
+      </div>
+      <div className="mt-3 " style={{ marginLeft: "1rem", marginBottom: "1rem", fontWeight:600, whiteSpace:"nowrap"}}> 
+        <span style={{ fontWeight : 400}}>Owner : </span>  
+        {data?.deal?.owner?.name}
+      </div>
+      <div className="mt-3 " style={{ marginLeft: "1rem", marginBottom: "1rem", fontWeight:600, whiteSpace:"nowrap"}}> 
+        <span style={{ fontWeight : 400}}>Dibuat : </span>  
+        {time}
+      </div>
+      <div className="mt-3 d-flex" style={{ marginLeft: "1rem", marginBottom: "1rem", fontWeight:600, whiteSpace:"nowrap"}}> 
+        <span style={{ fontWeight : 400}}>Action : </span>  
+        {position === "pRGYXVKdzCPoQ8" ? (
+      data.manager_approval == 0 ? (
+        <div className="action-icon">
+          <button
+            type="button"
+            onClick={() => handleApprove(data.uid)}
+            className="me-3 btn btn-success"
+            style={{ border: "none" }}
+          >
+           Approve
+          </button>
+          <button
+            type="button"
+            onClick={() => handleReject(data.uid)}
+            className="btn btn-danger"
+            style={{ border: "none" }}
+            title="delete"
+          >
+            Reject
+          </button>
+        </div>
+      ) : (
+        ""
+      )
+    ) : position === "_dLjLFdH-Nw8vg8U" ? (
+      data.finance_approval == 0 ? (
+        <div className="action-icon">
+          <button
+            type="button"
+            onClick={() => handleApprove(data.uid)}
+            className="me-3 btn btn-success"
+            style={{ border: "none" }}
+          >
+            Approve
+          </button>
+          <button
+            type="button"
+            onClick={() => handleReject(data.uid)}
+            className="btn btn-danger"
+            style={{ border: "none" }}
+            title="delete"
+          >
+            Reject
+          </button>
+        </div>
+      ) : (
+        ""
+      )
+    ) : position === "pRGYXVKdzCPoQ1" ? (
+      data.director_approval == 0 ? (
+        <div className="action-icon">
+          <button
+            type="button"
+            onClick={() => handleApprove(data.uid)}
+            className="me-3 btn btn-success"
+            style={{ border: "none" }}
+          >
+            Approve
+          </button>
+          <button
+            type="button"
+            onClick={() => handleReject(data.uid)}
+            className="btn btn-danger"
+            style={{ border: "none" }}
+            title="delete"
+          >
+            Reject
+          </button>
+        </div>
+      ) : (
+        ""
+      )
+    ) : (
+      ""
+    )}
+      </div>
+    </div>
+  )
+}

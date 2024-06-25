@@ -266,6 +266,27 @@ const ColumnsDataTable = ({
           {updated}
         </div>
         :""}
+
+        <div className="mt-3 d-flex" style={{ marginLeft: "1rem", marginBottom: "1rem", fontWeight:600, whiteSpace:"nowrap"}}> 
+          <span style={{ fontWeight : 400}}>Action : </span>  
+          <div className="action-icon ms-2">
+          <a
+            className="btn btn-primary"
+            title="edit"
+            href={`/company/${data.uid}/edit`}
+            target="_blank"
+          >
+             Edit
+          </a>
+          <button
+            className="ms-2 btn btn-danger"
+            title="delete"
+            onClick={() => setDeleteCompany(data.uid)}
+          >
+            Hapus
+          </button>
+        </div>
+        </div>
     </div>
     </>
    )
