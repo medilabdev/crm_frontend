@@ -409,6 +409,7 @@ const DataTableComponet = ({
       },
       sortable: true,
       width: "150px",
+      hide:'sm'
     },
     {
       name: "Action",
