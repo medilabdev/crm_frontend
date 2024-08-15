@@ -158,7 +158,7 @@ const ShowLPP = ({ data }) => {
             Kirim Tahap 1 (qty)
           </td>
           <td className="px-1">:</td>
-          <td>Unit </td>
+          <td>{data?.lpp_document?.delivery_mkhd_first_qty ?? "-"} </td>
         </tr>
         <tr className="fw-medium">
           <td style={{ width: "300px", fontSize: "0.9rem" }}>
@@ -172,7 +172,7 @@ const ShowLPP = ({ data }) => {
             Pengiriman Operate MKHD 1
           </td>
           <td className="px-1">:</td>
-          <td>{data?.lpp_document?.backup_mkhd_first_qty || ""} </td>
+          <td>{data?.lpp_document?.backup_mkhd_first_qty || "-"} </td>
         </tr>
         <tr className="fw-medium">
           <td style={{ width: "300px", fontSize: "0.9rem" }}>

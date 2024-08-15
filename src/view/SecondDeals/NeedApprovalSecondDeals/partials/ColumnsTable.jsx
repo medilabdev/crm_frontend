@@ -4,6 +4,7 @@ import { faCheck, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { handleApprove, handleReject } from "./Approve";
 
 export const position = localStorage.getItem("position");
+export const uid = localStorage.getItem("uid")
 export const ColumnsTable = [
   {
     name: "Name",
@@ -153,7 +154,7 @@ export const ColumnsTable = [
         ) : (
           ""
         )
-      ) : position === "_dLjLFdH-Nw8vg8U" ? (
+      ) :  position === "adsfasdf1321" && uid !=="MT1uv9Un9fDApw" ? (
         row.finance_approval == 0 ? (
           <div className="action-icon">
             <button
