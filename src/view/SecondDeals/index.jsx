@@ -25,7 +25,7 @@ const SecondDeals = () => {
     SetSideFilter(!SideFilter);
   };
   const FilterClass = SideFilter
-    ? "col-md-3 d-block border-end"
+    ? "col-md-3 d-block border-end" 
     : "col-md-0 d-none";
   const DatatableClass = SideFilter ? "col-md-9" : "col-md-12";
   const IconSideFilter = SideFilter ? faX : faFilter;
@@ -112,7 +112,7 @@ const SecondDeals = () => {
           <TopButton />
           <Card className="shadow">
             <div className="row">
-              <div id="filter" className={`${FilterClass}`}>
+              <div className={`${FilterClass}`} id="filter" >
                 <FilterTable
                   handleDealsType={handleDealsType}
                   handleSearchMultiple={handleSearchMultiple}
@@ -159,8 +159,7 @@ const SecondDeals = () => {
                       </div>
                     </div>
                   </div>
-                </div>
-                <div className="row">
+              
                   <div className="mt-3">
                     <DatatableDealSecond
                       data={listResultDataDeals}
@@ -170,7 +169,7 @@ const SecondDeals = () => {
                       totalRows={totalDataDeals}
                       pending={pending}
                     />
-                  </div>
+                </div>
                 </div>
               </div>
           </Card>
