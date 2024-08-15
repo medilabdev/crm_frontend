@@ -167,6 +167,8 @@ const TopButton = ({
   const handleReffresh = () => {
     window.location.reload();
   };
+
+  console.log(data);
   return (
     <div className="row">
       <div className="col mt-2">
@@ -223,7 +225,9 @@ const TopButton = ({
           )}
           {(position === "pRGYXVKdzCPoQ8" ||
             position === "_dLjLFdH-Nw8vg8U" ||
-            position === "pRGYXVKdzCPoQ1") &&
+            position === "pRGYXVKdzCPoQ1" || 
+            position === "adsfasdf1321"
+          ) &&
           stage !== "leads" &&
           stage !== "Approaching" ? (
             <button
@@ -237,7 +241,7 @@ const TopButton = ({
                 icon={showFormRoi ? faEyeSlash : faEye}
                 className="me-2"
               />
-              {position === "_dLjLFdH-Nw8vg8U" || position === "pRGYXVKdzCPoQ1"
+              {position === "_dLjLFdH-Nw8vg8U" || position === "pRGYXVKdzCPoQ1" || position === "adsfasdf1321"
                 ? "ROI"
                 : "Upload ROI"}
             </button>
@@ -287,7 +291,7 @@ const TopButton = ({
             {ShowFQP ? "Closed" : "Open"} FQP
           </a>
           {stage !== "leads" ? 
-            (position === "pRGYXVKdzCPoQ8" && data?.lpp_document !== null) || position === "_dLjLFdH-Nw8vg" || position === "pRGYXVKdzCPoQ1" || position === "_dLjLFdH-Nw8vg8U" ? (
+            (position === "pRGYXVKdzCPoQ8" && data?.lpp_document !== null) || position === "_dLjLFdH-Nw8vg" || position === "pRGYXVKdzCPoQ1" || position === "_dLjLFdH-Nw8vg8U" || position === "adsfasdf1321" ? (
             <a
               id={isVisible ? `floatingButtonLPP` : ""}
               className={`btn ${

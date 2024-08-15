@@ -234,7 +234,7 @@ const SingleCompany = () => {
   const getOwnerUser = async (retryCount = 0) => {
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_BACKEND_URL}/users`,
+        `${process.env.REACT_APP_BACKEND_URL}/users?limit=100`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -265,7 +265,7 @@ const SingleCompany = () => {
       }
     }
   };
-
+ 
   const addTelephone = () => {
     setInputCompany((prevInput) => ({
       ...prevInput,
@@ -339,6 +339,8 @@ const SingleCompany = () => {
     });
     return result;
   };
+
+
   const dealsSelect = () => {
     const result = [];
     deals?.map((data) => {
