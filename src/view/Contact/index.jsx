@@ -146,7 +146,7 @@ const Contact = () => {
 
   const getAllUser = (retryCount = 0) => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/users?limit=100`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

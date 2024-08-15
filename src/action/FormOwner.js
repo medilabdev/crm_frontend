@@ -13,7 +13,7 @@ export const getListOwner = (token, retryCount = 0) => {
     });
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_BACKEND_URL}/users`,
+        `${process.env.REACT_APP_BACKEND_URL}/users?limit=100`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
