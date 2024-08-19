@@ -307,12 +307,35 @@ const RekapBiayaPdf = ({ data }) => {
 }
 
 const LppPdf = ({data}) =>{
+  const formatDate = (dateString) => {
+    if (!dateString) return '-';
+  
+    const date = new Date(dateString);
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    
+    return date.toLocaleDateString('en-US', options);
+  };
  return(
   <Document>
    <Page size="A4" style={styles.section}>
     <View >
       <Text style={{ fontWeight: 700, fontSize:16, marginBottom: 10, textAlign: 'center'}}>Lembar Persetujuan Project</Text>
     </View>
+    <View style={[styles.row, { marginTop: 12 }]}>
+        <Text style={styles.label}>Owner Project</Text>
+        <Text style={styles.colon}>:</Text>
+        <Text style={styles.value}>{data?.owner?.name || '-'}</Text>
+      </View>
+    <View style={styles.row}>
+        <Text style={styles.label}>Approved By</Text>
+        <Text style={styles.colon}>:</Text>
+        <Text style={styles.value}>{data?.lpp_document?.approved_by?.name || '-'}</Text>
+      </View>
+    <View style={styles.row}>
+        <Text style={styles.label}>Approved At</Text>
+        <Text style={styles.colon}>:</Text>
+        <Text style={styles.value}>{formatDate(data?.lpp_document?.approved_at || '-')}</Text>
+      </View>
     <View style={styles.row}>
       <Text style={styles.header}>Customer</Text>
     </View>
@@ -531,6 +554,9 @@ const LppPdf = ({data}) =>{
 
 
 const LPP = ({ userUid, data, listCompany, uidDeals }) => {
+  console.log('====================================');
+  console.log(data);
+  console.log('====================================');
   const [showLpp, setShowLpp] = useState(true);
   const uid = localStorage.getItem("uid");
   const handleShowLpp = () => setShowLpp(!showLpp);
