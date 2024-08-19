@@ -554,9 +554,7 @@ const LppPdf = ({data}) =>{
 
 
 const LPP = ({ userUid, data, listCompany, uidDeals }) => {
-  console.log('====================================');
-  console.log(data);
-  console.log('====================================');
+  
   const [showLpp, setShowLpp] = useState(true);
   const uid = localStorage.getItem("uid");
   const handleShowLpp = () => setShowLpp(!showLpp);
