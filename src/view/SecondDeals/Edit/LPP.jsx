@@ -548,7 +548,11 @@ const LppPdf = ({data}) =>{
           <View style={{marginTop:-8}}>
             <RekapBiayaPdf data={data?.lpp_document} />
             </View>
-        <View style={styles.row}>
+       
+    </Page>
+
+    <Page size="A4" style={styles.section}>
+    <View style={styles.row}>
         <Text style={styles.header}>Timeline</Text>
         </View>
         <View style={[styles.row, {marginBottom:-4}]}>
