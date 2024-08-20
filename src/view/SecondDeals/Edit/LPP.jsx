@@ -154,7 +154,7 @@ const TableRabPdf = ({ data }) => {
         </View>
         {alkes?.map((item, index) => (
           <View key={index} style={styles.tableRow}>
-            <Text style={[styles.tableCell, { width: 150 }]}>{item?.item_uid || '-'}</Text>
+            <Text style={[styles.tableCell, { width: 150, textAlign: 'left' }]}>{item?.item_uid || '-'}</Text>
             <Text style={[styles.tableCell, { width: 150 }]}>
               {item?.estimated_cost
                 ? item.estimated_cost.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })
@@ -166,7 +166,7 @@ const TableRabPdf = ({ data }) => {
                 ? item.total_estimated_cost.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })
                 : '-'}
             </Text>
-            <Text style={[styles.tableCell, { width: 150 }]}>{item?.note || '-'}</Text>
+            <Text style={[styles.tableCell, { width: 150, fontSize: 7.5, textAlign: 'left'  }]}>{item?.realization_note || '-'}</Text>
           </View>
         ))}
       </View>
@@ -184,7 +184,7 @@ const TableRabPdf = ({ data }) => {
         </View>
         {noAlkse?.map((item, index) => (
           <View key={index} style={styles.tableRow}>
-            <Text style={[styles.tableCell, { width: 150 }]}>{item?.item_uid || '-'}</Text>
+            <Text style={[styles.tableCell, { width: 150, textAlign: 'left' }]}>{item?.item_uid || '-'}</Text>
             <Text style={[styles.tableCell, { width: 150 }]}>
               {item?.estimated_cost
                 ? item.estimated_cost.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })
@@ -196,7 +196,7 @@ const TableRabPdf = ({ data }) => {
                 ? item.total_estimated_cost.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })
                 : '-'}
             </Text>
-            <Text style={[styles.tableCell, { width: 150 }]}>{item?.note || '-'}</Text>
+            <Text style={[styles.tableCell, { width: 150, fontSize: 7.5, textAlign: 'left'  }]}>{item?.realization_note || '-'}</Text>
           </View>
         ))}
       </View>
@@ -217,14 +217,14 @@ const SupportKerjaSamaPdf = ({ data }) => {
         </View>
         {data?.support?.map((item, index) => (
       <View key={index} style={styles.tableRow}>
-        <Text style={[styles.tableCell, { width: 144, borderColor: 'black' }]}>{item?.item_uid || '-'}</Text>
+        <Text style={[styles.tableCell, { width: 144, borderColor: 'black', textAlign: 'left' }]}>{item?.item_uid || '-'}</Text>
         <Text style={[styles.tableCell, { width: 144, borderColor: 'black' }]}> {item?.estimated_cost 
     ? item.estimated_cost.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' }) 
     : '-'}</Text>
         <Text style={[styles.tableCell, { width: 144, borderColor: 'black' }]}>{item?.qty || '-'}</Text>
         <Text style={[styles.tableCell, { width: 144, borderColor: 'black' }]}> {item?.total_estimated_cost 
     ? item.total_estimated_cost.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' }) : '-'}</Text>
-        <Text style={[styles.tableCell, { width: 144, borderColor: 'black' }]}>{item?.realization_note || '-'}</Text>
+        <Text style={[styles.tableCell, { width: 144, borderColor: 'black', fontSize: 7.5, textAlign: 'left' }]}>{item?.realization_note || '-'}</Text>
       </View>
     ))}
     </View>
@@ -243,14 +243,14 @@ const FeeTindakanPdf = ({ data }) => {
         </View>
         {data?.fee?.map((item, index) => (
       <View key={index} style={styles.tableRow}>
-        <Text style={[styles.tableCell, { width: 144, borderColor: 'black' }]}>{item?.recieve_name || '-'}</Text>
+        <Text style={[styles.tableCell, { width: 144, borderColor: 'black', textAlign: 'left' }]}>{item?.recieve_name || '-'}</Text>
         <Text style={[styles.tableCell, { width: 144, borderColor: 'black' }]}> {item?.value 
     ? item.value.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' }) 
     : '-'}</Text>
         <Text style={[styles.tableCell, { width: 144, borderColor: 'black' }]}>{item?.qty || '-'}</Text>
         <Text style={[styles.tableCell, { width: 144, borderColor: 'black' }]}> {item?.total 
     ? item.total.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' }) : '-'}</Text>
-        <Text style={[styles.tableCell, { width: 144, borderColor: 'black' }]}>{item?.note || '-'}</Text>
+        <Text style={[styles.tableCell, { width: 144, borderColor: 'black', fontSize:7.5, textAlign: 'left'}]}>{item?.realization_note || '-'}</Text>
       </View>
     ))}
     </View>
@@ -442,7 +442,7 @@ const LppPdf = ({data}) =>{
         <Text style={styles.header}>Peralatan</Text>
         </View>
         <View style={styles.row}>
-          <Text style={styles.label}>RO</Text>
+          <Text style={styles.label}>RO (Kapasitas GPD)</Text>
           <Text style={styles.colon}>:</Text>
           <Text style={styles.value}>{data?.lpp_document?.ro || "-"}</Text>
         </View>
@@ -505,7 +505,10 @@ const LppPdf = ({data}) =>{
           <Text style={styles.value}>{data?.lpp_document?.action_during_cooperation_qty || "-"} Unit</Text>
         </View>
 
-        {data?.lpp_document?.rab !== null ? (
+        
+    </Page >
+    <Page size="A4" style={styles.section}>
+    {data?.lpp_document?.rab !== null ? (
           <>
             <View style={styles.row}>
             <Text style={styles.header} >RAB Bangunan & Lainnya terkait pembiayaan di awal
@@ -516,8 +519,6 @@ const LppPdf = ({data}) =>{
             </View>
         </>
         ) : ''}
-    </Page >
-    <Page size="A4" style={styles.section}>
         {data?.lpp_document?.support !== null ? (
           <>
             <View style={styles.row}>
