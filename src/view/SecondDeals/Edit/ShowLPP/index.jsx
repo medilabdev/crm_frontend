@@ -126,7 +126,9 @@ const ShowLPP = ({ data }) => {
         <tr className="fw-medium">
           <td style={{ width: "300px", fontSize: "0.9rem" }}>RO</td>
           <td className="px-1">:</td>
-          <td>{data?.lpp_document?.ro || ""}</td>
+          {console.log(data?.lpp_document)
+          }
+          <td>{data?.lpp_document?.ro || "-"}</td>
         </tr>
         <tr className="fw-medium">
           <td style={{ width: "300px", fontSize: "0.9rem" }}>Operate MKHD-1</td>
