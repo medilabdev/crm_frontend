@@ -41,7 +41,18 @@ const TableRab = ({ data }) => {
   const ColumnsTable = [
     {
       name: "Item",
-      selector: (row) => row.item_uid || "",
+      selector: (row) => (
+        <span
+        style={{
+          display: "inline-block",
+          maxWidth: "200px", // Sesuaikan dengan kebutuhan
+          wordWrap: "break-word", // Memastikan kata-kata pecah jika terlalu panjang
+          whiteSpace: "normal", // Mengizinkan pembungkusan teks
+        }}
+        >
+          {row.item_uid || "-"}
+        </span>
+      ),
     },
     {
       name: "Nilai Estimasi Biaya",
@@ -63,7 +74,18 @@ const TableRab = ({ data }) => {
     },
     {
       name: "Catatan Realisasi",
-      selector: (row) => (row.note ? row.note : ""),
+      selector: (row) => (
+        <span
+        style={{
+          display: "inline-block",
+          maxWidth: "200px", // Sesuaikan dengan kebutuhan
+          wordWrap: "break-word", // Memastikan kata-kata pecah jika terlalu panjang
+          whiteSpace: "normal", // Mengizinkan pembungkusan teks
+        }}
+        >
+          {row.realization_note || "-"}
+        </span>
+      ),
     },
   ];
   return (

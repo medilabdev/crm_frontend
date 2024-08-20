@@ -8,7 +8,18 @@ const TableFee = ({ data }) => {
   const ColumnsTable = [
     {
       name: "Nama Penerima",
-      selector: (row) => row.recieve_name,
+      selector: (row) => (
+        <span
+        style={{
+          display: "inline-block",
+          maxWidth: "200px", // Sesuaikan dengan kebutuhan
+          wordWrap: "break-word", // Memastikan kata-kata pecah jika terlalu panjang
+          whiteSpace: "normal", // Mengizinkan pembungkusan teks
+        }}
+        >
+          {row.recieve_name || "-"}
+        </span>
+      ),
     },
     {
       name: "Nilai Estimasi Biaya",
@@ -24,7 +35,17 @@ const TableFee = ({ data }) => {
     },
     {
       name: "Catatan Realisasi",
-      selector: (row) => row.note || "-",
+      selector: (row) =>(
+        <span
+        style={{
+          display: "inline-block",
+          maxWidth: "250px", // Sesuaikan dengan kebutuhan
+          wordWrap: "break-word", // Memastikan kata-kata pecah jika terlalu panjang
+          whiteSpace: "normal", // Mengizinkan pembungkusan teks
+        }}
+        >
+       {row.realization_note || "-"},
+      </span>)
     },
   ];
   const customStyle = {
