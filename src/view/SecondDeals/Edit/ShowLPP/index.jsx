@@ -151,6 +151,7 @@ const ShowLPP = ({ data }) => {
           <td>{data?.lpp_document?.backup_mkhd_second_qty || ""} Unit</td>
         </tr>
         <tr className="fw-medium">
+     
           <td style={{ width: "300px", fontSize: "0.9rem" }}>Total Mesin</td>
           <td className="px-1">:</td>
           <td>{data?.lpp_document?.total_mesin_qty || ""} Unit</td>
@@ -160,28 +161,28 @@ const ShowLPP = ({ data }) => {
             Kirim Tahap 1 (qty)
           </td>
           <td className="px-1">:</td>
-          <td>{data?.lpp_document?.delivery_mkhd_first_qty ?? "-"} </td>
+          <td>{data?.lpp_document?.stage_first_delivery_qty ?? "-"} Unit</td>
         </tr>
         <tr className="fw-medium">
           <td style={{ width: "300px", fontSize: "0.9rem" }}>
             Tanggal Pengiriman Tahap 1
           </td>
           <td className="px-1">:</td>
-          <td>{data?.lpp_document?.date_first_delivery || ""} </td>
+          <td>{data?.lpp_document?.date_first_delivery || "-"} </td>
         </tr>
         <tr className="fw-medium">
           <td style={{ width: "300px", fontSize: "0.9rem" }}>
             Pengiriman Operate MKHD 1
           </td>
           <td className="px-1">:</td>
-          <td>{data?.lpp_document?.backup_mkhd_first_qty || "-"} </td>
+          <td>{data?.lpp_document?.delivery_mkhd_first_qty || "-"} Unit</td>
         </tr>
         <tr className="fw-medium">
           <td style={{ width: "300px", fontSize: "0.9rem" }}>
             Pengiriman Operate MKHD 2
           </td>
           <td className="px-1">:</td>
-          <td>{data?.lpp_document?.backup_mkhd_second_qty || ""} </td>
+          <td>{data?.lpp_document?.delivery_mkhd_second_qty || "-"} Unit</td>
         </tr>
       </table>
       <div class="fw-bold mb-3">
@@ -254,6 +255,8 @@ const ShowLPP = ({ data }) => {
             Start Date Timeline
           </td>
           <td className="px-1">:</td>
+          {console.log(data?.lpp_document?.timeline[0]?.year_period)
+          }
           <td>{data?.lpp_document?.timeline[0]?.year_period || "-"}</td>
         </tr>
       </table>

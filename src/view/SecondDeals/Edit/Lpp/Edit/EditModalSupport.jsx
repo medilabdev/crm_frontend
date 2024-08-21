@@ -115,7 +115,7 @@ const EditModalSupport = ({show, handleClose, data, dataAll}) => {
           name="realization_note"
           onChange={handleInput}
           className="form-control"
-        >{inputData.realization_note || ''}</textarea>
+          value={inputData.realization_note}/>
       </div>
     </Modal.Body>
     <Modal.Footer>

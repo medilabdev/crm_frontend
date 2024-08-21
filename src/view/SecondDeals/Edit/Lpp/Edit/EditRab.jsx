@@ -72,7 +72,9 @@ const EditRab = ({data, dataSupport, dataFee}) => {
 
   const [editDataRab, setEditDataRab] = useState({})
   const [editModalRab, setEditModalRab] = useState(false)
-  const handleCloseEditRab = () => setEditModalRab(false)
+  const handleCloseEditRab = () => {
+    setEditModalRab(false)
+  }
   const handleOpenEditRab = (id, item_uid, estimated_cost, is_alkes, qty, total_estimated_cost, realization_note) => {
     setEditDataRab({
       id:id, 
@@ -116,7 +118,10 @@ const EditRab = ({data, dataSupport, dataFee}) => {
         },
         {
           name: "Qty",
-          selector: (row) => row.qty,
+          selector: (row) => (
+            <span style={{ width:1}}>{row.qty}</span>
+          ) 
+         
         },
         {
           name: "Total Estimasi Biaya",
@@ -399,6 +404,7 @@ const EditRab = ({data, dataSupport, dataFee}) => {
             fontSize: "8px",
             marginTop: "4px",
             fontWeight: "500",
+
           },
         },
       };

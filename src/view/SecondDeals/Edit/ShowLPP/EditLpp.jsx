@@ -20,6 +20,7 @@ import AddRegBPJS from "../Lpp/modals/addRegBPJS";
 import AddTipeFaskes from "../Lpp/modals/AddTipeFaskes";
 
 const EditLpp = ({ data, listCompany, uidDeals }) => {
+
   const uidLpp = data?.uid;
   const [dataLpp, setDataLpp] = useState(data);
   const [error, setError] = useState({
@@ -341,6 +342,10 @@ const EditLpp = ({ data, listCompany, uidDeals }) => {
         formData.append(
           "backup_mkhd_second_qty",
           dataLpp?.backup_mkhd_second_qty || ""
+        );
+        formData.append(
+          "stage_first_delivery_qty",
+          dataLpp?.stage_first_delivery_qty || ""
         );
         formData.append(
           "delivery_mkhd_first_qty",
@@ -784,8 +789,8 @@ const EditLpp = ({ data, listCompany, uidDeals }) => {
           <div className="form-floating mb-3">
             <input
               type="number"
-              name="total_mesin_qty"
-              value={dataLpp?.total_mesin_qty || ""}
+              name="stage_first_delivery_qty"
+              value={dataLpp?.stage_first_delivery_qty || ""}
               onChange={handleChange}
               className="form-control"
               placeholder=""

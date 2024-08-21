@@ -76,7 +76,7 @@ const EditModalRab = ({ show, handleClose, data, dataAll}) => {
           class="form-control"
           id="floatingInput"
           name="item_uid"
-          value={InputData.item_uid}
+          value={InputData.item_uid || ""}
           onChange={handleInput}
           placeholder="name@example.com"
         />
@@ -131,6 +131,7 @@ const EditModalRab = ({ show, handleClose, data, dataAll}) => {
         <label for="floatingInput">Total Estimasi Biaya</label>
       </div>
       <div className="mb-3">
+        
         <label htmlFor="" style={{ fontWeight: "600" }}>
           Catatan Realisasi
         </label>
@@ -141,7 +142,8 @@ const EditModalRab = ({ show, handleClose, data, dataAll}) => {
           name="realization_note"
           onChange={handleInput}
           className="form-control"
-        >{InputData.realization_note}</textarea>
+          value={InputData.realization_note || ""}
+        />
       </div>
     </Modal.Body>
     <Modal.Footer className="mb-4">

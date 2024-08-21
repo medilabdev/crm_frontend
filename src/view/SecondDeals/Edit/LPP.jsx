@@ -474,7 +474,7 @@ const LppPdf = ({data}) =>{
         <View style={styles.row}>
           <Text style={styles.label}>Kirim Tahap 1 (qty)</Text>
           <Text style={styles.colon}>:</Text>
-          <Text style={styles.value}>{data?.lpp_document?.total_mesin_qty || "-"} Unit</Text>
+          <Text style={styles.value}>{data?.lpp_document?.stage_first_delivery_qty || "-"} Unit</Text>
         </View>
         <View style={styles.row}>
           <Text style={styles.label}>Tanggal Pengiriman Tahap 1</Text>
@@ -484,12 +484,12 @@ const LppPdf = ({data}) =>{
         <View style={styles.row}>
           <Text style={styles.label}>Pengiriman Operate MKHD 1</Text>
           <Text style={styles.colon}>:</Text>
-          <Text style={styles.value}>{data?.lpp_document?.backup_mkhd_first_qty || "-"} Unit</Text>
+          <Text style={styles.value}>{data?.lpp_document?.delivery_mkhd_first_qty || "-"} Unit</Text>
         </View>
         <View style={styles.row}>
           <Text style={styles.label}>Pengiriman Operate MKHD 2</Text>
           <Text style={styles.colon}>:</Text>
-          <Text style={styles.value}>{data?.lpp_document?.backup_mkhd_second_qty || "-"} Unit</Text>
+          <Text style={styles.value}>{data?.lpp_document?.delivery_mkhd_second_qty || "-"} Unit</Text>
         </View>
         <View style={styles.row}>
         <Text style={styles.header}>Target</Text>
