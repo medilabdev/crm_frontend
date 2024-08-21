@@ -351,6 +351,10 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
           inputData.backup_mkhd_second_qty || ""
         );
         formData.append(
+          "stage_first_delivery_qty",
+          inputData.stage_first_delivery_qty || ""
+        );
+        formData.append(
           "delivery_mkhd_first_qty",
           inputData.delivery_mkhd_first_qty || ""
         );
@@ -907,7 +911,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
           <div className="form-floating mb-3">
             <input
               type="number"
-              name="total_mesin_qty"
+              name="stage_first_delivery_qty"
               id=""
               onChange={handleInputData}
               className="form-control"
