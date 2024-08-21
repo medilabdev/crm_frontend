@@ -421,7 +421,7 @@ const LppPdf = ({data}) =>{
         <View style={styles.row}>
          <Text style={styles.label}>Jangka Waktu Kerjasama</Text>
          <Text style={styles.colon}>:</Text>
-         <Text style={styles.value}>{data?.lpp_document?.collaboration_period || "-"}</Text>
+         <Text style={styles.value}>{data?.lpp_document?.collaboration_period || "-"} Tahun</Text>
         </View>
         <View style={styles.row}>
          <Text style={styles.label}>Harga</Text>
@@ -439,6 +439,11 @@ const LppPdf = ({data}) =>{
          <Text style={styles.value}>Customer</Text>
         </View>
         <View style={styles.row}>
+         <Text style={styles.label}>Ongkir</Text>
+         <Text style={styles.colon}>:</Text>
+         <Text style={styles.value}>{data?.lpp_document?.shipping_cost.charAt(0).toUpperCase() + data?.lpp_document?.shipping_cost.slice(1) || ""}</Text>
+        </View>
+        <View style={styles.row}>
         <Text style={styles.header}>Peralatan</Text>
         </View>
         <View style={styles.row}>
@@ -449,22 +454,22 @@ const LppPdf = ({data}) =>{
         <View style={styles.row}>
           <Text style={styles.label}>Operate MKHD-1</Text>
           <Text style={styles.colon}>:</Text>
-          <Text style={styles.value}>{data?.lpp_document?.operate_mkhd_first_qty || "-"} Unit</Text>
+          <Text style={styles.value}>{data?.lpp_document?.operate_mkhd_first_qty || "0"} Unit</Text>
         </View>
         <View style={styles.row}>
           <Text style={styles.label}>Operate MKHD-2</Text>
           <Text style={styles.colon}>:</Text>
-          <Text style={styles.value}>{data?.lpp_document?.operate_mkhd_second_qty || "-"} Unit</Text>
+          <Text style={styles.value}>{data?.lpp_document?.operate_mkhd_second_qty || "0"} Unit</Text>
         </View>
         <View style={styles.row}>
           <Text style={styles.label}>Back Up MKHD-1</Text>
           <Text style={styles.colon}>:</Text>
-          <Text style={styles.value}>{data?.lpp_document?.backup_mkhd_first_qty || "-"} Unit</Text>
+          <Text style={styles.value}>{data?.lpp_document?.backup_mkhd_first_qty || "0"} Unit</Text>
         </View>
         <View style={styles.row}>
           <Text style={styles.label}>Back Up MKHD-2</Text>
           <Text style={styles.colon}>:</Text>
-          <Text style={styles.value}>{data?.lpp_document?.backup_mkhd_second_qty || "-"} Unit</Text>
+          <Text style={styles.value}>{data?.lpp_document?.backup_mkhd_second_qty || "0"} Unit</Text>
         </View>
         <View style={styles.row}>
           <Text style={styles.label}>Total Mesin</Text>
@@ -474,22 +479,22 @@ const LppPdf = ({data}) =>{
         <View style={styles.row}>
           <Text style={styles.label}>Kirim Tahap 1 (qty)</Text>
           <Text style={styles.colon}>:</Text>
-          <Text style={styles.value}>{data?.lpp_document?.stage_first_delivery_qty || "-"} Unit</Text>
+          <Text style={styles.value}>{data?.lpp_document?.stage_first_delivery_qty || "0"} Unit</Text>
         </View>
         <View style={styles.row}>
           <Text style={styles.label}>Tanggal Pengiriman Tahap 1</Text>
           <Text style={styles.colon}>:</Text>
-          <Text style={styles.value}>{data?.lpp_document?.date_first_delivery || "-"} Unit</Text>
+          <Text style={styles.value}>{data?.lpp_document?.date_first_delivery || "-"}</Text>
         </View>
         <View style={styles.row}>
           <Text style={styles.label}>Pengiriman Operate MKHD 1</Text>
           <Text style={styles.colon}>:</Text>
-          <Text style={styles.value}>{data?.lpp_document?.delivery_mkhd_first_qty || "-"} Unit</Text>
+          <Text style={styles.value}>{data?.lpp_document?.delivery_mkhd_first_qty || "0"} Unit</Text>
         </View>
         <View style={styles.row}>
           <Text style={styles.label}>Pengiriman Operate MKHD 2</Text>
           <Text style={styles.colon}>:</Text>
-          <Text style={styles.value}>{data?.lpp_document?.delivery_mkhd_second_qty || "-"} Unit</Text>
+          <Text style={styles.value}>{data?.lpp_document?.delivery_mkhd_second_qty || "0"} Unit</Text>
         </View>
         <View style={styles.row}>
         <Text style={styles.header}>Target</Text>
@@ -497,12 +502,12 @@ const LppPdf = ({data}) =>{
         <View style={styles.row}>
           <Text style={styles.label}>Tindakan per mesin/ bulan</Text>
           <Text style={styles.colon}>:</Text>
-          <Text style={styles.value}>{data?.lpp_document?.action_machine_per_month_qty || "-"} Unit</Text>
+          <Text style={styles.value}>{data?.lpp_document?.action_machine_per_month_qty || "-"}</Text>
         </View>
         <View style={styles.row}>
           <Text style={styles.label}>Tindakan selama kerjasama</Text>
           <Text style={styles.colon}>:</Text>
-          <Text style={styles.value}>{data?.lpp_document?.action_during_cooperation_qty || "-"} Unit</Text>
+          <Text style={styles.value}>{data?.lpp_document?.action_during_cooperation_qty || "-"}</Text>
         </View>
 
         

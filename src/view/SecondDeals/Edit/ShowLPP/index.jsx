@@ -91,7 +91,7 @@ const ShowLPP = ({ data }) => {
             Jangka Waktu Kerjasama
           </td>
           <td className="px-1">:</td>
-          <td>{data?.lpp_document?.collaboration_period || ""}</td>
+          <td>{data?.lpp_document?.collaboration_period || ""} Tahun</td>
         </tr>
         <tr className="fw-medium">
           <td style={{ width: "300px", fontSize: "0.9rem" }}>Harga</td>
@@ -116,7 +116,7 @@ const ShowLPP = ({ data }) => {
         <tr className="fw-medium">
           <td style={{ width: "300px", fontSize: "0.9rem" }}>Ongkir</td>
           <td className="px-1">:</td>
-          <td>{data?.lpp_document?.shipping_cost || ""}</td>
+          <td>{data?.lpp_document?.shipping_cost.charAt(0).toUpperCase() + data?.lpp_document?.shipping_cost.slice(1) || ""}</td>
         </tr>
       </table>
       <div class="fw-bold mb-3">
@@ -124,31 +124,29 @@ const ShowLPP = ({ data }) => {
       </div>
       <table className="mb-4">
         <tr className="fw-medium">
-          <td style={{ width: "300px", fontSize: "0.9rem" }}>RO</td>
+          <td style={{ width: "300px", fontSize: "0.9rem" }}>RO (Kapasitas GPD)</td>
           <td className="px-1">:</td>
-          {console.log(data?.lpp_document)
-          }
           <td>{data?.lpp_document?.ro || "-"}</td>
         </tr>
         <tr className="fw-medium">
           <td style={{ width: "300px", fontSize: "0.9rem" }}>Operate MKHD-1</td>
           <td className="px-1">:</td>
-          <td>{data?.lpp_document?.operate_mkhd_first_qty || ""} Unit</td>
+          <td>{data?.lpp_document?.operate_mkhd_first_qty || "0"} Unit</td>
         </tr>
         <tr className="fw-medium">
           <td style={{ width: "300px", fontSize: "0.9rem" }}>Operate MKHD-2</td>
           <td className="px-1">:</td>
-          <td>{data?.lpp_document?.operate_mkhd_second_qty || ""} Unit</td>
+          <td>{data?.lpp_document?.operate_mkhd_second_qty || "0"} Unit</td>
         </tr>
         <tr className="fw-medium">
           <td style={{ width: "300px", fontSize: "0.9rem" }}>Back Up MKHD-1</td>
           <td className="px-1">:</td>
-          <td>{data?.lpp_document?.backup_mkhd_first_qty || ""} Unit</td>
+          <td>{data?.lpp_document?.backup_mkhd_first_qty || "0"} Unit</td>
         </tr>
         <tr className="fw-medium">
           <td style={{ width: "300px", fontSize: "0.9rem" }}>Back Up MKHD-2</td>
           <td className="px-1">:</td>
-          <td>{data?.lpp_document?.backup_mkhd_second_qty || ""} Unit</td>
+          <td>{data?.lpp_document?.backup_mkhd_second_qty || "0"} Unit</td>
         </tr>
         <tr className="fw-medium">
      
@@ -175,14 +173,14 @@ const ShowLPP = ({ data }) => {
             Pengiriman Operate MKHD 1
           </td>
           <td className="px-1">:</td>
-          <td>{data?.lpp_document?.delivery_mkhd_first_qty || "-"} Unit</td>
+          <td>{data?.lpp_document?.delivery_mkhd_first_qty || "0"} Unit</td>
         </tr>
         <tr className="fw-medium">
           <td style={{ width: "300px", fontSize: "0.9rem" }}>
             Pengiriman Operate MKHD 2
           </td>
           <td className="px-1">:</td>
-          <td>{data?.lpp_document?.delivery_mkhd_second_qty || "-"} Unit</td>
+          <td>{data?.lpp_document?.delivery_mkhd_second_qty || "0"} Unit</td>
         </tr>
       </table>
       <div class="fw-bold mb-3">
