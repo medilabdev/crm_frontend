@@ -441,7 +441,7 @@ const LppPdf = ({data}) =>{
         <View style={styles.row}>
          <Text style={styles.label}>Ongkir</Text>
          <Text style={styles.colon}>:</Text>
-         <Text style={styles.value}>{data?.lpp_document?.shipping_cost.charAt(0).toUpperCase() + data?.lpp_document?.shipping_cost.slice(1) || ""}</Text>
+         <Text style={styles.value}>{data?.lpp_document.shipping_cost ?  data?.lpp_document?.shipping_cost.charAt(0).toUpperCase() + data?.lpp_document?.shipping_cost.slice(1) : ""}</Text>
         </View>
         <View style={styles.row}>
         <Text style={styles.header}>Peralatan</Text>
