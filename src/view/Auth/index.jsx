@@ -63,7 +63,7 @@ const Auth = () => {
         });
       }
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       if (error.response) {
         Swal.fire({
           text: error.response.data.message,
