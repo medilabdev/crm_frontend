@@ -116,7 +116,7 @@ const ShowLPP = ({ data }) => {
         <tr className="fw-medium">
           <td style={{ width: "300px", fontSize: "0.9rem" }}>Ongkir</td>
           <td className="px-1">:</td>
-          <td>{data?.lpp_document.shipping_cost ?  data?.lpp_document?.shipping_cost.charAt(0).toUpperCase() + data?.lpp_document?.shipping_cost.slice(1) : ""}</td>
+          <td>{data?.lpp_document && data?.lpp_document.shipping_cost ?  data?.lpp_document?.shipping_cost.charAt(0).toUpperCase() + data?.lpp_document?.shipping_cost.slice(1) : ""}</td>
         </tr>
       </table>
       <div class="fw-bold mb-3">
@@ -253,8 +253,8 @@ const ShowLPP = ({ data }) => {
             Start Date Timeline
           </td>
           <td className="px-1">:</td>
-          {console.log(data?.lpp_document?.timeline[0]?.year_period)
-          }
+          {/* {console.log(data?.lpp_document?.timeline[0]?.year_period)
+          } */}
           <td>{data?.lpp_document?.timeline[0]?.year_period || "-"}</td>
         </tr>
       </table>
