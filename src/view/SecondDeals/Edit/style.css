@@ -32,3 +32,96 @@
   border-radius: 10px;
   transition: opacity 0.3s ease;
 }
+#floatingButtonActivity {
+  position: fixed;
+  bottom: 155px;
+  right: 30px;
+  padding: 10px 20px;
+  z-index: 1;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: opacity 0.3s ease;
+}
+
+#floatingButtonActivity1 {
+  position: fixed;
+  bottom: 65px;
+  right: 30px;
+  padding: 10px 20px;
+  z-index: 1;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: opacity 0.3s ease;
+}
+
+#floatingButtonActivity2 {
+  position: fixed;
+  bottom: 112px;
+  right: 30px;
+  padding: 10px 20px;
+  z-index: 1;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: opacity 0.3s ease;
+}
+
+#floatingButtonActivity3 {
+  position: fixed;
+  bottom: 155px;
+  right: 30px;
+  padding: 10px 20px;
+  z-index: 1;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: opacity 0.3s ease;
+}
+.chat-container {
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+.chat-message {
+  display: flex;
+  margin-bottom:10px; /* Jarak antara pesan-pesan */
+}
+
+.message-content {
+  /* background-color: #dae6f6; */
+  border-radius: 10px;
+  padding: 7px;
+  max-width: 85%;
+  word-wrap: break-word; /* Menghindari teks yang terlalu panjang */
+  margin-top: 1rem;
+}
+
+.message-date {
+  text-align: right;
+  font-size: 0.8rem; /* Menyesuaikan ukuran font */
+  color: #343434; /* Warna teks yang lebih pudar */
+}
+
+.input-container {
+  background-color: #dbeaf5;
+  border-top: 1px solid #e9e9e9;
+  position: sticky;
+  bottom: 0;
+  width: 100%;
+  padding: 10px; /* Memberi jarak di sekitar input */
+  box-sizing: border-box; /* Memastikan padding termasuk dalam total lebar */
+}
+
+.input-chat {
+  width: 100%;
+  border-radius: 20px;
+  padding: 10px 15px;
+  box-sizing: border-box;
+  max-height: 150px;
+  resize: none; /* Menonaktifkan resize oleh pengguna */
+  overflow-y: hidden; 
+}
+
+.submit-activity{
+  justify-content: right;
+} 
+
+

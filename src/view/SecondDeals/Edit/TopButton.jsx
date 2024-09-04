@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import "./../Edit/style.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  faClipboardCheck,
   faEye,
   faEyeSlash,
   faPenToSquare,
@@ -24,6 +25,8 @@ const TopButton = ({
   showFormRoi,
   handleShowPks,
   showFormPks,
+  HandleButtonActivity,
+  showActivity
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [buttonStatus, setButtonStatus] = useState(false);
@@ -168,7 +171,6 @@ const TopButton = ({
     window.location.reload();
   };
 
-  console.log(data);
   return (
     <div className="row">
       <div className="col mt-2">
@@ -329,6 +331,7 @@ const TopButton = ({
           ) : (
             ""
           )}
+          <button id={isVisible ? stage === "leads" ? `floatingButtonActivity1` : stage === "Approaching" ? `floatingButtonActivity2` : stage === "Decide" ? `floatingButtonActivity3`:"floatingButtonActivity" : ""} className={`btn ${showActivity !== true ? "btn-primary" : "btn-secondary"}`} style={{ fontSize: "0.85rem", fontWeight: "600" }} onClick={HandleButtonActivity}><FontAwesomeIcon icon={faClipboardCheck} className="me-2" />Activity</button>
         </div>
       </div>
     </div>
