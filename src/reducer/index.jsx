@@ -10,6 +10,7 @@ import DataSideBar from "./Properties/Sidebar";
 import DataFaskes from "./Properties/Faskes";
 import BpjsRegional from "./Properties/RegionalBpjs";
 import CategoryType from "./Properties/CategoryType";
+import DataActivityDeals from "./dealsV2/Activity";
 
 export default combineReducers({
     FormCompany,
@@ -22,5 +23,6 @@ export default combineReducers({
     DataSideBar,
     DataFaskes,
     BpjsRegional,
-    CategoryType
+    CategoryType,
+    DataActivityDeals
 });

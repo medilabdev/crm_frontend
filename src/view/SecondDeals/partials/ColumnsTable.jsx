@@ -98,6 +98,33 @@ export const ColumnsTable = [
       left:true
     
   },
+  // {
+  //   name:"Updated at",
+  //   selector:(row) => {
+  //     const date = new Date(row.updated_at);
+  //     const formatDate = {
+  //       year: "numeric",
+  //       month: "long",
+  //       day: "2-digit",
+  //       hour: "2-digit",
+  //       minute: "2-digit",
+  //     };
+  //     const formatResult = new Intl.DateTimeFormat("en-US", formatDate);
+  //     const time = formatResult.format(date);
+  //     return (
+  //       <div>
+  //         <p
+  //           style={{
+  //             fontSize: "0.90rem",
+  //             whiteSpace: "normal",
+  //           }}
+  //         >
+  //           {time}
+  //         </p>
+  //       </div>
+  //     );
+  //   }
+  // },
   {
     name: "Action",
     selector: (row) => (

@@ -1,4 +1,4 @@
-import { GET_DATA_DEALS, GET_DATA_DEALS_DETAIL } from "../../action/DataDeals";
+import { GET_DATA_DEALS, GET_DATA_DEALS_DETAIL, GET_DATA_ACTIVITY } from "../../action/DataDeals";
 
 const initialstate = {
   listResultDataDeals: false,
@@ -28,9 +28,12 @@ const DataDeals = (state = initialstate, action) => {
         loadingDataDeals: true,
         errorDataDeals: action.payload.errorMessage,
       };
+  
     default:
       return state;
   }
 };
 
 export default DataDeals;
+
+

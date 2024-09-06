@@ -11,7 +11,7 @@ import FQP from "./FQP";
 import LPP from "./LPP";
 import FDC from "./FDC";
 import { useDispatch } from "react-redux";
-import { GetDataDealsDetail } from "../../../action/DataDeals";
+import { GetDataActivity, GetDataDealsDetail } from "../../../action/DataDeals";
 import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { getListCompany } from "../../../action/FormCompany";
@@ -19,6 +19,7 @@ import InputRoi from "./Lpp/InputRoi";
 import FormPks from "./FormPks";
 import HistoryDeals from "./ShowLPP/history";
 import CloseLost from "./CloseLost";
+import Activity from "./activity";
 
 const EditDataSecondDeals = () => {
   const token = localStorage.getItem("token");
@@ -28,6 +29,7 @@ const EditDataSecondDeals = () => {
   const [ShowFDC, setShowFDC] = useState(false);
   const [showFormRoi, setShowFormRoi] = useState(false);
   const [showFormPks, setShowFormPks] = useState(false);
+  const [showActivity, setShowActivity] = useState(false)
   const handleShowFQP = () => {
     setShowFQP(!ShowFQP);
     setShowLPP(false);
@@ -65,14 +67,20 @@ const EditDataSecondDeals = () => {
     setShowLPP(false);
     setShowFormRoi(false);
   };
+  const HandleButtonActivity = () => {
+    setShowActivity(!showActivity)
+  }
   const { uid } = useParams();
   const dispatch = useDispatch();
   const { listResult } = useSelector((state) => state.FormCompany);
-
+  const { dataActivityDeals } = useSelector((state) => state.DataActivityDeals)
+ 
   useEffect(() => {
+    dispatch(GetDataActivity(uid, token));
     dispatch(GetDataDealsDetail(uid, token));
     dispatch(getListCompany(token));
-  }, [dispatch]);
+  }, [dispatch, uid, token]);
+  
   return (
     <body id="body">
       <Topbar />
@@ -94,6 +102,8 @@ const EditDataSecondDeals = () => {
             showFormRoi={showFormRoi}
             handleShowPks={handleShowPks}
             showFormPks={showFormPks}
+            HandleButtonActivity={HandleButtonActivity}
+            showActivity={showActivity}
           />
           ) : ""}
           
@@ -132,6 +142,7 @@ const EditDataSecondDeals = () => {
             )}
             <HistoryDeals data={detailDataDeals.history} />
           </div>
+          <Activity show={showActivity} HandleButtonActivity={HandleButtonActivity} uid={uid} data={dataActivityDeals}/>
         </div>
       </Main>
     </body>
