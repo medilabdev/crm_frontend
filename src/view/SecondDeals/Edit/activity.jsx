@@ -143,7 +143,7 @@ const Activity = ({ show, HandleButtonActivity, uid , data}) => {
               value={inputData.deskripsi}
               onChange={handleInput}
               className="input-chat me-2"
-              placeholder="Type Update Task..."
+              placeholder="Type Update Activity..."
               onInput={(e) => {
                 e.target.style.height = 'auto';
                 e.target.style.height = `${e.target.scrollHeight}px`;

@@ -36,7 +36,7 @@ const CreateSecondDeals = () => {
     if (Array?.isArray(listResult)) {
       listResult?.map((data) => {
         const finalResult = {
-          label: `${data.name}`,
+          label: `${data.name} (${data?.company_type?.name})`,
           value: data.uid,
         };
         result.push(finalResult);

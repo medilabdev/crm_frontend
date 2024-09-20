@@ -171,6 +171,9 @@ const TopButton = ({
     window.location.reload();
   };
 
+  
+
+
   return (
     <div className="row">
       <div className="col mt-2">
@@ -312,7 +315,6 @@ const TopButton = ({
           ) : "" : (
             ""
           )}
-          {stage !== "leads" && stage !== "Approaching" ?  (
             <a
               id={isVisible ? `floatingButtonFDC` : ""}
               className={`btn ${
@@ -328,10 +330,10 @@ const TopButton = ({
               />
               {ShowFDC ? "Closed" : "Open"} FDC
             </a>
-          ) : (
-            ""
-          )}
-          <button id={isVisible ? stage === "leads" ? `floatingButtonActivity1` : stage === "Approaching" ? `floatingButtonActivity2` : stage === "Decide" ? `floatingButtonActivity3`:"floatingButtonActivity" : ""} className={`btn ${showActivity !== true ? "btn-primary" : "btn-secondary"}`} style={{ fontSize: "0.85rem", fontWeight: "600" }} onClick={HandleButtonActivity}><FontAwesomeIcon icon={faClipboardCheck} className="me-2" />Activity</button>
+          {console.log(data)
+          }
+            
+          <button className={`btn ${showActivity !== true ? "btn-primary" : "btn-secondary"}`} style={{ fontSize: "0.85rem", fontWeight: "600" }} onClick={HandleButtonActivity}><FontAwesomeIcon icon={faClipboardCheck} className="me-2" />Activity</button>
         </div>
       </div>
     </div>

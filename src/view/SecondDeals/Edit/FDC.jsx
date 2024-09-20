@@ -29,7 +29,7 @@ const FDC = ({ userUid, data }) => {
             </div>
           </div>
         </Card.Header>
-      
+               
         {data?.fdc_document === null ? <InputFDC data={data} /> : userUid !== uid ? (
           <ShowFDC
             show={data?.fdc_document}

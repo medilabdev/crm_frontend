@@ -13,7 +13,7 @@
 
 #floatingButtonLPP {
   position: fixed;
-  bottom: 65px;
+  bottom: 110px;
   right: 20px;
   padding: 10px 20px;
   z-index: 1;
@@ -24,7 +24,7 @@
 
 #floatingButtonFDC {
   position: fixed;
-  bottom: 110px;
+  bottom: 65px;
   right: 20px;
   padding: 10px 20px;
   z-index: 1;
@@ -45,7 +45,7 @@
 
 #floatingButtonActivity1 {
   position: fixed;
-  bottom: 65px;
+  bottom: 110px;
   right: 30px;
   padding: 10px 20px;
   z-index: 1;
@@ -56,17 +56,6 @@
 
 #floatingButtonActivity2 {
   position: fixed;
-  bottom: 112px;
-  right: 30px;
-  padding: 10px 20px;
-  z-index: 1;
-  cursor: pointer;
-  border-radius: 10px;
-  transition: opacity 0.3s ease;
-}
-
-#floatingButtonActivity3 {
-  position: fixed;
   bottom: 155px;
   right: 30px;
   padding: 10px 20px;
@@ -75,6 +64,8 @@
   border-radius: 10px;
   transition: opacity 0.3s ease;
 }
+
+
 .chat-container {
   flex-grow: 1;
   overflow-y: auto;
