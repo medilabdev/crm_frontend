@@ -35,9 +35,9 @@ const InputFQP = ({ data, listCompany }) => {
   const selectCompany = () => {
     const result = [];
     if (Array.isArray(listCompany)) {
-      listCompany.map((data) => {
+      listCompany.map((data) => {        
         const finalResult = {
-          label: `${data.name}`,
+          label: `${data.name} (${data?.company_type?.name})`,
           value: data.uid,
         };
         result.push(finalResult);

@@ -19,7 +19,7 @@ import Swal from "sweetalert2"
 import AddRegBPJS from "../Lpp/modals/addRegBPJS";
 import AddTipeFaskes from "../Lpp/modals/AddTipeFaskes";
 
-const EditLpp = ({ data, listCompany, uidDeals }) => {
+const EditLpp = ({ data, listCompany, uidDeals, dataFqp }) => {
 
   const uidLpp = data?.uid;
   const [dataLpp, setDataLpp] = useState(data);
@@ -28,6 +28,7 @@ const EditLpp = ({ data, listCompany, uidDeals }) => {
     tindakanPerbulan:'',
     needApproval:''
   })
+  
   const [showOverlay, setShowOverlay] = useState(false);
   const handleShow = () => setShowOverlay(true);
   const handleClose = () => setShowOverlay(false);
@@ -308,7 +309,7 @@ const EditLpp = ({ data, listCompany, uidDeals }) => {
         });
         const formData = new FormData();
         formData.append("deals_uid", uidDeals)
-        formData.append("customer_name_uid", dataLpp?.customer_name_uid || "");
+        formData.append("customer_name_uid", dataFqp?.fqp_document?.hospital_uid || "");
         formData.append("faskes_type_uid", dataLpp?.faskes_type_uid || "");
         formData.append("bpjs_regional_uid", dataLpp?.bpjs_regional_uid || "");
         formData.append("type_collaboration", dataLpp?.type_collaboration || "");
@@ -469,12 +470,24 @@ const EditLpp = ({ data, listCompany, uidDeals }) => {
       }
     }
   }
+    
   return (
     <Card.Body>
       <div class="alert alert-primary mt-2" role="alert">
         <h6 style={{ fontWeight: "700" }}>Customer</h6>
       </div>
-      <div className=" mb-3">
+      <div className="form-floating mb-3">
+        <input
+          type="text"
+          id=""
+          value={dataFqp?.fqp_document?.hospital?.name  + " ( " + dataFqp?.fqp_document?.hospital?.company_type?.name + " ) " }
+          className="form-control"
+          placeholder=""
+          disabled={true}
+        />
+        <label htmlFor="">Customer</label>
+      </div>
+      {/* <div className=" mb-3">
         <Select
           placeholder="Select Customer"
           options={selectCompany()}
@@ -497,8 +510,8 @@ const EditLpp = ({ data, listCompany, uidDeals }) => {
           Tambah Rumah Sakit / Klinik
         </button>
         <OverlayAddCompany visible={showOverlay} onClose={handleClose} />
-      </div>
-      {dataLpp && dataLpp.type !== "D8iidh2341sf_kJ" ? (
+      </div> */}
+      {dataFqp?.fqp_document && dataFqp?.fqp_document?.hospital?.company_type_uid !== "D8iidh2341sf_kJ" ? (
         <>
           <div className="mb-3">
             <Select

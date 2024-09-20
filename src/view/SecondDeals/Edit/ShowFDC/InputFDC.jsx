@@ -260,9 +260,7 @@ const InputFDC = ({ data }) => {
     }
   };
 
-  const handleUpdate = (event) => {
-    event.prefentDefault();
-  };
+
   return (
     <Card.Body>
       <div class="alert alert-primary mt-2" role="alert">
@@ -276,7 +274,7 @@ const InputFDC = ({ data }) => {
         name=""
         className="form-control mb-3"
         disabled
-        value={data?.lpp_document?.customer?.name}
+        value={data?.fqp_document?.hospital?.name  + " ( " + data?.fqp_document?.hospital?.company_type?.name + " ) " }
         id=""
       />
       <div className="row mb-3">

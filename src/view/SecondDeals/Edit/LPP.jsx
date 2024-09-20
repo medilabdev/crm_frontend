@@ -627,7 +627,7 @@ const LPP = ({ userUid, data, listCompany, uidDeals }) => {
           ) : userUid !== uid ? (
             <ShowLPP data={data} />
           ) : showLpp ? (
-            <EditLpp data={data?.lpp_document} listCompany={listCompany}  uidDeals={uidDeals} />
+            <EditLpp data={data?.lpp_document} listCompany={listCompany}  uidDeals={uidDeals} dataFqp={data} />
           ) : (
             <ShowLPP data={data} />
           )}

@@ -75,7 +75,6 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
     const target = e.target.value;
     setFeeAction(target);
   };
-  console.log(feeAction);
   const handleSupportKerjaSama = (e) => {
     const target = e.target.value;
     setSupportKerjaSama(target);
@@ -308,7 +307,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
         });
         const formData = new FormData();
         formData.append("deals_uid", uidDeals);
-        formData.append("customer_name_uid", inputData.customer_name_uid || "");
+        formData.append("customer_name_uid", data?.fqp_document?.hospital_uid || "");
         formData.append("faskes_type_uid", inputData.faskes_type_uid || "");
         formData.append("bpjs_regional_uid", inputData.bpjs_regional_uid || "");
         formData.append("type_collaboration", jenisKerjasama || "");
@@ -609,13 +608,26 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
   }, []);
 
   
+  
   return (
     <Card.Body>
       <div class="alert alert-primary mt-2" role="alert">
         <h6 style={{ fontWeight: "700" }}>Customer</h6>
       </div>
       <div className=" mb-3">
-        <Select
+      <div className="form-floating mb-3">
+        <input
+          type="text"
+          name="price"
+          id=""
+          value={data?.fqp_document?.hospital?.name  + " ( " + data?.fqp_document?.hospital?.company_type?.name + " ) " }
+          className="form-control"
+          placeholder=""
+          disabled={true}
+        />
+        <label htmlFor="">Customer</label>
+      </div>
+        {/* <Select
           options={selectCompany()}
           placeholder="Select Customer"
           onChange={(e) =>
@@ -632,10 +644,10 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
           onClick={handleShow}
         >
           Tambah Rumah Sakit / Klinik
-        </button>
+        </button> */}
         <OverlayAddCompany visible={showOverlay} onClose={handleClose} />
       </div>
-      {inputData && inputData.type !== "D8iidh2341sf_kJ" ? (
+      {data?.fqp_document && data?.fqp_document?.hospital?.company_type_uid !== "D8iidh2341sf_kJ" ? (
         <>
           <div className="mb-3">
             <Select
