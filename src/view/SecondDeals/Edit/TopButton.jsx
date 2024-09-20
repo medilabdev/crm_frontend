@@ -296,7 +296,7 @@ const TopButton = ({
             {ShowFQP ? "Closed" : "Open"} FQP
           </a>
           {stage !== "leads" ? 
-            (position === "pRGYXVKdzCPoQ8" && data?.lpp_document !== null) || position === "_dLjLFdH-Nw8vg" || position === "pRGYXVKdzCPoQ1" || position === "_dLjLFdH-Nw8vg8U" || position === "adsfasdf1321" ? (
+            (position === "pRGYXVKdzCPoQ8" && data?.lpp_document !== null) || position === "_dLjLFdH-Nw8vg" || position === "pRGYXVKdzCPoQ1" || position === "_dLjLFdH-Nw8vg8U" || position === "adsfasdf1321" || position === "1-bZKHtNZCFWGg" ? (
             <a
               id={isVisible ? `floatingButtonLPP` : ""}
               className={`btn ${
@@ -315,6 +315,8 @@ const TopButton = ({
           ) : "" : (
             ""
           )}
+      
+          {position !== "1-bZKHtNZCFWGg" ?  
             <a
               id={isVisible ? `floatingButtonFDC` : ""}
               className={`btn ${
@@ -330,9 +332,7 @@ const TopButton = ({
               />
               {ShowFDC ? "Closed" : "Open"} FDC
             </a>
-          {console.log(data)
-          }
-            
+ : ''}
           <button className={`btn ${showActivity !== true ? "btn-primary" : "btn-secondary"}`} style={{ fontSize: "0.85rem", fontWeight: "600" }} onClick={HandleButtonActivity}><FontAwesomeIcon icon={faClipboardCheck} className="me-2" />Activity</button>
         </div>
       </div>

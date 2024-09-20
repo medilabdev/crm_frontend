@@ -23,6 +23,7 @@ import Activity from "./activity";
 
 const EditDataSecondDeals = () => {
   const token = localStorage.getItem("token");
+
   const { detailDataDeals } = useSelector((state) => state.DataDeals);
   const [ShowFQP, setShowFQP] = useState(true);
   const [ShowLPP, setShowLPP] = useState(false);
@@ -112,7 +113,9 @@ const EditDataSecondDeals = () => {
             <CloseLost  data={detailDataDeals} /> : ""}
             {showFormPks ? <FormPks data={detailDataDeals} /> : ""}
             {showFormRoi ? <InputRoi data={detailDataDeals} /> : ""}
+              
             {ShowFDC ? (
+              
               <FDC
                 userUid={detailDataDeals.owner_user_uid}
                 data={detailDataDeals}
