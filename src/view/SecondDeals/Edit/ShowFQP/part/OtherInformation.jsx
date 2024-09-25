@@ -3,7 +3,7 @@ import React from 'react'
 const OtherInformation = ({ data, position}) => {
   return (
     <>
-    {position !== "1-bZKHtNZCFWGg" ? 
+    {position !== "1-bZKHtNZCFWGg" && position !== "573MloZ8j--aaQ" && position !== "SzhgAQn6tP48xw" ? 
       <>
       <div class="fw-bold mb-3">
         <span className="fs-6 text-decoration-underline">

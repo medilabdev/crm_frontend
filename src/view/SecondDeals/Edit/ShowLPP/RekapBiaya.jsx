@@ -3,6 +3,7 @@ import DataTable from "react-data-table-component";
 import { Card } from 'react-bootstrap'
 
 const RekapBiaya = ({data}) => {
+  const position = localStorage.getItem('position')
   let valueFee = 0;
   if(data?.fee?.length > 0) {
     data?.fee.map((item) => (valueFee += item?.total)) 
@@ -33,10 +34,11 @@ const RekapBiaya = ({data}) => {
       name: "Support Selama Kerja Sama",
       nilai_estimasi: valueSupport,
     },
+    position !== "573MloZ8j--aaQ" ? 
     {
       name: "Fee Tindakan",
       nilai_estimasi: valueFee,
-    },
+    } : {name : '-', nilai_estimasi : '-'},
   ];
   const ColumnsTable = [
     {

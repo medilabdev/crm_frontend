@@ -2,8 +2,9 @@ import React from "react";
 import DataTable from "react-data-table-component";
 import dummy from "../Lpp/dummy";
 import { Card } from "react-bootstrap"
+import { position } from "../../partials/ColumnsTable";
 const TableRab = ({ data }) => {
-
+  const position = localStorage.getItem('position')
   const alkes = []
   const noAlkse = []
   if(data?.rab?.length > 0){
@@ -54,24 +55,26 @@ const TableRab = ({ data }) => {
         </span>
       ),
     },
+    position !== "573MloZ8j--aaQ" ? 
     {
       name: "Nilai Estimasi Biaya",
       selector: (row) =>
         row.estimated_cost
           ? `Rp. ${new Intl.NumberFormat().format(row.estimated_cost)}`
-          : "",
-    },
+          : "-",
+    } : '',
     {
       name: "Qty",
       selector: (row) => (row.qty ? row.qty : ""),
     },
+    position !== "573MloZ8j--aaQ" ? 
     {
       name: "Total Estimasi Biaya",
       selector: (row) =>
         row.total_estimated_cost
           ? `Rp. ${new Intl.NumberFormat().format(row.total_estimated_cost)}`
-          : "-",
-    },
+          : "-" 
+    } : '',
     {
       name: "Catatan Realisasi",
       selector: (row) => (
@@ -88,6 +91,8 @@ const TableRab = ({ data }) => {
       ),
     },
   ];
+  
+  
   return (
     <div className="row mb-2">
       <div className="col">
@@ -98,20 +103,35 @@ const TableRab = ({ data }) => {
                 </span>
           </Card.Header>
           <Card.Body>
+
+          {alkes && alkes.length > 0 ?   
+          <>
+           <div style={{fontSize:"1rem" }}>
+           Alat Kesehatan
+          </div>
           <DataTable
-      className="mb-2"
-        columns={ColumnsTable}
-        data={alkes}
-        customStyles={customStyle}
-        dense
-      />
-      <DataTable
-      className="mb-2"
-        columns={ColumnsTable}
-        data={noAlkse}
-        customStyles={customStyle}
-        dense
-      />
+            className="mb-2"
+            columns={ColumnsTable}
+            data={alkes}
+            customStyles={customStyle}
+            dense
+          />
+          </>
+          : ''}
+          {noAlkse && noAlkse.length > 0 ?  
+          <>
+          <div style={{fontSize:"1rem"}}>
+            Bukan Alat Kesehatan
+            </div>
+          <DataTable
+          className="mb-2"
+            columns={ColumnsTable}
+            data={noAlkse}
+            customStyles={customStyle}
+            dense
+          />
+          </>
+          : ''}
           </Card.Body>
         </Card>
       </div>

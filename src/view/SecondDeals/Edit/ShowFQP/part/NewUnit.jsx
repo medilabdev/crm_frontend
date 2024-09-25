@@ -26,7 +26,7 @@ const NewUnit = ({data, position}) => {
             {data && data?.cooperation_system === "etc" ? "lainnya" : data?.cooperation_system ?? "-"}
           </td>
         </tr>
-        {position !== "1-bZKHtNZCFWGg" ? 
+        {position !== "1-bZKHtNZCFWGg" && position !=="573MloZ8j--aaQ"  ? 
         <>
         <tr className="fw-medium ">
           <td style={{ width: "200px", fontSize: "0.9rem" }}>SDM</td>
@@ -39,6 +39,8 @@ const NewUnit = ({data, position}) => {
               : "-"}
           </td>
         </tr>
+        {position !== "SzhgAQn6tP48xw" ? 
+        <> 
         <tr className="fw-medium">
           <td style={{ width: "200px", fontSize: "0.9rem" }}>
             Faskes HD 5 km sekitar New Unit
@@ -73,6 +75,8 @@ const NewUnit = ({data, position}) => {
             )}
           </td>
         </tr>
+        </>
+        : "" }
         </>
         : "" }
       </table>
