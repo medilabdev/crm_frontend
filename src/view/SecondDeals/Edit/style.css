@@ -22,6 +22,17 @@
   transition: opacity 0.3s ease;
 }
 
+#floatingButtonLPPTech{
+  position: fixed;
+  bottom: 70px;
+  right: 20px;
+  padding: 10px 20px;
+  z-index: 1;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: opacity 0.3s ease;
+}
+
 #floatingButtonFDC {
   position: fixed;
   bottom: 65px;

@@ -179,7 +179,7 @@ const EditLpp = ({ data, listCompany, uidDeals, dataFqp }) => {
                     validateAndSetDefault(secondQty, defaultQty) + 
                     validateAndSetDefault(backUpTwo, defaultQty) + 
                     validateAndSetDefault(backUpOne, defaultQty);
-  const actionDuringCoperationQty = (firstQty + secondQty) *  actionMachinePerMonthQty * 60;
+  const actionDuringCoperationQty = (firstQty + secondQty) *  actionMachinePerMonthQty * (dataLpp?.collaboration_period * 12);
 
   useEffect(() => {
     dispatch(GetDataRegionalBpjs(token));

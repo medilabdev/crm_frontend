@@ -188,7 +188,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
   const resultMesin = validateAndSetDefault(firstQty, defaultQty) + validateAndSetDefault(secondQty, defaultQty) + validateAndSetDefault(backUpOne, defaultQty) + validateAndSetDefault(backUpTwo, defaultQty) 
 
   
-  const actionDuringCoperationQty = (firstQty + secondQty) * tindakanPerbulan * 60;
+  const actionDuringCoperationQty = (firstQty + secondQty) * tindakanPerbulan * (inputData.collaboration_period * 12);
 
   let tempSupport = [];
   for (let i = 0; i < localStorage.length; i++) {
