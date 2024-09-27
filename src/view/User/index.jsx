@@ -16,13 +16,12 @@ import IconImage from "../../assets/img/man.png";
 import Swal from "sweetalert2";
 
 const User = () => {
-  const [getDataUser, setGetDataUser] = useState([]);
-  const [filterData, setFilterData] = useState([]);
   // modal add
   const [usersCreate, setUsersCreate] = useState(false);
   const handleCloseModal = () => setUsersCreate(false);
   // modal edit
   const [userEdit, setUserEdit] = useState(false);
+  const [search, setSearch] = useState([])
 
   const token = localStorage.getItem("token");
 
@@ -43,17 +42,38 @@ const User = () => {
 
   // get all position
   const [position, setPosition] = useState([]);
-  const getData = async (url, token, state, retryCount = 0) => {
+  const [data, setData] = useState([])
+  const [totalRows, setTotalRows] = useState(0)
+  const [pending, setPending] = useState(true)
+  const [pagination, setPagination] = useState({
+    page:1,
+    limit:10
+  });
+  const handleChangePage = (page) => {
+    setPagination((e) => ({ ...e, page }));
+  };
+
+  const handlePagePerChange = (pageSize, page) => {
+    setPagination((prev) => ({ ...prev, pageSize, page }));
+  };
+  const getData = async (token, search, pagination, retryCount = 0) => {
     try {
+      const params = {}
+      if(search){
+        params.search = search
+      }
+      params.page = pagination.page;
+      params.limit = pagination.limit;
       const response = await axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/${url}`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
+        params:params
       })
-      state(response.data.data)
-      setFilterData(response.data.data)
-      setPending(false)
+      
+      setData(response.data?.data)
+      setTotalRows(response.data?.pagination?.totalData);
     } catch (error) {
       if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
         localStorage.clear();
@@ -73,6 +93,8 @@ const User = () => {
       }
     }
   };
+
+  
 
   const getAllRoles = async (token, retryCount = 0) => {
     try {
@@ -189,12 +211,12 @@ const User = () => {
     }
   };
 
-  const [pending, setPending] = useState(true)
+ 
 
   const fetchData = async() => {
     try {
       setPending(true)
-      await getData("users", token, setGetDataUser);
+      await getData(token, search, pagination);
       await getAllRoles(token);
       await getPrimaryTeam(token);
       await getAllUser(token);
@@ -208,7 +230,7 @@ const User = () => {
 
   useEffect(() => {
   fetchData()
-  }, [token]);
+  }, [token, search, pagination]);
 
   // show redirect
   const navigate = useNavigate();
@@ -308,10 +330,8 @@ const User = () => {
 
   function handleFilter(event) {
     if(event.key === "Enter"){
-      const newData = getDataUser.filter((row) => {
-        return row.name.toLowerCase().includes(event.target.value.toLowerCase());
-      });
-      setFilterData(newData);
+      const value = event.target.value.toLowerCase()
+      setSearch(value)
     }
   }
 
@@ -362,12 +382,18 @@ const User = () => {
             </div>
             <DataTable
               columns={columns}
-              data={filterData}
-              defaultSortFieldId={1}
+              data={data}
               pagination
-              paginationComponentOptions={paginationComponentOptions}
+              paginationServer
+              defaultSortFieldId={1}
+              paginationPerPage={pagination.limit}
+              paginationTotalRows={totalRows}
               className="mt-2"
-              progressPending={pending}
+              onChangePage={handleChangePage}
+              onChangeRowsPerPage={handlePagePerChange}
+              paginationComponentOptions={{
+                noRowsPerPage: true,
+              }}
             />
             <AddUser
               onClose={handleCloseModal}
