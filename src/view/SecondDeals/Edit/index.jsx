@@ -20,23 +20,27 @@ import FormPks from "./FormPks";
 import HistoryDeals from "./ShowLPP/history";
 import CloseLost from "./CloseLost";
 import Activity from "./activity";
+import WeeklyReport from "./WeeklyReport";
+import { fa } from "@faker-js/faker";
 
 const EditDataSecondDeals = () => {
   const token = localStorage.getItem("token");
 
   const { detailDataDeals } = useSelector((state) => state.DataDeals);
-  const [ShowFQP, setShowFQP] = useState(true);
+  const [ShowFQP, setShowFQP] = useState(false);
   const [ShowLPP, setShowLPP] = useState(false);
   const [ShowFDC, setShowFDC] = useState(false);
   const [showFormRoi, setShowFormRoi] = useState(false);
   const [showFormPks, setShowFormPks] = useState(false);
   const [showActivity, setShowActivity] = useState(false)
+  const [showWeeklyReport, setShowWeeklyReport] = useState(false)
   const handleShowFQP = () => {
     setShowFQP(!ShowFQP);
     setShowLPP(false);
     setShowFDC(false);
     setShowFormRoi(false);
     setShowFormPks(false)
+    localStorage.setItem('activeForm', 'FQP');
   };
 
   const handleShowLPP = () => {
@@ -45,6 +49,7 @@ const EditDataSecondDeals = () => {
     setShowFQP(false);
     setShowFormRoi(false);
     setShowFormPks(false)
+    localStorage.setItem('activeForm', 'LPP');
   };
 
   const handleShowFDC = () => {
@@ -53,6 +58,7 @@ const EditDataSecondDeals = () => {
     setShowFQP(false);
     setShowFormRoi(false);
     setShowFormPks(false)
+    localStorage.setItem('activeForm', 'FDC');
   };
   const handleShowRoi = () => {
     setShowFormRoi(!showFormRoi);
@@ -60,6 +66,7 @@ const EditDataSecondDeals = () => {
     setShowFQP(false);
     setShowLPP(false);
     setShowFormPks(false)
+    localStorage.setItem('activeForm', 'ROI');
   };
   const handleShowPks = () => {
     setShowFormPks(!showFormPks);
@@ -67,19 +74,60 @@ const EditDataSecondDeals = () => {
     setShowFQP(false);
     setShowLPP(false);
     setShowFormRoi(false);
+    localStorage.setItem('activeForm', 'PKS');
   };
   const HandleButtonActivity = () => {
     setShowActivity(!showActivity)
+  }
+
+  const handleButtonWeeklyReport = () => {
+    setShowWeeklyReport(!showWeeklyReport)
   }
   const { uid } = useParams();
   const dispatch = useDispatch();
   const { listResult } = useSelector((state) => state.FormCompany);
   const { dataActivityDeals } = useSelector((state) => state.DataActivityDeals)
+
+
  
   useEffect(() => {
     dispatch(GetDataActivity(uid, token));
     dispatch(GetDataDealsDetail(uid, token));
     dispatch(getListCompany(token));
+
+    const savedState = localStorage.getItem('activeForm')
+
+    if (savedState) {
+      // Set the correct state based on the saved value
+      switch (savedState) {
+        case 'FQP':
+          setShowFQP(true);
+          break;
+        case 'LPP':
+          setShowLPP(true);
+          break;
+        case 'FDC':
+          setShowFDC(true);
+          break;
+        case 'ROI':
+          setShowFormRoi(true);
+          break;
+        case 'PKS':
+          setShowFormPks(true);
+          break;
+        default:
+          break;
+      }
+    }
+    
+    const handleBeforeUnload = () => {
+      localStorage.removeItem('activeForm');
+    };
+
+    // Cleanup the event listener on unmount
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
   }, [dispatch, uid, token]);
   
   return (
@@ -105,6 +153,8 @@ const EditDataSecondDeals = () => {
             showFormPks={showFormPks}
             HandleButtonActivity={HandleButtonActivity}
             showActivity={showActivity}
+            handleButtonWeeklyReport={handleButtonWeeklyReport}
+            showWeeklyReport={showWeeklyReport}
           />
           ) : ""}
           
@@ -146,6 +196,7 @@ const EditDataSecondDeals = () => {
             <HistoryDeals data={detailDataDeals.history} />
           </div>
           <Activity show={showActivity} HandleButtonActivity={HandleButtonActivity} uid={uid} data={dataActivityDeals}/>
+          {/* <WeeklyReport show={showWeeklyReport} handleButtonWeeklyReport={handleButtonWeeklyReport} uid={uid} /> */}
         </div>
       </Main>
     </body>

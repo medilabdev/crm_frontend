@@ -26,7 +26,9 @@ const TopButton = ({
   handleShowPks,
   showFormPks,
   HandleButtonActivity,
-  showActivity
+  showActivity,
+  handleButtonWeeklyReport,
+  showWeeklyReport
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [buttonStatus, setButtonStatus] = useState(false);
@@ -335,7 +337,8 @@ const TopButton = ({
               {ShowFDC ? "Closed" : "Open"} FDC
             </a>
  : ''}
-          <button className={`btn ${showActivity !== true ? "btn-primary" : "btn-secondary"}`} style={{ fontSize: "0.85rem", fontWeight: "600" }} onClick={HandleButtonActivity}><FontAwesomeIcon icon={faClipboardCheck} className="me-2" />Activity</button>
+          <button className={`btn ${showActivity !== true ? "btn-primary" : "btn-secondary"} me-2`} style={{ fontSize: "0.85rem", fontWeight: "600" }} onClick={HandleButtonActivity}><FontAwesomeIcon icon={faClipboardCheck} className="me-2 " />Activity</button>
+          {/* <button className={`btn ${showActivity !== true ? "btn-success" : "btn-secondary"}`} style={{ fontSize: "0.85rem", fontWeight: "600" }} onClick={handleButtonWeeklyReport}><FontAwesomeIcon icon={faClipboardCheck} className="me-2" />Weekly Report</button> */}
         </div>
       </div>
     </div>

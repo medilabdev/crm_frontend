@@ -1,6 +1,7 @@
 import axios from 'axios';
 import React, { useEffect, useRef, useState } from 'react'
 import { Button, Card, Form, Offcanvas } from 'react-bootstrap'
+import ReactQuill from 'react-quill';
 import Swal from 'sweetalert2';
 
 const Activity = ({ show, HandleButtonActivity, uid , data}) => {
@@ -118,9 +119,9 @@ const Activity = ({ show, HandleButtonActivity, uid , data}) => {
                 backgroundColor:value.user_uid === userUid ?"#93BFCF" : "#C5705D",
                }}>
                <Card >
-                 <Card.Body>
-                  {value?.activity_description}
-                 </Card.Body>
+               <Card.Body>
+                <div dangerouslySetInnerHTML={{ __html: value?.activity_description }} />
+              </Card.Body>
                  <Card.Footer>
                    <div className="message-date">
                      <p className='fw-semibold' style={{ fontSize:'0.85rem'}}>{value?.user?.name ?? value?.user_created_name}, <br /><span className='fw-medium' style={{ fontSize:'0.70rem'}}>{new Intl.DateTimeFormat('id-ID', {
@@ -136,8 +137,25 @@ const Activity = ({ show, HandleButtonActivity, uid , data}) => {
              </div>
             ))}
           </div>
-          <div className="input-container mt-3 d-flex align-items-center">
-            <Form.Control
+          <div className="input-container mt-3 d-flex align-items-end">
+            <div className="p-2">
+            <ReactQuill 
+              theme="snow"
+              name='deskripsi'
+              value={inputData.deskripsi}
+              placeholder="Type Update Activity..."
+              className='me-2'
+              onChange={(value) =>
+                handleInput({ target: { name: "deskripsi", value } })
+              }
+              onInput={(e) => {
+                e.target.style.height = 'auto';
+                e.target.style.height = `${e.target.scrollHeight}px`;
+              }}
+              style={{ backgroundColor:'white'}}
+              />
+              </div>
+            {/* <Form.Control
               as="textarea"
               name='deskripsi'
               value={inputData.deskripsi}
@@ -148,9 +166,11 @@ const Activity = ({ show, HandleButtonActivity, uid , data}) => {
                 e.target.style.height = 'auto';
                 e.target.style.height = `${e.target.scrollHeight}px`;
               }}
-            />
-            <Button className='submit-activity' variant='primary' onClick={handleSubmit}>Submit</Button>
+            /> */}
+            
+          <Button className='submit-activity mb-2'  variant='primary' onClick={handleSubmit}>Submit</Button>
           </div>
+          
         </Offcanvas.Body>
       </Offcanvas>
     );

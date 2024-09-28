@@ -179,6 +179,10 @@ const EditLpp = ({ data, listCompany, uidDeals, dataFqp }) => {
                     validateAndSetDefault(secondQty, defaultQty) + 
                     validateAndSetDefault(backUpTwo, defaultQty) + 
                     validateAndSetDefault(backUpOne, defaultQty);
+
+    
+                    
+
   const actionDuringCoperationQty = (firstQty + secondQty) *  actionMachinePerMonthQty * (dataLpp?.collaboration_period * 12);
 
   useEffect(() => {
@@ -356,7 +360,7 @@ const EditLpp = ({ data, listCompany, uidDeals, dataFqp }) => {
           "delivery_mkhd_second_qty",
           dataLpp?.delivery_mkhd_second_qty || ""
         );
-        formData.append("total_mesin_qty", dataLpp?.total_mesin_qty || "")
+        formData.append("total_mesin_qty", resultMesin || "")
         formData.append("date_first_delivery", dataLpp?.date_first_delivery || "")
         formData.append("action_machine_per_month_qty", actionMachinePerMonthQty|| "")
         formData.append("action_during_cooperation_qty", actionDuringCoperationQty)
