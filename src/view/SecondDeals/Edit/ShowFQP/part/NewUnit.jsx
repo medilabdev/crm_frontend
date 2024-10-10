@@ -26,7 +26,7 @@ const NewUnit = ({data, position}) => {
             {data && data?.cooperation_system === "etc" ? "lainnya" : data?.cooperation_system ?? "-"}
           </td>
         </tr>
-        {position !== "1-bZKHtNZCFWGg" && position !=="573MloZ8j--aaQ"  ? 
+        {position !== "_dLjLFdH-Nw8vg8U_002" && position !=="_dLjLFdH-Nw8vg8U_001"  ? 
         <>
         <tr className="fw-medium ">
           <td style={{ width: "200px", fontSize: "0.9rem" }}>SDM</td>
@@ -39,7 +39,7 @@ const NewUnit = ({data, position}) => {
               : "-"}
           </td>
         </tr>
-        {position !== "SzhgAQn6tP48xw" ? 
+        {position !== "_dLjLFdH-Nw8vg8U_003" ? 
         <> 
         <tr className="fw-medium">
           <td style={{ width: "200px", fontSize: "0.9rem" }}>

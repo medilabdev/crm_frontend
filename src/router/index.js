@@ -58,6 +58,7 @@ import CreateSecondDeals from "../view/SecondDeals/create";
 import NeedApprovalSecondDeals from "../view/SecondDeals/NeedApprovalSecondDeals";
 import DealsVersion from "../view/Properties/DealsVersion";
 import EditDataSecondDeals from "../view/SecondDeals/Edit";
+import AssignDealsSales from "../view/SecondDeals/AssignDeals";
 
 const Login = ({ children }) => {
   const token = localStorage.getItem("token");
@@ -491,6 +492,7 @@ function Router() {
           }
         />
         <Route exact path="/deals-second/:uid/edit" element={<Login><EditDataSecondDeals/></Login>} />
+        <Route exact path="/deals-second/assign-deals" element={<Login><AssignDealsSales /></Login>}/>
       </Routes>
     </BrowserRouter>
   );

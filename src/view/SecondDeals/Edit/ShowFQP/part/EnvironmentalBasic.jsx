@@ -3,7 +3,6 @@ import React from 'react'
 const EnvironmentalBasic = ({ data }) => {
   const position = localStorage.getItem('posititon')
   return (
-    position === "SzhgAQn6tP48xw" ?  
    <>
     <div class="fw-bold mb-3">
         <span className="fs-6 text-decoration-underline">
@@ -65,7 +64,6 @@ const EnvironmentalBasic = ({ data }) => {
         </tr>
       </table>
    </>
-   : ''
   )
 }
 

@@ -15,7 +15,8 @@ const ShowFQP = ({ data }) => {
       <ExistingUnit data={data} position={position} />
       <NewUnit data={data} position={position} />
       <EnvironmentalBasic data={data} />
-      <OtherInformation data={data} position={position} />
+      {position !== "1-bZKHtNZCFWGg" && position !== "573MloZ8j--aaQ" && position !== "SzhgAQn6tP48xw" ? 
+      <OtherInformation data={data} position={position} /> : "" }
       <div class="fw-bold mb-3">
         <span className="fs-6 text-decoration-underline">Catatan lainnya</span>
       </div>

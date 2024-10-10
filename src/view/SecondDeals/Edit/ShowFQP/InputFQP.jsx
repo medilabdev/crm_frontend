@@ -27,6 +27,9 @@ const InputFQP = ({ data, listCompany }) => {
     detractors: getNames(data.detcractors) 
   });
 
+  console.log(data);
+  
+
   const categoriesNps = ['promoters', 'neutrals', 'detractors'];
 
   const [showOverlay, setShowOverlay] = useState(false);
@@ -48,10 +51,16 @@ const InputFQP = ({ data, listCompany }) => {
     return result;
   };
   const handleInputData = (e) => {
-    setInputData({
-      ...inputData,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value} = e.target
+      setInputData((prevInputData) => {
+        if(prevInputData[name] !== value){
+          return{
+            ...prevInputData,
+            [name] : value,
+          };
+        }
+        return prevInputData
+      })
   };
   const [inputPrice, setInputPrice] = useState(data?.existing_bhp_price);
   const handleInputDataRP = (e) => {
@@ -373,7 +382,7 @@ const InputFQP = ({ data, listCompany }) => {
           <input
             type="text"
             name={`promoters[0]`}
-            value={inputNps.promoters[0] || ""}
+            value={inputNps?.promoters[0] || ""}
             onChange={(e) =>
               setInputNps({
                 ...inputNps,
@@ -392,12 +401,12 @@ const InputFQP = ({ data, listCompany }) => {
           <input
             type="text"
             name={`promoters[1]`}
-            value={inputNps.promoters[1] || ""}
+            value={inputNps?.promoters[1] || ""}
             onChange={(e) =>
               setInputNps({
                 ...inputNps,
                 promoters: [
-                  inputNps.promoters[0] || "",
+                  inputNps?.promoters[0] || "",
                   e.target.value,
                   inputNps.promoters[2] || "",
                 ],
@@ -870,10 +879,12 @@ const InputFQP = ({ data, listCompany }) => {
         </div>
         <div className="mb-2">
           <h6 className="ms-2 mt-3">Catatan</h6>
+          {console.log(inputData?.another_notes)
+          }
           <ReactQuill
             className="p-2"
             theme="snow"
-            value={inputData.another_notes || ""}
+            value={inputData?.another_notes || ""}
             onChange={(value) =>
               handleInputData({
                 target: {
@@ -883,7 +894,7 @@ const InputFQP = ({ data, listCompany }) => {
               })
             }
           />
-        </div>
+        </div>  
         <div className="mb-3">
           <label htmlFor="" className="mb-1">
            <span className="text-danger fw-bold">*</span> Apakah membutuhkan approval untuk ke stage selanjutnya ? 

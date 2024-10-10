@@ -11,6 +11,8 @@ import DataFaskes from "./Properties/Faskes";
 import BpjsRegional from "./Properties/RegionalBpjs";
 import CategoryType from "./Properties/CategoryType";
 import DataActivityDeals from "./dealsV2/Activity";
+import DataSelectDealsV2 from "./dealsV2/SelectDeals";
+import DataPks from "./dealsV2/DataPks";
 
 export default combineReducers({
     FormCompany,
@@ -24,5 +26,7 @@ export default combineReducers({
     DataFaskes,
     BpjsRegional,
     CategoryType,
-    DataActivityDeals
+    DataActivityDeals,
+    DataSelectDealsV2,
+    DataPks,
 });

@@ -12,6 +12,7 @@ import Swal from "sweetalert2";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
 import axios from "axios";
 import { token } from "../partials/ColumnsTable";
+import HandleApprove from "./ShowFQP/part/HandleApprove";
 const TopButton = ({
   handleShowFQP,
   ShowFQP,
@@ -30,12 +31,15 @@ const TopButton = ({
   handleButtonWeeklyReport,
   showWeeklyReport
 }) => {
+  
   const [isVisible, setIsVisible] = useState(false);
   const [buttonStatus, setButtonStatus] = useState(false);
   const handleShowModalStatus = () => setButtonStatus(true);
   const handleCloseModalStatus = () => setButtonStatus(false);
   const position = localStorage.getItem("position");
   const stage = data.staging?.name;
+
+  
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 100) {
@@ -49,7 +53,19 @@ const TopButton = ({
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
-  const needApprovalDeal = data?.need_approval?.uid;
+
+  
+  const statusLevel = data?.staging?.name
+
+  const uidFqp = data?.fqp_document?.need_approval?.uid ?? null ;
+  const uidLpp = data?.lpp_document?.need_approval?.uid ?? null ;
+  const uidRoi = data?.need_approval?.uid ?? null
+  
+  
+  
+  const uidForm = statusLevel === "leads" ? uidFqp : statusLevel === "Approaching" ? uidLpp : statusLevel === "Decide" ? uidRoi : '' ;
+
+  
   const handleApprove = async (e) => {
     e.preventDefault();
     let timerInterval;
@@ -79,7 +95,7 @@ const TopButton = ({
           },
         });
         const formData = new FormData();
-        formData.append("temporary_deals_uid[0]", needApprovalDeal);
+        formData.append("temporary_deals_uid[0]", uidForm);
         formData.append("_method", "put");
 
         const response = await axios.post(
@@ -107,7 +123,7 @@ const TopButton = ({
       });
     }
   };
-
+  
   const handleReject = async (e) => {
     let timerInterval;
     try {
@@ -139,7 +155,7 @@ const TopButton = ({
         });
         const formData = new FormData();
         formData.append("notes", text);
-        formData.append("temporary_deals_uid[0]", needApprovalDeal);
+        formData.append("temporary_deals_uid[0]", uidForm);
         formData.append("_method", "put");
         const response = await axios.post(
           `${process.env.REACT_APP_BACKEND_URL}/v2/deals/rejected/manager`,
@@ -176,6 +192,10 @@ const TopButton = ({
   
 
 
+   
+
+  
+
   return (
     <div className="row">
       <div className="col mt-2">
@@ -204,9 +224,17 @@ const TopButton = ({
         />
 
         <div className="d-flex float-end">
+     
+          {((position === "pRGYXVKdzCPoQ8" && statusLevel === "leads") || (position === "pRGYXVKdzCPoQ8" && statusLevel === "Approaching") || (position === "_dLjLFdH-Nw8vg8U" && statusLevel === "Decide") || (position ==="pRGYXVKdzCPoQ1" && statusLevel === "Decide")) && uidForm ? (
+              <>
+              <HandleApprove handleApprove={handleApprove} handleReject={handleReject}/>
+              </>
+          ): "" }
+
           {((position === "pRGYXVKdzCPoQ8" ||
             position === "_dLjLFdH-Nw8vg8U" ||
-            position === "pRGYXVKdzCPoQ1") &&
+            position === "pRGYXVKdzCPoQ1" || 
+            position === "_dLjLFdH-Nw8vg8U_005") &&
             stage !== "leads" &&
             stage !== "Approaching" &&
             stage !== "Decide") ||
@@ -225,7 +253,7 @@ const TopButton = ({
                 icon={showFormPks ? faEyeSlash : faEye}
                 className="me-2"
               />
-              {uidPerson === ownerUserUidDeals ? "Upload PKS" : "PKS"}
+              {position === "_dLjLFdH-Nw8vg8U_005" ? "Upload PKS" : "PKS"}
             </button>
           ) : (
             ""
@@ -248,43 +276,15 @@ const TopButton = ({
                 icon={showFormRoi ? faEyeSlash : faEye}
                 className="me-2"
               />
-              {position === "_dLjLFdH-Nw8vg8U" || position === "pRGYXVKdzCPoQ1" || position === "adsfasdf1321"
+              {(position !== "pRGYXVKdzCPoQ8") || (stage ==="Closed Won" || stage === "Implementation") 
                 ? "ROI"
                 : "Upload ROI"}
             </button>
           ) : (
             ""
           )}
-          {position === "pRGYXVKdzCPoQ8" ||
-          position === "pRGYXVKdzCPoQ1" ||
-          position === "_dLjLFdH-Nw8vg8U" ? (
-            data?.need_approval?.manager_approval == 0 ? (
-              <>
-                <button
-                  className="btn btn-success me-2"
-                  style={{
-                    fontSize: "0.85rem",
-                    fontWeight: "600",
-                  }}
-                  onClick={handleApprove}
-                >
-                  Approve
-                </button>
-                <button
-                  className="btn btn-danger me-2"
-                  style={{ fontSize: "0.85rem", fontWeight: "600" }}
-                  onClick={handleReject}
-                >
-                  Reject
-                </button>
-              </>
-            ) : (
-              ""
-            )
-          ) : (
-            ""
-          )}
-
+       
+          
           <a
             id={isVisible ? `floatingButtonFQP` : ""}
             className={`btn ${ShowFQP ? "btn-secondary" : "btn-primary"} me-2`}
@@ -301,7 +301,7 @@ const TopButton = ({
 
 
           {stage !== "leads" ? 
-            (position === "pRGYXVKdzCPoQ8" && data?.lpp_document !== null) || position === "_dLjLFdH-Nw8vg" || position === "pRGYXVKdzCPoQ1" || position === "_dLjLFdH-Nw8vg8U" || position === "adsfasdf1321" || position === "1-bZKHtNZCFWGg" || position === "573MloZ8j--aaQ" || position === "SzhgAQn6tP48xw" ? (
+            (position === "pRGYXVKdzCPoQ8" && data?.lpp_document !== null) || position === "_dLjLFdH-Nw8vg" || position === "pRGYXVKdzCPoQ1" || position === "_dLjLFdH-Nw8vg8U" || position === "adsfasdf1321" || position === "1-bZKHtNZCFWGg" || position === "573MloZ8j--aaQ" || position === "SzhgAQn6tP48xw" || position === "_dLjLFdH-Nw8vg8U_005" ? (
             <a
               id={isVisible ? (position === "1-bZKHtNZCFWGg" || position === "573MloZ8j--aaQ" || position === "SzhgAQn6tP48xw")  ? `floatingButtonLPPTech` :  `floatingButtonLPP` : ""}
               className={`btn ${
@@ -320,6 +320,7 @@ const TopButton = ({
           ) : "" : (
             ""
           )}
+
           {position !== "1-bZKHtNZCFWGg" && position !== "573MloZ8j--aaQ" && position !== "SzhgAQn6tP48xw" ? 
             <a
               id={isVisible ? `floatingButtonFDC` : ""}
@@ -337,8 +338,12 @@ const TopButton = ({
               {ShowFDC ? "Closed" : "Open"} FDC
             </a>
  : ''}
-          <button className={`btn ${showActivity !== true ? "btn-primary" : "btn-secondary"} me-2`} style={{ fontSize: "0.85rem", fontWeight: "600" }} onClick={HandleButtonActivity}><FontAwesomeIcon icon={faClipboardCheck} className="me-2 " />Activity</button>
-          {/* <button className={`btn ${showActivity !== true ? "btn-success" : "btn-secondary"}`} style={{ fontSize: "0.85rem", fontWeight: "600" }} onClick={handleButtonWeeklyReport}><FontAwesomeIcon icon={faClipboardCheck} className="me-2" />Weekly Report</button> */}
+ 
+
+          {position !== "SzhgAQn6tP48xw" && position !== "1-bZKHtNZCFWGg" && position !== "573MloZ8j--aaQ" && position !== "_dLjLFdH-Nw8vg8U_004"  ? (
+             <button className={`btn ${showActivity !== true ? "btn-primary" : "btn-secondary"} me-2`} style={{ fontSize: "0.85rem", fontWeight: "600" }} onClick={HandleButtonActivity}><FontAwesomeIcon icon={faClipboardCheck} className="me-2 " />Activitys</button>
+          ) : ''} 
+         
         </div>
       </div>
     </div>

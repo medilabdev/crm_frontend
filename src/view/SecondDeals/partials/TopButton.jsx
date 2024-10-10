@@ -31,6 +31,9 @@ const TopButton = () => {
           ) : (
             ""
           )}
+          {position === "pRGYXVKdzCPoQ8" ? (
+          <a href="/deals-second/assign-deals" className="btn btn-primary ms-2" style={{ fontSize: "0.85rem", fontWeight: "600" }}>Assign Deals</a>
+          ) : "" }
         </div>
       </div>
     </div>

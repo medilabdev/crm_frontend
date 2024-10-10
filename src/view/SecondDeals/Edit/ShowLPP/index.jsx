@@ -24,40 +24,41 @@ const ShowLPP = ({ data }) => {
       {position !== "1-bZKHtNZCFWGg" && position !== "SzhgAQn6tP48xw"  ? <Target data={data} /> : "" } 
       
       {position !== "1-bZKHtNZCFWGg" && position !== "SzhgAQn6tP48xw" ?
-      <>
-      <div className="p-2 mb-3">
-        {data?.lpp_document?.rab !== null ? <TableRab data={data?.lpp_document || ""} />
-        :"-"}
-      </div>
-      <hr />
-      </>
-      : ''}
+         data?.lpp_document?.rab.length > 0 ? (
+          <>
+          <div className="p-2 mb-3">
+          <TableRab data={data?.lpp_document || ""} />
+          </div>
+          <hr />
+          </> )
+        : ('')
+        : ''}
       {(position !== "1-bZKHtNZCFWGg" && position !== "SzhgAQn6tP48xw")  ?
-      <>
-      <div className="p-2 mb-3">
-        {data?.lpp_document?.support !== null ? (
-          <TableSupport data={data?.lpp_document || ""} />
+        data?.lpp_document?.support.length > 0  ? (
+        <>
+          <div className="p-2 mb-3">
+            <TableSupport data={data?.lpp_document} />
+          </div>
+        <hr />
+       </>
         ) : (
-          " - "
-        )}
-      </div>
-      <hr />
-      </>
+          " "
+        )
+     
       : '' }
       {position !== "1-bZKHtNZCFWGg" && position !== "573MloZ8j--aaQ" && position !== "SzhgAQn6tP48xw"  ? 
-      <>
-      <div className="p-2 mb-3">
-        {data?.lpp_document?.fee !== null ? (
-          <TableFee data={data?.lpp_document || ""} />
-        ) : (
-          " - "
-        )}
-      </div>
-      <hr />
-      </> : '' }
+        data?.lpp_document?.fee.length > 0 ? (
+          <>
+            <div className="p-2 mb-3">
+                <TableFee data={data?.lpp_document || ""} />
+            </div>
+            <hr />
+         </> 
+        ) : (" ")
+      : '' }
 
     
-      {position !== "1-bZKHtNZCFWGg" && position !== "SzhgAQn6tP48xw"  ?  <RekapBiaya data={data?.lpp_document || ""} /> : ''}
+      {position !== "1-bZKHtNZCFWGg" && position !== "SzhgAQn6tP48xw" && position !== "573MloZ8j--aaQ" ?  <RekapBiaya data={data?.lpp_document || ""} /> : ''}
       {position !== "1-bZKHtNZCFWGg" && position !== "573MloZ8j--aaQ" && position !== "SzhgAQn6tP48xw"  ? 
       <>
       <hr />

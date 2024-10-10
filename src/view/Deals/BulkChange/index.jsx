@@ -159,7 +159,7 @@ const BulkChangeDeals = () => {
         <Card className="mt-5 shadow">
           <Card.Body>
             <form action="" onSubmit={handleSubmitBulk}>
-              <Form.Group className="mb-3 col-9">
+              <Form.Group className="mb-2 col-9">
                 <Form.Label className="fw-bold">Select Deals</Form.Label>
                 <Select
                   isMulti
@@ -167,12 +167,12 @@ const BulkChangeDeals = () => {
                   onChange={(e) => handleSelectDeals(e)}
                 />
               </Form.Group>
-              <Form.Group className="mb-3 col-5" md={5}>
+              <Form.Group className="mb-2 col-5" md={5}>
                 <Form.Label className="fw-bold">Give Permission to</Form.Label>
                 <Select options={selectUser()} onChange={handleNewOwner} />
               </Form.Group>
-              <div className="mt-4">
-                <a href="/deals" className="btn btn-secondary me-4 shadow">
+              <div className="mt-1">
+                <a href="/deals" className="btn btn-secondary me-1 shadow">
                   Cancel
                 </a>
                 <button className="btn btn-primary shadow" type="submit">

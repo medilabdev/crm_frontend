@@ -22,6 +22,7 @@ import CloseLost from "./CloseLost";
 import Activity from "./activity";
 import WeeklyReport from "./WeeklyReport";
 import { fa } from "@faker-js/faker";
+import { getPks } from "../../../action/GetPks";
 
 const EditDataSecondDeals = () => {
   const token = localStorage.getItem("token");
@@ -87,16 +88,22 @@ const EditDataSecondDeals = () => {
   const dispatch = useDispatch();
   const { listResult } = useSelector((state) => state.FormCompany);
   const { dataActivityDeals } = useSelector((state) => state.DataActivityDeals)
+  const { dataPks } = useSelector((state) => state.DataPks) 
+
+  
+  
+  
+  
 
 
- 
   useEffect(() => {
     dispatch(GetDataActivity(uid, token));
     dispatch(GetDataDealsDetail(uid, token));
     dispatch(getListCompany(token));
+    dispatch(getPks(uid, token))
 
     const savedState = localStorage.getItem('activeForm')
-
+   
     if (savedState) {
       // Set the correct state based on the saved value
       switch (savedState) {
@@ -128,7 +135,7 @@ const EditDataSecondDeals = () => {
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [dispatch, uid, token]);
+  }, [dispatch]);
   
   return (
     <body id="body">
@@ -137,7 +144,6 @@ const EditDataSecondDeals = () => {
       <Main>
         <div className="container">
           <BreadcrumbEdit />
-          {detailDataDeals?.staging_uid !== "M-s3254fdg" ? (
             <TopButton
             handleShowFQP={handleShowFQP}
             ShowFQP={ShowFQP}
@@ -156,12 +162,11 @@ const EditDataSecondDeals = () => {
             handleButtonWeeklyReport={handleButtonWeeklyReport}
             showWeeklyReport={showWeeklyReport}
           />
-          ) : ""}
           
           <div className="row mt-3">
             {detailDataDeals?.staging_uid === "M-s3254fdg" ? 
             <CloseLost  data={detailDataDeals} /> : ""}
-            {showFormPks ? <FormPks data={detailDataDeals} /> : ""}
+            {showFormPks ? <FormPks data={detailDataDeals} dataPks={dataPks}/> : ""}
             {showFormRoi ? <InputRoi data={detailDataDeals} /> : ""}
               
             {ShowFDC ? (
