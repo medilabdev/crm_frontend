@@ -9,6 +9,9 @@ import {
 } from "react-bootstrap";
 import Swal from "sweetalert2";
 import Select from "react-select";
+import { useDispatch } from "react-redux";
+import { GetDataTypeHospital } from "../../action/TypeHospital";
+import { useSelector } from "react-redux";
 const OverlayAddCompany = ({ visible, onClose }) => {
   const uid = localStorage.getItem("uid")
   const [ownerUser, setOwnerUser] = useState([]);
@@ -32,6 +35,9 @@ const OverlayAddCompany = ({ visible, onClose }) => {
   });
 
   const token = localStorage.getItem("token");
+  const dispatch = useDispatch()
+  const { DataTypeHospital } = useSelector((state) => state.GetTypeHospital
+)
   //menambah telephone
   const addTelephone = () => {
     setInputCompany((prevInputCompany) => ({
@@ -138,6 +144,7 @@ const OverlayAddCompany = ({ visible, onClose }) => {
     getSourceContact(token);
     getCompanyParent(token);
     getCompanyType(token);
+    dispatch(GetDataTypeHospital(token))
   }, [token]);
 
   const selectOwner = () => {
@@ -163,6 +170,25 @@ const OverlayAddCompany = ({ visible, onClose }) => {
     });
     return result;
   };
+
+  const TypeCompany = () => {
+    const result = [];
+    if (Array?.isArray(DataTypeHospital)) {
+      DataTypeHospital?.map((data) => {
+        console.log(data);
+        
+        const finalResult = {
+          label: data.name,
+          value: data.uid,
+        };
+        result.push(finalResult);
+      });
+    } else {
+      console.error("listResult is not an array or is not yet initialized.");
+    }
+    return result;
+  }
+  
 
   const selectType = () => {
     const result = [];
@@ -198,6 +224,12 @@ const OverlayAddCompany = ({ visible, onClose }) => {
     setInputCompany({
       ...inputCompany,
       company_source_uid: e.value,
+    });
+  };
+  const handleInputTypeHospital = (e) => {
+    setInputCompany({
+      ...inputCompany,
+      hospital_type_uid: e.value,
     });
   };
   const handleTypeComp = (e) => {
@@ -276,6 +308,15 @@ const OverlayAddCompany = ({ visible, onClose }) => {
               placeholder=""
               name="website_url"
               onChange={handleInputChange}
+            />
+          </Form.Group>
+          <Form.Group className="mb-3" controlId="formBasicEmail">
+            <Form.Label>
+              Type Hospital <span className="text-danger fs-5">*</span>
+            </Form.Label>
+            <Select
+              options={TypeCompany()}
+              onChange={(e) => handleInputTypeHospital(e)}
             />
           </Form.Group>
           <Form.Group>

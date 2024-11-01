@@ -879,8 +879,6 @@ const InputFQP = ({ data, listCompany }) => {
         </div>
         <div className="mb-2">
           <h6 className="ms-2 mt-3">Catatan</h6>
-          {console.log(inputData?.another_notes)
-          }
           <ReactQuill
             className="p-2"
             theme="snow"

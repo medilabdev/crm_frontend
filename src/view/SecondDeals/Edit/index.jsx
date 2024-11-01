@@ -168,7 +168,7 @@ const EditDataSecondDeals = () => {
             <CloseLost  data={detailDataDeals} /> : ""}
             {showFormPks ? <FormPks data={detailDataDeals} dataPks={dataPks}/> : ""}
             {showFormRoi ? <InputRoi data={detailDataDeals} /> : ""}
-              
+          
             {ShowFDC ? (
               
               <FDC

@@ -322,7 +322,7 @@ const FQP = ({ userUid, dataFQP, listCompany }) => {
   const handleDownload = (url) => {
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'example.pdf';
+    link.download = 'Fqp.pdf';
     link.click();
   };
   const uid = localStorage.getItem("uid");

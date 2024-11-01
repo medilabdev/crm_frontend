@@ -225,7 +225,7 @@ const TopButton = ({
 
         <div className="d-flex float-end">
      
-          {((position === "pRGYXVKdzCPoQ8" && statusLevel === "leads") || (position === "pRGYXVKdzCPoQ8" && statusLevel === "Approaching") || (position === "_dLjLFdH-Nw8vg8U" && statusLevel === "Decide") || (position ==="pRGYXVKdzCPoQ1" && statusLevel === "Decide")) && uidForm ? (
+          {((position === "pRGYXVKdzCPoQ8" && statusLevel === "leads") || (position === "pRGYXVKdzCPoQ8" && statusLevel === "Approaching") || (position === "adsfasdf1321" && statusLevel === "Decide") || (position ==="pRGYXVKdzCPoQ1" && statusLevel === "Decide")) && uidForm ? (
               <>
               <HandleApprove handleApprove={handleApprove} handleReject={handleReject}/>
               </>
@@ -234,7 +234,7 @@ const TopButton = ({
           {((position === "pRGYXVKdzCPoQ8" ||
             position === "_dLjLFdH-Nw8vg8U" ||
             position === "pRGYXVKdzCPoQ1" || 
-            position === "_dLjLFdH-Nw8vg8U_005") &&
+            position === "T6pWdcQ8gxwgGA") &&
             stage !== "leads" &&
             stage !== "Approaching" &&
             stage !== "Decide") ||
@@ -253,7 +253,7 @@ const TopButton = ({
                 icon={showFormPks ? faEyeSlash : faEye}
                 className="me-2"
               />
-              {position === "_dLjLFdH-Nw8vg8U_005" ? "Upload PKS" : "PKS"}
+              {position === "T6pWdcQ8gxwgGA" ? "Upload PKS" : "PKS"}
             </button>
           ) : (
             ""
@@ -340,8 +340,8 @@ const TopButton = ({
  : ''}
  
 
-          {position !== "SzhgAQn6tP48xw" && position !== "1-bZKHtNZCFWGg" && position !== "573MloZ8j--aaQ" && position !== "_dLjLFdH-Nw8vg8U_004"  ? (
-             <button className={`btn ${showActivity !== true ? "btn-primary" : "btn-secondary"} me-2`} style={{ fontSize: "0.85rem", fontWeight: "600" }} onClick={HandleButtonActivity}><FontAwesomeIcon icon={faClipboardCheck} className="me-2 " />Activitys</button>
+          {position !== "SzhgAQn6tP48xw" && position !== "1-bZKHtNZCFWGg" && position !== "573MloZ8j--aaQ" && position !== "_dLjLFdH-Nw8vg8U_004" && position !== "adsfasdf1321" ? (
+             <button className={`btn ${showActivity !== true ? "btn-primary" : "btn-secondary"} me-2`} style={{ fontSize: "0.85rem", fontWeight: "600" }} onClick={HandleButtonActivity}><FontAwesomeIcon icon={faClipboardCheck} className="me-2 " />Activity</button>
           ) : ''} 
          
         </div>

@@ -11,6 +11,9 @@ import OverlayAddCompany from "../../../components/Overlay/addCompany";
 import OverlayAddDeals from "../../../components/Overlay/addDeals";
 import Swal from "sweetalert2";
 import OverlayAddContact from "../../../components/Overlay/addContact";
+import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
+import { GetDataTypeHospital } from "../../../action/TypeHospital";
 
 const SingleCompany = () => {
   const token = localStorage.getItem("token");
@@ -56,6 +59,13 @@ const SingleCompany = () => {
   const handleCloseContact = () => setShowAddContact(false);
   const handleShowContact = () => setShowAddContact(true);
   const [isButtonDisable, setButtonDisable] = useState(false);
+  const dispatch = useDispatch()
+  const { DataTypeHospital } = useSelector((state) => state.GetTypeHospital
+  )
+  
+  
+  
+  
   const getDeals = async (retryCount = 0) => {
     try {
       const respon = await axios.get(
@@ -353,10 +363,38 @@ const SingleCompany = () => {
     return result;
   };
 
+  
+  const TypeCompany = () => {
+    const result = [];
+    if (Array?.isArray(DataTypeHospital)) {
+      DataTypeHospital?.map((data) => {
+        const finalResult = {
+          label: data.name,
+          value: data.uid,
+        };
+        result.push(finalResult);
+      });
+    } else {
+      console.error("listResult is not an array or is not yet initialized.");
+    }
+    return result;
+  }
+  
+
+  
+
+
+
   const handleInputOwner = (selected) => {
     setInputCompany({
       ...inputCompany,
       owner_user_uid: selected.value,
+    });
+  };
+  const handleInputTypeHospital = (selected) => {
+    setInputCompany({
+      ...inputCompany,
+      hospital_type_uid: selected.value,
     });
   };
 
@@ -389,11 +427,12 @@ const SingleCompany = () => {
     formData.append("company_source_uid", inputCompany.company_source_uid);
     formData.append("company_type_uid", inputCompany.company_type_uid);
     formData.append("notes", inputCompany.notes);
+    formData.append("hospital_type_uid", inputCompany.hospital_type_uid);
     // console.log("FormData Content:");
     // for (const pair of formData.entries()) {
     //   console.log(pair[0] + ": " + pair[1]);
     // }
-    setButtonDisable(true);
+    // setButtonDisable(true);
     try {
       const addCompany = await axios
         .post(`${process.env.REACT_APP_BACKEND_URL}/companies`, formData, {
@@ -434,6 +473,7 @@ const SingleCompany = () => {
     getCompanyParent();
     getContact();
     getDeals();
+    dispatch(GetDataTypeHospital(token))
   }, [token]);
   return (
     <body id="body">
@@ -505,6 +545,7 @@ const SingleCompany = () => {
                       onChange={handleInputCompany}
                     />
                   </FloatingLabel>
+
                   <Form.Group className="mb-3">
                     <Form.Label controlId="floatingInput">
                       <span>
@@ -518,6 +559,22 @@ const SingleCompany = () => {
                       name="owner_user_uid"
                       onChange={handleInputOwner}
                       options={ownerSelect()}
+                      required
+                    />
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label controlId="floatingInput">
+                      <span>
+                        Type Hospital
+                        <span style={{ color: "red" }} className="fs-6">
+                          *
+                        </span>
+                      </span>
+                    </Form.Label>
+                    <Select
+                      name="owner_user_uid"
+                      onChange={handleInputTypeHospital}
+                      options={TypeCompany()}
                       required
                     />
                   </Form.Group>

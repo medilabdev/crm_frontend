@@ -25,19 +25,19 @@ const TypeWork = ({ data }) => {
                 <tr className="fw-medium">
                 <td style={{ width: "300px", fontSize: "0.9rem" }}>Customer</td>
                 <td className="px-1">:</td>
-                <td>{data?.lpp_document?.revenue_sharing_customer || "-"} %</td>
+                <td>{data?.lpp_document?.revenue_sharing_customer + "%" || "-"} </td>
                 </tr>
                 <tr className="fw-medium">
                 <td style={{ width: "300px", fontSize: "0.9rem" }}>ISS</td>
                 <td className="px-1">:</td>
-                <td>{data?.lpp_document?.revenue_sharing_iss || "-"} %</td>
+                <td>{data?.lpp_document?.revenue_sharing_iss + "%" || "-"}</td>
                 </tr>
             </>
             ) : data?.lpp_document?.type_collaboration === "JualPutus" ? (
             <tr className="fw-medium">
                 <td style={{ width: "300px", fontSize: "0.9rem" }}>Jual Putus </td>
                 <td className="px-1">:</td>
-                <td>{data?.lpp_document?.sell_disconect || "-"} %</td>
+                <td>{data?.lpp_document?.sell_disconect || "-"} </td>
             </tr>
             ) : (
             ""

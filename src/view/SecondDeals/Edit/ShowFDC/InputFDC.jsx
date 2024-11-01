@@ -27,7 +27,8 @@ const InputFDC = ({ data }) => {
   const [siup, setSiup] = useState([]);
   const [kso, setKso] = useState([]);
   const [izinDagang, setIzinDagang] = useState([]);
-
+  console.log(data);
+  
   const handleInput = (e) => {
     setInputData({
       ...inputData,

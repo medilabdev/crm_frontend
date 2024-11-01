@@ -13,6 +13,9 @@ import CategoryType from "./Properties/CategoryType";
 import DataActivityDeals from "./dealsV2/Activity";
 import DataSelectDealsV2 from "./dealsV2/SelectDeals";
 import DataPks from "./dealsV2/DataPks";
+import SelectAmbasador from "./Owner/Ambasador";
+import DataDealsAmbasador from "./dealsV2/DataAmbasador";
+import GetTypeHospital from "./Properties/TypeHospital";
 
 export default combineReducers({
     FormCompany,
@@ -29,4 +32,7 @@ export default combineReducers({
     DataActivityDeals,
     DataSelectDealsV2,
     DataPks,
+    SelectAmbasador,
+    DataDealsAmbasador,
+    GetTypeHospital,
 });

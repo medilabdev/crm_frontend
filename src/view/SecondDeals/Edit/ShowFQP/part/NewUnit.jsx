@@ -26,7 +26,7 @@ const NewUnit = ({data, position}) => {
             {data && data?.cooperation_system === "etc" ? "lainnya" : data?.cooperation_system ?? "-"}
           </td>
         </tr>
-        {position !== "_dLjLFdH-Nw8vg8U_002" && position !=="_dLjLFdH-Nw8vg8U_001"  ? 
+        {position !== "_dLjLFdH-Nw8vg8U_002" && position !=="_dLjLFdH-Nw8vg8U_001" && position !== "adsfasdf1321"  ? 
         <>
         <tr className="fw-medium ">
           <td style={{ width: "200px", fontSize: "0.9rem" }}>SDM</td>

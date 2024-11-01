@@ -20,7 +20,7 @@
 
 body {
   font-family: "Open Sans";
-  background: #fff7f374 !important;
+  background: #ffffff80 !important;
   color: #444444;
 }
 
@@ -56,11 +56,11 @@ h6 {
 # Page Title
 --------------------------------------------------------------*/
 .pagetitle {
-  margin-bottom: 10px;
+  margin-bottom: 7px;
 }
 
 .pagetitle h1 {
-  font-size: 26px;
+  font-size: 24px;
   margin-bottom: 0;
   font-weight: bold;
   color: #012a708d;
@@ -300,15 +300,15 @@ h6 {
 }
 
 /* Breadcrumbs */
-.breadcrumb {
-  font-size: 14px;
-  font-family: "Nunito", sans-serif;
-  color: #899bbd;
-  font-weight: 600;
+
+.breadcrumb-item {
+  font-size: 13px;
+  color: #020303;
+  font-weight: 500;
 }
 
 .breadcrumb a {
-  color: #899bbd;
+  color: #51678fde;
   transition: 0.3s;
 }
 
@@ -322,7 +322,7 @@ h6 {
 
 .breadcrumb .active {
   color: #51678f;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 /* Bordered Tabs */

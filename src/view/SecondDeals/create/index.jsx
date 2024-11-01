@@ -224,9 +224,9 @@ const CreateSecondDeals = () => {
           inputData.jumlah_mesin_unit_hd || ""
         );
         formData.append("another_notes", inputData.another_notes || "");
-        // for (const pair of formData.entries()) {
-        //   console.log(pair[0] + ": " + pair[1]);
-        // }
+        for (const pair of formData.entries()) {
+          console.log(pair[0] + ": " + pair[1]);
+        }
         setButtonBlocked(true);
         const response = await axios.post(
           `${process.env.REACT_APP_BACKEND_URL}/v2/deals`,

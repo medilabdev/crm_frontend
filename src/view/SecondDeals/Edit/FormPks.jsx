@@ -9,6 +9,8 @@ import Swal from "sweetalert2";
 import Action from "./part/Action";
 
 const FormPks = ({ data, dataPks }) => {
+  console.log(data);
+  
   const token = localStorage.getItem("token");
   const position = localStorage.getItem("position");
   const uid = useParams();
@@ -86,10 +88,7 @@ const FormPks = ({ data, dataPks }) => {
       }
     }
   };
-
-
- 
- 
+  
   return (
     <div>
       <Card>
@@ -97,8 +96,36 @@ const FormPks = ({ data, dataPks }) => {
           <span className="fs-5 fw-semibold">Perjanjian Kerja Sama</span>
         </Card.Header>
         <Card.Body>
-          <div className="row mt-3">
-            <div className="col-md-12 mb-2">
+         
+        
+        {(data?.staging?.name === "Implementation" &&( position === "pRGYXVKdzCPoQ1" || position === "pRGYXVKdzCPoQ8")) ? 
+        <>
+          <table className="mb-4">
+            <tr className="fw-medium">
+              <td style={{ width: "150px", fontSize: "0.9rem" }}>
+                File PKS
+              </td>
+              <td className="px-1">:</td>
+              <td>
+                <a
+                  className="btn btn-primary"
+                  href={`${process.env.REACT_APP_BACKEND_URL}/storage/file/deals/${data.pks_document}`}
+                  target="_blank"
+                  style={{
+                    whiteSpace: "normal",
+                    fontSize: "0.75rem",
+                    fontWeight: "600",
+                  }}
+                >
+                  {data?.pks_document || "-"}{" "}
+                </a>
+              </td>
+            </tr>
+          </table>
+        </>
+        : ( 
+        <div className="row mt-3">
+          <div className="col-md-12 mb-2">
             <table className="table table-bordered table-striped table-hover">
               <thead className="thead-light">
                 <tr>
@@ -109,82 +136,84 @@ const FormPks = ({ data, dataPks }) => {
                 </tr>
               </thead>
               <tbody>
-                {dataPks && dataPks.length > 0  ? (dataPks.map((row) => (
-                  <tr key={row.id}>
-                    <td>
-                      <a
-                        className="btn btn-primary btn-sm"
-                        href={`${process.env.REACT_APP_BACKEND_URL}/storage/file/deals/${row.file}`}
-                        target="_blank"
-                      >
-                        {row?.file || "-"}
-                      </a>
-                    </td>
-                    <td>
-                      {row.is_status === "review_sales" ? (
-                        <button className="btn btn-primary btn-sm">Review Sales</button>
-                      ) : row.is_status === "review_manager" ? (
-                        <button className="btn btn-info btn-sm text-white">Review Sales Manager</button>
-                      ) : row.is_status === "reject" ? (
-                        <button className="btn btn-danger btn-sm">Reject</button>
-                      ) : (
-                        <button className="btn btn-success btn-sm">Approved</button>
-                      )}
-                    </td>
-                    <td>
-                    {new Date(row.created_at).toLocaleString("id-ID", {
-                        day: "2-digit",
-                        month: "long",
-                        year: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </td>
-                    <td>
-                      <Action position={position} row={row} />
-                     
-                    </td>
+                {Array.isArray(dataPks) && dataPks.length > 0 && !(data?.staging?.name === "Implementation" && position === "pRGYXVKdzCPoQ1") ? (
+                  dataPks.map((row) => (
+                    <tr key={row.id}>
+                      <td>
+                        <a
+                          className="btn btn-primary btn-sm"
+                          href={`${process.env.REACT_APP_BACKEND_URL}/storage/file/deals/${row.file}`}
+                          target="_blank"
+                        >
+                          {row?.file || "-"}
+                        </a>
+                      </td>
+                      <td>
+                        {row.is_status === "review_sales" ? (
+                          <button className="btn btn-primary btn-sm">Review Sales</button>
+                        ) : row.is_status === "review_manager" ? (
+                          <button className="btn btn-info btn-sm text-white">Review Sales Manager</button>
+                        ) : row.is_status === "reject" ? (
+                          <button className="btn btn-danger btn-sm">Reject</button>
+                        ) : (
+                          <button className="btn btn-success btn-sm">Approved</button>
+                        )}
+                      </td>
+                      <td>
+                        {new Date(row.created_at).toLocaleString("id-ID", {
+                          day: "2-digit",
+                          month: "long",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </td>
+                      <td>
+                        <Action position={position} row={row} />
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="4">Tidak Ada Data</td>
                   </tr>
-                ))) :  (
-                <tr>
-                      <td colSpan="4">Tidak Ada Data</td>
-                </tr>) }
+                )}
               </tbody>
             </table>
-
-            </div>
           </div>
-        
-   
-    <div className="col-md-12 mt-4">
-        {position === "_dLjLFdH-Nw8vg8U_005" ?  
-                        <>
-                               <hr />
-                        <label
-                          htmlFor="floatingInput"
-                          className="mb-2"
-                          style={{ fontWeight: "600" }}
-                        >
-                          Upload File Perjanjian Kerja Sama
-                        </label>
-                        <input
-                          type="file"
-                          className="form-control"
-                          name="file"
-                          onChange={handleFileChange}
-                        />
-                        <div className="mt-4">
-                          <button
-                            className="btn btn-primary me-2"
-                            onClick={handleSubmit}
+        </div>)
+      }
+
+
+      <div className="col-md-12 mt-4">
+          {position === "T6pWdcQ8gxwgGA" ?  
+                          <>
+                                <hr />
+                          <label
+                            htmlFor="floatingInput"
+                            className="mb-2"
+                            style={{ fontWeight: "600" }}
                           >
-                            Simpan
-                          </button>
-                          <button className="btn btn-secondary">Kembali</button>
-                        </div>
-                        </>
-                        : ``}
-    </div>
+                            Upload File Perjanjian Kerja Sama
+                          </label>
+                          <input
+                            type="file"
+                            className="form-control"
+                            name="file"
+                            onChange={handleFileChange}
+                          />
+                          <div className="mt-4">
+                            <button
+                              className="btn btn-primary me-2"
+                              onClick={handleSubmit}
+                            >
+                              Simpan
+                            </button>
+                            <button className="btn btn-secondary">Kembali</button>
+                          </div>
+                          </>
+                          : ``}
+      </div>
          
         </Card.Body>
       </Card>

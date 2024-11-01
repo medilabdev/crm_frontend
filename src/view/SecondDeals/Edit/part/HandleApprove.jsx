@@ -1,7 +1,6 @@
 import axios from "axios";
 import Swal from "sweetalert2";
 export const token = localStorage.getItem("token")
-console.log(token);
 
 export const handleApprovePks = async(uid) => {
     let timerInterval;
