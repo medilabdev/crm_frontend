@@ -8,8 +8,8 @@ import {
   faPenToSquare,
 } from "@fortawesome/free-solid-svg-icons";
 
-const ShowFDC = ({ show, CompanyName }) => {
- 
+const ShowFDC = ({ show, CompanyName, data }) => {
+  
   return (
     <Card.Body>
       <div class="fw-bold mb-3">

@@ -27,7 +27,6 @@ const InputFQP = ({ data, listCompany }) => {
     detractors: getNames(data.detcractors) 
   });
 
-  console.log(data);
   
 
   const categoriesNps = ['promoters', 'neutrals', 'detractors'];

@@ -175,8 +175,6 @@ const OverlayAddCompany = ({ visible, onClose }) => {
     const result = [];
     if (Array?.isArray(DataTypeHospital)) {
       DataTypeHospital?.map((data) => {
-        console.log(data);
-        
         const finalResult = {
           label: data.name,
           value: data.uid,

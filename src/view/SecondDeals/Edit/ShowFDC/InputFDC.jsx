@@ -14,6 +14,8 @@ import { Card } from "react-bootstrap";
 import Swal from "sweetalert2";
 import axios from "axios";
 import EditFormDataBank from "../FDC/EditFormDataBank";
+import CompanyInformation from "./PartCretateFDC/CompanyInformation";
+import DataPajak from "./PartCretateFDC/DataPajak";
 
 const InputFDC = ({ data }) => {
   const token = localStorage.getItem("token");
@@ -27,7 +29,6 @@ const InputFDC = ({ data }) => {
   const [siup, setSiup] = useState([]);
   const [kso, setKso] = useState([]);
   const [izinDagang, setIzinDagang] = useState([]);
-  console.log(data);
   
   const handleInput = (e) => {
     setInputData({
@@ -146,6 +147,8 @@ const InputFDC = ({ data }) => {
         formData.append("direksi[2][position]", "Penanggung jawab operasional");
         formData.append("direksi[2][email]", inputData.pj_email || "");
         formData.append("direksi[2][phone_number]", inputData.pj_no_telp || "");
+
+       if (data?.name !== "PT" && data.name !== "Yayasan"){ 
         formData.append("direksi[3][name]", inputData.kprs_name || "");
         formData.append("direksi[3][position]", "Kepala Rumah Sakit");
         formData.append("direksi[3][email]", inputData.kprs_email || "");
@@ -153,14 +156,19 @@ const InputFDC = ({ data }) => {
           "direksi[3][phone_number]",
           inputData.kprs_no_telp || ""
         );
+       }
         formData.append("direksi[4][name]", inputData.kr_name || "");
         formData.append("direksi[4][position]", "Kepala Ruang");
         formData.append("direksi[4][email]", inputData.kr_email || "");
         formData.append("direksi[4][phone_number]", inputData.kr_no_telp || "");
+
+        if (data?.name !== "PT" && data.name !== "Yayasan"){ 
         formData.append("direksi[5][name]", inputData.kp_hd || "");
         formData.append("direksi[5][position]", "Kepala perawat HD");
         formData.append("direksi[5][email]", inputData.kp_email || "");
         formData.append("direksi[5][phone_number]", inputData.kp_no_telp || "");
+        }
+
         formData.append("direksi[6][name]", inputData.dokter_sppd_name || "");
         formData.append("direksi[6][position]", "Dokter SpPD");
         formData.append("direksi[6][email]", inputData.dokter_sppd_email || "");
@@ -260,161 +268,13 @@ const InputFDC = ({ data }) => {
       }
     }
   };
-
-
+  
+  
   return (
     <Card.Body>
-      <div class="alert alert-primary mt-2" role="alert">
-        <h6 style={{ fontWeight: "700" }}>
-          <FontAwesomeIcon icon={faBuilding} className="me-2" /> Informasi
-          perusahaan
-        </h6>
-      </div>
-      <input
-        type="text"
-        name=""
-        className="form-control mb-3"
-        disabled
-        value={data?.fqp_document?.hospital?.name  + " ( " + data?.fqp_document?.hospital?.company_type?.name + " ) " }
-        id=""
-      />
-      <div className="row mb-3">
-        <div className="col-md-6">
-          <label htmlFor="floatingInput">Nama Pemilik Perusahaan</label>
-          <input
-            type="text"
-            className="form-control"
-            name="owner_company"
-            onChange={handleInput}
-          />
-        </div>
-        <div className="col-md-6">
-          <label htmlFor="floatingInput">Didirikan Sejak Tahun</label>
-          <input
-            type="text"
-            className="form-control"
-            name="founded_year_at"
-            onChange={handleInput}
-          />
-        </div>
-      </div>
-      <div className="row mb-3">
-        <div className="col-md-6">
-          <label htmlFor="floatingInput">Jenis Usaha</label>
-          <input
-            type="text"
-            className="form-control"
-            name="business_type"
-            onChange={handleInput}
-          />
-        </div>
-        <div className="col-md-6">
-          <label htmlFor="floatingInput">Alamat Situs</label>
-          <input
-            type="text"
-            className="form-control"
-            name="website"
-            onChange={handleInput}
-          />
-        </div>
-      </div>
-      <div className="form-floating mb-3">
-        <input
-          type="text"
-          placeholder="Input in here"
-          className="form-control"
-          name="name_person_in_charge"
-          onChange={handleInput}
-        />
-        <label htmlFor="floatingInput">Nama Penanggung Jawab & Jabatan</label>
-      </div>
-      <div className="form-floating mb-3">
-        <input
-          type="email"
-          name="email"
-          placeholder="Input in here"
-          className="form-control"
-          onChange={handleInput}
-        />
-        <label htmlFor="floatingInput">
-          <FontAwesomeIcon icon={faEnvelopesBulk} /> Alamat Email
-        </label>
-      </div>
-      <div className="form-floating mb-3">
-        <input
-          type="number"
-          name="phone_number"
-          placeholder="Input in here"
-          onChange={handleInput}
-          className="form-control"
-        />
-        <label htmlFor="floatingInput">
-          <FontAwesomeIcon icon={faPhone} /> No. Telepon kantor
-        </label>
-      </div>
-      <div className="mb-3">
-        <label htmlFor="">Alamat Perusahaan (Sesuai NPWP)</label>
-        <textarea
-          name="company_address"
-          id=""
-          cols="15"
-          rows="5"
-          className="form-control"
-          onChange={handleInput}
-        ></textarea>
-      </div>
-      <div className="mb-3">
-        <label htmlFor="">
-          Alamat Lain perusahaan (Apabila alamat : Perusahaan berbeda dengan
-          yang tersebut Diatas)
-        </label>
-        <textarea
-          name="other_company_address"
-          onChange={handleInput}
-          id=""
-          cols="15"
-          rows="5"
-          className="form-control"
-        ></textarea>
-      </div>
-      <div class="alert alert-primary mt-2" role="alert">
-        <h6 style={{ fontWeight: "700" }}>
-          <FontAwesomeIcon icon={faPercent} className="me-2" /> Data Pajak
-        </h6>
-      </div>
-      <div className="form-floating mb-3">
-        <input
-          type="text"
-          name="npwp"
-          onChange={handleInput}
-          placeholder="Input in here"
-          className="form-control"
-        />
-        <label htmlFor="floatingInput">
-          Nomor NPWP (Sesuai dengan Faktur Pajak)
-        </label>
-      </div>
-      <div className="form-floating mb-3">
-        <input
-          type="text"
-          placeholder="Input in here"
-          name="tax_invoice_number"
-          onChange={handleInput}
-          className="form-control"
-        />
-        <label htmlFor="floatingInput">Nomor Serial Faktur Pajak</label>
-      </div>
-      <div className="form-floating mb-3">
-        <input
-          type="text"
-          placeholder="Input in here"
-          className="form-control"
-          name="pkp_number"
-          onChange={handleInput}
-        />
-        <label htmlFor="floatingInput">Nomor Surat Pengukuhan PKP</label>
-      </div>
-        <FormDireksiAndPic handleInput={handleInput} />
+      <CompanyInformation data={data} handleInput={handleInput} />
+      <DataPajak handleInput={handleInput} />
+        <FormDireksiAndPic handleInput={handleInput}  data={data?.company?.hospital_type}/>
         <FormDataBank handleInputChange={handleInputChange} />
 
       <div class="alert alert-primary mt-2" role="alert">

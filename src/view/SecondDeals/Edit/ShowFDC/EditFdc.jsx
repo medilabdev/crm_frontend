@@ -145,6 +145,7 @@ const EditFdc = ({ data }) => {
       }
     }
   };
+  
   return (
     <Card.Body>
       <div class="alert alert-primary mt-2" role="alert">
@@ -158,7 +159,7 @@ const EditFdc = ({ data }) => {
         name=""
         className="form-control mb-3"
         disabled
-        value={data?.lpp_document?.customer?.name}
+        value={data?.company?.name}
         id=""
       />
       <div className="row mb-3">
@@ -311,7 +312,7 @@ const EditFdc = ({ data }) => {
         />
         <label htmlFor="floatingInput">Nomor Surat Pengukuhan PKP</label>
       </div>
-      <EditDireksi valueOld={data?.fdc_document?.direksi} />
+      <EditDireksi valueOld={data?.fdc_document?.direksi} data={data} />
       <EditBank valueOld={data?.fdc_document?.bank} />
       <div class="alert alert-primary mt-2" role="alert">
         <h6 style={{ fontWeight: "700" }}>

@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import ModalDireksi from "./ModalDireksi";
 import { Card } from "react-bootstrap";
 
-const EditDireksi = ({ valueOld }) => {
+const EditDireksi = ({ valueOld, data }) => {
   const [editModal, setEditModal] = useState([]);
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);

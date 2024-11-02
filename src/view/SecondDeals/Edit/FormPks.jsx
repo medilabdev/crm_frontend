@@ -9,7 +9,6 @@ import Swal from "sweetalert2";
 import Action from "./part/Action";
 
 const FormPks = ({ data, dataPks }) => {
-  console.log(data);
   
   const token = localStorage.getItem("token");
   const position = localStorage.getItem("position");

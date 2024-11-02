@@ -2,7 +2,9 @@ import { faIdCardClip } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
 
-const FormDireksiAndPic = ({ handleInput }) => {
+const FormDireksiAndPic = ({ handleInput, data }) => {
+  console.log(data);
+  
   return (
     <div>
       <div class="alert alert-primary mt-2" role="alert">
@@ -11,6 +13,8 @@ const FormDireksiAndPic = ({ handleInput }) => {
           dan PIC
         </h6>
       </div>
+      
+      {/* direktur */}
       <div>
         <h6 className="fw-semibold">
           Direktur RS
@@ -55,6 +59,7 @@ const FormDireksiAndPic = ({ handleInput }) => {
           </div>
         </div>
       </div>
+      {/* wakil direktur */}
       <div>
         <h6 className="fw-semibold">
           Wakil direktur
@@ -99,6 +104,8 @@ const FormDireksiAndPic = ({ handleInput }) => {
           </div>
         </div>
       </div>
+
+      {/* penanggung jawab operasional */}
       <div>
         <h6 className="fw-semibold">
           Penanggung jawab operasional
@@ -143,6 +150,8 @@ const FormDireksiAndPic = ({ handleInput }) => {
           </div>
         </div>
       </div>
+     
+      {data && data.name !== "PT" && data.name !== "Yayasan" && (
       <div>
         <h6 className="fw-semibold">
           Kepala Rumah Sakit
@@ -187,6 +196,8 @@ const FormDireksiAndPic = ({ handleInput }) => {
           </div>
         </div>
       </div>
+      )}
+
       <div>
         <h6 className="fw-semibold">
           Kepala Ruang
@@ -231,6 +242,8 @@ const FormDireksiAndPic = ({ handleInput }) => {
           </div>
         </div>
       </div>
+
+    {data && data.name !== "PT" && data.name !== "Yayasan" && (
       <div>
         <h6 className="fw-semibold">
           Kepala perawat HD
@@ -275,6 +288,8 @@ const FormDireksiAndPic = ({ handleInput }) => {
           </div>
         </div>
       </div>
+    )}
+
       <div>
         <h6 className="fw-semibold">
           Dokter SpPD

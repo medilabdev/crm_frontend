@@ -11,7 +11,7 @@ const FDC = ({ userUid, data }) => {
   const [showFDC, setShowFDC] = useState(true);
   const handleShowFDC = () => setShowFDC(!showFDC);
   const uid = localStorage.getItem("uid");
-
+  
   return (
     <div id="FDC" className="col-12">
       <Card className="shadow-sm">
@@ -41,6 +41,7 @@ const FDC = ({ userUid, data }) => {
           <ShowFDC
             show={data?.fdc_document}
             CompanyName={data?.lpp_document?.customer?.name}
+            data={data}
           />
         )} 
       
