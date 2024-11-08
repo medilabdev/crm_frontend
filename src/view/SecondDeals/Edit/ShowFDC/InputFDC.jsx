@@ -14,8 +14,8 @@ import { Card } from "react-bootstrap";
 import Swal from "sweetalert2";
 import axios from "axios";
 import EditFormDataBank from "../FDC/EditFormDataBank";
-import CompanyInformation from "./PartCretateFDC/CompanyInformation";
-import DataPajak from "./PartCretateFDC/DataPajak";
+import CompanyInformation from "./PartCreateFDC/CompanyInformation";
+import DataPajak from "./PartCreateFDC/DataPajak";
 
 const InputFDC = ({ data }) => {
   const token = localStorage.getItem("token");

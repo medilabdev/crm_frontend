@@ -50,14 +50,14 @@ const FilterTable = ({
 
   return (
     <form onSubmit="">
-      <div className="container">
+      <div className="container mt-5" style={{ fontFamily: "Open Sans, sans-serif"  }}>
         <div className="row mt-3">
           <div className="col">
             <h6>
               <i class="bi bi-funnel fs-5"></i>
               <span
                 className="fw-semibold ms-2 fs-6"
-                style={{ fontSize: "0.85rem", fontWeight: "600" }}
+                style={{ fontSize: "0.85rem", fontFamily:"Nunito Sans, sans-serif" }}
               >
                 Filter
               </span>
@@ -77,34 +77,20 @@ const FilterTable = ({
           </div>
         </div>
         <div className="row mt-2">
-          <div className="col mb-2">
+          <div className="col mb-2" style={{ fontFamily:"Nunito Sans, sans-serif"  }}>
             <Select
+            style={{ fontFamily: "Open Sans, sans-serif"  }}
               placeholder="Select Owner"
               options={selectOwner()}
               onChange={(e) => setInputOwner(e)}
             />
           </div>
         </div>
-        {/* <div className="row mt-2">
-          <div className="col mb-2">
-            <h6>
-              <i className="bi bi-link-45deg fs-5"></i>
-              <span className="fw-semibold ms-2 fs-6">Associated</span>
-            </h6>
-          </div>
-          <div className="mb-2">
-            <Select
-              placeholder="Select Hospital / Klinik"
-              options={selectCompany()}
-              onChange={(e) => setInputCompany(e)}
-            />
-          </div>
-        </div> */}
         <div className="row mt-3">
           <div className="col">
             <h6>
               <i class="bi bi-currency-dollar"></i>
-              <span className="fw-semibold ms-2 fs-6">Deals</span>
+              <span className="ms-2 fw-semibold fs-6" style={{ fontFamily:"Nunito Sans, sans-serif"  }}>Deals</span>
             </h6>
           </div>
           <div className="row mt-2">
@@ -117,7 +103,7 @@ const FilterTable = ({
           </div>
         </div>
           <div className="mb-2">
-            <label className="mb-2" htmlFor="" style={{ fontWeight: "600" }}>
+            <label className="mb-2 fw-semibold" style={{ fontFamily:"Nunito Sans, sans-serif"  }}>
               Created At
             </label>
             <input
@@ -128,7 +114,7 @@ const FilterTable = ({
             />
           </div>
           <div className="mb-2">
-            <label className="mb-2" htmlFor="" style={{ fontWeight: "600" }}>
+            <label className="mb-2 fw-semibold" htmlFor="" style={{ fontFamily:"Nunito Sans, sans-serif"  }}>
               Updated At
             </label>
             <input

@@ -160,7 +160,7 @@ const SecondDeals = () => {
                     </div>
                   </div>
               
-                  <div className="mt-3">
+                  <div className="mt-5">
                     <DatatableDealSecond
                       data={listResultDataDeals}
                       paginationPerPage={pagination.limit}

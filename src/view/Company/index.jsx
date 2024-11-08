@@ -31,6 +31,9 @@ import ColumnsDataTable, {
   CustomStyles,
 } from "./partials/ColumnsDataTable";
 import { useMediaQuery } from "react-responsive";
+import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
+import { getListContact } from "../../action/FormContact";
 
 const Company = () => {
   const uid = localStorage.getItem("uid");
@@ -89,36 +92,11 @@ const Company = () => {
     });
   };
 
-  const getContact = (retryCount = 0) => {
-    axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/contacts/form/select`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => {
-        setContact(res.data.data);
-      })
-      .catch(async (err) => {
-        if (err.response.data.message === "Unauthenticated") {
-          localStorage.clear();
-          window.location.href = "/login";
-        } else if (err.response.status === 429) {
-          const maxRetries = 3;
-          if (retryCount < maxRetries) {
-            setTimeout(() => {
-              getContact(retryCount + 1);
-            }, 2000);
-          } else {
-            console.error(
-              "Max retry attempts reached. Unable to complete the request."
-            );
-          }
-        } else {
-          console.error("Unhandled error:", err);
-        }
-      });
-  };
+  const dispatch = useDispatch()
+
+  const { listResultContact } = useSelector((state) => state.SelectContact)
+  
+
 
   const getDeals = (retryCount = 0) => {
     axios
@@ -409,13 +387,17 @@ const Company = () => {
 
   const selectContact = () => {
     const result = [];
-    contact?.map((data) => {
-      const conAss = {
-        value: data.uid,
-        label: data.name,
-      };
-      result.push(conAss);
-    });
+    if(Array?.isArray(listResultContact)){
+      listResultContact?.map((data) => {
+        const conAss = {
+          value: data.uid,
+          label: data.name,
+        };
+        result.push(conAss);
+      });
+    }else{
+      console.error("listResult is not an array or is not yet initialized.");
+    }
     return result;
   };
   const [resultTypeCompany, setResultTypeCompany] = useState([]);
@@ -485,7 +467,6 @@ const Company = () => {
       await getOwnerUser();
       await getSource();
       await getAlltypeCompany();
-      await getContact();
       await getDeals();
     } catch (error) {
       console.error("error in fetch data", error);
@@ -497,6 +478,7 @@ const Company = () => {
   useEffect(() => {
     try {
       setPending(true);
+      dispatch(getListContact(token))
       getAllCompany(token, search, ownerCompany, formSearch);
     } catch (error) {
       console.error("error in fetch data", error);

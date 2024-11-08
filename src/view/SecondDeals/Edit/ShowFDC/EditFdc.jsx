@@ -15,6 +15,7 @@ import EditBank from "./EditBank";
 import EditDireksi from "./EditDireksi";
 
 const EditFdc = ({ data }) => {
+  
   const [editData, setEditData] = useState(data?.fdc_document);
   const [fileKtp, setFileKtp] = useState([]);
   const [fileNpwp, setFileNpwp] = useState([]);

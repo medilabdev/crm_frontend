@@ -62,11 +62,15 @@ function Topbar() {
   return (
     <header id="header" className="header fixed-top d-flex align-items-center">
       <div className="d-flex align-items-center justify-content-between ms-3">
+      <i
+          className="bi bi-list toggle-sidebar-btn"
+          style={{ fontSize: "1.8rem" }}
+        />
         <a
           href="\"
           className="logo d-flex align-items-center text-decoration-none"
         >
-          <img src={Image} style={{ width: "25px", marginLeft: "1rem" }} />
+          <img src={Image} style={{ width: "25px", marginLeft: "0.3rem" }} />
           <span
             className="title"
             style={{
@@ -79,15 +83,12 @@ function Topbar() {
             HARISSA CRM
           </span>
         </a>
-        <i
-          className="bi bi-list toggle-sidebar-btn"
-          style={{ fontSize: "1.8rem" }}
-        />
+      
       </div>
       <nav className="header-nav ms-auto">
         <ul className="d-flex align-items-center">
           {/* End Search Icon*/}
-          <li className="nav-item dropdown">
+          {/* <li className="nav-item dropdown">
             <a className="nav-link nav-icon" href="#" data-bs-toggle="dropdown">
               <i className="bi bi-bell" style={{ fontSize: "1.4rem" }} />
               <span
@@ -159,10 +160,10 @@ function Topbar() {
               </li>
             </ul>
             {/* End Notification Dropdown Items */}
-          </li>
+          {/* </li> */}
           {/* End Notification Nav */}
-          <li className="nav-item dropdown">
-            <a className="nav-link nav-icon" href="#" data-bs-toggle="dropdown">
+          {/* <li className="nav-item dropdown"> */}
+            {/* <a className="nav-link nav-icon" href="#" data-bs-toggle="dropdown">
               <i
                 className="bi bi-chat-left-text"
                 style={{ fontSize: "1.4rem" }}
@@ -173,9 +174,9 @@ function Topbar() {
               >
                 3
               </span>
-            </a>
+            </a> */}
             {/* End Messages Icon */}
-            <ul className="dropdown-menu dropdown-menu-end dropdown-menu-arrow messages">
+            {/* <ul className="dropdown-menu dropdown-menu-end dropdown-menu-arrow messages">
               <li className="dropdown-header">
                 You have 3 new messages
                 <a href="#">
@@ -200,9 +201,9 @@ function Topbar() {
                   </div>
                 </a>
               </li>
-            </ul>
+            </ul> */}
             {/* End Messages Dropdown Items */}
-          </li>
+          {/* </li> */}
           {/* End Messages Nav */}
           <li className="nav-item dropdown pe-3">
             <a

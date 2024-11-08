@@ -4,11 +4,12 @@
 .toggle-sidebar-btn {
     font-size: 50px;
     margin-left: -10px;
+    margin-right: 5px;
   }
   
   @media (max-width: 767px) {
     .toggle-sidebar-btn {
       font-size: 50px;
-      margin-left: 10px;
+      margin-left:-10px;
     }
   }

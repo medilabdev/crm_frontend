@@ -9,6 +9,8 @@
 /*--------------------------------------------------------------
 # General
 --------------------------------------------------------------*/
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+
 * {
   font-size: 0.85rem;
   font-family: "Rubik";
@@ -20,7 +22,7 @@
 
 body {
   font-family: "Open Sans";
-  background: #ffffff80 !important;
+  background: #F5F7FA !important;
   color: #444444;
 }
 
@@ -41,8 +43,8 @@ h6 {
 # Main
 --------------------------------------------------------------*/
 #main {
-  margin-top: 60px;
-  padding: 20px 30px;
+  margin-top: 70px;
+  padding:5px 5px;
   transition: all 0.3s;
 }
 
@@ -63,7 +65,7 @@ h6 {
   font-size: 24px;
   margin-bottom: 0;
   font-weight: bold;
-  color: #012a708d;
+  color: #052e758d;
 }
 
 /*--------------------------------------------------------------
@@ -302,8 +304,8 @@ h6 {
 /* Breadcrumbs */
 
 .breadcrumb-item {
-  font-size: 13px;
-  color: #020303;
+  font-size: 13.5px;
+  color: #3f3f4080;
   font-weight: 500;
 }
 
@@ -317,11 +319,11 @@ h6 {
 }
 
 .breadcrumb .breadcrumb-item::before {
-  color: #899bbd;
+  color: #44639e;
 }
 
 .breadcrumb .active {
-  color: #51678f;
+  color: #3079ff;
   font-weight: 500;
 }
 
@@ -602,10 +604,10 @@ h6 {
   left: 0;
   bottom: 0;
   font-weight: 600;
-  width: 300px;
+  width: 250px;
   z-index: 996;
   transition: all 0.3s;
-  padding: 20px;
+  padding: 15px;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: #aab7cf transparent;
@@ -634,7 +636,7 @@ h6 {
 @media (min-width: 1200px) {
   #main,
   #footer {
-    margin-left: 300px;
+    margin-left: 265px;
   }
 }
 
@@ -698,7 +700,7 @@ h6 {
 }
 
 .sidebar-nav .nav-link.collapsed {
-  color: #012970;
+  color: #3f4c63;
   background: #fff;
 }
 
@@ -707,12 +709,15 @@ h6 {
 }
 
 .sidebar-nav .nav-link:hover {
-  color: white;
+  color: white !important;
   background: #1b70f08d;
 }
 
 .sidebar-nav .nav-link:hover i {
-  color: white;
+  color: white !important;
+}
+.sidebar-nav .nav-link:hover span {
+  color: white !important;
 }
 
 .sidebar-nav .nav-link .bi-chevron-down {

@@ -14,7 +14,7 @@ const Breadcrumb = () => {
           <nav>
             <ol className="breadcrumb mt-2">
               <li className="breadcrumb-item">
-                <Link to="/" className="text-decoration-none">
+                <Link to="/" className="breadcrumb-item text-decoration-none">
                   Dashboard
                 </Link>
               </li>

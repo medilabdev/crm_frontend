@@ -13,11 +13,11 @@ const BreadcrumbCompany = () => {
           <nav>
             <ol className="breadcrumb mt-2">
               <li className="breadcrumb-item">
-                <a href="/" className="text-decoration-none">
+                <a href="/" className="breadcrumb-item text-decoration-none">
                   Dashboard
                 </a>
               </li>
-              <li className="breadcrumb-item active fw-bold">Company</li>
+              <li className="breadcrumb-item active">Company</li>
             </ol>
           </nav>
         </div>
