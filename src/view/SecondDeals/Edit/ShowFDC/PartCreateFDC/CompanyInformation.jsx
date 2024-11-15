@@ -2,9 +2,7 @@ import { faBuilding, faEnvelopesBulk, faPhone } from '@fortawesome/free-solid-sv
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import React from 'react'
 
-const CompanyInformation = ({ data, handleInput}) => {
-    console.log(data);
-    
+const CompanyInformation = ({ data, handleInput}) => {    
   return (
     <div>
           <div class="alert alert-primary mt-2" role="alert">

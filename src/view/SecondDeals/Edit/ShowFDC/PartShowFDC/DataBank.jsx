@@ -1,64 +1,56 @@
 import React from 'react'
+import { Card, Table } from 'react-bootstrap'
 
 const DataBank = ({ show }) => {
   return (
-    <div>
-        <div class="fw-bold mb-3">
-          <span className="fs-6 text-decoration-underline">Data Bank</span>
-        </div>
-        {show?.bank.map((item) => (
-          <>
-            <table className="mb-2">
-              <tr className="fw-medium mb-4">
-                <td style={{ width: "300px", fontSize: "0.9rem" }}>
-                  Nama Bank
-                </td>
-                <td className="px-1">:</td>
-                <td>{item?.bank_name || ""}</td>
+    <>
+        <Card className="mb-3 uniform-spacing col-md">
+        <Card.Body> 
+          <h5 className="fw-bold mb-3">Data Bank</h5>
+          {!show?.bank ? '-' : show?.bank.map((item) => (
+            <Table borderless className="mb-0">
+            <tbody style={{ fontFamily:"Rubik"}}>
+              <tr>
+                <td style={{ width: "350px" }}>Nama Bank</td>
+                <td style={{ width: "5px", textAlign: "center" }}>:</td>
+                <td> {item?.bank_name || "-"}</td>
               </tr>
-              <tr className="fw-medium">
-                <td style={{ width: "300px", fontSize: "0.9rem" }}>Cabang</td>
-                <td className="px-1">:</td>
-                <td>{item?.branch_bank || ""}</td>
+              <tr>
+                <td style={{ width: "350px" }}>Cabang</td>
+                <td style={{ width: "5px", textAlign: "center" }}>:</td>
+                <td>{item?.branch_bank || "-"}</td>
               </tr>
-              <tr className="fw-medium">
-                <td style={{ width: "200px", fontSize: "0.9rem" }}>
-                  Nama Account (A/N)
-                </td>
-                <td className="px-1">:</td>
-                <td>{item?.account_name || ""}</td>
+              <tr>
+                <td style={{ width: "350px" }}>Nama Account (A/N)</td>
+                <td style={{ width: "5px", textAlign: "center" }}>:</td>
+                <td>{item?.account_name || "-"}</td>
               </tr>
-              <tr className="fw-medium ">
-                <td style={{ width: "200px", fontSize: "0.9rem" }}>Kota</td>
-                <td className="px-1">:</td>
-                <td>{item?.city || ""}</td>
+              <tr>
+                <td style={{ width: "350px" }}>Kota</td>
+                <td style={{ width: "5px", textAlign: "center" }}>:</td>
+                <td>{item?.city || "-"}</td>
               </tr>
-              <tr className="fw-medium ">
-                <td style={{ width: "200px", fontSize: "0.9rem" }}>
-                  No. Rekening
-                </td>
-                <td className="px-1">:</td>
+              <tr>
+                <td style={{ width: "350px" }}>NO. Rekening</td>
+                <td style={{ width: "5px", textAlign: "center" }}>:</td>
                 <td>{item?.bank_account_number || "-"}</td>
               </tr>
-              <tr className="fw-medium ">
-                <td style={{ width: "200px", fontSize: "0.9rem" }}>
-                  Mata Uang
-                </td>
-                <td className="px-1">:</td>
+              <tr>
+                <td style={{ width: "350px" }}>Mata Uang</td>
+                <td style={{ width: "5px", textAlign: "center" }}>:</td>
                 <td>{item?.currency || "-"}</td>
               </tr>
-              <tr className="fw-medium ">
-                <td style={{ width: "200px", fontSize: "0.9rem" }}>
-                  Swift Code
-                </td>
-                <td className="px-1">:</td>
-                <td>{item?.swift_code || ""}</td>
+              <tr>
+                <td style={{ width: "350px" }}>Swift Code</td>
+                <td style={{ width: "5px", textAlign: "center" }}>:</td>
+                <td>{item?.swift_code || "-"}</td>
               </tr>
-            </table>
-            <hr />
-          </>
-        ))}
-    </div>
+            </tbody>
+          </Table>
+          ))}
+        </Card.Body>
+    </Card>
+    </>
   )
 }
 

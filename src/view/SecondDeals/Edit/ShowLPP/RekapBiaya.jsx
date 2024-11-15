@@ -52,14 +52,16 @@ const RekapBiaya = ({data}) => {
     },
   ];
   const customStyle = {
-    headRow: {
+    headCells: {
       style: {
+        fontSize: "2rem", // Sesuaikan ukuran font header
+        fontWeight: "bold", // Atur agar teks lebih tebal
+        textTransform: "uppercase", 
+        color: "white", 
         backgroundColor: "#496989",
-        color: "white",
-        marginTop: "15px",
-        borderRadius: "8px",
-        fontWeight: "600",
-        fontSize: "12px",
+        padding: "9px 12px",
+        // borderTop: "2px solid #CBDCEB",
+        // borderRadius: "8px", 
       },
     },
     cells: {
@@ -67,11 +69,23 @@ const RekapBiaya = ({data}) => {
         fontSize: "8px",
         marginTop: "4px",
         fontWeight: "500",
+        textTransform: "uppercase", 
       },
     },
   };
   return (
-    <div className="row mb-2">
+    <>
+     <Card className="mb-3 uniform-spacing col-md">
+        <Card.Body> 
+          <h5 className="fw-bold mb-3">Peralatan</h5>
+          <DataTable
+          data={datas}
+          columns={ColumnsTable}
+          customStyles={customStyle}
+          dense/>
+        </Card.Body>
+    </Card>
+    {/* <div className="row mb-2">
       <div className="col">
         <Card>
           <Card.Header>
@@ -81,16 +95,16 @@ const RekapBiaya = ({data}) => {
           </Card.Header>
           <Card.Body>
           <DataTable
-         data={datas}
-        columns={ColumnsTable}
-        customStyles={customStyle}
-        dense
-      />
+          data={datas}
+          columns={ColumnsTable}
+          customStyles={customStyle}
+          dense/>
           </Card.Body>
         </Card>
       </div>
       
-    </div>
+    </div> */}
+    </>
   );
 };
 

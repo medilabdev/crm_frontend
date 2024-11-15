@@ -1,18 +1,18 @@
 import React from 'react'
+import { Card, Table } from 'react-bootstrap'
 
 const DokumentFDC = ({ show }) => {
   return (
-    <div>
-          <div class="fw-bold mb-3">
-          <span className="fs-6 text-decoration-underline">Dokumen</span>
-        </div>
-        <table className="mt-3">
-            <tr className="fw-medium">
-              <td style={{ width: "150px", fontSize: "0.9rem" }}>
-                KTP Penanggung Jawab
-              </td>
-              <td className="px-1">:</td>
-              <td>
+    <>
+    <Card className="mb-3 uniform-spacing col-md">
+        <Card.Body> 
+          <h5 className="fw-bold mb-3">Dokumen</h5>
+          <Table borderless className="mb-0">
+            <tbody style={{ fontFamily:"Rubik"}}>
+              <tr>
+                <td style={{ width: "350px" }}>KTP Penanggung Jawab</td>
+                <td style={{ width: "5px", textAlign: "center" }}>:</td>
+                <td>
                 {show?.ktp_file ? (
                   <a
                   className="btn btn-primary"
@@ -27,17 +27,12 @@ const DokumentFDC = ({ show }) => {
                   {show?.ktp_file || "-"}
                 </a>
                 ) : "-"}
-                
-              </td>
-            </tr>
-          </table>
-        <table className="mt-3">
-            <tr className="fw-medium">
-              <td style={{ width: "150px", fontSize: "0.9rem" }}>
-              Kartu NPWP
-              </td>
-              <td className="px-1">:</td>
-              <td>
+                </td>
+              </tr>
+              <tr>
+                <td style={{ width: "350px" }}>Kartu NPWP</td>
+                <td style={{ width: "5px", textAlign: "center" }}>:</td>
+                <td>
                 {show?.npwp_file ? (
                   <a
                   className="btn btn-primary"
@@ -52,17 +47,12 @@ const DokumentFDC = ({ show }) => {
                   {show?.npwp_file || "-"}
                 </a>
                 ) : "-"}
-                
-              </td>
-            </tr>
-          </table>
-        <table className="mt-3">
-            <tr className="fw-medium">
-              <td style={{ width: "150px", fontSize: "0.9rem" }}>
-              Surat Pengukuhan Pengusaha Kena Pajak (SPPKP)
-              </td>
-              <td className="px-1">:</td>
-              <td>
+                </td>
+              </tr>
+              <tr>
+                <td style={{ width: "350px" }}>Surat Pengukuhan Pengusaha Kena Pajak (SPPKP)</td>
+                <td style={{ width: "5px", textAlign: "center" }}>:</td>
+                <td>
                 {show?.sppkp_file ? (
                   <a
                   className="btn btn-primary"
@@ -77,18 +67,13 @@ const DokumentFDC = ({ show }) => {
                   {show?.sppkp_file || "-"}
                 </a>
                 ) : "-"}
-                
-              </td>
-            </tr>
-          </table>
-        <table className="mt-3">
-            <tr className="fw-medium">
-              <td style={{ width: "150px", fontSize: "0.9rem" }}>
-              Tanda Daftar Perusahaan
-              </td>
-              <td className="px-1">:</td>
-              <td>
-                {show?.company_registration_file ? (
+                </td>
+              </tr>
+              <tr>
+                <td style={{ width: "350px" }}>Tanda Daftar Perusahaan</td>
+                <td style={{ width: "5px", textAlign: "center" }}>:</td>
+                <td>
+                {show?.sppkp_file ? (
                   <a
                   className="btn btn-primary"
                   href={`https://api-crm-iss.medilabjakarta.id/storage/file/deals/fdc/${show?.company_registration_file}`}
@@ -102,18 +87,13 @@ const DokumentFDC = ({ show }) => {
                   {show?.company_registration_file || "-"}
                 </a>
                 ) : "-"}
-                
-              </td>
-            </tr>
-          </table>
-        <table className="mt-3">
-            <tr className="fw-medium">
-              <td style={{ width: "150px", fontSize: "0.9rem" }}>
-              Surat Izin Usaha Perdagangan
-              </td>
-              <td className="px-1">:</td>
-              <td>
-                {show?.business_license_file ? (
+                </td>
+              </tr>
+              <tr>
+                <td style={{ width: "350px" }}>Surat Izin Usaha Perdagangan</td>
+                <td style={{ width: "5px", textAlign: "center" }}>:</td>
+                <td>
+                {show?.sppkp_file ? (
                   <a
                   className="btn btn-primary"
                   href={`https://api-crm-iss.medilabjakarta.id/storage/file/deals/fdc/${show?.business_license_file}`}
@@ -127,18 +107,13 @@ const DokumentFDC = ({ show }) => {
                   {show?.business_license_file || "-"}
                 </a>
                 ) : "-"}
-                
-              </td>
-            </tr>
-          </table>
-        <table className="mt-3">
-            <tr className="fw-medium">
-              <td style={{ width: "150px", fontSize: "0.9rem" }}>
-              Surat keterangan Domisili Usaha (SIUP)
-              </td>
-              <td className="px-1">:</td>
-              <td>
-                {show?.siup_file ? (
+                </td>
+              </tr>
+              <tr>
+                <td style={{ width: "350px" }}>Surat Keterangan Domisili Usaha (SIUP)</td>
+                <td style={{ width: "5px", textAlign: "center" }}>:</td>
+                <td>
+                {show?.sppkp_file ? (
                   <a
                   className="btn btn-primary"
                   href={`https://api-crm-iss.medilabjakarta.id/storage/file/deals/fdc/${show?.siup_file}`}
@@ -152,17 +127,12 @@ const DokumentFDC = ({ show }) => {
                   {show?.siup_file || "-"}
                 </a>
                 ) : "-"}
-                
-              </td>
-            </tr>
-          </table>
-        <table className="mt-3">
-            <tr className="fw-medium">
-              <td style={{ width: "150px", fontSize: "0.9rem" }}>
-              Surat keterangan Domisili Usaha (SIUP)
-              </td>
-              <td className="px-1">:</td>
-              <td>
+                </td>
+              </tr>
+              <tr>
+                <td style={{ width: "350px" }}>Tanda Tangan Kontrak Kerja Sama (KSO)</td>
+                <td style={{ width: "5px", textAlign: "center" }}>:</td>
+                <td>
                 {show?.kso_file ? (
                   <a
                   className="btn btn-primary"
@@ -177,12 +147,13 @@ const DokumentFDC = ({ show }) => {
                   {show?.kso_file || "-"}
                 </a>
                 ) : "-"}
-                
-              </td>
-            </tr>
-          </table>
-
-    </div>
+                </td>
+              </tr>
+            </tbody>
+          </Table>
+        </Card.Body>
+    </Card>
+   </>
   )
 }
 

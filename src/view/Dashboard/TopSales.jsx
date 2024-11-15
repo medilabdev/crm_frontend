@@ -9,23 +9,23 @@ const TopSales = () => {
   const [endDate, setEndDate] = useState(new Date());
   return (
     <div className='mb-3'>
-    <div className="d-flex justify-content-end align-items-center mb-4">
-  <p className="mb-0 me-3 fs-5 btn btn-sm btn-primary d-flex align-items-center">
-    Filter Date <FontAwesomeIcon icon={faArrowRightLong} className="ms-2" />
-  </p>
-  <input
-    type="date"
-    placeholder="dd/mm/yyyy"
-    className="form-control me-2"
-    style={{ maxWidth: "200px" }}
-  />
-  <input
-    type="date"
-    placeholder="dd/mm/yyyy"
-    className="form-control"
-    style={{ maxWidth: "200px" }}
-  />
-</div>
+      <div className="d-flex justify-content-end align-items-center mb-4">
+        <button className="mb-0 me-3 fs-5 btn btn-sm btn-primary d-flex align-items-center">
+          Filter Date <FontAwesomeIcon icon={faArrowRightLong} className="ms-2" />
+        </button>
+        <input
+          type="date"
+          placeholder="dd/mm/yyyy"
+          className="form-control me-2"
+          style={{ maxWidth: "200px" }}
+        />
+        <input
+          type="date"
+          placeholder="dd/mm/yyyy"
+          className="form-control"
+          style={{ maxWidth: "200px" }}
+        />
+    </div>
 
          <Row className="g-4">
         <Col md={8}>
@@ -34,18 +34,18 @@ const TopSales = () => {
             <Col md={6}>
               <Card className="info-card shadow-sm">
                 <Card.Body>
-                  <h5><FontAwesomeIcon icon={faContactCard}  className='fs-4 me-2'/> Data Contact</h5>
-                  <h2>
+                  <h5 className='fw-semibold'><FontAwesomeIcon icon={faContactCard}  className='fs-4 me-2'/> Data Contact</h5>
+                  <h4>
                      Data Contact Today  <span style={{
                           color: "white",
-                          fontSize: "1.4rem",
-                          backgroundColor: "3b82f6",
+                          fontSize: "1.2rem",
+                          backgroundColor: "rgba(59, 130, 246, 0.8)",
                           borderRadius: "20%",
                           padding: "0.5rem",
                           textAlign: "center",
                           height: "2rem",
-                    }}>11</span> 
-                  </h2>
+                    }}>10</span> 
+                  </h4>
                   <hr />
                   <Button className='btn-sm btn-success'>100</Button> Than Yesterday
                 </Card.Body>
@@ -54,18 +54,18 @@ const TopSales = () => {
             <Col md={6}>
               <Card className="info-card shadow-sm">
                 <Card.Body>
-                  <h5><FontAwesomeIcon icon={faBuilding} className='fs-4 me-2' /> Data Deals</h5>
-                  <h2>
+                  <h5 className='fw-semibold'><FontAwesomeIcon icon={faBuilding} className='fs-4 me-2' /> Data Deals</h5>
+                  <h4>
                     Stage Leads Deals Today <span style={{
                           color: "white",
-                          fontSize: "1.4rem",
+                          fontSize: "1.2rem",
                           backgroundColor: "rgba(59, 130, 246, 0.8)",
                           borderRadius: "20%",
                           padding: "0.5rem",
                           textAlign: "center",
                           height: "2rem",
                     }}>22</span> 
-                  </h2>
+                  </h4>
                   <hr />
                   <Button className='btn-sm' bg="primary">50</Button> Than last week
                 </Card.Body>

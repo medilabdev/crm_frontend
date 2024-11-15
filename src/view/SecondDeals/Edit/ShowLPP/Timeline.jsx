@@ -5,7 +5,6 @@ const Timeline = ({ data }) => {
   return (
     <div>
       <table className="table table-sm caption-top table-bordered">
-        <caption className="fw-bold fs-5">Timeline</caption>
         <thead className="text-center table-info">
           <tr>
             <th colSpan="13">Minggu</th>

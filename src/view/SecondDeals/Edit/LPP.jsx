@@ -40,9 +40,9 @@ const LPP = ({ userUid, data, listCompany, uidDeals }) => {
     <div id="LPP">
       <div className="col-12">
         <Card>
-          <Card.Header>
+          <Card.Header className="text-center">
             <div className="">
-              <span className="fs-5 fw-semibold">
+              <span className="fs-5 fw-semibold" style={{ fontWeight: 700, letterSpacing:"1.3px"}}>
                 {data?.lpp_document === null
                   ? "Lembar Persetujuan Project"
                   : "Edit Lembar Persetujuan Project"}
@@ -76,11 +76,12 @@ const LPP = ({ userUid, data, listCompany, uidDeals }) => {
             />
           ) : userUid !== uid ? (
             <ShowLPP data={data} />
-          ) : showLpp && (staging !== "Implementation" && staging !== "Closed Won")  ? (
+          ) : showLpp ? (
             <EditLpp data={data?.lpp_document} listCompany={listCompany}  uidDeals={uidDeals} dataFqp={data} />
-          ) : (
+          ):(
             <ShowLPP data={data} />
-          )}
+          )
+          }
         </Card>
       </div>
     </div>

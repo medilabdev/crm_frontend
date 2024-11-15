@@ -1,0 +1,25 @@
+.header-box {
+    background: linear-gradient(135deg,#386f93, #327cad);
+    border: 1px solid #b0c4de;
+    color: white;
+    font-family: "Nonito", sans-serif;
+    border-radius: 8px;
+    padding: 10px 15px;
+    font-weight: 600;
+    font-size: 1.1em;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    letter-spacing: 1.2px;
+  }
+  
+  .header-box::before {
+    content: '';
+    display: block;
+    width: 4px;
+    height: 100%;
+    background: #007bff;
+    margin-right: 10px;
+    border-radius: 4px;
+  }
+  

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Card } from "react-bootstrap";
+import { Card, Table, ToastHeader } from "react-bootstrap";
 import ReactQuill from "react-quill";
 import { useDispatch } from "react-redux";
 import Select from "react-select";
@@ -10,6 +10,10 @@ import Swal from "sweetalert2";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import Feedback from "react-bootstrap/esm/Feedback";
+import BaseInformation from "./PartEdit/BaseInformation";
+import ExistingUnit from "./PartEdit/ExistingUnit";
+import NewUnit from "./PartEdit/NewUnit";
+import EnvironmentalConditions from "./PartEdit/EnvironmentalConditions";
 
 const getNames = (items) => {
   return [0,1,2].map(index => items && items[index] ? items[index].name : '')
@@ -24,12 +28,14 @@ const InputFQP = ({ data, listCompany }) => {
   const [inputNps, setInputNps] = useState({
     promoters: getNames(data.promoters),
     neutrals: getNames(data.neutrals),
-    detractors: getNames(data.detcractors) 
+    detcractors: getNames(data.detcractors) 
   });
 
+  console.log(inputNps);
+  
   
 
-  const categoriesNps = ['promoters', 'neutrals', 'detractors'];
+  const categoriesNps = ['promoters', 'neutrals', 'detcractors'];
 
   const [showOverlay, setShowOverlay] = useState(false);
   const handleShow = () => setShowOverlay(true);
@@ -258,12 +264,19 @@ const InputFQP = ({ data, listCompany }) => {
       }
     }
   };
+
+
+
+  const autoResizeTextarea = (e) => {
+    e.target.style.height = "auto"; // Reset tinggi ke auto
+    e.target.style.height = `${e.target.scrollHeight}px`; // Sesuaikan tinggi berdasarkan konten
+  };
   return (
     <Card.Body>
       <>
-        <div class="alert alert-primary mt-2" role="alert">
-          <h6 style={{ fontWeight: "700" }}>Data Dasar Informasi</h6>
-        </div>
+      <div class="header-box">
+                  DATA DASAR INFORMASI
+          </div>
         <div className="mb-3">
           <Select
             placeholder="Pilih Rumah Sakit / Klinik"
@@ -288,594 +301,138 @@ const InputFQP = ({ data, listCompany }) => {
           </button>
           <OverlayAddCompany visible={showOverlay} onClose={handleClose} />
         </div>
-        <div className="mb-3">
-          <label htmlFor="floatingInput">
-            <span className="text-danger fs-6 fw-bold">*</span> Nama Kepala
-            Ruangan HD
-          </label>
-          <input
-            type="text"
-            className="form-control"
-            name="head_name_hd_room"
-            value={inputData.head_name_hd_room}
-            onChange={handleInputData}
-            required
-          />
-        </div>
-        <div className="row">
-          <div className="col-md-6">
-            <div className="mb-3">
-              <label htmlFor="floatingInput">
-                <span className="text-danger fs-6 fw-bold">*</span> Nama Dokter
-                Umum / Pelaksana HD
-              </label>
-              <input
-                type="text"
-                name="name_of_general_practitioner"
-                value={inputData.name_of_general_practitioner}
-                onChange={handleInputData}
-                className="form-control"
-                required
-              />
+        <BaseInformation inputData={inputData} handleInputData={handleInputData}/>
+        <div class="header-box">
+           NPS CUSTOMER
+          </div>
+        <Table className="table table-bordered w-100">
+          <thead>
+            <tr className="text-center">
+              <th className="fw-semibold">Promoters</th>
+              <th className="fw-semibold">Neutrals</th>
+              <th className="fw-semibold">Detractors</th>
+            </tr>
+          </thead>
+          <tbody>
+            {[0, 1, 2].map((idx) => (
+              <tr key={idx}>
+                <td className="p-3">
+                  <textarea
+                    name={`promoters[${idx}]`}
+                    value={inputNps?.promoters[idx] || ""}
+                    onChange={(e) => {
+                      setInputNps({
+                        ...inputNps,
+                        promoters: [
+                          ...inputNps.promoters.slice(0, idx),
+                          e.target.value,
+                          ...inputNps.promoters.slice(idx + 1),
+                        ],
+                      });
+                      autoResizeTextarea(e);
+                    }}
+                    placeholder="Input Nama / Jabatan"
+                    className="form-control mb-2"
+                    style={{
+                      resize: "none",
+                      overflow: "hidden",
+                      minHeight: "38px",
+                    }}
+                  />
+                </td>
+                <td className="p-3">
+                  <textarea
+                    name={`neutrals[${idx}]`}
+                    value={inputNps?.neutrals[idx] || ""}
+                    onChange={(e) => {
+                      setInputNps({
+                        ...inputNps,
+                        neutrals: [
+                          ...inputNps.neutrals.slice(0, idx),
+                          e.target.value,
+                          ...inputNps.neutrals.slice(idx + 1),
+                        ],
+                      });
+                      autoResizeTextarea(e);
+                    }}
+                    placeholder="Input Nama / Jabatan"
+                    className="form-control mb-2"
+                    style={{
+                      resize: "none",
+                      overflow: "hidden",
+                      minHeight: "38px",
+                    }}
+                  />
+                </td>
+                <td className="p-3">
+                  <textarea
+                    name={`detcractors[${idx}]`}
+                    value={inputNps?.detcractors[idx] || ""}
+                    onChange={(e) => {
+                      setInputNps({
+                        ...inputNps,
+                        detcractors: [
+                          ...inputNps.detcractors.slice(0, idx),
+                          e.target.value,
+                          ...inputNps.detcractors.slice(idx + 1),
+                        ],
+                      });
+                      autoResizeTextarea(e);
+                    }}
+                    placeholder="Input Nama / Jabatan"
+                    className="form-control mb-2"
+                    style={{
+                      resize: "none",
+                      overflow: "hidden",
+                      minHeight: "38px",
+                    }}
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+      </Table>
+
+          <ExistingUnit handleInputData={handleInputData} inputData={inputData} inputPrice={inputPrice} handleInputDataRP={handleInputDataRP}/>
+      
+          <NewUnit inputData={inputData} handleInputData={handleInputData} />
+            <EnvironmentalConditions inputData={inputData} handleInputData={handleInputData} />
+            <div class="header-box mt-4">
+                INFORMASI LAINNYA
             </div>
-          </div>
-          <div className="col-md-6">
-            <div className="mb-3">
-              <label htmlFor="floatingInput">
-                <span className="text-danger fs-6 fw-bold">*</span> Nama Dokter
-                Konsulen / SpPD KGH
-              </label>
-              <input
-                type="text"
-                name="name_of_consular_doctor"
-                value={inputData.name_of_consular_doctor}
-                onChange={handleInputData}
-                id=""
-                className="form-control"
-              />
-            </div>
-          </div>
-        </div>
-        <div className="row">
-          <div className="col-md-6">
-            <div className="mb-3">
-              <label htmlFor="floatingInput">
-                <span className="text-danger fs-6 fw-bold">*</span>
-                No.Telp Perawat / Dokter
-              </label>
-              <input
-                type="number"
-                name="contact_person_nurse_or_doctor"
-                value={inputData.contact_person_nurse_or_doctor}
-                onChange={handleInputData}
-                id=""
-                className="form-control"
-                required
-              />
-            </div>
-          </div>
-          <div className="col-md-6">
-            <div className="mb-3">
-              <label htmlFor="floatingInput">
-                <span className="text-danger fs-6 fw-bold">*</span>
-                No.Telp Pengadaan / Manajemen
-              </label>
-              <input
-                type="number"
-                name="procurement_or_management_contact_person"
-                value={inputData.procurement_or_management_contact_person}
-                onChange={handleInputData}
-                id=""
-                className="form-control"
-                required
-              />
-            </div>
-          </div>
-        </div>
-        <div class="alert alert-primary mt-4" role="alert">
-          <h6 style={{ fontWeight: "700" }}>NPS Customer</h6>
-        </div>
-        <div className="row">
-        <h6 className="fw-bold ms-2 mt-3">Promoters</h6>
-          <div className="col-md-4 ">
-          <input
-            type="text"
-            name={`promoters[0]`}
-            value={inputNps?.promoters[0] || ""}
-            onChange={(e) =>
-              setInputNps({
-                ...inputNps,
-                promoters: [
-                  e.target.value,
-                  inputNps.promoters[1] || "",
-                  inputNps.promoters[2] || "",
-                ],
-              })
-            }
-            placeholder="Input Nama/Jabatan"
-            className="form-control mb-2"
-          />
-          </div>
-          <div className="col-md-4">
-          <input
-            type="text"
-            name={`promoters[1]`}
-            value={inputNps?.promoters[1] || ""}
-            onChange={(e) =>
-              setInputNps({
-                ...inputNps,
-                promoters: [
-                  inputNps?.promoters[0] || "",
-                  e.target.value,
-                  inputNps.promoters[2] || "",
-                ],
-              })
-            }
-            placeholder="Input Nama/Jabatan"
-            className="form-control mb-2"
-          />
-          </div>
-          <div className="col-md-4 ">
-          <input
-            type="text"
-            name={`promoters[2]`}
-            value={inputNps.promoters[2] || ""}
-            onChange={(e) =>
-              setInputNps({
-                ...inputNps,
-                promoters: [
-                  inputNps.promoters[0] || "",
-                  inputNps.promoters[1] || "",
-                  e.target.value,
-                ],
-              })
-            }
-            placeholder="Input Nama/Jabatan"
-            className="form-control mb-2"
-          />
-          </div>
-          <h6 className="fw-bold ms-2 mt-3">Neutrals</h6>
-          <div className="col-md-4">
-          <input
-            type="text"
-            name={`neutrals[0]`}
-            value={inputNps.neutrals[0] || ""}
-            onChange={(e) =>
-              setInputNps({
-                ...inputNps,
-                neutrals: [
-                  e.target.value,
-                  inputNps.neutrals[1] || "",
-                  inputNps.neutrals[2] || "",
-                ],
-              })
-            }
-            placeholder="Input Nama/Jabatan"
-            className="form-control mb-2"
-          />
-          </div>
-          
-            <div className="col-md-4">
-            <input
-            type="text"
-            name={`neutrals[1]`}
-            value={inputNps.neutrals[1] || ""}
-            onChange={(e) =>
-              setInputNps({
-                ...inputNps,
-                neutrals: [
-                  inputNps.neutrals[0] || "",
-                  e.target.value,
-                  inputNps.neutrals[2] || "",
-                ],
-              })
-            }
-            placeholder="Input Nama/Jabatan"
-            className="form-control mb-2"
-          />
-            </div>
-            <div className="col-md-4">
-            <input
-            type="text"
-            name={`neutrals[2]`}
-            value={inputNps.neutrals[2] || ""}
-            onChange={(e) =>
-              setInputNps({
-                ...inputNps,
-                neutrals: [
-                  inputNps.neutrals[0] || "",
-                  inputNps.neutrals[1] || "",
-                  e.target.value,
-                ],
-              })
-            }
-            placeholder="Input Nama/Jabatan"
-            className="form-control mb-2"
-          />
-            </div> 
-            <h6 className="fw-bold ms-2 mt-3">Detractors</h6>
-            <div className="col-md-4">
-            <input
-            type="text"
-            name={`detractors[0]`}
-            value={inputNps.detractors[0] || ""}
-            onChange={(e) =>
-              setInputNps({
-                ...inputNps,
-                detractors: [
-                  e.target.value,
-                  inputNps.detractors[1] || "",
-                  inputNps.detractors[2] || "",
-                ],
-              })
-            }
-            placeholder="Input Nama/Jabatan"
-            className="form-control mb-2"
-          />
-            </div>
-            <div className="col-md-4">
-            <input
-            type="text"
-            name={`detractors[1]`}
-            value={inputNps.detractors[1] || ""}
-            onChange={(e) =>
-              setInputNps({
-                ...inputNps,
-                detractors: [
-                  inputNps.detractors[0] || "",
-                  e.target.value,
-                  inputNps.detractors[2] || "",
-                ],
-              })
-            }
-            placeholder="Input Nama/Jabatan"
-            className="form-control mb-2"
-          />
-            </div>
-            <div className="col-md-4">
-            <input
-            type="text"
-            name={`detractors[2]`}
-            value={inputNps.detractors[2] || ""}
-            onChange={(e) =>
-              setInputNps({
-                ...inputNps,
-                detractors: [
-                  inputNps.detractors[0] || "",
-                  inputNps.detractors[1] || "",
-                  e.target.value,
-                ],
-              })
-            }
-            placeholder="Input Nama/Jabatan"
-            className="form-control mb-2"
-          />
-            </div>
-          </div>
-        <div class="alert alert-primary mt-4" role="alert">
-          <h6 style={{ fontWeight: "700" }}>Existing Unit</h6>
-        </div>
         <div className="row">
           <div className="col-md-6">
             <div className="form-floating mb-3">
               <input
-                type="text"
-                name="existing_vendor"
-                value={inputData.existing_vendor || ""}
+                type="number"
+                name="hd_unit_count_distance_from_faskes"
+                id=""
+                value={inputData.hd_unit_count_distance_from_faskes || ""}
                 onChange={handleInputData}
                 className="form-control"
                 placeholder=""
-                id=""
               />
-              <label htmlFor="floatingInput">Existing vendor</label>
+              <label htmlFor="">Jumlah unit HD kurang dari 20 km faskes</label>
             </div>
           </div>
           <div className="col-md-6">
             <div className="form-floating mb-3">
               <input
                 type="number"
-                name="number_of_machine_unit"
-                value={inputData.number_of_machine_unit || ""}
+                name="hd_machine_unit_count"
+                value={inputData.hd_machine_unit_count || ""}
                 onChange={handleInputData}
+                id=""
                 className="form-control"
                 placeholder=""
-                id=""
               />
-              <label htmlFor="floatingInput">Jumlah Unit Mesin</label>
+              <label htmlFor="">Jumlah mesin unit HD sekitar</label>
             </div>
           </div>
         </div>
-        <div className="row">
-          <div className="col-md-6">
-            <div className="form-floating mb-3">
-              <input
-                type="number"
-                name="average_total_actions_last_six_months"
-                value={inputData.average_total_actions_last_six_months || ""}
-                onChange={handleInputData}
-                className="form-control"
-                placeholder=""
-                id=""
-              />
-              <label htmlFor="floatingInput">
-                Total rata-rata tindakan per 6 bulan terakhir
-              </label>
-            </div>
-          </div>
-          <div className="col-md-6">
-            <div className="form-floating mb-3">
-              <input
-                type="number"
-                name="number_of_existing_patients"
-                value={inputData.number_of_existing_patients || ""}
-                onChange={handleInputData}
-                className="form-control"
-                placeholder=""
-                id=""
-              />
-              <label htmlFor="floatingInput">Jumlah pasien existing</label>
-            </div>
-          </div>
-        </div>
-        <div className="row">
-          <div className="col-md-6">
-            <div className="form-floating mb-3">
-              <input
-                type="text"
-                name="expired_contract_period"
-                value={inputData.expired_contract_period || ""}
-                onChange={handleInputData}
-                className="form-control"
-                placeholder=""
-                id=""
-              />
-              <label htmlFor="floatingInput">Masa kontrak berakhir</label>
-            </div>
-          </div>
-          <div className="col-md-6">
-            <div className="mb-3">
-              <label htmlFor="floatingInput">Replace/ Expand</label>
-              <select
-                name="status_contract_unit"
-                value={inputData.status_contract_unit || ""}
-                id=""
-                onChange={handleInputData}
-                className="form-control"
-              >
-                <option value="">Select Chose</option>
-                <option value="replace">Replace</option>
-                <option value="expand">Expand</option>
-              </select>
-            </div>
-          </div>
-        </div>
-        <div className="row">
-          <div className="col-md-6">
-            <div className="form-floating mb-3">
-              <input
-                type="text"
-                name="existing_bhp_price"
-                className="form-control"
-                placeholder=""
-                value={inputPrice || ""}
-                onChange={handleInputDataRP}
-                id=""
-              />
-              <label htmlFor="floatingInput">Harga BHP existing</label>
-            </div>
-          </div>
-          <div className="col-md-6">
-            <div className="form-floating mb-3">
-              <input
-                type="text"
-                name="expired_hd_permit_period"
-                value={inputData.expired_hd_permit_period || ""}
-                onChange={handleInputData}
-                className="form-control"
-                placeholder=""
-                id=""
-              />
-              <label htmlFor="floatingInput">Masa berlaku Izin HD</label>
-            </div>
-          </div>
-        </div>
-        <div className="mb-3">
-          <label htmlFor="" className="mb-1">
-            Apakah Bekerjasama Dengan BPJS
-          </label>
-          <select
-            name="collaborating_with_bpjs"
-            id=""
-            value={inputData.collaborating_with_bpjs || ""}
-            onChange={handleInputData}
-            className="form-select"
-          >
-            <option value="">Select Choose</option>
-            <option value="yes">Ya</option>
-            <option value="no">Tidak</option>
-          </select>
-        </div>
-        <div className="form-floating mb-3">
-          <input
-            type="number"
-            className="form-control"
-            name="number_of_unit_facilities"
-            value={inputData.number_of_unit_facilities || ""}
-            onChange={handleInputData}
-            placeholder=""
-          />
-          <label htmlFor="">Jumlah Sarana Unit</label>
-        </div>
-        <div class="alert alert-primary mt-4" role="alert">
-          <h6 style={{ fontWeight: "700" }}>New Unit</h6>
-        </div>
-        <div className="form-floating mb-3">
-          <input
-            type="number"
-            name="total_of_machine_unit"
-            placeholder=""
-            value={inputData.total_of_machine_unit || ""}
-            onChange={handleInputData}
-            id=""
-            className="form-control"
-          />
-          <label htmlFor="">Jumlah Unit</label>
-        </div>
-        <div className="mb-3">
-          <label htmlFor="" className="mb-1">
-            Sistem Kerja Sama
-          </label>
-          <select
-            name="cooperation_system"
-            value={inputData.cooperation_system || ""}
-            onChange={handleInputData}
-            id=""
-            className="form-control"
-          >
-            <option value="">Select Chose</option>
-            <option value="buy">Buy</option>
-            <option value="kso">Kso</option>
-            <option value="etc">Lainnya</option>
-          </select>
-        </div>
-        <div className="mb-3">
-          <label htmlFor="" className="mb-1">
-            SDM
-          </label>
-          <select
-            name="human_resources"
-            className="form-control"
-            value={inputData.human_resources || ""}
-            onChange={handleInputData}
-          >
-            <option value="">Select Chose</option>
-            <option value="available">Tersedia</option>
-            <option value="not_yet_available">Belum Tersedia</option>
-          </select>
-        </div>
-        <div className="mb-2">
-          <h6 className="ms-2 mt-3">Faskes HD 5 km sekitar New Unit</h6>
-          <ReactQuill
-            className="p-2"
-            theme="snow"
-            value={inputData.hd_health_facilities_arround || ""}
-            onChange={(value) =>
-              handleInputData({
-                target: { name: "hd_health_facilities_arround", value },
-              })
-            }
-          />
-        </div>
-        <div className="mb-2">
-          <h6 className="ms-2 mt-3">Kapasitas Faskes HD Sekitar New Unit</h6>
-          <ReactQuill
-            className="p-2"
-            theme="snow"
-            value={inputData.hd_health_facilities_capacity_approximately || ""}
-            onChange={(value) =>
-              handleInputData({
-                target: {
-                  name: "hd_health_facilities_capacity_approximately",
-                  value,
-                },
-              })
-            }
-          />
-        </div>
-        <div class="alert alert-primary mt-4" role="alert">
-          <h6 style={{ fontWeight: "700" }}>Keadaan Lingkungan</h6>
-        </div>
-        <div className="mb-3">
-          <label htmlFor="" className="mb-1">
-            Banjir
-          </label>
-          <select
-            name="cataclysm"
-            id=""
-            value={inputData.cataclysm || ""}
-            onChange={handleInputData}
-            className="form-select"
-          >
-            <option value="">Select Choose</option>
-            <option value="yes">Ya</option>
-            <option value="no">Tidak</option>
-          </select>
-        </div>
-        <div className="mb-3">
-          <label htmlFor="" className="mb-1">
-            Dekat Laut (Kurang dari 5km)
-          </label>
-          <select
-            name="near_the_sea"
-            id=""
-            value={inputData.near_the_sea || ""}
-            onChange={handleInputData}
-            className="form-select"
-          >
-            <option value="">Select Choose</option>
-            <option value="yes">Ya</option>
-            <option value="no">Tidak</option>
-          </select>
-        </div>
-        <div className="mb-3">
-          <label htmlFor="" className="mb-1">
-            Ketersedian SDM
-          </label>
-          <select
-            name="availability_of_human_resource"
-            id=""
-            value={inputData.availability_of_human_resource || ""}
-            onChange={handleInputData}
-            className="form-select"
-          >
-            <option value="">Select Choose</option>
-            <option value="available">Ada</option>
-            <option value="not_yet_available">Tidak</option>
-          </select>
-        </div>
-        <div className="mb-3">
-          <label htmlFor="" className="mb-1">
-            Akses Transportasi / Logistik
-          </label>
-          <select
-            name="access_to_transportation"
-            id=""
-            value={inputData.access_to_transportation || ""}
-            onChange={handleInputData}
-            className="form-select"
-          >
-            <option value="">Select Choose</option>
-            <option value="easy">Mudah</option>
-            <option value="difficult">Sulit</option>
-          </select>
-        </div>
-        <div class="alert alert-primary mt-4" role="alert">
-          <h6 style={{ fontWeight: "700" }}>Other Information</h6>
-        </div>
-        <div className="form-floating mb-3">
-          <input
-            type="number"
-            name="hd_unit_count_distance_from_faskes"
-            id=""
-            value={inputData.hd_unit_count_distance_from_faskes || ""}
-            onChange={handleInputData}
-            className="form-control"
-            placeholder=""
-          />
-          <label htmlFor="">Jumlah unit HD kurang dari 20 km faskes</label>
-        </div>
-        <div className="form-floating mb-3">
-          <input
-            type="number"
-            name="hd_machine_unit_count"
-            value={inputData.hd_machine_unit_count || ""}
-            onChange={handleInputData}
-            id=""
-            className="form-control"
-            placeholder=""
-          />
-          <label htmlFor="">Jumlah mesin unit HD sekitar</label>
-        </div>
+      
+       
+        
         <div className="mb-2">
           <h6 className="ms-2 mt-3">Catatan</h6>
           <ReactQuill

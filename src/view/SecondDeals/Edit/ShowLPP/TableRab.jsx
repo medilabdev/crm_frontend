@@ -41,7 +41,59 @@ const TableRab = ({ data }) => {
 
   const ColumnsTable = [
     {
-      name: "Item",
+      name: "Item (Alat Kesehatan)",
+      selector: (row) => (
+        <span
+        style={{
+          display: "inline-block",
+          maxWidth: "200px", // Sesuaikan dengan kebutuhan
+          wordWrap: "break-word", // Memastikan kata-kata pecah jika terlalu panjang
+          whiteSpace: "normal", // Mengizinkan pembungkusan teks
+        }}
+        >
+          {row.item_uid || "-"}
+        </span>
+      ),
+    },
+    position !== "573MloZ8j--aaQ" ? 
+    {
+      name: "Nilai Estimasi Biaya",
+      selector: (row) =>
+        row.estimated_cost
+          ? `Rp. ${new Intl.NumberFormat().format(row.estimated_cost)}`
+          : "-",
+    } : '',
+    {
+      name: "Qty",
+      selector: (row) => (row.qty ? row.qty : ""),
+    },
+    position !== "573MloZ8j--aaQ" ? 
+    {
+      name: "Total Estimasi Biaya",
+      selector: (row) =>
+        row.total_estimated_cost
+          ? `Rp. ${new Intl.NumberFormat().format(row.total_estimated_cost)}`
+          : "-" 
+    } : '',
+    {
+      name: "Catatan Realisasi",
+      selector: (row) => (
+        <span
+        style={{
+          display: "inline-block",
+          maxWidth: "200px", // Sesuaikan dengan kebutuhan
+          wordWrap: "break-word", // Memastikan kata-kata pecah jika terlalu panjang
+          whiteSpace: "normal", // Mengizinkan pembungkusan teks
+        }}
+        >
+          {row.realization_note || "-"}
+        </span>
+      ),
+    },
+  ];
+  const ColumnsTableNonAlkes = [
+    {
+      name: "Item (Bukan Alat Kesehatan)",
       selector: (row) => (
         <span
         style={{
@@ -94,49 +146,34 @@ const TableRab = ({ data }) => {
   
   
   return (
-    <div className="row mb-2">
-      <div className="col">
-        <Card>
-          <Card.Header>
-          <span style={{fontSize:"0.85rem", fontWeight:"500"}}>
-                RAB Bangunan & Lainnya terkait pembiayaan di awal
-                </span>
-          </Card.Header>
-          <Card.Body>
-
-          {alkes && alkes.length > 0 ?   
+    <Card className="mb-3 uniform-spacing col-md">
+      <Card.Body>
+      <h5 className="fw-bold mb-1">RAB Bangunan & Lainnya Terkait Pembiayaan Diawal</h5>
+      {alkes && alkes.length > 0 ?   
           <>
-           <div style={{fontSize:"1rem" }}>
-           Alat Kesehatan
-          </div>
           <DataTable
             className="mb-2"
             columns={ColumnsTable}
             data={alkes}
             customStyles={customStyle}
             dense
+            subHeader
           />
           </>
           : ''}
           {noAlkse && noAlkse.length > 0 ?  
           <>
-          <div style={{fontSize:"1rem"}}>
-            Bukan Alat Kesehatan
-            </div>
           <DataTable
           className="mb-2"
-            columns={ColumnsTable}
+            columns={ColumnsTableNonAlkes}
             data={noAlkse}
             customStyles={customStyle}
             dense
           />
           </>
           : ''}
-          </Card.Body>
-        </Card>
-      </div>
-      
-    </div>
+      </Card.Body>
+    </Card>
   );
 };
 

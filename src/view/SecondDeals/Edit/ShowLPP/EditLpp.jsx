@@ -65,7 +65,8 @@ const EditLpp = ({ data, listCompany, uidDeals, dataFqp }) => {
       },
     }),
   });
-
+  console.log(dataLpp);
+  
   const dispatch = useDispatch();
   const selectCompany = () => {
     const result = [];
@@ -223,6 +224,8 @@ const EditLpp = ({ data, listCompany, uidDeals, dataFqp }) => {
     newData[index][valueIndex] = newData[index][valueIndex] === "1" ? "0" : "1";
     setTimelineData(newData);
   };
+
+  
 
   let RabData = [];
   for (let i = 0; i < localStorage.length; i++) {
@@ -416,7 +419,7 @@ const EditLpp = ({ data, listCompany, uidDeals, dataFqp }) => {
         formData.append("date_period", dataLpp?.date_period || "")
         if(Array.isArray(TimelineData) && TimelineData.length > 0){
           TimelineData.forEach((time, index) => {
-            
+
             formData.append(
               `timeline[${index}][name]`,
               index === 0 ? 
@@ -441,9 +444,9 @@ const EditLpp = ({ data, listCompany, uidDeals, dataFqp }) => {
         }
         formData.append('is_validate', dataLpp.is_validate)
         formData.append("_method", "put")
-        for (const pair of formData.entries()) {
-          console.log(pair[0] + ": " + pair[1]);
-        }
+        // for (const pair of formData.entries()) {
+        //   console.log(pair[0] + ": " + pair[1]);
+        // }
        const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/v2/lpp-document/${uidLpp}`, formData,{
         headers:{
           Authorization:`Bearer ${token}`
@@ -477,8 +480,8 @@ const EditLpp = ({ data, listCompany, uidDeals, dataFqp }) => {
     
   return (
     <Card.Body>
-      <div class="alert alert-primary mt-2" role="alert">
-        <h6 style={{ fontWeight: "700" }}>Customer</h6>
+       <div class="header-box">
+                  CUSTOMER
       </div>
       <div className="form-floating mb-3">
         <input
@@ -566,8 +569,8 @@ const EditLpp = ({ data, listCompany, uidDeals, dataFqp }) => {
       ) : (
         ""
       )}
-      <div class="alert alert-primary mt-2" role="alert">
-        <h6 style={{ fontWeight: "700" }}>Jenis Kerjasama</h6>
+     <div class="header-box mt-4">
+                  JENIS KERJASAMA 
       </div>
       <div className="mb-3">
         <label htmlFor="" className="mb-1 fw-semibold">
@@ -655,8 +658,8 @@ const EditLpp = ({ data, listCompany, uidDeals, dataFqp }) => {
         />
           {error && <div className="invalid-feedback">{error.categoryType}</div>}
       </div>
-      <div class="alert alert-primary mt-4" role="alert">
-        <h6 style={{ fontWeight: "700" }}>Term Kerjasama</h6>
+      <div class="header-box mt-4">
+                  JANGKA WAKTU KERJASAMA 
       </div>
       <div className="form-floating mb-3">
         <input
@@ -715,8 +718,8 @@ const EditLpp = ({ data, listCompany, uidDeals, dataFqp }) => {
           <option value="iss">PT ISS</option>
         </select>
       </div>
-      <div class="alert alert-primary mt-2" role="alert">
-        <h6 style={{ fontWeight: "700" }}>Peralatan</h6>
+      <div class="header-box mt-4">
+                  PERALATAN 
       </div>
       <div className="form-floating mb-3">
         <input
@@ -857,8 +860,8 @@ const EditLpp = ({ data, listCompany, uidDeals, dataFqp }) => {
           </div>
         </div>
       </div>
-      <div class="alert alert-primary mt-2" role="alert">
-        <h6 style={{ fontWeight: "700" }}>Target</h6>
+      <div class="header-box mt-4">
+                  TARGET 
       </div>
       <div className="form-floating mb-3">
         <input

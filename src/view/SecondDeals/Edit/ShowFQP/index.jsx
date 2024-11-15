@@ -6,6 +6,7 @@ import ExistingUnit from "./part/ExistingUnit";
 import NewUnit from "./part/NewUnit";
 import EnvironmentalBasic from "./part/EnvironmentalBasic";
 import OtherInformation from "./part/OtherInformation";
+import NoteOther from "./part/NoteOther";
 const ShowFQP = ({ data }) => {
   const position = localStorage.getItem("position")
   return (
@@ -20,22 +21,7 @@ const ShowFQP = ({ data }) => {
       {position !== "1-bZKHtNZCFWGg" && position !== "573MloZ8j--aaQ" && position !== "SzhgAQn6tP48xw" && position !== "adsfasdf1321" ? 
       <>
         <OtherInformation data={data} position={position} /> 
-        <div class="fw-bold mb-3">
-          <span className="fs-6 text-decoration-underline">Catatan lainnya</span>
-        </div>
-        <table className="mb-4">
-          <tr className="fw-medium">
-            <td>{data && data.another_notes ? (
-                <span
-                  dangerouslySetInnerHTML={{
-                    __html: data.another_notes,
-                  }}
-                />
-              ) : (
-                "-"
-              )}</td>
-          </tr>
-        </table>
+        <NoteOther data={data} />
       </>
       : "" }
     </Card.Body>

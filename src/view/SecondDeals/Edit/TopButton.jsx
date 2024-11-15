@@ -189,15 +189,8 @@ const TopButton = ({
     window.location.reload();
   };
 
-  
-
-
-   
-
-  
-
   return (
-    <div className="row">
+    <div className="row button-second-deals">
       <div className="col mt-2">
         <button
           className={`btn ${
@@ -223,7 +216,7 @@ const TopButton = ({
           uid={uid}
         />
 
-        <div className="d-flex float-end">
+        <div className="button-container d-flex float-end">
      
           {((position === "pRGYXVKdzCPoQ8" && statusLevel === "leads") || (position === "pRGYXVKdzCPoQ8" && statusLevel === "Approaching") || (position === "adsfasdf1321" && statusLevel === "Decide") || (position ==="pRGYXVKdzCPoQ1" && statusLevel === "Decide")) && uidForm ? (
               <>

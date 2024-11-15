@@ -2,9 +2,7 @@ import { faIdCardClip } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
 
-const FormDireksiAndPic = ({ handleInput, data }) => {
-  console.log(data);
-  
+const FormDireksiAndPic = ({ handleInput, data }) => {  
   return (
     <div>
       <div class="alert alert-primary mt-2" role="alert">

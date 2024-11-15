@@ -20,7 +20,7 @@ const MenuSidebar = ({ type, name, icon, url, isActive }) => {
   const handleLinkClick = () => {
   };
   
-
+  
   return (
     <div style={{ position: "relative" }}>
 
