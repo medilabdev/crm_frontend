@@ -141,7 +141,7 @@ const FormPks = ({ data, dataPks }) => {
                       <td>
                         <a
                           className="btn btn-primary btn-sm"
-                          href={`${process.env.REACT_APP_BACKEND_URL}/storage/file/deals/${row.file}`}
+                          href={`${process.env.REACT_APP_BACKEND_IMAGE}/storage/file/deals/${row.file}`}
                           target="_blank"
                         >
                           {row?.file || "-"}
