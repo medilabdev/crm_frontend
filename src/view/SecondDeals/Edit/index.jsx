@@ -41,6 +41,7 @@ const EditDataSecondDeals = () => {
     setShowFDC(false);
     setShowFormRoi(false);
     setShowFormPks(false)
+    setShowWeeklyReport(false)
     localStorage.setItem('activeForm', 'FQP');
   };
 
@@ -50,6 +51,7 @@ const EditDataSecondDeals = () => {
     setShowFQP(false);
     setShowFormRoi(false);
     setShowFormPks(false)
+    setShowWeeklyReport(false)
     localStorage.setItem('activeForm', 'LPP');
   };
 
@@ -59,6 +61,7 @@ const EditDataSecondDeals = () => {
     setShowFQP(false);
     setShowFormRoi(false);
     setShowFormPks(false)
+    setShowWeeklyReport(false)
     localStorage.setItem('activeForm', 'FDC');
   };
   const handleShowRoi = () => {
@@ -67,6 +70,7 @@ const EditDataSecondDeals = () => {
     setShowFQP(false);
     setShowLPP(false);
     setShowFormPks(false)
+    setShowWeeklyReport(false)
     localStorage.setItem('activeForm', 'ROI');
   };
   const handleShowPks = () => {
@@ -75,6 +79,7 @@ const EditDataSecondDeals = () => {
     setShowFQP(false);
     setShowLPP(false);
     setShowFormRoi(false);
+    setShowWeeklyReport(false)
     localStorage.setItem('activeForm', 'PKS');
   };
   const HandleButtonActivity = () => {
@@ -83,19 +88,22 @@ const EditDataSecondDeals = () => {
 
   const handleButtonWeeklyReport = () => {
     setShowWeeklyReport(!showWeeklyReport)
+    setShowFDC(false);
+    setShowFQP(false);
+    setShowLPP(false);
+    setShowFormRoi(false);
+    setShowFormPks(false)
+    localStorage.setItem('activeForm', 'WeeklyActivities');
   }
   const { uid } = useParams();
   const dispatch = useDispatch();
   const { listResult } = useSelector((state) => state.FormCompany);
   const { dataActivityDeals } = useSelector((state) => state.DataActivityDeals)
   const { dataPks } = useSelector((state) => state.DataPks) 
-
   
   
   
   
-
-
   useEffect(() => {
     dispatch(GetDataActivity(uid, token));
     dispatch(GetDataDealsDetail(uid, token));
@@ -122,6 +130,8 @@ const EditDataSecondDeals = () => {
         case 'PKS':
           setShowFormPks(true);
           break;
+        case 'WeeklyActivities':
+          setShowWeeklyReport(true);
         default:
           break;
       }
@@ -168,7 +178,7 @@ const EditDataSecondDeals = () => {
             <CloseLost  data={detailDataDeals} /> : ""}
             {showFormPks ? <FormPks data={detailDataDeals} dataPks={dataPks}/> : ""}
             {showFormRoi ? <InputRoi data={detailDataDeals} /> : ""}
-          
+            {showWeeklyReport ? <WeeklyReport data={detailDataDeals} /> : ''}
             {ShowFDC ? (
               
               <FDC

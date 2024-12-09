@@ -48,6 +48,7 @@ function Topbar() {
       })
       .then((response) => {
         localStorage.clear();
+        sessionStorage.clear();
         Swal.fire({
           title: "Logout Berhasil",
           text: response.data.message,

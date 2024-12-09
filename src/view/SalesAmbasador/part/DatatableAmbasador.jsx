@@ -7,7 +7,7 @@ const DatatableAmbasador = ({ data, paginationPerPage, handleChangePage, handleP
   return (
     <>
         <DataTable 
-            data={data}
+            // data={data}
             columns={ColumnsTable}
             customStyles={CustomStyles}
             pagination

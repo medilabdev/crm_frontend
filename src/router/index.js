@@ -60,6 +60,11 @@ import DealsVersion from "../view/Properties/DealsVersion";
 import EditDataSecondDeals from "../view/SecondDeals/Edit";
 import AssignDealsSales from "../view/SecondDeals/AssignDeals";
 import SalesAmbasador from "../view/SalesAmbasador";
+import WeeklyTask from "../view/Weekly/WeeklyTask"
+import WeeklyReport from "../view/Weekly/WeeklyReport";
+import CreateWeeklyTask from "../view/Weekly/WeeklyTask/Create";
+import EditTaskWeekly from "../view/Weekly/WeeklyTask/Edit";
+import FillTaskWeekly from "../view/Weekly/FillTaskWeekly";
 
 const Login = ({ children }) => {
   const token = localStorage.getItem("token");
@@ -495,6 +500,12 @@ function Router() {
         <Route exact path="/deals-second/:uid/edit" element={<Login><EditDataSecondDeals/></Login>} />
         <Route exact path="/deals-second/assign-deals" element={<Login><AssignDealsSales /></Login>}/>
         <Route exact path="/sales-ambasador" element={<Login><SalesAmbasador /></Login>}/>
+        <Route exact path="/weekly-task" element={<Login><WeeklyTask /></Login>}/>
+        <Route exact path="/weekly-report" element={<Login><WeeklyReport /></Login>}/>
+        <Route exact path="/weekly-task/create" element={<Login><CreateWeeklyTask /></Login>}/>
+        <Route exact path="/weekly-task/:uid/edit" element={<Login><EditTaskWeekly /></Login>}/>
+        <Route exact path="/weekly-task/:uid/note" element={<Login><FillTaskWeekly /></Login>}/>
+        
       </Routes>
     </BrowserRouter>
   );

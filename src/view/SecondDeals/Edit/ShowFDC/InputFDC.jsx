@@ -5,9 +5,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBuilding,
   faEnvelopesBulk,
+  faFileAlt,
   faFolderPlus,
   faPercent,
   faPhone,
+  faUpload,
 } from "@fortawesome/free-solid-svg-icons";
 import Select from "react-select";
 import { Card } from "react-bootstrap";
@@ -29,7 +31,8 @@ const InputFDC = ({ data }) => {
   const [siup, setSiup] = useState([]);
   const [kso, setKso] = useState([]);
   const [izinDagang, setIzinDagang] = useState([]);
-  
+  const [formDataDireksi, setFormDataDireksi] = useState({});
+  const [touchedFields, setTouchedFields] = useState({});
   const handleInput = (e) => {
     setInputData({
       ...inputData,
@@ -37,15 +40,117 @@ const InputFDC = ({ data }) => {
     });
   };
 
-  const handleInputChange = (e, index, fieldName) => {
-    const { value } = e.target;
-    setInputBank((prev) => {
-      const newData = [...prev];
-      newData[index] = { ...newData[index], [fieldName]: value };
-      return newData;
-    });
-  };
+  const handleInputChange = (e, groupIndex, position) => {
+    const { name, value } = e.target;
+    // Update formData dengan nama, posisi, dan field
+    setFormDataDireksi((prevData) => ({
+      ...prevData,
+      [`direksi[${groupIndex}][${name}]`]: value,
+      [`direksi[${groupIndex}][position]`]: position, // Tambahkan posisi
+    }));
 
+    // Tandai field sebagai disentuh
+    setTouchedFields((prevFields) => ({
+      ...prevFields,
+      [`direksi[${groupIndex}][${name}]`]: true,
+    }));
+  };
+  
+  const HospitalType = data?.company?.hospital_type || null;
+  const groups = [
+    { title: "Direktur RS", position: "Direktur", fields: ["name", "phone_number", "email"] },
+    { title: "Wakil Direktur", position: "Wakil Direktur", fields: ["name", "phone_number", "email"] },
+    { title: "Penanggung Jawab Operasional", position: "Penanggung Jawab Operasional", fields: ["name", "phone_number", "email"] },
+    ...(HospitalType && HospitalType.name !== "PT" && HospitalType.name !== "Yayasan"
+      ? [
+          { title: "Kepala Rumah Sakit", position: "Kepala Rumah Sakit", fields: ["name", "phone_number", "email"] },
+          { title: "Kepala Perawat HD", position: "Kepala Perawat HD", fields: ["name", "phone_number", "email"] },
+        ]
+      : []),
+    { title: "Kepala Ruang", position: "Kepala Ruang", fields: ["name", "phone_number", "email"] },
+    { title: "Dokter SpPD", position: "Dokter SpPD", fields: ["name", "phone_number", "email"] },
+    { title: "Finance AP", position: "Finance AP", fields: ["name", "phone_number", "email"] },
+    { title: "Logistik", position: "Logistik", fields: ["name", "phone_number", "email"] },
+  ];
+
+ 
+  const [uploadedFiles, setUploadedFiles] = useState([
+    { name: "KTP Penanggung Jawab", key: "ktp_file", file: null },
+    { name: "Kartu NPWP", key: "npwp_file", file: null },
+    { name: "Surat Pengukuhan Pengusaha Kena Pajak (SPPKP)", key: "sppkp_file", file: null },
+    { name: "Tanda Daftar Perusahaan", key: "company_registration_file", file: null },
+    { name: "Surat Izin Usaha Perdagangan", key: "business_license_file", file: null },
+    { name: "Surat Keterangan Domisili Usaha (SIUP)", key: "siup_file", file: null },
+    { name: "Tanda Tangan Kontrak Kerja Sama (KSO)", key: "kso_file", file: null },
+  ]);
+  
+  
+
+  
+  const handleFileChange = (e, key) => {
+    const file = e.target.files[0];
+    setUploadedFiles((prevFiles) =>
+      prevFiles.map((doc) =>
+        doc.key === key ? { ...doc, file } : doc
+      )
+    );
+  };
+  
+
+  const renderFileUpload = (label, key, file) => (
+    <div
+      className="mb-4"
+      style={{
+        border: "2px dashed #d3d3d3",
+        borderRadius: "10px",
+        padding: "20px",
+        textAlign: "center",
+        backgroundColor: "#f9f9f9",
+        cursor: "pointer",
+        position: "relative",
+      }}
+      onClick={() => document.getElementById(`file-${key}`).click()}
+    >
+      <input
+        type="file"
+        id={`file-${key}`}
+        style={{ display: "none" }}
+        onChange={(e) => handleFileChange(e, key)}
+      />
+      <div>
+        {!file ? (
+          <>
+            <div
+              style={{
+                fontSize: "2rem",
+                color: "#007bff",
+                marginBottom: "10px",
+              }}
+            >
+              <FontAwesomeIcon icon={faUpload} className="fs-5" />
+            </div>
+            <p style={{ margin: 0, fontWeight: "bold" }}>Upload {label}</p>
+            <small style={{ color: "#999" }}>or, click to browse (4 MB max)</small>
+          </>
+        ) : (
+          <>
+            <div
+              style={{
+                fontSize: "2rem",
+                color: "#28a745",
+                marginBottom: "10px",
+              }}
+            >
+              <FontAwesomeIcon icon={faFileAlt} className="fs-2" />
+            </div>
+            <p style={{ margin: 0, color: "#333" }}><span className="fw-bold">  {label} </span>: {file.name}</p>
+            <small style={{ color: "#007bff", cursor: "pointer" }}>Click to replace file</small>
+          </>
+        )}
+      </div>
+    </div>
+  );
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -102,15 +207,9 @@ const InputFDC = ({ data }) => {
           "tax_invoice_number",
           inputData.tax_invoice_number || ""
         );
-        formData.append("ktp_file", fileKtp || "");
-        formData.append("npwp_file", fileNpwp || "");
-        formData.append("sppkp_file", sppkp || "");
-        formData.append("siup_file", siup || "");
-        formData.append("kso_file", kso || "");
-        formData.append(
-          "company_registration_file",
-          tandaDaftarPerusahaan || ""
-        );
+        uploadedFiles.forEach((doc) => {
+          formData.append(doc.key, doc.file || "");
+        });
         formData.append("business_license_file", izinDagang || "");
         if (inputBank && inputBank.length > 0) {
           inputBank.forEach((item, index) => {
@@ -129,112 +228,17 @@ const InputFDC = ({ data }) => {
             formData.append(`bank[${index}][swift_code]`, item.swiftCode || "");
           });
         }
-        formData.append("direksi[0][name]", inputData.direktur_name || "");
-        formData.append("direksi[0][position]", "Direktur");
-        formData.append("direksi[0][email]", inputData.email_direktur || "");
-        formData.append(
-          "direksi[0][phone_number]",
-          inputData.no_telp_direktur || ""
-        );
-        formData.append("direksi[1][name]", inputData.wadik_name || "");
-        formData.append("direksi[1][position]", "Wakil Direktur");
-        formData.append("direksi[1][email]", inputData.wadik_email || "");
-        formData.append(
-          "direksi[1][phone_number]",
-          inputData.wadik_no_telp || ""
-        );
-        formData.append("direksi[2][name]", inputData.pj_name || "");
-        formData.append("direksi[2][position]", "Penanggung jawab operasional");
-        formData.append("direksi[2][email]", inputData.pj_email || "");
-        formData.append("direksi[2][phone_number]", inputData.pj_no_telp || "");
-
-       if (data?.name !== "PT" && data.name !== "Yayasan"){ 
-        formData.append("direksi[3][name]", inputData.kprs_name || "");
-        formData.append("direksi[3][position]", "Kepala Rumah Sakit");
-        formData.append("direksi[3][email]", inputData.kprs_email || "");
-        formData.append(
-          "direksi[3][phone_number]",
-          inputData.kprs_no_telp || ""
-        );
-       }
-        formData.append("direksi[4][name]", inputData.kr_name || "");
-        formData.append("direksi[4][position]", "Kepala Ruang");
-        formData.append("direksi[4][email]", inputData.kr_email || "");
-        formData.append("direksi[4][phone_number]", inputData.kr_no_telp || "");
-
-        if (data?.name !== "PT" && data.name !== "Yayasan"){ 
-        formData.append("direksi[5][name]", inputData.kp_hd || "");
-        formData.append("direksi[5][position]", "Kepala perawat HD");
-        formData.append("direksi[5][email]", inputData.kp_email || "");
-        formData.append("direksi[5][phone_number]", inputData.kp_no_telp || "");
-        }
-
-        formData.append("direksi[6][name]", inputData.dokter_sppd_name || "");
-        formData.append("direksi[6][position]", "Dokter SpPD");
-        formData.append("direksi[6][email]", inputData.dokter_sppd_email || "");
-        formData.append(
-          "direksi[6][phone_number]",
-          inputData.dokter_sppd_notelp || ""
-        );
-        formData.append("direksi[7][name]", inputData.dokter_kgh_name || "");
-        formData.append("direksi[7][position]", "Dokter Kgh");
-        formData.append("direksi[7][email]", inputData.dokter_kgh_email || "");
-        formData.append(
-          "direksi[7][phone_number]",
-          inputData.dokter_kgh_no_telp || ""
-        );
-        formData.append("direksi[8][name]", inputData.du_hd_name || "");
-        formData.append("direksi[8][position]", "Dokter umum HD");
-        formData.append("direksi[8][email]", inputData.du_email || "");
-        formData.append("direksi[8][phone_number]", inputData.du_no_telp || "");
-        formData.append("direksi[9][name]", inputData.finance_name || "");
-        formData.append("direksi[9][position]", "Finance AP");
-        formData.append("direksi[9][email]", inputData.finance_email || "");
-        formData.append(
-          "direksi[9][phone_number]",
-          inputData.finance_no_telp || ""
-        );
-        formData.append("direksi[10][name]", inputData.acc_tax_name || "");
-        formData.append("direksi[10][position]", "Accounting & tax");
-        formData.append("direksi[10][email]", inputData.acc_tax_email || "");
-        formData.append(
-          "direksi[10][phone_number]",
-          inputData.acc_tax_telp || ""
-        );
-        formData.append("direksi[11][name]", inputData.purchase_name || "");
-        formData.append("direksi[11][position]", "Purchasing");
-        formData.append("direksi[11][email]", inputData.purchase_email || "");
-        formData.append(
-          "direksi[11][phone_number]",
-          inputData.purchase_no_telp || ""
-        );
-        formData.append("direksi[12][name]", inputData.logistik_name || "");
-        formData.append("direksi[12][position]", "Logistik");
-        formData.append("direksi[12][email]", inputData.logistik_email || "");
-        formData.append(
-          "direksi[12][phone_number]",
-          inputData.logistik_no_telp || ""
-        );
-        formData.append("direksi[13][name]", inputData.teknisi_name || "");
-        formData.append("direksi[13][position]", "Teknisi");
-        formData.append("direksi[13][email]", inputData.teknisi_email || "");
-        formData.append(
-          "direksi[13][phone_number]",
-          inputData.teknisi_no_telp || ""
-        );
-        formData.append("direksi[14][name]", inputData.klinik_name || "");
-        formData.append("direksi[14][position]", "Klinikal");
-        formData.append(
-          "direksi[14][email]",
-          inputData.klinik_name_email || ""
-        );
-        formData.append(
-          "direksi[14][phone_number]",
-          inputData.klinik_name_no_telp || ""
-        );
-        // for (const pair of formData.entries()) {
-        //   console.log(pair[0] + ": " + pair[1]);
-        // }
+        groups.forEach((group, index) => {
+          // Tambahkan posisi
+          formData.append(`direksi[${index}][position]`, group.position);
+  
+          // Tambahkan semua field
+          group.fields.forEach((field) => {
+            const fieldName = `direksi[${index}][${field}]`;
+            formData.append(fieldName, formDataDireksi[fieldName] || ""); // Gunakan nilai dari formDataDireksi jika ada, atau kosongkan
+          });
+        });
+  
         const response = await axios.post(
           `${process.env.REACT_APP_BACKEND_URL}/v2/fdc-document`,
           formData,
@@ -274,120 +278,14 @@ const InputFDC = ({ data }) => {
     <Card.Body>
       <CompanyInformation data={data} handleInput={handleInput} />
       <DataPajak handleInput={handleInput} />
-        <FormDireksiAndPic handleInput={handleInput}  data={data?.company?.hospital_type}/>
+        <FormDireksiAndPic handleInputChange={handleInputChange} touchedFields={touchedFields} formDataDireksi={formDataDireksi} groups={groups} />
         <FormDataBank handleInputChange={handleInputChange} />
 
-      <div class="alert alert-primary mt-2" role="alert">
-        <h6 style={{ fontWeight: "700" }}>
-          <FontAwesomeIcon icon={faFolderPlus} className="me-2" /> Dokumen yang
-          harus dilengkapi
-        </h6>
-      </div>
-      <div className="mb-3">
-        <label htmlFor="" className="fw-semibold mt-3 fs-6 mb-1">
-          KTP Penanggung Jawab
-        </label>
-        <input
-          type="file"
-          name=""
-          onChange={(e) => {
-            const file = e.target.files[0];
-            setFileKtp(file);
-          }}
-          className="form-control"
-          id=""
-        />
-      </div>
-      <div className="mb-3">
-        <label htmlFor="" className="fw-semibold mt-3 fs-6 mb-1">
-          Kartu NPWP
-        </label>
-        <input
-          type="file"
-          name=""
-          className="form-control"
-          id=""
-          onChange={(e) => {
-            const file = e.target.files[0];
-            setFileNpwp(file);
-          }}
-        />
-      </div>
-      <div className="mb-3">
-        <label htmlFor="" className="fw-semibold mt-3 fs-6 mb-1">
-          Surat Pengukuhan Pengusaha Kena Pajak (SPPKP)
-        </label>
-        <input
-          type="file"
-          name=""
-          className="form-control"
-          id=""
-          onChange={(e) => {
-            const file = e.target.files[0];
-            setSppkp(file);
-          }}
-        />
-      </div>
-      <div className="mb-3">
-        <label htmlFor="" className="fw-semibold mt-3 fs-6 mb-1">
-          Tanda Daftar Perusahaan
-        </label>
-        <input
-          type="file"
-          name=""
-          className="form-control"
-          id=""
-          onChange={(e) => {
-            const file = e.target.files[0];
-            setTandaDaftarPerusahaan(file);
-          }}
-        />
-      </div>
-      <div className="mb-3">
-        <label htmlFor="" className="fw-semibold mt-3 fs-6 mb-1">
-          Surat Izin Usaha Perdagangan
-        </label>
-        <input
-          type="file"
-          name=""
-          className="form-control"
-          id=""
-          onChange={(e) => {
-            const file = e.target.files[0];
-            setIzinDagang(file);
-          }}
-        />
-      </div>
-      <div className="mb-3">
-        <label htmlFor="" className="fw-semibold mt-3 fs-6 mb-1">
-          Surat keterangan Domisili Usaha (SIUP)
-        </label>
-        <input
-          type="file"
-          name=""
-          className="form-control"
-          id=""
-          onChange={(e) => {
-            const file = e.target.files[0];
-            setSiup(file);
-          }}
-        />
-      </div>
-      <div className="mb-3">
-        <label htmlFor="" className="fw-semibold mt-3 fs-6 mb-1">
-          Tanda Tangan Kontrak Kerja Sama (KSO)
-        </label>
-        <input
-          type="file"
-          name=""
-          className="form-control"
-          id=""
-          onChange={(e) => {
-            const file = e.target.files[0];
-            setKso(file);
-          }}
-        />
-      </div>
+        <div className="header-box mt-2">
+          <FontAwesomeIcon icon={faFolderPlus} className="me-2" /> DOKUMEN YANG HARUS DILENGKAPI
+        </div>
+        {uploadedFiles.map(({ name, key, file }) => renderFileUpload(name, key, file))}
+
       <div className=" mt-2">
         <button
           className="btn btn-primary me-2"

@@ -35,13 +35,15 @@ const FDC = ({ userUid, data }) => {
         <InputFDC data={data} />
       ) : data?.fdc_document && userUid === uid ? (
         // Jika ada fdc_document dan userUid sama dengan uid, tampilkan EditFdc dan ShowFDC
-        <>
-          <EditFdc data={data} />
-          <ShowFDC
+        <>{showFDC ? <EditFdc data={data} /> :  
+        <ShowFDC
             show={data.fdc_document}
             CompanyName={data?.lpp_document?.customer?.name}
             data={data}
           />
+        }
+          
+          
         </>
       ) : !data?.fdc_document && userUid !== uid ? (
         // Jika tidak ada fdc_document dan userUid tidak sama dengan uid, tampilkan pesan "Belum Ada Data"

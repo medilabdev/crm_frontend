@@ -16,6 +16,9 @@ import DataPks from "./dealsV2/DataPks";
 import SelectAmbasador from "./Owner/Ambasador";
 import DataDealsAmbasador from "./dealsV2/DataAmbasador";
 import GetTypeHospital from "./Properties/TypeHospital";
+import DataWeeklyTask from "./dealsV2/DataWeeklyPlanTask";
+import DetailWeeklyTask from "./dealsV2/DetailWeeklyPlan";
+import DataSelectWeek from "./dealsV2/DataSelectWeekTask";
 
 export default combineReducers({
     FormCompany,
@@ -35,4 +38,7 @@ export default combineReducers({
     SelectAmbasador,
     DataDealsAmbasador,
     GetTypeHospital,
+    DataWeeklyTask,
+    DetailWeeklyTask,
+    DataSelectWeek
 });

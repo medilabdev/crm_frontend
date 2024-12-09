@@ -5,12 +5,9 @@ import React from 'react'
 const CompanyInformation = ({ data, handleInput}) => {    
   return (
     <div>
-          <div class="alert alert-primary mt-2" role="alert">
-        <h6 style={{ fontWeight: "700" }}>
-          <FontAwesomeIcon icon={faBuilding} className="me-2" /> Informasi
-          perusahaan
-        </h6>
-      </div>
+       <div class="header-box">
+       <FontAwesomeIcon icon={faBuilding} className="me-2" /> INFORMASI PERUSAHAAN
+              </div>
       <input
         type="text"
         name=""

@@ -949,7 +949,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
           className="p-2"
           theme="snow"
           onChange={(value) =>
-            handleInputData({
+          handleInputData({
               target: { name: "postscript", value },
             })
           }

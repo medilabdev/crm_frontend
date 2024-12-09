@@ -1,13 +1,15 @@
 import {
   faBuilding,
   faEnvelopesBulk,
+  faFileAlt,
   faFolderPlus,
   faPercent,
   faPhone,
+  faUpload,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Card } from "react-bootstrap";
 import Swal from "sweetalert2";
 import { token } from "../../partials/ColumnsTable";
@@ -34,6 +36,121 @@ const EditFdc = ({ data }) => {
   };
   const CompanyUid = data?.fdc_document?.company?.uid;
 
+  const [uploadedFiles, setUploadedFiles] = useState([
+    { name: "KTP Penanggung Jawab", key: "ktp_file", file: null, fileOld: null },
+    { name: "Kartu NPWP", key: "npwp_file", file: null, fileOld: null },
+    { name: "Surat Pengukuhan Pengusaha Kena Pajak (SPPKP)", key: "sppkp_file", file: null, fileOld: null },
+    { name: "Tanda Daftar Perusahaan", key: "company_registration_file", file: null, fileOld: null },
+    { name: "Surat Izin Usaha Perdagangan", key: "business_license_file", file: null, fileOld: null },
+    { name: "Surat Keterangan Domisili Usaha (SIUP)", key: "siup_file", file: null, fileOld: null },
+    { name: "Tanda Tangan Kontrak Kerja Sama (KSO)", key: "kso_file", file: null, fileOld: null },
+  ]);
+
+  
+  
+
+  useEffect(() => {
+    if (data?.fdc_document) {
+      const updatedFiles = uploadedFiles.map((fileData) => ({
+        ...fileData,
+        fileOld: data.fdc_document[fileData.key]
+          ? { name: data.fdc_document[fileData.key] }
+          : null,
+      }));
+      setUploadedFiles(updatedFiles);
+    }
+  }, [data]);
+
+  const handleFileChange = (e, key) => {
+    const file = e.target.files[0];
+    setUploadedFiles((prevFiles) =>
+      prevFiles.map((doc) =>
+        doc.key === key ? { ...doc, file } : doc
+      )
+    );
+  };
+
+  const renderFileRow = (label, key, file, fileOld) => (
+    <div className="row align-items-center mb-4" key={key}>
+      {/* Kolom File Lama */}
+      <div className="col-md-6">
+        {fileOld ? (
+          <div className="file-old">
+            <p style={{ margin: 0, fontWeight: "bold", color: "#333" }}>
+              {label} (File Lama):
+            </p>
+            <a
+              href={`https://api-crm-iss.medilabjakarta.id/storage/file/deals/fdc/${fileOld.name}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className=" mt-2"
+            >
+              {fileOld.name}
+            </a>
+          </div>
+        ) : (
+          <p style={{ fontStyle: "italic", color: "#999" }}>{label} (File Lama): Tidak ada</p>
+        )}
+      </div>
+  
+      {/* Kolom File Baru */}
+      <div className="col-md-6">
+        <div
+          style={{
+            border: "2px dashed #d3d3d3",
+            borderRadius: "10px",
+            padding: "20px",
+            textAlign: "center",
+            backgroundColor: "#f9f9f9",
+            cursor: "pointer",
+          }}
+          onClick={() => document.getElementById(`file-${key}`).click()}
+        >
+          {/* Input File */}
+          <input
+            type="file"
+            id={`file-${key}`}
+            style={{ display: "none" }}
+            onChange={(e) => handleFileChange(e, key)}
+          />
+  
+          {/* Tampilan Jika File Baru Tidak Ada */}
+          {!file ? (
+            <div>
+              <div
+                style={{
+                  fontSize: "2rem",
+                  color: "#007bff",
+                  marginBottom: "10px",
+                }}
+              >
+                <FontAwesomeIcon icon={faUpload} className="fs-5" />
+              </div>
+              <p style={{ margin: 0, fontWeight: "bold" }}>Upload {label}</p>
+              <small style={{ color: "#999" }}>or, click to browse (4 MB max)</small>
+            </div>
+          ) : (
+            /* Tampilan Jika File Baru Ada */
+            <div>
+              <div
+                style={{
+                  fontSize: "2rem",
+                  color: "#28a745",
+                  marginBottom: "10px",
+                }}
+              >
+                <FontAwesomeIcon icon={faFileAlt} className="fs-2" />
+              </div>
+              <p style={{ margin: 0, fontWeight: "bold", color: "#333" }}>
+                {label} (File Baru): {file.name}
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+  
   const handleUpdate = async (e) => {
     e.preventDefault();
 
@@ -99,20 +216,14 @@ const EditFdc = ({ data }) => {
           "tax_invoice_number",
           editData.tax_invoice_number || ""
         );
-        formData.append("ktp_file", fileKtp || "");
-        formData.append("npwp_file", fileNpwp || "");
-        formData.append("sppkp_file", sppkp || "");
-        formData.append("siup_file", siup || "");
-        formData.append("kso_file", kso || "");
-        formData.append(
-          "company_registration_file",
-          tandaDaftarPerusahaan || ""
-        );
+        uploadedFiles.forEach(({ key, file }) => {
+          formData.append(key, file || ""); 
+        });
         formData.append("business_license_file", izinDagang || "");
         formData.append('is_validate', editData.is_validate)
-        // for (const pair of formData.entries()) {
-        //   console.log(pair[0] + ": " + pair[1]);
-        // }
+        for (const pair of formData.entries()) {
+          console.log(pair[0] + ": " + pair[1]);
+        }
         const response = await axios.post(
           `${process.env.REACT_APP_BACKEND_URL}/v2/fdc-document/${data.fdc_document?.uid}`,
           formData,
@@ -149,12 +260,9 @@ const EditFdc = ({ data }) => {
   
   return (
     <Card.Body>
-      <div class="alert alert-primary mt-2" role="alert">
-        <h6 style={{ fontWeight: "700" }}>
-          <FontAwesomeIcon icon={faBuilding} className="me-2" /> Informasi
-          perusahaan
-        </h6>
-      </div>
+        <div class="header-box">
+       <FontAwesomeIcon icon={faBuilding} className="me-2" /> INFORMASI PERUSAHAAN
+              </div>
       <input
         type="text"
         name=""
@@ -273,11 +381,10 @@ const EditFdc = ({ data }) => {
           {editData?.other_company_address || ""}
         </textarea>
       </div>
-      <div class="alert alert-primary mt-2" role="alert">
-        <h6 style={{ fontWeight: "700" }}>
-          <FontAwesomeIcon icon={faPercent} className="me-2" /> Data Pajak
-        </h6>
-      </div>
+      <div class="header-box mt-2">
+       <FontAwesomeIcon icon={faPercent} className="me-2" /> DATA PAJAK
+              </div>
+      
       <div className="form-floating mb-3">
         <input
           type="text"
@@ -314,292 +421,14 @@ const EditFdc = ({ data }) => {
         <label htmlFor="floatingInput">Nomor Surat Pengukuhan PKP</label>
       </div>
       <EditDireksi valueOld={data?.fdc_document?.direksi} data={data} />
-      <EditBank valueOld={data?.fdc_document?.bank} />
-      <div class="alert alert-primary mt-2" role="alert">
-        <h6 style={{ fontWeight: "700" }}>
-          <FontAwesomeIcon icon={faFolderPlus} className="me-2" /> Dokumen yang
-          harus dilengkapi
-        </h6>
-      </div>
+      <EditBank valueOld={data?.fdc_document?.bank} />  
+      <div class="header-box mt-2">
+       <FontAwesomeIcon icon={faFolderPlus} className="me-2" /> DOKUMEN YANG HARUS DILENGKAPI
+              </div>
       <div className="mb-3">
-        {editData?.ktp_file ? (
-          <table className="mt-3">
-            <tr className="fw-medium">
-              <td style={{ width: "150px", fontSize: "0.9rem" }}>
-                KTP Penanggung Jawab
-              </td>
-              <td className="px-1">:</td>
-              <td>
-                <a
-                  className="btn btn-primary"
-                  href={`https://api-crm-iss.medilabjakarta.id/storage/file/deals/fdc/${editData.ktp_file}`}
-                  target="_blank"
-                  style={{
-                    whiteSpace: "normal",
-                    fontSize: "0.75rem",
-                    fontWeight: "600",
-                  }}
-                >
-                  {editData?.ktp_file || "-"}
-                </a>
-              </td>
-            </tr>
-          </table>
-        ) : (
-          ""
-        )}
-        <label htmlFor="" className="fw-semibold mt-3 fs-6 mb-1">
-          KTP Penanggung Jawab
-        </label>
-        <input
-          type="file"
-          name=""
-          className="form-control"
-          onChange={(e) => {
-            const file = e.target.files[0];
-            setFileKtp(file);
-          }}
-        />
-      </div>
-      <div className="mb-3">
-        {editData?.npwp_file ? (
-          <table className="mt-3">
-            <tr className="fw-medium">
-              <td style={{ width: "150px", fontSize: "0.9rem" }}>Kartu NPWP</td>
-              <td className="px-1">:</td>
-              <td>
-                <a
-                  className="btn btn-primary"
-                  href={`https://api-crm-iss.medilabjakarta.id/storage/file/deals/fdc/${editData.npwp_file}`}
-                  target="_blank"
-                  style={{
-                    whiteSpace: "normal",
-                    fontSize: "0.75rem",
-                    fontWeight: "600",
-                  }}
-                >
-                  {editData?.npwp_file || "-"}
-                </a>
-              </td>
-            </tr>
-          </table>
-        ) : (
-          ""
-        )}
-        <label htmlFor="" className="fw-semibold mt-3 fs-6 mb-1">
-          Kartu NPWP
-        </label>
-        <input
-          type="file"
-          name=""
-          className="form-control"
-          onChange={(e) => {
-            const file = e.target.files[0];
-            setFileNpwp(file);
-          }}
-        />
-      </div>
-      <div className="mb-3">
-        {editData?.npwp_file ? (
-          <table className="mt-3">
-            <tr className="fw-medium">
-              <td style={{ width: "150px", fontSize: "0.9rem" }}>
-                Surat Pengukuhan Pengusaha Kena Pajak (SPPKP)
-              </td>
-              <td className="px-1">:</td>
-              <td>
-                <a
-                  className="btn btn-primary"
-                  href={`https://api-crm-iss.medilabjakarta.id/storage/file/deals/fdc/${editData.sppkp_file}`}
-                  target="_blank"
-                  style={{
-                    whiteSpace: "normal",
-                    fontSize: "0.75rem",
-                    fontWeight: "600",
-                  }}
-                >
-                  {editData?.sppkp_file || "-"}
-                </a>
-              </td>
-            </tr>
-          </table>
-        ) : (
-          ""
-        )}
-        <label htmlFor="" className="fw-semibold mt-3 fs-6 mb-1">
-          Surat Pengukuhan Pengusaha Kena Pajak (SPPKP)
-        </label>
-        <input
-          type="file"
-          name=""
-          className="form-control"
-          onChange={(e) => {
-            const file = e.target.files[0];
-            setSppkp(file);
-          }}
-        />
-      </div>
-      <div className="mb-3">
-        {editData?.company_registration_file ? (
-          <table className="mt-3">
-            <tr className="fw-medium">
-              <td style={{ width: "150px", fontSize: "0.9rem" }}>
-                Tanda Daftar Perusahaan
-              </td>
-              <td className="px-1">:</td>
-              <td>
-                <a
-                  className="btn btn-primary"
-                  href={`https://api-crm-iss.medilabjakarta.id/storage/file/deals/fdc/${editData.company_registration_file}`}
-                  target="_blank"
-                  style={{
-                    whiteSpace: "normal",
-                    fontSize: "0.75rem",
-                    fontWeight: "600",
-                  }}
-                >
-                  {editData?.company_registration_file || "-"}
-                </a>
-              </td>
-            </tr>
-          </table>
-        ) : (
-          ""
-        )}
-        <label htmlFor="" className="fw-semibold mt-3 fs-6 mb-1">
-          Tanda Daftar Perusahaan
-        </label>
-        <input
-          type="file"
-          name=""
-          className="form-control"
-          onChange={(e) => {
-            const file = e.target.files[0];
-            setTandaDaftarPerusahaan(file);
-          }}
-        />
-      </div>
-      <div className="mb-3">
-        {editData?.business_license_file ? (
-          <table className="mt-3">
-            <tr className="fw-medium">
-              <td style={{ width: "150px", fontSize: "0.9rem" }}>
-                Surat Izin Usaha Perdagangan
-              </td>
-              <td className="px-1">:</td>
-              <td>
-                <a
-                  className="btn btn-primary"
-                  href={`https://api-crm-iss.medilabjakarta.id/storage/file/deals/fdc/${editData?.business_license_file}`}
-                  target="_blank"
-                  style={{
-                    whiteSpace: "normal",
-                    fontSize: "0.75rem",
-                    fontWeight: "600",
-                  }}
-                >
-                  {editData?.business_license_file || "-"}
-                </a>
-              </td>
-            </tr>
-          </table>
-        ) : (
-          ""
-        )}
-        <label htmlFor="" className="fw-semibold mt-3 fs-6 mb-1">
-          Surat Izin Usaha Perdagangan
-        </label>
-        <input
-          type="file"
-          name=""
-          className="form-control"
-          id=""
-          onChange={(e) => {
-            const file = e.target.files[0];
-            setIzinDagang(file);
-          }}
-        />
-      </div>
-      <div className="mb-3">
-        {editData?.siup_file ? (
-          <table className="mt-3">
-            <tr className="fw-medium">
-              <td style={{ width: "150px", fontSize: "0.9rem" }}>
-                Surat keterangan Domisili Usaha (SIUP)
-              </td>
-              <td className="px-1">:</td>
-              <td>
-                <a
-                  className="btn btn-primary"
-                  href={`https://api-crm-iss.medilabjakarta.id/storage/file/deals/fdc/${editData.siup_file}`}
-                  target="_blank"
-                  style={{
-                    whiteSpace: "normal",
-                    fontSize: "0.75rem",
-                    fontWeight: "600",
-                  }}
-                >
-                  {editData?.siup_file || "-"}
-                </a>
-              </td>
-            </tr>
-          </table>
-        ) : (
-          ""
-        )}
-        <label htmlFor="" className="fw-semibold mt-3 fs-6 mb-1">
-          Surat keterangan Domisili Usaha (SIUP)
-        </label>
-        <input
-          type="file"
-          name=""
-          className="form-control"
-          onChange={(e) => {
-            const file = e.target.files[0];
-            setSiup(file);
-          }}
-        />
-      </div>
-      <div className="mb-3">
-        {editData?.kso_file ? (
-          <table className="mt-3">
-            <tr className="fw-medium">
-              <td style={{ width: "150px", fontSize: "0.9rem" }}>
-                Tanda Tangan Kontrak Kerja Sama (KSO)
-              </td>
-              <td className="px-1">:</td>
-              <td>
-                <a
-                  className="btn btn-primary"
-                  href={`https://api-crm-iss.medilabjakarta.id/storage/file/deals/fdc/${editData.kso_file}`}
-                  target="_blank"
-                  style={{
-                    whiteSpace: "normal",
-                    fontSize: "0.75rem",
-                    fontWeight: "600",
-                  }}
-                >
-                  {editData?.kso_file || "-"}
-                </a>
-              </td>
-            </tr>
-          </table>
-        ) : (
-          ""
-        )}
-        <label htmlFor="" className="fw-semibold mt-3 fs-6 mb-1">
-          Tanda Tangan Kontrak Kerja Sama (KSO)
-        </label>
-        <input
-          type="file"
-          name=""
-          className="form-control"
-          id=""
-          onChange={(e) => {
-            const file = e.target.files[0];
-            setKso(file);
-          }}
-        />
+      {uploadedFiles.map(({ name, key, file, fileOld }) =>
+      renderFileRow(name, key, file, fileOld)
+    )}
       </div>
       <div className="mb-3">
           <label htmlFor="" className="mb-1">

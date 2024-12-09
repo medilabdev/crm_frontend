@@ -1,3 +1,6 @@
+import { ur } from "@faker-js/faker";
+import { faGauge } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
@@ -8,6 +11,7 @@ const MenuSidebar = ({ type, name, icon, url, isActive }) => {
   const [urlActive, setUrlActive] = useState(false);
 
 
+  
   useEffect(() => {
     if (location.pathname === url) {
       setUrlActive(true);
@@ -26,7 +30,7 @@ const MenuSidebar = ({ type, name, icon, url, isActive }) => {
 
       {type !== "collapse" ? (
         <>
-          <li className={`nav-item mt-1  ${isActive ? "active" : "d-none"} `}>
+          <li className={`nav-item mt-1  ${isActive || window.location.pathname.startsWith(url) ? "active" : "d-none"} `}>
             <a
               href={url}
               className={`nav-link ${urlActive ? "" : "collapsed"}`}

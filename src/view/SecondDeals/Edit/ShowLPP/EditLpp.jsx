@@ -444,9 +444,9 @@ const EditLpp = ({ data, listCompany, uidDeals, dataFqp }) => {
         }
         formData.append('is_validate', dataLpp.is_validate)
         formData.append("_method", "put")
-        // for (const pair of formData.entries()) {
-        //   console.log(pair[0] + ": " + pair[1]);
-        // }
+        for (const pair of formData.entries()) {
+          console.log(pair[0] + ": " + pair[1]);
+        }
        const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/v2/lpp-document/${uidLpp}`, formData,{
         headers:{
           Authorization:`Bearer ${token}`

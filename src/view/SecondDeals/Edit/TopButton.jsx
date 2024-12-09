@@ -216,8 +216,20 @@ const TopButton = ({
           uid={uid}
         />
 
-        <div className="button-container d-flex float-end">
-     
+        <div className="button-container d-flex float-end" >
+        <button
+              className={`btn ${
+                showWeeklyReport ? "btn-secondary" : "btn-primary"
+              } text-white me-2`}
+              style={{ fontSize: "0.85rem", fontWeight: "600" }}
+              onClick={handleButtonWeeklyReport}
+            >
+              <FontAwesomeIcon
+                icon={showWeeklyReport ? faEyeSlash : faEye }
+                className="me-2"
+              />
+              Task
+            </button>
           {((position === "pRGYXVKdzCPoQ8" && statusLevel === "leads") || (position === "pRGYXVKdzCPoQ8" && statusLevel === "Approaching") || (position === "adsfasdf1321" && statusLevel === "Decide") || (position ==="pRGYXVKdzCPoQ1" && statusLevel === "Decide")) && uidForm ? (
               <>
               <HandleApprove handleApprove={handleApprove} handleReject={handleReject}/>

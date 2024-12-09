@@ -36,6 +36,8 @@ const Auth = () => {
           },
         }
       );
+      localStorage.clear();
+      sessionStorage.clear();
       if (response.data.message !== "Login successful!") {
         Swal.fire({
           title: response.data.message,
@@ -47,6 +49,7 @@ const Auth = () => {
         const uid = response.data.data.uid;
         const role = response.data.data.role_uid;
         const position = response.data.data.position_uid;
+      
         localStorage.setItem("token", response.data.data.token);
         localStorage.setItem("name", name);
         localStorage.setItem("uid", uid);
@@ -82,7 +85,7 @@ const Auth = () => {
       <main className="auth-main color-auth">
         <Container>
           <section className="section min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
-            <Container>
+            <Container> 
               <Row className="justify-content-center">
                 <Col
                   lg={4}

@@ -138,8 +138,8 @@ const Activity = ({ show, HandleButtonActivity, uid , data}) => {
             ))}
           </div>
           <div className="input-container mt-3 d-flex align-items-end">
-            <div className="p-2">
-            <ReactQuill 
+            {/* <div className="p-2"> */}
+            {/* <ReactQuill 
               theme="snow"
               name='deskripsi'
               value={inputData.deskripsi}
@@ -154,8 +154,8 @@ const Activity = ({ show, HandleButtonActivity, uid , data}) => {
               }}
               style={{ backgroundColor:'white'}}
               />
-              </div>
-            {/* <Form.Control
+              </div> */}
+            <Form.Control
               as="textarea"
               name='deskripsi'
               value={inputData.deskripsi}
@@ -166,7 +166,7 @@ const Activity = ({ show, HandleButtonActivity, uid , data}) => {
                 e.target.style.height = 'auto';
                 e.target.style.height = `${e.target.scrollHeight}px`;
               }}
-            /> */}
+            />
             
           <Button className='submit-activity mb-2'  variant='primary' onClick={handleSubmit}>Submit</Button>
           </div>

@@ -15,7 +15,7 @@ const DokumentFDC = ({ show }) => {
                 <td>
                 {show?.ktp_file ? (
                   <a
-                  className="btn btn-primary"
+                  className=""
                   href={`https://api-crm-iss.medilabjakarta.id/storage/file/deals/fdc/${show?.ktp_file}`}
                   target="_blank"
                   style={{
@@ -35,7 +35,7 @@ const DokumentFDC = ({ show }) => {
                 <td>
                 {show?.npwp_file ? (
                   <a
-                  className="btn btn-primary"
+                  className=""
                   href={`https://api-crm-iss.medilabjakarta.id/storage/file/deals/fdc/${show?.npwp_file}`}
                   target="_blank"
                   style={{
@@ -55,7 +55,7 @@ const DokumentFDC = ({ show }) => {
                 <td>
                 {show?.sppkp_file ? (
                   <a
-                  className="btn btn-primary"
+                  className=""
                   href={`https://api-crm-iss.medilabjakarta.id/storage/file/deals/fdc/${show?.sppkp_file}`}
                   target="_blank"
                   style={{
@@ -75,7 +75,7 @@ const DokumentFDC = ({ show }) => {
                 <td>
                 {show?.sppkp_file ? (
                   <a
-                  className="btn btn-primary"
+                  className=""
                   href={`https://api-crm-iss.medilabjakarta.id/storage/file/deals/fdc/${show?.company_registration_file}`}
                   target="_blank"
                   style={{
@@ -95,7 +95,7 @@ const DokumentFDC = ({ show }) => {
                 <td>
                 {show?.sppkp_file ? (
                   <a
-                  className="btn btn-primary"
+                  className=""
                   href={`https://api-crm-iss.medilabjakarta.id/storage/file/deals/fdc/${show?.business_license_file}`}
                   target="_blank"
                   style={{
@@ -115,7 +115,7 @@ const DokumentFDC = ({ show }) => {
                 <td>
                 {show?.sppkp_file ? (
                   <a
-                  className="btn btn-primary"
+                  className=""
                   href={`https://api-crm-iss.medilabjakarta.id/storage/file/deals/fdc/${show?.siup_file}`}
                   target="_blank"
                   style={{
@@ -135,7 +135,7 @@ const DokumentFDC = ({ show }) => {
                 <td>
                 {show?.kso_file ? (
                   <a
-                  className="btn btn-primary"
+                  className=""
                   href={`https://api-crm-iss.medilabjakarta.id/storage/file/deals/fdc/${show?.kso_file}`}
                   target="_blank"
                   style={{

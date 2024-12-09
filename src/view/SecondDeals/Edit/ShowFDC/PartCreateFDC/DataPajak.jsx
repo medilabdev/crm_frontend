@@ -5,11 +5,9 @@ import React from 'react'
 const DataPajak = ({ handleInput }) => {
   return (
     <div>
-        <div class="alert alert-primary mt-2" role="alert">
-        <h6 style={{ fontWeight: "700" }}>
-          <FontAwesomeIcon icon={faPercent} className="me-2" /> Data Pajak
-        </h6>
-      </div>
+       <div class="header-box">
+       <FontAwesomeIcon icon={faPercent} className="me-2" /> DATA PAJAK
+              </div>
       <div className="form-floating mb-3">
         <input
           type="text"
