@@ -49,6 +49,9 @@ const Datatable = () => {
           setSearch(value)
         }
       }
+      console.log(dataWeekly);
+      
+      // const dataWeekly ='';
 
       const handleChangePage = (page) => {
         setPagination((e) => ({ ...e, page }));
@@ -78,7 +81,10 @@ const Datatable = () => {
             data={dataWeekly || []}
             columns={ColumnsWeeklyTask(handleOpenOffcanvas)}
             customStyles={customStyles}
+            onChangePage={handleChangePage}
+            onChangeRowsPerPage={handlePagePerChange}
             highlightOnHover
+            responsive
             pagination
             selectableRows 
             className='mt-4 mb-3'

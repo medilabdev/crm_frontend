@@ -102,7 +102,7 @@ const InputRoi = ({ data }) => {
                 <td>
                   <a
                     className="btn btn-primary"
-                    href={`${process.env.REACT_APP_BACKEND_URL}/storage/file/deals/${data.roi_document}`}
+                    href={`${process.env.REACT_APP_BACKEND_IMAGE}/storage/file/deals/${data.roi_document}`}
                     target="_blank"
                     style={{
                       whiteSpace: "normal",

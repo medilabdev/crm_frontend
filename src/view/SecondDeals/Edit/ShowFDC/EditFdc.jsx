@@ -80,7 +80,7 @@ const EditFdc = ({ data }) => {
               {label} (File Lama):
             </p>
             <a
-              href={`https://api-crm-iss.medilabjakarta.id/storage/file/deals/fdc/${fileOld.name}`}
+              href={`$${process.env.REACT_APP_BACKEND_IMAGE}/storage/file/deals/fdc/${fileOld.name}`}
               target="_blank"
               rel="noopener noreferrer"
               className=" mt-2"
