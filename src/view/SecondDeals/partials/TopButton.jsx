@@ -19,7 +19,7 @@ const TopButton = () => {
             ""
           )}
 
-          {position !== "_dLjLFdH-Nw8vg" ? (
+          {/* {position !== "_dLjLFdH-Nw8vg" ? (
             <a
               href="/deals-second/need-approval"
               className="btn btn-outline-primary ms-2"
@@ -30,7 +30,10 @@ const TopButton = () => {
             </a>
           ) : (
             ""
-          )}
+          )} */}
+          {position === "pRGYXVKdzCPoQ8" ? (
+          <a href="/deals-second/assign-deals" className="btn btn-primary ms-2" style={{ fontSize: "0.85rem", fontWeight: "600" }}>Assign Deals</a>
+          ) : "" }
         </div>
       </div>
     </div>

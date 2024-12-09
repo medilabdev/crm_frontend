@@ -10,6 +10,8 @@ import TermWork from "./part/TermWork";
 import Equipment from "./part/Equipment";
 import Target from "./part/Target";
 import Customer from "./part/Customer";
+import Note from "./part/Note";
+import TimelineShow from "./part/Timeline";
 
 const ShowLPP = ({ data }) => {
   const position = localStorage.getItem('position')
@@ -24,72 +26,48 @@ const ShowLPP = ({ data }) => {
       {position !== "1-bZKHtNZCFWGg" && position !== "SzhgAQn6tP48xw"  ? <Target data={data} /> : "" } 
       
       {position !== "1-bZKHtNZCFWGg" && position !== "SzhgAQn6tP48xw" ?
-      <>
-      <div className="p-2 mb-3">
-        {data?.lpp_document?.rab !== null ? <TableRab data={data?.lpp_document || ""} />
-        :"-"}
-      </div>
-      <hr />
-      </>
-      : ''}
+         data?.lpp_document?.rab.length > 0 ? (
+          <>
+          <div className="p-2 mb-3">
+          <TableRab data={data?.lpp_document || ""} />
+          </div>
+          <hr />
+          </> )
+        : ('')
+        : ''}
       {(position !== "1-bZKHtNZCFWGg" && position !== "SzhgAQn6tP48xw")  ?
-      <>
-      <div className="p-2 mb-3">
-        {data?.lpp_document?.support !== null ? (
-          <TableSupport data={data?.lpp_document || ""} />
+        data?.lpp_document?.support.length > 0  ? (
+        <>
+          <div className="p-2 mb-3">
+            <TableSupport data={data?.lpp_document} />
+          </div>
+        <hr />
+       </>
         ) : (
-          " - "
-        )}
-      </div>
-      <hr />
-      </>
+          " "
+        )
+     
       : '' }
       {position !== "1-bZKHtNZCFWGg" && position !== "573MloZ8j--aaQ" && position !== "SzhgAQn6tP48xw"  ? 
-      <>
-      <div className="p-2 mb-3">
-        {data?.lpp_document?.fee !== null ? (
-          <TableFee data={data?.lpp_document || ""} />
-        ) : (
-          " - "
-        )}
-      </div>
-      <hr />
-      </> : '' }
+        data?.lpp_document?.fee.length > 0 ? (
+          <>
+            <div className="p-2 mb-3">
+                <TableFee data={data?.lpp_document || ""} />
+            </div>
+            <hr />
+         </> 
+        ) : (" ")
+      : '' }
 
     
-      {position !== "1-bZKHtNZCFWGg" && position !== "SzhgAQn6tP48xw"  ?  <RekapBiaya data={data?.lpp_document || ""} /> : ''}
-      {position !== "1-bZKHtNZCFWGg" && position !== "573MloZ8j--aaQ" && position !== "SzhgAQn6tP48xw"  ? 
+      {position !== "1-bZKHtNZCFWGg" && position !== "SzhgAQn6tP48xw" && position !== "573MloZ8j--aaQ" ?  <RekapBiaya data={data?.lpp_document || ""} /> : ''}
+      
+    <TimelineShow data={data} />
+    {position !== "1-bZKHtNZCFWGg" && position !== "573MloZ8j--aaQ" && position !== "SzhgAQn6tP48xw"  ? 
       <>
-      <hr />
-      <div class="fw-bold">
-        <span className="fs-6 text-decoration-underline">Catatan</span>
-      </div>
-      <table className="mb-4">
-        <tr className="fw-medium">
-          <td>
-          {data && data.lpp_document?.postscript ? (
-              <span
-                dangerouslySetInnerHTML={{
-                  __html: data.lpp_document?.postscript,
-                }}
-              />
-            ) : (
-              "-"
-            )}</td>
-        </tr>
-      </table>
+      <Note data={data}/>
     </> 
     : ''}
-      <table className="">
-        <tr className="fw-medium">
-          <td style={{ width: "300px", fontSize: "0.9rem" }}>
-            Start Date Timeline
-          </td>
-          <td className="px-1">:</td>
-          <td>{data?.lpp_document?.timeline[0]?.year_period || "-"}</td>
-        </tr>
-      </table>
-      <Timeline data={data?.lpp_document} />
     </Card.Body>
   );
 };

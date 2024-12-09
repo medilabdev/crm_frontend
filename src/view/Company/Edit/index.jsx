@@ -24,6 +24,9 @@ import DataTable from "react-data-table-component";
 import IconContact from "../../../assets/img/telephone-call.png";
 import IconDeals from "../../../assets/img/coin.png";
 import IconCompany from "../../../assets/img/condo.png";
+import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
+import { GetDataTypeHospital } from "../../../action/TypeHospital";
 const EditCompany = () => {
   const { uid } = useParams();
   const token = localStorage.getItem("token");
@@ -50,6 +53,9 @@ const EditCompany = () => {
   const [formParentComp, setFormParentComp] = useState(false);
   const [isButtonDisable, setButtonDisable] = useState(false);
   // console.log(oldAssociate);
+
+  const dispatch = useDispatch()
+  const { DataTypeHospital } = useSelector((state) => state.GetTypeHospital)
   const getDeals = async (retryCount = 0) => {
     try {
       const response = await axios.get(
@@ -239,6 +245,7 @@ const EditCompany = () => {
       const telp_number = companyDetail?.phone?.map((phoneObj) => phoneObj);
       const oldAssociate = companyDetail?.associate?.map((data) => data);
       setOldAssociate(oldAssociate);
+      
       setEditCompany({
         name: companyDetail.name,
         website_url: companyDetail.website_url,
@@ -251,6 +258,7 @@ const EditCompany = () => {
         owner_user_uid: companyDetail?.owner?.uid,
         company_source_uid: companyDetail?.company_source?.uid,
         company_type_uid: companyDetail?.company_type?.uid,
+        hospital_type_uid:companyDetail?.hospital_type_uid
       });
       setTelephone(telp_number ? telp_number : []);
       setHistory(companyDetail.history);
@@ -379,6 +387,8 @@ const EditCompany = () => {
     });
   };
 
+
+
   const contactSelect = () => {
     const result = [];
     contact?.map((data) => {
@@ -392,6 +402,21 @@ const EditCompany = () => {
       (cont) => !oldAssociate.some((old) => old?.contact?.uid === cont.value)
     );
     return filterCont;
+  };
+
+  const TypeHospital = () => {
+    const result = [];
+    if (Array?.isArray(DataTypeHospital)) {
+      DataTypeHospital?.map((data) => {
+      const contact = {
+        value: data.uid,
+        label: data.name,
+      };
+      result.push(contact);
+    });
+  }
+   
+    return result;
   };
 
   const selectOwner = () => {
@@ -452,6 +477,7 @@ const EditCompany = () => {
     getCompanyParent();
     getContact();
     getDeals();
+    dispatch(GetDataTypeHospital(token))
     const clearLocalStorage = () => {
       localStorage.removeItem("parentComp");
     };
@@ -479,6 +505,7 @@ const EditCompany = () => {
     formData.append("owner_user_uid", editCompany.owner_user_uid || "");
     formData.append("company_source_uid", editCompany.company_source_uid || "");
     formData.append("company_type_uid", editCompany.company_type_uid || "");
+    formData.append("hospital_type_uid", editCompany.hospital_type_uid || "");
     formData.append("notes", editCompany.notes || "");
     if (valueDeals) {
       valueDeals.forEach((deals, index) => {
@@ -491,10 +518,10 @@ const EditCompany = () => {
       });
     }
     formData.append("_method", "put");
-    // console.log("FormData Content:");
-    // for (const pair of formData.entries()) {
-    //   console.log(pair[0] + ": " + pair[1]);
-    // }
+    console.log("FormData Content:");
+    for (const pair of formData.entries()) {
+      console.log(pair[0] + ": " + pair[1]);
+    }
     setButtonDisable(true);
     try {
       const update = await axios
@@ -763,6 +790,21 @@ const EditCompany = () => {
                           })
                         }
                         placeholder="Select Owner"
+                      />
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Select
+                        options={TypeHospital()}
+                        value={TypeHospital().find(
+                          (e) => e.value === editCompany.hospital_type_uid
+                        )}
+                        onChange={(e) =>
+                          setEditCompany({
+                            ...editCompany,
+                            hospital_type_uid: e.value,
+                          })
+                        }
+                        placeholder="Select Type Hospital"
                       />
                     </Form.Group>
                     {telephone?.map((tel, index) => (

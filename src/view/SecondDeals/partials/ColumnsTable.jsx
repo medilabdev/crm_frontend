@@ -1,69 +1,122 @@
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  faCheck,
+  faEdit,
   faEye,
+  faGears,
+  faInfoCircle,
   faPenToSquare,
+  faSquareXmark,
+  faTools,
   faTrash,
+  faX,
+  faXRay,
 } from "@fortawesome/free-solid-svg-icons";
-import Swal from "sweetalert2";
-import axios from "axios";
+import { handleDeleteDataTable } from "./System/Action";
+import Icon from "../../../assets/img/man.png"
 export const token = localStorage.getItem("token");
 export const position = localStorage.getItem("position");
 export const uid = localStorage.getItem("uid");
 export const ColumnsTable = [
   {
     name: "Name",
-    selector: (row) =>{ 
-      const createdDate = new Date(row?.created_at)
+    selector: (row) => { 
+      const createdDate = new Date(row?.created_at);
       const currentDate = new Date();
-      const twoDaysAgo = new Date(currentDate)
-      twoDaysAgo?.setDate(currentDate.getDate() - 2)
+      const twoDaysAgo = new Date(currentDate);
+      twoDaysAgo?.setDate(currentDate.getDate() - 2);
       const isNew = createdDate > twoDaysAgo; 
       return (
-      <div>
-      <a
-        href={`/deals-second/${row.uid}/edit`}
-        target="_blank"
-        className="text-decoration-none fw-semibold"
-        style={{ whiteSpace: "normal", color: "black" }}
-      >
-        {row?.fqp_document?.hospital?.name ?? "-"}
-      </a>
-        {isNew && <span className="badge bg-primary ms-2">New</span> }
-      </div>
-    )},
-    width:'200px',
-    left:true
+        <div> {/* Apply Open Sans */}
+          <a
+            href={`/deals-second/${row.uid}/edit`}
+            className="text-decoration-none"
+            style={{ whiteSpace: "normal", color: "black", fontWeight: 600 ,fontFamily:"Nunito Sans, sans-serif", fontSize:"0.9rem" }}
+          >
+            {row?.fqp_document?.hospital?.name ?? "-"}
+          </a>
+          {isNew && <span className="badge bg-primary ms-2">New</span>}
+        </div>
+      );
+    },
+    width: '200px',
+    left: true
   },
   {
     name: "Stage",
-    selector: (row) => (
-      <div>
-        <p
-          className={`btn mt-3 ${
-            row.staging?.name === "Closed Won" || row.staging?.name === "Implementation"
-              ? "btn-success"
-              : row.staging?.name === "Closed Lost"
-                ? "btn-danger"
-                : "btn-primary"
-          }`}
-          style={{ fontSize: "0.65rem", fontWeight: "600" }}
-        >
-          {row.staging?.name ?? "-"}
-        </p>
-      </div>
-    ),
-    hide:'sm',
-    left:true
+    selector: (row) => row.staging?.name ?? "-",
+    cell: (row) => {
+      const stageName = row.staging?.name ?? "-";
+      
+      const getIcon = () => {
+        switch (stageName) {
+          case "Closed Won":
+            return <FontAwesomeIcon icon={faCheck} /> // Ikon checklist untuk Closed Won
+          case "Implementation":
+            return <FontAwesomeIcon icon={faTools} />; // Ikon tools untuk Implementation
+          case "Closed Lost":
+            return <FontAwesomeIcon icon={faSquareXmark} />; // Ikon silang untuk Closed Lost
+          default:
+            return <FontAwesomeIcon icon={faGears} />; // Ikon info untuk default
+        }
+      };
+      // Gaya tombol berdasarkan nama stage
+      const getButtonStyle = () => {
+        switch (stageName) {
+          case "Closed Won":
+          case "Implementation":
+            return {
+              backgroundColor: "#e9f7ef", // Hijau
+              color: "#198754",
+            };
+          case "Closed Lost":
+            return {
+              backgroundColor: "#f8d7da", // Merah
+              color: "#dc3545",
+            };
+          default:
+            return {
+              backgroundColor: "#e7f1ff", // Biru
+              color: "#0d6efd",
+            };
+        }
+      };
+  
+      // Gaya kontainer teks
+      const containerStyle = {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontFamily: "Nunito Sans, sans-serif",
+      };
+  
+      // Gaya tombol
+      const buttonStyle = {
+        ...getButtonStyle(),
+        padding: "5px 10px",
+        borderRadius: "15px",
+        fontWeight: "600",
+        textTransform:"uppercase"
+      };
+  
+      return (
+        <div style={containerStyle}>
+          <span style={buttonStyle}>
+          {getIcon()} {stageName}</span>
+        </div>
+      );
+    },
+    left: true, // Letakkan teks di kiri
   },
+  
   {
     name: "Owner",
     selector: (row) => {
-      // console.log(row);
       const date = new Date(row.created_at);
       const formatDate = {
         year: "numeric",
-        month: "long",
+        month: "short",
         day: "2-digit",
         hour: "2-digit",
         minute: "2-digit",
@@ -71,127 +124,75 @@ export const ColumnsTable = [
       const formatResult = new Intl.DateTimeFormat("en-US", formatDate);
       const time = formatResult.format(date);
       return (
-        <div>
-          <p
-            className="mt-2 fw-bold"
+        <div className="d-flex align-items-center mt-2" style={{ fontFamily:"Nunito Sans sans-serif", }}> 
+        <img
+          src={Icon}
+          alt={Icon}
+          style={{ width: "30px", height: "30px", borderRadius: "50%", marginRight: "10px" }}
+        />
+      <div>
+          <div
+            className="mb-2"
             style={{
-              fontSize: "0.90rem",
+              fontSize: "14px",
               fontWeight: "bold",
               whiteSpace: "normal",
+              fontFamily: "Nunito Sans, sans-serif",
             }}
           >
             {row.owner?.name ?? "-"}
-          </p>
-          <p
+          </div>
+          <div
             style={{
-              fontSize: "0.70rem",
+              fontSize: "12px",
               marginTop: "-8px",
               whiteSpace: "normal",
+              fontFamily: "Nunito Sans, sans-serif",
             }}
           >
             {time}
-          </p>
+          </div>
+          </div>
         </div>
       );
     },
-      hide:'sm',
-      left:true
-    
+    hide: 'sm',
+    left: true
   },
-  // {
-  //   name:"Updated at",
-  //   selector:(row) => {
-  //     const date = new Date(row.updated_at);
-  //     const formatDate = {
-  //       year: "numeric",
-  //       month: "long",
-  //       day: "2-digit",
-  //       hour: "2-digit",
-  //       minute: "2-digit",
-  //     };
-  //     const formatResult = new Intl.DateTimeFormat("en-US", formatDate);
-  //     const time = formatResult.format(date);
-  //     return (
-  //       <div>
-  //         <p
-  //           style={{
-  //             fontSize: "0.90rem",
-  //             whiteSpace: "normal",
-  //           }}
-  //         >
-  //           {time}
-  //         </p>
-  //       </div>
-  //     );
-  //   }
-  // },
   {
     name: "Action",
     selector: (row) => (
-      <div className="action-icon">
+      <div className="action-icon" style={{ fontFamily: "Nunito Sans, sans-serif" }}> {/* Apply Open Sans */}
         {row.owner_user_uid === uid ? (
           <>
             <a
               href={`/deals-second/${row.uid}/edit`}
-              className="me-2 icon-button text-dark"
-              target="_blank"
-            >
-              <FontAwesomeIcon icon={faPenToSquare} />
-            </a>
-            <button
-              className="icon-button"
-              onClick={() => {
-                Swal.fire({
-                  title: "Konfirmasi",
-                  text: "Apakah kamu yakin ingin menghapus ini deals ini?",
-                  icon: "warning",
-                  showCancelButton: true,
-                  confirmButtonColor: "#3085d6",
-                  cancelButtonColor: "#d33",
-                  confirmButtonText: "Ya, Hapus!",
-                  cancelButtonText: "Batal",
-                }).then((res) => {
-                  if (res.isConfirmed) {
-                    axios
-                      .delete(
-                        `${process.env.REACT_APP_BACKEND_URL}/v2/deals/${row.uid}`,
-                        {
-                          headers: {
-                            Authorization: `Bearer ${token}`,
-                          },
-                        }
-                      )
-                      .then((res) => {
-                        Swal.fire({
-                          title: res.data.message,
-                          text: "Successfully delete deals",
-                          icon: "success",
-                        }).then((res) => {
-                          if (res.isConfirmed) {
-                            window.location.reload();
-                          }
-                        });
-                      })
-                      .catch((err) => {
-                        if (err.response.data.message === "Delete failed!") {
-                          Swal.fire({
-                            title: "Delete Failed",
-                            text: "Tidak dapat menghapus, data master ini terkait dengan data lainnya",
-                            icon: "warning",
-                          });
-                        }
-                      });
-                  }
-                });
+              className="me-2 text-white btn btn-primary btn-sm"
+              style={{
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
               }}
             >
-              <FontAwesomeIcon icon={faTrash} />
+              <FontAwesomeIcon icon={faEdit} style={{ color: "#0D6EFD", fontSize: "18px" }} />
+            </a>
+            <button
+              className="text-white btn btn-danger btn-sm"
+              style={{
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
+              }}
+              onClick ={(e) => handleDeleteDataTable(row?.uid, token, e)}
+             
+            >
+              <FontAwesomeIcon icon={faTrash}  style={{ color: "#DD3F45", fontSize: "18px" }} />
             </button>
           </>
         ) : (
           <a
             href={`/deals-second/${row.uid}/edit`}
-            className="me-2 icon-button text-dark"
+            className="me-2 text-white btn btn-primary btn-sm"
             target="_blank"
           >
             <FontAwesomeIcon icon={faEye} />
@@ -199,14 +200,28 @@ export const ColumnsTable = [
         )}
       </div>
     ),
-    left:true
+    center: true
   },
 ];
 
 export const CustomStyles = {
-  head: {
+   headCells: {
     style: {
-      fontWeight: "650",
+      fontSize: "18px", // Sesuaikan ukuran font header
+      fontWeight: "semibold", // Atur agar teks lebih tebal
+      textTransform: "uppercase", // Atur huruf menjadi kapital
+      backgroundColor: "#f8f9fa", // Sesuaikan warna latar belakang header jika diperlukan
+      padding: "9px 12px",  
+    },
+  },
+  rows: {
+    style: {
+      fontSize: "14px",
+      minHeight: "72px",
+      borderBottom: "1px solid #dee2e6",
+    },
+    highlightOnHoverStyle: {
+      backgroundColor: "#f1f5f9",
     },
   },
 };

@@ -11,7 +11,7 @@ const initialstate = {
         case GET_LIST_OWNER:
           return{
             ...state,
-            listResultOwner:action.payload.data,
+            listResultOwner:action.payload.data || {},
             listLoadingOwner:action.payload.loading,
             listErrorOwner:action.payload.errorMessage
           }  

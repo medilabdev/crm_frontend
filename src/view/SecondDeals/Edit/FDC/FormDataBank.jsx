@@ -45,12 +45,9 @@ const FormDataBank = ({ handleInputChange }) => {
     <div>
       {inputData.map((data, index) => (
         <>
-          <div class="alert alert-primary mt-2" role="alert">
-            <h6 style={{ fontWeight: "700" }}>
-              <FontAwesomeIcon icon={faBuildingColumns} className="me-2" /> Data
-              Bank {index + 1}
-            </h6>
-          </div>
+         <div class="header-box">
+                  DATA BANK {index + 1}
+              </div>
           <div key={index}>
             <div className="row">
               <div className="col-md-6">

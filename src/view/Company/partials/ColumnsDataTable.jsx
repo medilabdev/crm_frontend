@@ -16,11 +16,23 @@ import React from "react";
 import { useMediaQuery } from "react-responsive";
 
 export const CustomStyles = {
-  head: {
-    style: {
-      fontWeight: "650",
-    },
-  },
+  headCells: {
+   style: {
+     fontSize: "2rem", // Sesuaikan ukuran font header
+     fontWeight: "bold", // Atur agar teks lebih tebal
+     textTransform: "uppercase", // Atur huruf menjadi kapital
+     color: "black", // Sesuaikan warna jika perlu
+     backgroundColor: "#F7F9F2", // Sesuaikan warna latar belakang header jika diperlukan
+     padding: "9px 12px", // Sesuaikan padding untuk header
+     borderTop: "2px solid #CBDCEB",
+   },
+ },
+ cells: {
+   style: {
+     padding: "1px 5px",
+     fontFamily:"Nunito Sans, sans-serif",
+   },
+ },
 };
 
 const ColumnsDataTable = ({
@@ -301,6 +313,7 @@ const ColumnsDataTable = ({
         pagination
         paginationServer
         selectableRows
+        customStyles={CustomStyles}
         onSelectedRowsChange={selectUid}
         paginationPerPage={paginationPerPage}
         onChangePage={onChangePage}

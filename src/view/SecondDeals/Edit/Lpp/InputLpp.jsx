@@ -218,18 +218,27 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
 
  
   const [inputTimeline, setInputTimeline] = useState([]);
-  const handleInputTimeline = (e) => {
-    if (e.target.checked) {
-      setInputTimeline({
-        ...inputTimeline,
-        [e.target.name]: "1",
-      });
-    } else {
-      const updatedInputTimeline = { ...inputTimeline };
-      delete updatedInputTimeline[e.target.name];
-      setInputTimeline(updatedInputTimeline);
-    }
+ 
+
+  const handleInputTimeline = (event, processIndex, weekIndex) => {
+    const isChecked = event.target.checked ? 1 : 0;
+    const newTimeline = {
+      ...inputTimeline,
+      [`timeline[${processIndex}][${weekIndex}]`]: isChecked,
+    };
+    setInputTimeline(newTimeline);
   };
+  const processNames = [
+    "Renovasi",
+    "Kirim Mesin",
+    "Install Mesin",
+    "Izin HD & BPJS",
+    "Training",
+    "1st Running Patient",
+  ];
+
+  console.log(inputTimeline);
+  
   const [categoryType, setCategoryType] = useState("");
 
   useEffect(() => {
@@ -426,96 +435,26 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
         formData.append("postscript", inputData.postscript || "");
 
         formData.append("timeline[0][name]", categoryType || "");
-        formData.append("timeline[0][1]", inputTimeline.timeline01 || 0);
-        formData.append("timeline[0][2]", inputTimeline.timeline02 || 0);
-        formData.append("timeline[0][3]", inputTimeline.timeline03 || 0);
-        formData.append("timeline[0][4]", inputTimeline.timeline04 || 0);
-        formData.append("timeline[0][5]", inputTimeline.timeline05 || 0);
-        formData.append("timeline[0][6]", inputTimeline.timeline06 || 0);
-        formData.append("timeline[0][7]", inputTimeline.timeline07 || 0);
-        formData.append("timeline[0][8]", inputTimeline.timeline08 || 0);
-        formData.append("timeline[0][9]", inputTimeline.timeline09 || 0);
-        formData.append("timeline[0][10]", inputTimeline.timeline10 || 0);
-        formData.append("timeline[0][11]", inputTimeline.timeline11 || 0);
-        formData.append("timeline[0][12]", inputTimeline.timeline12 || 0);
-        formData.append("timeline[1][name]", "Renovasi");
-        formData.append("timeline[1][1]", inputTimeline.timeline13 || 0);
-        formData.append("timeline[1][2]", inputTimeline.timeline14 || 0);
-        formData.append("timeline[1][3]", inputTimeline.timeline15 || 0);
-        formData.append("timeline[1][4]", inputTimeline.timeline16 || 0);
-        formData.append("timeline[1][5]", inputTimeline.timeline17 || 0);
-        formData.append("timeline[1][6]", inputTimeline.timeline18 || 0);
-        formData.append("timeline[1][7]", inputTimeline.timeline19 || 0);
-        formData.append("timeline[1][8]", inputTimeline.timeline20 || 0);
-        formData.append("timeline[1][9]", inputTimeline.timeline21 || 0);
-        formData.append("timeline[1][10]", inputTimeline.timeline22 || 0);
-        formData.append("timeline[1][11]", inputTimeline.timeline23 || 0);
-        formData.append("timeline[1][12]", inputTimeline.timeline24 || 0);
-        formData.append("timeline[2][name]", "Kirim Mesin");
-        formData.append("timeline[2][1]", inputTimeline.timeline25 || 0);
-        formData.append("timeline[2][2]", inputTimeline.timeline26 || 0);
-        formData.append("timeline[2][3]", inputTimeline.timeline27 || 0);
-        formData.append("timeline[2][4]", inputTimeline.timeline28 || 0);
-        formData.append("timeline[2][5]", inputTimeline.timeline29 || 0);
-        formData.append("timeline[2][6]", inputTimeline.timeline30 || 0);
-        formData.append("timeline[2][7]", inputTimeline.timeline31 || 0);
-        formData.append("timeline[2][8]", inputTimeline.timeline32 || 0);
-        formData.append("timeline[2][9]", inputTimeline.timeline33 || 0);
-        formData.append("timeline[2][10]", inputTimeline.timeline34 || 0);
-        formData.append("timeline[2][11]", inputTimeline.timeline35 || 0);
-        formData.append("timeline[2][12]", inputTimeline.timeline36 || 0);
-        formData.append("timeline[3][name]", "Install Mesin");
-        formData.append("timeline[3][1]", inputTimeline.timeline37 || 0);
-        formData.append("timeline[3][2]", inputTimeline.timeline38 || 0);
-        formData.append("timeline[3][3]", inputTimeline.timeline39 || 0);
-        formData.append("timeline[3][4]", inputTimeline.timeline40 || 0);
-        formData.append("timeline[3][5]", inputTimeline.timeline41 || 0);
-        formData.append("timeline[3][6]", inputTimeline.timeline42 || 0);
-        formData.append("timeline[3][7]", inputTimeline.timeline43 || 0);
-        formData.append("timeline[3][8]", inputTimeline.timeline44 || 0);
-        formData.append("timeline[3][9]", inputTimeline.timeline45 || 0);
-        formData.append("timeline[3][10]", inputTimeline.timeline46 || 0);
-        formData.append("timeline[3][11]", inputTimeline.timeline47 || 0);
-        formData.append("timeline[3][12]", inputTimeline.timeline48 || 0);
-        formData.append("timeline[4][name]", "Izin HD & BPJS");
-        formData.append("timeline[4][1]", inputTimeline.timeline49 || 0);
-        formData.append("timeline[4][2]", inputTimeline.timeline50 || 0);
-        formData.append("timeline[4][3]", inputTimeline.timeline51 || 0);
-        formData.append("timeline[4][4]", inputTimeline.timeline52 || 0);
-        formData.append("timeline[4][5]", inputTimeline.timeline53 || 0);
-        formData.append("timeline[4][6]", inputTimeline.timeline54 || 0);
-        formData.append("timeline[4][7]", inputTimeline.timeline55 || 0);
-        formData.append("timeline[4][8]", inputTimeline.timeline56 || 0);
-        formData.append("timeline[4][9]", inputTimeline.timeline57 || 0);
-        formData.append("timeline[4][10]", inputTimeline.timeline58 || 0);
-        formData.append("timeline[4][11]", inputTimeline.timeline59 || 0);
-        formData.append("timeline[4][12]", inputTimeline.timeline60 || 0);
-        formData.append("timeline[5][name]", "Training");
-        formData.append("timeline[5][1]", inputTimeline.timeline61 || 0);
-        formData.append("timeline[5][2]", inputTimeline.timeline62 || 0);
-        formData.append("timeline[5][3]", inputTimeline.timeline63 || 0);
-        formData.append("timeline[5][4]", inputTimeline.timeline64 || 0);
-        formData.append("timeline[5][5]", inputTimeline.timeline65 || 0);
-        formData.append("timeline[5][6]", inputTimeline.timeline66 || 0);
-        formData.append("timeline[5][7]", inputTimeline.timeline67 || 0);
-        formData.append("timeline[5][8]", inputTimeline.timeline68 || 0);
-        formData.append("timeline[5][9]", inputTimeline.timeline69 || 0);
-        formData.append("timeline[5][10]", inputTimeline.timeline70 || 0);
-        formData.append("timeline[5][11]", inputTimeline.timeline71 || 0);
-        formData.append("timeline[5][12]", inputTimeline.timeline72 || 0);
-        formData.append("timeline[6][name]", "1st Running Patient");
-        formData.append("timeline[6][1]", inputTimeline.timeline73 || 0);
-        formData.append("timeline[6][2]", inputTimeline.timeline74 || 0);
-        formData.append("timeline[6][3]", inputTimeline.timeline75 || 0);
-        formData.append("timeline[6][4]", inputTimeline.timeline76 || 0);
-        formData.append("timeline[6][5]", inputTimeline.timeline77 || 0);
-        formData.append("timeline[6][6]", inputTimeline.timeline78 || 0);
-        formData.append("timeline[6][7]", inputTimeline.timeline79 || 0);
-        formData.append("timeline[6][8]", inputTimeline.timeline80 || 0);
-        formData.append("timeline[6][9]", inputTimeline.timeline81 || 0);
-        formData.append("timeline[6][10]", inputTimeline.timeline82 || 0);
-        formData.append("timeline[6][11]", inputTimeline.timeline83 || 0);
-        formData.append("timeline[6][12]", inputTimeline.timeline84 || 0);
+        for (let weekIndex = 1; weekIndex <= 12; weekIndex++) {
+          formData.append(
+            `timeline[0][${weekIndex}]`,
+            inputTimeline[`timeline[0][${weekIndex}]`] || 0
+          );
+        }
+        processNames.forEach((processName, processIndex) => {
+          const actualIndex = processIndex + 1; // Mulai dari 1 untuk proses tambahan
+      
+          // Tambahkan nama proses ke FormData
+          formData.append(`timeline[${actualIndex}][name]`, processName);
+      
+          // Tambahkan data mingguan untuk setiap proses
+          for (let weekIndex = 1; weekIndex <= 12; weekIndex++) {
+            formData.append(
+              `timeline[${actualIndex}][${weekIndex}]`,
+              inputTimeline[`timeline[${actualIndex}][${weekIndex}]`] || 0
+            );
+          }
+        });
         formData.append("date_period", inputData.date_period || "");
         for (const pair of formData.entries()) {
           console.log(pair[0] + ": " + pair[1]);
@@ -611,8 +550,8 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
   
   return (
     <Card.Body>
-      <div class="alert alert-primary mt-2" role="alert">
-        <h6 style={{ fontWeight: "700" }}>Customer</h6>
+      <div class="header-box">
+                  CUSTOMER
       </div>
       <div className=" mb-3">
       <div className="form-floating mb-3">
@@ -692,8 +631,8 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
       ) : (
         ""
       )}
-      <div class="alert alert-primary mt-2" role="alert">
-        <h6 style={{ fontWeight: "700" }}>Jenis Kerjasama</h6>
+      <div class="header-box mt-4">
+                  JENIS KERJASAMA 
       </div>
       <div className="mb-3">
         <label htmlFor="" className="mb-1 fw-semibold">
@@ -774,8 +713,8 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
         />
          {error && <div className="invalid-feedback">{error.categoryType}</div>}
       </div>
-      <div class="alert alert-primary mt-4" role="alert">
-        <h6 style={{ fontWeight: "700" }}>Term Kerjasama</h6>
+      <div class="header-box mt-4">
+                  JANGKA WAKTU KERJASAMA 
       </div>
       <div className="form-floating mb-3">
         <input
@@ -836,8 +775,9 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
           <option value="iss">PT ISS</option>
         </select>
       </div>
-      <div class="alert alert-primary mt-2" role="alert">
-        <h6 style={{ fontWeight: "700" }}>Peralatan</h6>
+
+      <div class="header-box mt-4">
+                  PERALATAN 
       </div>
       <div className="form-floating mb-3">
         <input
@@ -971,8 +911,8 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
           </div>
         </div>
       </div>
-      <div class="alert alert-primary mt-2" role="alert">
-        <h6 style={{ fontWeight: "700" }}>Target</h6>
+      <div class="header-box mt-4">
+                  TARGET 
       </div>
       <div className="form-floating mb-3">
         <input
@@ -1009,7 +949,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
           className="p-2"
           theme="snow"
           onChange={(value) =>
-            handleInputData({
+          handleInputData({
               target: { name: "postscript", value },
             })
           }

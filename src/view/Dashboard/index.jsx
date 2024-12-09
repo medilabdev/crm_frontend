@@ -10,7 +10,13 @@ import { Card } from "react-bootstrap";
 import { ChartVertikal } from "./ChartVertikal";
 import { ChartLineDoang } from "./ChartLineDoang";
 import { ChartWinLose } from "./ChartWinLose";
+
 import axios from "axios";
+import Map from "./Map";
+import TopSales from "./TopSales";
+import ContactRecap from "./ContactRecap";
+import CompanyRecap from "./CompanyRecap";
+import DealsRecap from "./DealsRecap";
 
 function Dashboard() {
   return (
@@ -18,25 +24,27 @@ function Dashboard() {
       <Topbar />
       <Sidebar />
       <Main>
-        <div className="container">
+        <div className="container" style={{ marginBottom: "3.4rem"}}>
           <div className="row">
             <div className="col">
               <div className="pagetitle">
                 <h1>Dashboard</h1>
-                <nav>
-                  <ol className="breadcrumb mt-2">
-                    <li className="breadcrumb-item">Dashboard</li>
-                  </ol>
-                </nav>
               </div>
             </div>
           </div>
-          <div className="row">
-            <div>
-            <Card className="shadow">
+          <div className="row mt-3">
+            <TopSales />
+            <ContactRecap />
+            <CompanyRecap />
+            <DealsRecap />
+          </div>
+          
+          {/* <div className="row">
+              <div className="col-md-6">
+              <Card className="shadow">
                 <ChartWinLose />
               </Card>
-            </div>
+              </div>
           </div>
           <div className="row">
             <div className="col-md-6">
@@ -62,7 +70,7 @@ function Dashboard() {
                 <ChartWinLose />
               </Card>
             </div>
-          </div>
+          </div> */}
         </div>
         <Footer />
       </Main>

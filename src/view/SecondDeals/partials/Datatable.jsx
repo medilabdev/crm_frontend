@@ -43,17 +43,17 @@ const DatatableDealSecond = ({
           <span style={{ fontWeight : 400}}>Action : </span>  
           <a
             href={`/deals-second/${data.uid}/edit`}
-            className="me-2 btn btn-primary"
+            className="ms-2 btn btn-primary btn-sm"
             target="_blank"
           >
-            Lihat Detail
+          Detail
           </a>
         </div>
       </div>
     )
   }
   return (
-    <div>
+    <div className="p-2">
       <DataTable
         data={data}
         columns={ColumnsTable}

@@ -3,7 +3,6 @@ import { Card } from "react-bootstrap";
 
 
 const CloseLost = ({ data }) => {
-    console.log(data);
   return (
     <div className='col'>
     <Card>
