@@ -11,7 +11,7 @@ const MenuSidebar = ({ type, name, icon, url, isActive }) => {
   const [urlActive, setUrlActive] = useState(false);
 
 
-  
+
   useEffect(() => {
     if (location.pathname === url) {
       setUrlActive(true);
@@ -20,11 +20,7 @@ const MenuSidebar = ({ type, name, icon, url, isActive }) => {
     }
   }, [location.pathname, url]);
 
-  // Handle link click to show loading overlay
-  const handleLinkClick = () => {
-  };
-  
-  
+
   return (
     <div style={{ position: "relative" }}>
 
@@ -35,8 +31,8 @@ const MenuSidebar = ({ type, name, icon, url, isActive }) => {
               href={url}
               className={`nav-link ${urlActive ? "" : "collapsed"}`}
             >
-              <i className={icon} style={{ fontSize: "1rem", color: "gray", color: urlActive ? "white" : "hsl(218, 22%, 32%)"  }} />
-              <span style={{ fontSize: "1rem", fontWeight: "450",  color: urlActive ? "white" : "hsl(218, 22%, 32%)"  }}>{name}</span>
+              <i className={icon} style={{ fontSize: "1rem", color: "gray", color: urlActive ? "white" : "hsl(218, 22%, 32%)" }} />
+              <span style={{ fontSize: "1rem", fontWeight: "450", color: urlActive ? "white" : "hsl(218, 22%, 32%)" }}>{name}</span>
             </a>
           </li>
         </>

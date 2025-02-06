@@ -1,0 +1,11 @@
+.filter-wrapper {
+    transition: all 0.3s ease-in-out;
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.filter-wrapper.hidden {
+    opacity: 0;
+    transform: translateX(-20px); /* Geser ke kiri saat disembunyikan */
+    pointer-events: none; /* Mencegah interaksi saat hidden */
+}

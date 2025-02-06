@@ -1,20 +1,12 @@
 import React from "react";
-import {
-  BrowserRouter,
-  Routes,
-  Navigate,
-  useLocation,
-  Route,
-  useNavigate,
-  Switch,
-} from "react-router-dom";
+import { BrowserRouter, Routes, Navigate, Route, } from "react-router-dom";
 import Dashboard from "../view/Dashboard";
 import User from "../view/User";
 import ShowUser from "../view/User/show";
 import Auth from "../view/Auth";
 import Contact from "../view/Contact";
 import SingleContact from "../view/Contact/SingleContact";
-import Swal from "sweetalert2";
+
 import BulkChange from "../view/Contact/BulkChange";
 import Company from "../view/Company";
 import SingleCompany from "../view/Company/SingleCompany";
@@ -51,7 +43,7 @@ import OtorisasiMenu from "../view/Properties/OtorisasiMenu";
 import UserAccessMenu from "../view/Properties/UserAccessMenu";
 import DetailAccessMenu from "../view/Properties/UserAccessMenu/DetailAccessMenu";
 import AccountProfil from "../view/User/AccountProfile";
-import EditTask from "../view/Task/Overlay/EditTask";
+
 import EditTaskFix from "../view/Task/EditTask";
 import SecondDeals from "../view/SecondDeals";
 import CreateSecondDeals from "../view/SecondDeals/create";
@@ -65,6 +57,7 @@ import WeeklyReport from "../view/Weekly/WeeklyReport";
 import CreateWeeklyTask from "../view/Weekly/WeeklyTask/Create";
 import EditTaskWeekly from "../view/Weekly/WeeklyTask/Edit";
 import FillTaskWeekly from "../view/Weekly/FillTaskWeekly";
+import ActivityTechnician from "../view/ActivityTechnicians";
 
 const Login = ({ children }) => {
   const token = localStorage.getItem("token");
@@ -488,24 +481,19 @@ function Router() {
           }
         />
 
-        <Route
-          exact
-          path="/properties/deals-version"
-          element={
-            <Login>
-              <DealsVersion />
-            </Login>
-          }
-        />
-        <Route exact path="/deals-second/:uid/edit" element={<Login><EditDataSecondDeals/></Login>} />
-        <Route exact path="/deals-second/assign-deals" element={<Login><AssignDealsSales /></Login>}/>
-        <Route exact path="/sales-ambasador" element={<Login><SalesAmbasador /></Login>}/>
-        <Route exact path="/weekly-task" element={<Login><WeeklyTask /></Login>}/>
-        <Route exact path="/weekly-report" element={<Login><WeeklyReport /></Login>}/>
-        <Route exact path="/weekly-task/create" element={<Login><CreateWeeklyTask /></Login>}/>
-        <Route exact path="/weekly-task/:uid/edit" element={<Login><EditTaskWeekly /></Login>}/>
-        <Route exact path="/weekly-task/:uid/note" element={<Login><FillTaskWeekly /></Login>}/>
-        
+        <Route exact path="/properties/deals-version" element={<Login><DealsVersion /></Login>} />
+        <Route exact path="/deals-second/:uid/edit" element={<Login><EditDataSecondDeals /></Login>} />
+        <Route exact path="/deals-second/assign-deals" element={<Login><AssignDealsSales /></Login>} />
+        <Route exact path="/sales-ambasador" element={<Login><SalesAmbasador /></Login>} />
+        <Route exact path="/weekly-task" element={<Login><WeeklyTask /></Login>} />
+        <Route exact path="/weekly-report" element={<Login><WeeklyReport /></Login>} />
+        <Route exact path="/weekly-task/create" element={<Login><CreateWeeklyTask /></Login>} />
+        <Route exact path="/weekly-task/:uid/edit" element={<Login><EditTaskWeekly /></Login>} />
+        <Route exact path="/weekly-task/:uid/note" element={<Login><FillTaskWeekly /></Login>} />
+
+        {/* activity technician */}
+        <Route exact path="/activity-technician" element={<Login><ActivityTechnician /></Login>} />
+
       </Routes>
     </BrowserRouter>
   );
