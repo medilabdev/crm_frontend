@@ -1,6 +1,6 @@
 // eslint-disable-next-line
 
-import React, { useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import Topbar from '../../../components/Template/Topbar'
 import Sidebar from '../../../components/Template/Sidebar'
 import Main from '../../../components/Template/Main'
@@ -13,37 +13,35 @@ import ImageMachine from '../../../assets/img/MK-HDF 1.png'
 import FileUpload from '../../../components/FileUpload'
 import { useParams } from 'react-router-dom'
 import Swal from "sweetalert2";
-
-const dataMachines = [
-    { name: 'MKHD-001', image: ImageMachine, model: 'MK-HDP-001', sn: '2025010101' },
-    { name: 'MKHD-002', image: ImageMachine, model: 'MK-HDP-002', sn: '2025010102' },
-    { name: 'MKHD-003', image: ImageMachine, model: 'MK-HDP-003', sn: '2025010103' },
-];
-
-const purposeOfVisitData = [
-    { label: "Installation & Training", value: "01JNN6RCSBZ7MY1760PCQVXHEK" },
-    { label: "Maintenance Machine", value: "01JNN6RCSC32P2D02FK71MFHR2" },
-    { label: "Maintenance HD", value: "01JNN6RCSD0R9Y8F5632YZCVQ2" },
-    { label: "Troubleshooting", value: "01JNN6RCSF37HK6CT75HFQKP3M" },
-    { label: "Others", value: "01JNN6RCSH0Z4GSQE9XXE1C4B4" }
-]
-
-const selectDataMachines = () => {
-    return dataMachines.map(item => ({
-        value: item.sn,
-        label: `${item.name} | ${item.sn}`
-    }));
-}
-
+import SignatureCanvas from "react-signature-canvas";
+import axios from 'axios'
 
 const DetailActivity = () => {
     const { uid } = useParams();
     const [sections, setSections] = useState([{ id: 1, machine: '', jobdesc: '', notes: '', photos: [] }]);
+    const [purposeOfVisitData, setPurposeOfVisitData] = useState([]);
     const [selectedPurpose, setSelectedPurpose] = useState('');
+    const [technicianDetailData, setTechnicianDetailData] = useState([]);
+    const [loading, setLoading] = useState(false);
+
     const [drafts, setDrafts] = useState({
         detail_uid: uid, // Gunakan id_detail jika ada, jika tidak buat random
         data: []
     });
+    const [selectedConclusion, setSelectedConclusion] = useState("");
+    const [jobDescData, setJobDescData] = useState("");
+    const ulidParams = useParams().uid;
+
+    // signature
+    const [signatureClient, setSignatureClient] = useState("");
+    const [signatureImage, setSignatureImage] = useState(null);
+    const sigCanvas = useRef(null);
+    const [imageURL, setImageURL] = useState(null);
+
+    // url
+    const urlVisitPurpose = `${process.env.REACT_APP_BACKEND_URL}/visit-purposes`;
+    const urlTechnicianDetail = `${process.env.REACT_APP_BACKEND_URL}/technician-tickets/${ulidParams}?rel=details,machines,company,visit-purpose`;
+    const token = localStorage.getItem("token");
 
     const LOCAL_STORAGE_KEY = `activityDraft_${uid}`;
 
@@ -75,11 +73,31 @@ const DetailActivity = () => {
         );
     };
 
-
     // handle purpose change
     const handlePurposeChange = (event) => {
         setSelectedPurpose(event.target.value);
     };
+
+
+    // handle Submit
+    const handleSubmit = (e) => {
+        e.preventDefault();
+
+        setLoading(true); // Set loading jadi true sebelum mulai request
+
+        const formData = new FormData();
+
+        formData.append("visit_purpose_ulid", selectedPurpose);
+        console.log("Form submitted:", sections, selectedPurpose);
+    };
+
+    const selectDataMachines = () => {
+        return technicianDetailData?.machines?.map(item => ({
+            value: item.ulid,
+            label: `${item.name} | ${item.sn}`
+        }));
+    }
+
 
     const addSection = () => {
         setSections(prevSections => [...prevSections, { id: prevSections.length + 1, machine: '', jobdesc: '', notes: '', photos: [] }]);
@@ -87,11 +105,6 @@ const DetailActivity = () => {
 
     const removeSection = (id) => {
         setSections(prevSections => prevSections.filter(section => section.id !== id));
-    };
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        console.log("Form submitted:", sections, selectedPurpose);
     };
 
     const handleSaveDraft = () => {
@@ -159,6 +172,98 @@ const DetailActivity = () => {
     };
 
 
+    // Simpan tanda tangan sebagai gambar
+    const saveSignature = () => {
+        if (sigCanvas.current) {
+            const dataURL = sigCanvas.current.getCanvas().toDataURL("image/png"); // Simpan dulu nilai DataURL
+            setImageURL(dataURL); // Update state dengan DataURL
+
+            const file = dataURLtoFile(dataURL, "signature.png"); // Konversi DataURL ke File
+            setSignatureImage(file); // Simpan File ke State
+        }
+    };
+
+
+    // Hapus tanda tangan
+    const clearSignature = () => {
+        sigCanvas.current.clear();
+        setImageURL(null);
+    };
+
+    const dataURLtoFile = (dataurl, filename) => {
+        let arr = dataurl.split(","),
+            mime = arr[0].match(/:(.*?);/)[1],
+            bstr = atob(arr[1]),
+            n = bstr.length,
+            u8arr = new Uint8Array(n);
+
+        while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+        }
+
+        return new File([u8arr], filename, { type: mime });
+    };
+
+    useEffect(() => {
+        const fetchPurposeData = async () => {
+            const response = await fetchDataApi(urlVisitPurpose, token);
+            if (response) setPurposeOfVisitData(response.data.data);
+        };
+
+        const fetchTechnicianDetailData = async () => {
+            const response = await fetchDataApi(urlTechnicianDetail, token);
+            if (response) {
+                setTechnicianDetailData(response.data.data); // Set detail teknisi setelah fetch selesai
+            }
+        };
+
+        fetchPurposeData();
+        fetchTechnicianDetailData();
+    }, []); // Dipanggil sekali saat component pertama kali render
+
+    // Ini akan berjalan SETELAH `technicianDetailData` diperbarui
+    useEffect(() => {
+        if (technicianDetailData?.visit_purpose_ulid) {
+            setSelectedPurpose(technicianDetailData.visit_purpose_ulid);
+        }
+
+        if (technicianDetailData?.jobdesc) {
+            setJobDescData(technicianDetailData.jobdesc);
+        }
+
+        if (technicianDetailData?.machines && technicianDetailData?.machines.length > 0) {
+            const initialSections = technicianDetailData.machines.map((machine, index) => ({
+                id: index + 1,
+                machine: machine.ulid || "",
+                jobdesc: "",
+                notes: "",
+                photos: [],
+            }));
+            setSections(initialSections);
+        }
+    }, [technicianDetailData]); // Dipanggil ulang setiap `technicianDetailData` berubah
+
+
+    const fetchDataApi = useCallback(async (url, token) => {
+        try {
+            const response = await axios.get(url, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            return response;
+        } catch (error) {
+            if (error.response?.status === 401) {
+                localStorage.clear();
+                window.location.href = "/login";
+            }
+
+            // setLoadingMachines(false)
+            console.error(error);
+        }
+    }, []);
+
+
     return (
         <div id="body">
             <Topbar />
@@ -169,7 +274,7 @@ const DetailActivity = () => {
                         <div className="d-flex gap-2 align-items-center mb-2">
                             <FontAwesomeIcon icon={faBuilding} style={{ fontSize: '16px' }} />
 
-                            <h5 className="fw-bolder m-0">PT. Prima Indo Medilab - Maintenance</h5>
+                            <h5 className="fw-bolder m-0">{technicianDetailData?.company?.name} - {technicianDetailData?.visit_purpose?.name}</h5>
                         </div>
                         <Breadcrumb>
                             <Breadcrumb.Item href="/activity-technician">Activity Transaction</Breadcrumb.Item>
@@ -184,18 +289,18 @@ const DetailActivity = () => {
                                 <InputGroup.Text className="input-label mb-3">Purpose of Visit</InputGroup.Text>
 
                                 <div className="px-3 py-1">
-                                    {purposeOfVisitData.map((item) => (
-                                        <div className="d-flex gap-2 align-items-center mb-3" key={item.value}>
+                                    {purposeOfVisitData.map((item) => {
+                                        return <div className="d-flex gap-2 align-items-center mb-3" key={item.ulid}>
                                             <input
                                                 type="radio"
                                                 name="purpose_of_visit"
-                                                value={item.value}
-                                                checked={selectedPurpose === item.value}
+                                                value={item.ulid}
+                                                checked={selectedPurpose === item.ulid}
                                                 onChange={handlePurposeChange}
                                             />
-                                            <span>{item.label}</span>
+                                            <span>{item.name}</span>
                                         </div>
-                                    ))}
+                                    })}
                                 </div>
                             </InputGroup>
                         </div>
@@ -211,6 +316,7 @@ const DetailActivity = () => {
                                         className="w-100 border p-3"
                                         placeholder="Select Machine"
                                         options={selectDataMachines()}
+                                        value={selectDataMachines()?.find(option => option.value === section.machine)}
                                         onChange={(e) => handleInputChange(section.id, "machine", e.value)}
                                     />
                                 </InputGroup>
@@ -221,7 +327,7 @@ const DetailActivity = () => {
                                         as="textarea"
                                         rows={4}
                                         placeholder="Type job description..."
-                                        value={section.jobdesc}
+                                        value={jobDescData ? jobDescData : section.jobdesc}
                                         onChange={(e) => handleInputChange(section.id, "jobdesc", e.target.value)}
                                     />
                                 </InputGroup>
@@ -259,14 +365,62 @@ const DetailActivity = () => {
 
                                 <div className="d-flex gap-5 align-items-center mt-3">
                                     <label className="d-flex align-items-center gap-1">
-                                        <input type="radio" name="conclusion" value="completed" /> Task Completed
+                                        <input
+                                            type="radio"
+                                            name="conclusion"
+                                            value="completed"
+                                            checked={selectedConclusion === "completed"}
+                                            onChange={() => setSelectedConclusion("completed")}
+                                        /> Task Completed
                                     </label>
 
                                     <label className="d-flex align-items-center gap-1">
-                                        <input type="radio" name="conclusion" value="not_completed" /> Task Not Completed
+                                        <input
+                                            type="radio"
+                                            name="conclusion"
+                                            value="not_completed"
+                                            checked={selectedConclusion === "not_completed"}
+                                            onChange={() => setSelectedConclusion("not_completed")}
+                                        /> Task Not Completed
                                     </label>
                                 </div>
                             </InputGroup>
+
+                            {selectedConclusion === "completed" && (
+                                <div className="mt-3">
+                                    <p>Apakah mau tanda tangan client disini?</p>
+                                    <div className="d-flex gap-4">
+                                        <label className="d-flex align-items-center gap-1">
+                                            <input type="radio" name="sign_client" value="yes" onChange={() => setSignatureClient('yes')} /> Yes
+                                        </label>
+                                        <label className="d-flex align-items-center gap-1">
+                                            <input type="radio" name="sign_client" value="no" onChange={() => setSignatureClient('no')} /> No
+                                        </label>
+                                    </div>
+                                </div>
+                            )}
+
+                            {signatureClient === "yes" && (
+                                <div className="flex flex-col items-center gap-4 p-4 border mt-3">
+                                    <SignatureCanvas
+                                        ref={sigCanvas}
+                                        penColor="black"
+                                        canvasProps={{ width: 400, height: 200, className: "border-2" }}
+                                    />
+
+                                    <div className="d-flex gap-3">
+                                        <Button onClick={saveSignature}>Simpan</Button>
+                                        <Button variant="destructive" onClick={clearSignature}>Hapus</Button>
+                                    </div>
+
+                                    {imageURL && (
+                                        <div className="mt-4">
+                                            <h5 className="fw-bolder">Hasil Tanda Tangan:</h5>
+                                            <img src={imageURL} alt="Signature" className="border-2" />
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </Card>
 
                         <div className="floating-buttons">

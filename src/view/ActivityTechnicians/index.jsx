@@ -42,7 +42,9 @@ const columns = [
     {
         name: <><FontAwesomeIcon icon={faBriefcase} className="me-2" /> Job</>, // Tambahkan ikon koper di header kolom
         selector: row => {
-            return (<a href={`/activity-technician/${row.id}/detail`} className="text-decoration-none">{row.jobdesc}</a>)
+            console.log(row);
+
+            return (<a href={`/activity-technician/${row.ulid}/detail`} className="text-decoration-none">{row.visit_purpose.name}</a>)
         },
         sortable: true,
     },
@@ -51,7 +53,7 @@ const columns = [
         selector: row => {
             return (
                 <div style={{ border: "1px solid #ABABAC", borderRadius: "3px", padding: "4px 6px" }}>
-                    {row.customer}
+                    {row.company.name}
                 </div>
             )
         },
@@ -228,8 +230,6 @@ const ActivityTechnician = () => {
     useEffect(() => {
         const fetchDataListTechnician = async () => {
             const response = await fetchDataApi(urlTechnicianData, token);
-            console.log(response.data);
-
             if (response) setTechnicianData(response.data.data);
         }
 
@@ -331,7 +331,7 @@ const ActivityTechnician = () => {
                             </div>
 
                             <div className={showFilter ? "col-12" : "col-md-9"}>
-                                <Datatables columns={columns} data={data} />
+                                <Datatables columns={columns} data={technicianData} />
                             </div>
                         </div>
                     </Card>

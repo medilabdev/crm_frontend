@@ -19,13 +19,13 @@ const CreateTechnicianTicket = () => {
     const [selectedMachines, setSelectedMachines] = useState([{ id: 1, value: null }]);
     const [loading, setLoading] = useState(false);
     const [loadingMachines, setLoadingMachines] = useState(false);
+    const [selectedMachine, setSelectedMachine] = useState('');
 
     // url api
     const urlCompany = `${process.env.REACT_APP_BACKEND_URL}/companies`;
     const urlVisitPurpose = `${process.env.REACT_APP_BACKEND_URL}/visit-purposes`;
     const urlGetAllMachine = `${process.env.REACT_APP_BACKEND_URL}/machines/${fullData[0].company_uid}`;
     const token = localStorage.getItem("token");
-
 
     // handle purpose change
     const handlePurposeChange = (event) => {
@@ -39,6 +39,8 @@ const CreateTechnicianTicket = () => {
     const handleSelectInputChanges = (name, value) => {
         const values = [...fullData];
         values[0] = { ...values[0], [name]: value, machine_ulid: [] };
+
+        setSelectedMachine(value);
         setFullData(values);
         setSelectedMachines([{ id: 1, value: null }]); // Reset pilihan mesin
     };
@@ -78,7 +80,7 @@ const CreateTechnicianTicket = () => {
         formData.append('date', fullData[0].date);
 
         if (fullData[0].machine_ulid.length > 0) {
-            fullData[0].machine_ulid.forEach((machine) => {
+            fullData[0].machine_ulid.forEach((machine, index) => {
                 formData.append("machine_ulid[]", machine);
             });
         }
