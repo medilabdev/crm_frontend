@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Moment from 'react-moment';
 import 'moment-timezone';
 import Topbar from "../../components/Template/Topbar";
@@ -11,6 +11,7 @@ import { faBriefcase, faBuildingCircleExclamation, faCalendarDays, faCheckCircle
 import { Search } from 'react-bootstrap-icons'; // Bootstrap Icons
 import './activity.css';
 import Select from "react-select";
+import axios from "axios";
 
 const renderTooltip = (props) => (
     <Tooltip {...props}>Download PDF</Tooltip>
@@ -27,7 +28,7 @@ const columns = [
         name: <><FontAwesomeIcon icon={faExclamationCircle} className="me-2" /> Action</>,
         width: "100px",
         selector: row => {
-            if (row.status === 1) {
+            if (row.is_complete === 1) {
                 return (
                     <OverlayTrigger placement="top" overlay={renderTooltip}>
                         <button className="btn">
@@ -40,7 +41,9 @@ const columns = [
     },
     {
         name: <><FontAwesomeIcon icon={faBriefcase} className="me-2" /> Job</>, // Tambahkan ikon koper di header kolom
-        selector: row => row.job,
+        selector: row => {
+            return (<a href={`/activity-technician/${row.id}/detail`} className="text-decoration-none">{row.jobdesc}</a>)
+        },
         sortable: true,
     },
     {
@@ -56,15 +59,15 @@ const columns = [
     },
     {
         name: <><FontAwesomeIcon icon={faSyncAlt} className="me-2" /> Status</>,
-        selector: row => row.status, // Gunakan nilai angka untuk sorting
+        selector: row => row.is_complete, // Gunakan nilai angka untuk sorting
         cell: row => {
-            if (row.status === 0) {
+            if (row.is_complete === 0) {
                 return (
                     <div style={{ backgroundColor: "#FBE8CC", padding: "4px 10px", borderRadius: "3px", color: "#AC7449" }}>
                         <span><FontAwesomeIcon icon={faExclamationCircle} className="me-2" />Awaiting Status</span>
                     </div>
                 );
-            } else if (row.status === 1) {
+            } else if (row.is_complete === 1) {
                 return (
                     <div style={{ backgroundColor: "#00FF1E40", padding: "4px 10px", borderRadius: "3px", color: "#004708B5" }}>
                         <span><FontAwesomeIcon icon={faCheckCircle} className="me-2" />Completed</span>
@@ -91,121 +94,121 @@ const data = [
     {
         id: 1,
         title: 'Waktunya Maintenance RO',
-        job: 'Maintenance',
+        jobdesc: 'Maintenance',
         customer: 'PT. Prima Indo Medilab',
-        status: 0,
+        is_complete: 0,
         date: '2025-02-06T08:59-0500',
     },
     {
         id: 2,
         title: 'Waktunya Maintenance RO',
-        job: 'Troubleshooting',
+        jobdesc: 'Troubleshooting',
         customer: 'PT. Prima Indo Medilab',
-        status: 1,
+        is_complete: 1,
         date: '2025-02-06T08:59-0500',
     },
     {
         id: 3,
         title: 'Waktunya Maintenance RO',
-        job: 'Troubleshooting',
+        jobdesc: 'Troubleshooting',
         customer: 'PT. Prima Indo Medilab',
-        status: 1,
+        is_complete: 1,
         date: '2025-02-06T08:59-0500',
     },
     {
         id: 4,
         title: 'Waktunya Maintenance RO',
-        job: 'Others',
+        jobdesc: 'Others',
         customer: 'PT. Prima Indo Medilab',
-        status: 2,
+        is_complete: 2,
         date: '2025-02-06T08:59-0500',
     },
     {
         id: 5,
         title: 'Waktunya Maintenance RO',
-        job: 'Installasi & Training',
+        jobdesc: 'Installasi & Training',
         customer: 'PT. Prima Indo Medilab',
-        status: 2,
+        is_complete: 2,
         date: '2025-02-06T08:59-0500',
     },
     {
         id: 6,
         title: 'Waktunya Maintenance RO',
-        job: 'Maintenance',
+        jobdesc: 'Maintenance',
         customer: 'PT. Prima Indo Medilab',
-        status: 0,
+        is_complete: 0,
         date: '2025-02-06T08:59-0500',
     },
     {
         id: 7,
         title: 'Waktunya Maintenance RO',
-        job: 'Troubleshooting',
+        jobdesc: 'Troubleshooting',
         customer: 'PT. Prima Indo Medilab',
-        status: 1,
+        is_complete: 1,
         date: '2025-02-06T08:59-0500',
     },
     {
         id: 8,
         title: 'Waktunya Maintenance RO',
-        job: 'Troubleshooting',
+        jobdesc: 'Troubleshooting',
         customer: 'PT. Prima Indo Medilab',
-        status: 1,
+        is_complete: 1,
         date: '2025-02-06T08:59-0500',
     },
     {
         id: 9,
         title: 'Waktunya Maintenance RO',
-        job: 'Others',
+        jobdesc: 'Others',
         customer: 'PT. Prima Indo Medilab',
-        status: 2,
+        is_complete: 2,
         date: '2025-02-06T08:59-0500',
     },
     {
         id: 10,
         title: 'Waktunya Maintenance RO',
-        job: 'Installasi & Training',
+        jobdesc: 'Installasi & Training',
         customer: 'PT. Prima Indo Medilab',
-        status: 2,
+        is_complete: 2,
         date: '2025-02-06T08:59-0500',
     },
     {
         id: 11,
         title: 'Waktunya Maintenance RO',
-        job: 'Maintenance',
+        jobdesc: 'Maintenance',
         customer: 'PT. Prima Indo Medilab',
-        status: 0,
+        is_complete: 0,
         date: '2025-02-06T08:59-0500',
     },
     {
         id: 12,
         title: 'Waktunya Maintenance RO',
-        job: 'Troubleshooting',
+        jobdesc: 'Troubleshooting',
         customer: 'PT. Prima Indo Medilab',
-        status: 1,
+        is_complete: 1,
         date: '2025-02-06T08:59-0500',
     },
     {
         id: 13,
         title: 'Waktunya Maintenance RO',
-        job: 'Troubleshooting',
+        jobdesc: 'Troubleshooting',
         customer: 'PT. Prima Indo Medilab',
-        status: 1,
+        is_complete: 1,
         date: '2025-02-06T08:59-0500',
     },
     {
         id: 14,
         title: 'Waktunya Maintenance RO',
-        job: 'Others',
+        jobdesc: 'Others',
         customer: 'PT. Prima Indo Medilab',
-        status: 2,
+        is_complete: 2,
         date: '2025-02-06T08:59-0500',
     },
     {
         id: 15,
         title: 'Waktunya Maintenance RO',
-        job: 'Installasi & Training',
+        jobdesc: 'Installasi & Training',
         customer: 'PT. Prima Indo Medilab',
-        status: 2,
+        is_complete: 2,
         date: '2025-02-06T08:59-0500',
     },
 
@@ -213,12 +216,44 @@ const data = [
 
 const ActivityTechnician = () => {
     const [showFilter, setShowFilter] = useState(true);
+    const [technicianData, setTechnicianData] = useState([]);
+
+    const urlTechnicianData = `${process.env.REACT_APP_BACKEND_URL}/technician-tickets?rel=visit-purpose,company`;
+    const token = localStorage.getItem('token');
 
     const toggleFilter = () => {
         setShowFilter(prevState => !prevState);
     };
 
-    const handleSelect = () => { };
+    useEffect(() => {
+        const fetchDataListTechnician = async () => {
+            const response = await fetchDataApi(urlTechnicianData, token);
+            console.log(response.data);
+
+            if (response) setTechnicianData(response.data.data);
+        }
+
+        fetchDataListTechnician()
+    }, []);
+
+    // fetch data api
+    const fetchDataApi = useCallback(async (url, token) => {
+        try {
+            const response = await axios.get(url, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            return response;
+        } catch (error) {
+            if (error.response?.status === 401) {
+                localStorage.clear();
+                window.location.href = "/login";
+            }
+
+            console.error(error);
+        }
+    }, []);
 
     return (
         <div id="body">
@@ -268,7 +303,7 @@ const ActivityTechnician = () => {
 
                                     {/* Kanan: Create Ticket */}
                                     <div>
-                                        <button className="btn btn-success" style={{ borderRadius: "3px" }}>
+                                        <button className="btn btn-success" onClick={() => window.location.href = '/activity-technician/create'} style={{ borderRadius: "3px" }}>
                                             <FontAwesomeIcon icon={faPlusCircle} className="me-2" />Create Ticket
                                         </button>
                                     </div>

@@ -58,6 +58,8 @@ import CreateWeeklyTask from "../view/Weekly/WeeklyTask/Create";
 import EditTaskWeekly from "../view/Weekly/WeeklyTask/Edit";
 import FillTaskWeekly from "../view/Weekly/FillTaskWeekly";
 import ActivityTechnician from "../view/ActivityTechnicians";
+import DetailActivity from "../view/ActivityTechnicians/details";
+import CreateTechnicianTicket from "../view/ActivityTechnicians/create";
 
 const Login = ({ children }) => {
   const token = localStorage.getItem("token");
@@ -493,6 +495,8 @@ function Router() {
 
         {/* activity technician */}
         <Route exact path="/activity-technician" element={<Login><ActivityTechnician /></Login>} />
+        <Route exact path="/activity-technician/:uid/detail" element={<Login><DetailActivity /></Login>} />
+        <Route exact path="/activity-technician/create" element={<Login><CreateTechnicianTicket /></Login>} />
 
       </Routes>
     </BrowserRouter>
