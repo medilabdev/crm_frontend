@@ -4,10 +4,9 @@ import Sidebar from '../../../components/Template/Sidebar'
 import Main from '../../../components/Template/Main'
 import { Breadcrumb, Button, Card, InputGroup } from 'react-bootstrap'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPaperPlane, faPlus, faPlusSquare, faSave } from '@fortawesome/free-solid-svg-icons'
+import { faPaperPlane, faPlus, faPlusSquare } from '@fortawesome/free-solid-svg-icons'
 import Select from "react-select"
 import axios from 'axios'
-import ImageMachine from '../../../assets/img/MK-HDF 1.png'
 import Swal from 'sweetalert2'
 
 const CreateTechnicianTicket = () => {
@@ -19,12 +18,12 @@ const CreateTechnicianTicket = () => {
     const [selectedMachines, setSelectedMachines] = useState([{ id: 1, value: null }]);
     const [loading, setLoading] = useState(false);
     const [loadingMachines, setLoadingMachines] = useState(false);
-    const [selectedMachine, setSelectedMachine] = useState('');
+    const [machineUrl, setMachineUrl] = useState("");
+
 
     // url api
     const urlCompany = `${process.env.REACT_APP_BACKEND_URL}/companies`;
     const urlVisitPurpose = `${process.env.REACT_APP_BACKEND_URL}/visit-purposes`;
-    const urlGetAllMachine = `${process.env.REACT_APP_BACKEND_URL}/machines/${fullData[0].company_uid}`;
     const token = localStorage.getItem("token");
 
     // handle purpose change
@@ -40,7 +39,6 @@ const CreateTechnicianTicket = () => {
         const values = [...fullData];
         values[0] = { ...values[0], [name]: value, machine_ulid: [] };
 
-        setSelectedMachine(value);
         setFullData(values);
         setSelectedMachines([{ id: 1, value: null }]); // Reset pilihan mesin
     };
@@ -81,7 +79,7 @@ const CreateTechnicianTicket = () => {
 
         if (fullData[0].machine_ulid.length > 0) {
             fullData[0].machine_ulid.forEach((machine, index) => {
-                formData.append("machine_ulid[]", machine);
+                formData.append(`machine_ulid[${index}]`, machine);
             });
         }
 
@@ -100,7 +98,6 @@ const CreateTechnicianTicket = () => {
                 Authorization: `Bearer ${token}`,
             },
         }).then((response) => {
-            console.log(response);
             setLoading(false); // Hentikan loading
 
             Swal.fire({
@@ -108,6 +105,8 @@ const CreateTechnicianTicket = () => {
                 text: "Data has been submitted successfully.",
                 icon: "success",
                 confirmButtonText: "OK",
+            }).then(() => {
+                window.location.href = "/activity-technician";
             });
         }).catch((error) => {
             setLoading(false); // Hentikan loading meskipun gagal
@@ -136,7 +135,6 @@ const CreateTechnicianTicket = () => {
         };
 
 
-
         fetchCompanyData();
         fetchPurposeData();
 
@@ -145,19 +143,24 @@ const CreateTechnicianTicket = () => {
     useEffect(() => {
         if (!fullData[0].company_uid) {
             setMachineOptions([]); // Kosongkan jika company belum dipilih
-            return;
+        } else {
+            setMachineUrl(`${process.env.REACT_APP_BACKEND_URL}/machines?company=${fullData[0].company_uid}`);
         }
+    }, [fullData[0].company_uid, token]);
 
-        setLoadingMachines(true); // Mulai loading
+    useEffect(() => {
+        if (!machineUrl) return; // Jika URL kosong, jangan fetch data
+
+        setLoadingMachines(true);
 
         const fetchMachineData = async () => {
-            const response = await fetchDataApi(urlGetAllMachine, token);
+            const response = await fetchDataApi(machineUrl, token);
             if (response) setMachineOptions(selectDataMachines(response.data.data));
+            setLoadingMachines(false);
         };
 
         fetchMachineData();
-    }, [fullData[0].company_uid, token]);
-
+    }, [machineUrl, token]);
 
     const fetchDataApi = useCallback(async (url, token) => {
         try {
@@ -175,12 +178,14 @@ const CreateTechnicianTicket = () => {
 
             setLoadingMachines(false)
             console.error(error);
+        } finally {
+            setLoadingMachines(false); // Pastikan loading berhenti di semua kondisi
         }
     }, []);
 
     const selectDataMachines = (data) => {
         return data.map(item => ({
-            value: item.sn,
+            value: item.ulid,
             label: `${item.name} | ${item.sn}`
         }));
     }

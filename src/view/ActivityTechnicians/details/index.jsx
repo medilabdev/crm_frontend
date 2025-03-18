@@ -8,7 +8,7 @@ import './detail.css'
 import { Breadcrumb, Button, Card, Form, InputGroup } from 'react-bootstrap'
 import Select from "react-select"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faBuilding, faPaperPlane, faPlus, faSave, faTrash } from '@fortawesome/free-solid-svg-icons'
+import { faBuilding, faEye, faPaperPlane, faPlus, faSave, faTrash } from '@fortawesome/free-solid-svg-icons'
 import ImageMachine from '../../../assets/img/MK-HDF 1.png'
 import FileUpload from '../../../components/FileUpload'
 import { useParams } from 'react-router-dom'
@@ -23,6 +23,11 @@ const DetailActivity = () => {
     const [selectedPurpose, setSelectedPurpose] = useState('');
     const [technicianDetailData, setTechnicianDetailData] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [machines, setMachines] = useState([]);
+    const [company, setCompany] = useState('');
+    const [isCompleted, setIsCompleted] = useState(null);
+    const [isEdit, setIsEdit] = useState(false)
+    const technicianAuth = localStorage.getItem('uid');
 
     const [drafts, setDrafts] = useState({
         detail_uid: uid, // Gunakan id_detail jika ada, jika tidak buat random
@@ -38,9 +43,10 @@ const DetailActivity = () => {
     const sigCanvas = useRef(null);
     const [imageURL, setImageURL] = useState(null);
 
-    // url
+    // url  
     const urlVisitPurpose = `${process.env.REACT_APP_BACKEND_URL}/visit-purposes`;
-    const urlTechnicianDetail = `${process.env.REACT_APP_BACKEND_URL}/technician-tickets/${ulidParams}?rel=details,machines,company,visit-purpose`;
+    const urlTechnicianDetail = `${process.env.REACT_APP_BACKEND_URL}/technician-tickets/${ulidParams}?rel=details,machines,company,visit-purpose,details.photos`;
+    const urlMachinesByCompany = `${process.env.REACT_APP_BACKEND_URL}/machines?company=${company}`
     const token = localStorage.getItem("token");
 
     const LOCAL_STORAGE_KEY = `activityDraft_${uid}`;
@@ -58,13 +64,11 @@ const DetailActivity = () => {
             prevSections.map(section => {
                 if (section.id === sectionId) {
                     if (file) {
-                        // Cek apakah file sudah ada berdasarkan fileId
                         const existingPhotos = section.photos.map(p => p.id);
                         if (!existingPhotos.includes(fileId)) {
                             return { ...section, photos: [...section.photos, { id: fileId, file }] };
                         }
                     } else {
-                        // Jika file dihapus, filter array `photos`
                         return { ...section, photos: section.photos.filter(p => p.id !== fileId) };
                     }
                 }
@@ -78,7 +82,6 @@ const DetailActivity = () => {
         setSelectedPurpose(event.target.value);
     };
 
-
     // handle Submit
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -86,18 +89,98 @@ const DetailActivity = () => {
         setLoading(true); // Set loading jadi true sebelum mulai request
 
         const formData = new FormData();
+        const conclusion = selectedConclusion === "completed" ? 1 : 2
 
-        formData.append("visit_purpose_ulid", selectedPurpose);
-        console.log("Form submitted:", sections, selectedPurpose);
+        formData.append("_method", "PATCH");
+        formData.append("is_completed", conclusion);
+
+        if (signatureImage) {
+            formData.append("signature[file]", signatureImage)
+            formData.append("signature[name]", "Hosea Leonardo")
+        };
+
+        if (sections.length > 0) {
+            sections.forEach((item, index) => {
+                formData.append(`details[${index}][machine_ulid]`, item.machine);
+                formData.append(`details[${index}][jobdesc]`, item.jobdesc || "");
+                formData.append(`details[${index}][notes]`, item.notes || "");
+                formData.append(`details[${index}][technician_user_uid]`, technicianAuth);
+
+                if (item.photos.length > 0) {
+                    item.photos.forEach((secItem, i) => {
+                        formData.append(`details[${index}][photos][${i}]`, secItem.file);
+                    })
+                }
+            })
+        }
+
+        Swal.fire({
+            title: "Process...",
+            text: "Please wait while we process your request.",
+            allowEscapeKey: false,
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        axios.post(`${process.env.REACT_APP_BACKEND_URL}/technician-tickets/${ulidParams}`, formData, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        }).then((response) => {
+            setLoading(false); // Hentikan loading
+
+            if (response.data.data) {
+                Swal.fire({
+                    title: "Success!",
+                    text: response.data.data.alerts.success.message,
+                    icon: "success",
+                    confirmButtonText: "OK",
+                }).then(() => {
+                    window.location.reload();
+                });
+            }
+        }).catch((error) => {
+            setLoading(false); // Hentikan loading meskipun gagal
+            console.error(error.response.data);
+
+            Swal.fire({
+                title: "Error!",
+                text: "Failed to submit data. Please try again.",
+                icon: "error",
+                confirmButtonText: "OK",
+            });
+        });
     };
 
     const selectDataMachines = () => {
-        return technicianDetailData?.machines?.map(item => ({
+        // Jika `technicianDetailData.machines` ada dan tidak kosong, gunakan itu
+        if (technicianDetailData.machines && technicianDetailData.machines.length > 0) {
+            return technicianDetailData.machines.map(item => ({
+                value: item.ulid,
+                label: `${item.name} | ${item.sn}`
+            }));
+        }
+
+        // Jika `machines` sudah ada, gunakan itu
+        if (machines.length > 0) {
+            return machines.map(item => ({
+                value: item.value,
+                label: item.label
+            }));
+        }
+
+        // Jika masih kosong, return array kosong
+        return [];
+    }
+
+    const selectDataMachineConvert = (data) => {
+        return data.map(item => ({
             value: item.ulid,
             label: `${item.name} | ${item.sn}`
         }));
     }
-
 
     const addSection = () => {
         setSections(prevSections => [...prevSections, { id: prevSections.length + 1, machine: '', jobdesc: '', notes: '', photos: [] }]);
@@ -213,12 +296,14 @@ const DetailActivity = () => {
         const fetchTechnicianDetailData = async () => {
             const response = await fetchDataApi(urlTechnicianDetail, token);
             if (response) {
-                setTechnicianDetailData(response.data.data); // Set detail teknisi setelah fetch selesai
+                setTechnicianDetailData(response.data.data);
+                setCompany(response.data.data.company_uid) // Set detail teknisi setelah fetch selesai
             }
         };
 
         fetchPurposeData();
         fetchTechnicianDetailData();
+
     }, []); // Dipanggil sekali saat component pertama kali render
 
     // Ini akan berjalan SETELAH `technicianDetailData` diperbarui
@@ -232,16 +317,42 @@ const DetailActivity = () => {
         }
 
         if (technicianDetailData?.machines && technicianDetailData?.machines.length > 0) {
-            const initialSections = technicianDetailData.machines.map((machine, index) => ({
-                id: index + 1,
-                machine: machine.ulid || "",
-                jobdesc: "",
-                notes: "",
-                photos: [],
-            }));
-            setSections(initialSections);
+            setSections(prevSections => {
+                // Buat mapping dari ID mesin lama ke foto yang sudah diupload
+                const existingPhotosMap = prevSections.reduce((acc, section) => {
+                    acc[section.machine] = section.photos || [];
+                    return acc;
+                }, {});
+
+                // Buat array section baru dan tetap menyimpan foto lama
+                return technicianDetailData.technician_ticket_details.map((item, index) => ({
+                    id: index + 1,
+                    machine: item.machine_ulid || "",
+                    jobdesc: item.jobdesc,
+                    notes: item.jobdesc,
+                    photos: existingPhotosMap[item.machine] || [], // Ambil foto lama jika ada
+                }));
+            });
+        }
+
+        if (technicianDetailData.is_completed) {
+            setIsCompleted(technicianDetailData.is_completed)
+        };
+
+
+        const getDataMachineByCompany = async () => {
+            const response = await fetchDataApi(urlMachinesByCompany, token);
+            if (response) setMachines(selectDataMachineConvert(response.data.data))
+        }
+
+        if (company) {
+            getDataMachineByCompany();
         }
     }, [technicianDetailData]); // Dipanggil ulang setiap `technicianDetailData` berubah
+
+    const handleRedirect = (ulid) => {
+        window.open(`${process.env.REACT_APP_BACKEND_URL}/assets/technician-ticket/photos/${ulid}`, '_blank');
+    };
 
 
     const fetchDataApi = useCallback(async (url, token) => {
@@ -262,7 +373,6 @@ const DetailActivity = () => {
             console.error(error);
         }
     }, []);
-
 
     return (
         <div id="body">
@@ -297,6 +407,7 @@ const DetailActivity = () => {
                                                 value={item.ulid}
                                                 checked={selectedPurpose === item.ulid}
                                                 onChange={handlePurposeChange}
+                                                disabled={isCompleted === 3 && !isEdit}
                                             />
                                             <span>{item.name}</span>
                                         </div>
@@ -318,6 +429,7 @@ const DetailActivity = () => {
                                         options={selectDataMachines()}
                                         value={selectDataMachines()?.find(option => option.value === section.machine)}
                                         onChange={(e) => handleInputChange(section.id, "machine", e.value)}
+                                        isDisabled={isCompleted === 3 && !isEdit}
                                     />
                                 </InputGroup>
 
@@ -329,6 +441,7 @@ const DetailActivity = () => {
                                         placeholder="Type job description..."
                                         value={jobDescData ? jobDescData : section.jobdesc}
                                         onChange={(e) => handleInputChange(section.id, "jobdesc", e.target.value)}
+                                        disabled={isCompleted === 3 && !isEdit}
                                     />
                                 </InputGroup>
 
@@ -340,21 +453,68 @@ const DetailActivity = () => {
                                         placeholder="Type notes..."
                                         value={section.notes}
                                         onChange={(e) => handleInputChange(section.id, "notes", e.target.value)}
+                                        disabled={isCompleted === 3 && !isEdit}
                                     />
                                 </InputGroup>
 
-                                <InputGroup className="custom-textarea mb-3">
-                                    <InputGroup.Text className="input-label">Upload Photo</InputGroup.Text>
-                                    <FileUpload label="Upload Photo" sectionId={section.id} onFileChange={handleFileChange} />
-                                </InputGroup>
+                                {technicianDetailData.technician_ticket_details && technicianDetailData.technician_ticket_details.length > 0 ? (technicianDetailData.technician_ticket_details[index].technician_ticket_photos && technicianDetailData.technician_ticket_details[index].technician_ticket_photos.length > 0 ? (
+                                    <div className="row my-3">
+                                        <label htmlFor="" className='fw-bolder mb-2' style={{ fontSize: '1rem' }}>Photos</label>
+                                        {technicianDetailData.technician_ticket_details[index].technician_ticket_photos.map((item) => {
+                                            const fileName = item.photo_path;
+                                            const parts = fileName.split('.')
+                                            const nameWithoutExt = parts.slice(0, -1).join('.'); // Gabungkan kembali tanpa ekstensi
+                                            const extension = parts.slice(-1)[0];
 
-                                {index !== 0 && (
-                                    <div className="d-flex justify-content-end">
-                                        <Button variant="danger" onClick={() => removeSection(section.id)}>
-                                            <FontAwesomeIcon icon={faTrash} className="me-2" /> Remove Section
-                                        </Button>
+                                            return (
+                                                <div className="col-lg-3 col-sm-6 mb-3">
+                                                    <div className="d-flex align-items-center p-3 border rounded shadow-sm bg-light w-100" style={{ maxWidth: "400px" }}>
+                                                        {/* Icon File */}
+                                                        <div className="me-3">
+                                                            <i className="bi bi-paperclip fs-4 text-danger"></i>
+                                                        </div>
+
+                                                        {/* File Info */}
+                                                        <div className="flex-grow-1 me-2" style={{ maxWidth: '60%' }}>
+                                                            <p className="mb-0 fw-semibold">{nameWithoutExt}</p>
+                                                            <small className="text-muted">.{extension}</small>
+                                                        </div>
+
+                                                        {/* Action Buttons */}
+                                                        <div className="d-flex gap-2">
+                                                            <button type='button' className="btn btn-light btn-sm">
+                                                                <FontAwesomeIcon icon={faEye} onClick={(e) => handleRedirect(item.ulid)} />
+                                                            </button>
+                                                            {/* <button type='button' className="btn btn-light btn-sm text-danger">
+                                                                <i className="bi bi-trash"></i>
+                                                            </button> */}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )
+                                        })}
                                     </div>
+                                ) : "") : ""}
+
+                                {isCompleted === 3 && !isEdit ? "" : (
+                                    <>
+                                        <InputGroup className="custom-textarea mb-3">
+                                            <InputGroup.Text className="input-label">Upload Photo</InputGroup.Text>
+
+
+                                            <FileUpload label="Upload Photo" sectionId={section.id} onFileChange={handleFileChange} />
+                                        </InputGroup>
+
+                                        {index !== 0 && (
+                                            <div className="d-flex justify-content-end">
+                                                <Button variant="danger" onClick={() => removeSection(section.id)}>
+                                                    <FontAwesomeIcon icon={faTrash} className="me-2" /> Remove Section
+                                                </Button>
+                                            </div>
+                                        )}
+                                    </>
                                 )}
+
                             </Card>
                         ))}
 
@@ -369,8 +529,9 @@ const DetailActivity = () => {
                                             type="radio"
                                             name="conclusion"
                                             value="completed"
-                                            checked={selectedConclusion === "completed"}
+                                            checked={selectedConclusion === "completed" || isCompleted === 3}
                                             onChange={() => setSelectedConclusion("completed")}
+                                            disabled={isCompleted === 3 && !isEdit}
                                         /> Task Completed
                                     </label>
 
@@ -379,8 +540,9 @@ const DetailActivity = () => {
                                             type="radio"
                                             name="conclusion"
                                             value="not_completed"
-                                            checked={selectedConclusion === "not_completed"}
+                                            checked={selectedConclusion === "not_completed" || isCompleted === 4}
                                             onChange={() => setSelectedConclusion("not_completed")}
+                                            disabled={isCompleted === 3 && !isEdit}
                                         /> Task Not Completed
                                     </label>
                                 </div>
@@ -423,7 +585,7 @@ const DetailActivity = () => {
                             )}
                         </Card>
 
-                        <div className="floating-buttons">
+                        <div className={`${isCompleted === 3 && !isEdit ? 'd-none' : ''} floating-buttons`}>
                             <Button variant="success" type="submit"><FontAwesomeIcon icon={faPaperPlane} className='me-2' /> Submit</Button>
                             <Button variant="primary" type="button" onClick={(e) => handleSaveDraft()}><FontAwesomeIcon icon={faSave} className='me-2' />Draft</Button>
 

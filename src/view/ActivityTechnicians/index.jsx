@@ -12,9 +12,15 @@ import { Search } from 'react-bootstrap-icons'; // Bootstrap Icons
 import './activity.css';
 import Select from "react-select";
 import axios from "axios";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import GeneratePDF from "../../components/PDF";
+import Logo from "../../assets/img/iss_logo.png"
 
-const renderTooltip = (props) => (
+const renderTooltipDownloadPdf = (props) => (
     <Tooltip {...props}>Download PDF</Tooltip>
+);
+const renderTooltipAction = (props) => (
+    <Tooltip {...props}>Status</Tooltip>
 );
 
 const options = [
@@ -28,22 +34,65 @@ const columns = [
         name: <><FontAwesomeIcon icon={faExclamationCircle} className="me-2" /> Action</>,
         width: "100px",
         selector: row => {
-            if (row.is_complete === 1) {
-                return (
-                    <OverlayTrigger placement="top" overlay={renderTooltip}>
-                        <button className="btn">
-                            <FontAwesomeIcon icon={faFilePdf} color="red" />
-                        </button>
-                    </OverlayTrigger>
-                );
-            }
+            const data = {
+                logo: Logo,
+                technician: {
+                    name: "Hengki Ibrahim",
+                    signature: Logo,
+                    dateArrived: "2025-03-17 10:30:00",
+                    dateReport: "2025-03-17 10:30:00",
+                },
+                customer: {
+                    name: row.company.name,
+                    address: row.company.address,
+                },
+                completion: "Instalasi 12 Mesin dan 6 Diod",
+                jobDescription: "Instalasi 12 Mesin dan 6 Diod",
+                machines: [
+                    { model: "MKID1", serialNumber: "123456789" },
+                    { model: "MKID2", serialNumber: "987654321" },
+                    { model: "MKID1", serialNumber: "123456789" },
+                    { model: "MKID2", serialNumber: "987654321" },
+
+                ],
+                purposeOfVisit: "01JP4X4S4ZMN9VFJ08PGFFMR5V",
+                signatures: {
+                    name: row.signature_name,
+                    signature: `${process.env.REACT_APP_BACKEND_URL}/assets/technician-ticket/signatures/${row.ulid}`
+                }
+            };
+
+            return (
+                <div className="d-flex gap-2">
+                    {/* Button untuk ubah status (selalu muncul) */}
+                    {row.is_completed !== 3 && (
+                        <OverlayTrigger placement="top" overlay={renderTooltipAction}>
+                            <button className="btn">
+                                <FontAwesomeIcon icon={faCheckCircle} color="#444442" />
+                            </button>
+                        </OverlayTrigger>
+
+                    )
+                    }
+
+                    {/* Button PDF hanya muncul jika is_completed = 3 */}
+                    {row.is_completed === 3 && (
+                        <PDFDownloadLink document={<GeneratePDF data={data} />} fileName="ticket_activity_report.pdf">
+                            {({ loading }) => (loading ? "Loading..." : <OverlayTrigger placement="top" overlay={renderTooltipDownloadPdf}>
+                                <button className="btn">
+                                    <FontAwesomeIcon icon={faFilePdf} color="red" />
+                                </button>
+                            </OverlayTrigger>)}
+                        </PDFDownloadLink>
+
+                    )}
+                </div>
+            )
         },
     },
     {
         name: <><FontAwesomeIcon icon={faBriefcase} className="me-2" /> Job</>, // Tambahkan ikon koper di header kolom
         selector: row => {
-            console.log(row);
-
             return (<a href={`/activity-technician/${row.ulid}/detail`} className="text-decoration-none">{row.visit_purpose.name}</a>)
         },
         sortable: true,
@@ -61,15 +110,27 @@ const columns = [
     },
     {
         name: <><FontAwesomeIcon icon={faSyncAlt} className="me-2" /> Status</>,
-        selector: row => row.is_complete, // Gunakan nilai angka untuk sorting
+        selector: row => row.is_completed, // Gunakan nilai angka untuk sorting
         cell: row => {
-            if (row.is_complete === 0) {
+            if (row.is_completed === 0) {
                 return (
                     <div style={{ backgroundColor: "#FBE8CC", padding: "4px 10px", borderRadius: "3px", color: "#AC7449" }}>
                         <span><FontAwesomeIcon icon={faExclamationCircle} className="me-2" />Awaiting Status</span>
                     </div>
                 );
-            } else if (row.is_complete === 1) {
+            } else if (row.is_completed === 1) {
+                return (
+                    <div style={{ backgroundColor: "#EB82F5", padding: "4px 10px", borderRadius: "3px", color: "#FEF2FF" }}>
+                        <span><FontAwesomeIcon icon={faExclamationCircle} className="me-2" />In Queue</span>
+                    </div>
+                );
+            } else if (row.is_completed === 2) {
+                return (
+                    <div style={{ backgroundColor: "#E0D841", padding: "4px 10px", borderRadius: "3px", color: "#444442" }}>
+                        <span><FontAwesomeIcon icon={faExclamationCircle} className="me-2" />On Progress</span>
+                    </div>
+                );
+            } else if (row.is_completed === 3) {
                 return (
                     <div style={{ backgroundColor: "#00FF1E40", padding: "4px 10px", borderRadius: "3px", color: "#004708B5" }}>
                         <span><FontAwesomeIcon icon={faCheckCircle} className="me-2" />Completed</span>
@@ -87,140 +148,16 @@ const columns = [
     },
     {
         name: <><FontAwesomeIcon icon={faCalendarDays} className="me-2" /> Date</>,
-        selector: row => <Moment format="DD MMM YYYY HH:mm" locale="id">{row.date}</Moment>,
+        selector: row => <Moment format="DD MMM YYYY HH:mm" locale="id">{row.created_at}</Moment>,
         sortable: true,
     },
 ];
-
-const data = [
-    {
-        id: 1,
-        title: 'Waktunya Maintenance RO',
-        jobdesc: 'Maintenance',
-        customer: 'PT. Prima Indo Medilab',
-        is_complete: 0,
-        date: '2025-02-06T08:59-0500',
-    },
-    {
-        id: 2,
-        title: 'Waktunya Maintenance RO',
-        jobdesc: 'Troubleshooting',
-        customer: 'PT. Prima Indo Medilab',
-        is_complete: 1,
-        date: '2025-02-06T08:59-0500',
-    },
-    {
-        id: 3,
-        title: 'Waktunya Maintenance RO',
-        jobdesc: 'Troubleshooting',
-        customer: 'PT. Prima Indo Medilab',
-        is_complete: 1,
-        date: '2025-02-06T08:59-0500',
-    },
-    {
-        id: 4,
-        title: 'Waktunya Maintenance RO',
-        jobdesc: 'Others',
-        customer: 'PT. Prima Indo Medilab',
-        is_complete: 2,
-        date: '2025-02-06T08:59-0500',
-    },
-    {
-        id: 5,
-        title: 'Waktunya Maintenance RO',
-        jobdesc: 'Installasi & Training',
-        customer: 'PT. Prima Indo Medilab',
-        is_complete: 2,
-        date: '2025-02-06T08:59-0500',
-    },
-    {
-        id: 6,
-        title: 'Waktunya Maintenance RO',
-        jobdesc: 'Maintenance',
-        customer: 'PT. Prima Indo Medilab',
-        is_complete: 0,
-        date: '2025-02-06T08:59-0500',
-    },
-    {
-        id: 7,
-        title: 'Waktunya Maintenance RO',
-        jobdesc: 'Troubleshooting',
-        customer: 'PT. Prima Indo Medilab',
-        is_complete: 1,
-        date: '2025-02-06T08:59-0500',
-    },
-    {
-        id: 8,
-        title: 'Waktunya Maintenance RO',
-        jobdesc: 'Troubleshooting',
-        customer: 'PT. Prima Indo Medilab',
-        is_complete: 1,
-        date: '2025-02-06T08:59-0500',
-    },
-    {
-        id: 9,
-        title: 'Waktunya Maintenance RO',
-        jobdesc: 'Others',
-        customer: 'PT. Prima Indo Medilab',
-        is_complete: 2,
-        date: '2025-02-06T08:59-0500',
-    },
-    {
-        id: 10,
-        title: 'Waktunya Maintenance RO',
-        jobdesc: 'Installasi & Training',
-        customer: 'PT. Prima Indo Medilab',
-        is_complete: 2,
-        date: '2025-02-06T08:59-0500',
-    },
-    {
-        id: 11,
-        title: 'Waktunya Maintenance RO',
-        jobdesc: 'Maintenance',
-        customer: 'PT. Prima Indo Medilab',
-        is_complete: 0,
-        date: '2025-02-06T08:59-0500',
-    },
-    {
-        id: 12,
-        title: 'Waktunya Maintenance RO',
-        jobdesc: 'Troubleshooting',
-        customer: 'PT. Prima Indo Medilab',
-        is_complete: 1,
-        date: '2025-02-06T08:59-0500',
-    },
-    {
-        id: 13,
-        title: 'Waktunya Maintenance RO',
-        jobdesc: 'Troubleshooting',
-        customer: 'PT. Prima Indo Medilab',
-        is_complete: 1,
-        date: '2025-02-06T08:59-0500',
-    },
-    {
-        id: 14,
-        title: 'Waktunya Maintenance RO',
-        jobdesc: 'Others',
-        customer: 'PT. Prima Indo Medilab',
-        is_complete: 2,
-        date: '2025-02-06T08:59-0500',
-    },
-    {
-        id: 15,
-        title: 'Waktunya Maintenance RO',
-        jobdesc: 'Installasi & Training',
-        customer: 'PT. Prima Indo Medilab',
-        is_complete: 2,
-        date: '2025-02-06T08:59-0500',
-    },
-
-]
 
 const ActivityTechnician = () => {
     const [showFilter, setShowFilter] = useState(true);
     const [technicianData, setTechnicianData] = useState([]);
 
-    const urlTechnicianData = `${process.env.REACT_APP_BACKEND_URL}/technician-tickets?rel=visit-purpose,company`;
+    const urlTechnicianData = `${process.env.REACT_APP_BACKEND_URL}/technician-tickets?rel=visit-purpose,company,details`;
     const token = localStorage.getItem('token');
 
     const toggleFilter = () => {

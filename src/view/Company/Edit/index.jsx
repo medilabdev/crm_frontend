@@ -27,6 +27,8 @@ import IconCompany from "../../../assets/img/condo.png";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import { GetDataTypeHospital } from "../../../action/TypeHospital";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
 const EditCompany = () => {
   const { uid } = useParams();
   const token = localStorage.getItem("token");
@@ -52,6 +54,9 @@ const EditCompany = () => {
   const [valueComp, setValueComp] = useState([]);
   const [formParentComp, setFormParentComp] = useState(false);
   const [isButtonDisable, setButtonDisable] = useState(false);
+  const [machines, setMachines] = useState([
+    { id: 1, name: "", model: "", sn: "", type: "" },
+  ]);
   // console.log(oldAssociate);
 
   const dispatch = useDispatch()
@@ -245,7 +250,7 @@ const EditCompany = () => {
       const telp_number = companyDetail?.phone?.map((phoneObj) => phoneObj);
       const oldAssociate = companyDetail?.associate?.map((data) => data);
       setOldAssociate(oldAssociate);
-      
+
       setEditCompany({
         name: companyDetail.name,
         website_url: companyDetail.website_url,
@@ -258,7 +263,7 @@ const EditCompany = () => {
         owner_user_uid: companyDetail?.owner?.uid,
         company_source_uid: companyDetail?.company_source?.uid,
         company_type_uid: companyDetail?.company_type?.uid,
-        hospital_type_uid:companyDetail?.hospital_type_uid
+        hospital_type_uid: companyDetail?.hospital_type_uid
       });
       setTelephone(telp_number ? telp_number : []);
       setHistory(companyDetail.history);
@@ -387,7 +392,10 @@ const EditCompany = () => {
     });
   };
 
-
+  const machineOptions = [
+    { value: "Active", label: "Active" },
+    { value: "Backup", label: "Backup" }
+  ]
 
   const contactSelect = () => {
     const result = [];
@@ -408,14 +416,14 @@ const EditCompany = () => {
     const result = [];
     if (Array?.isArray(DataTypeHospital)) {
       DataTypeHospital?.map((data) => {
-      const contact = {
-        value: data.uid,
-        label: data.name,
-      };
-      result.push(contact);
-    });
-  }
-   
+        const contact = {
+          value: data.uid,
+          label: data.name,
+        };
+        result.push(contact);
+      });
+    }
+
     return result;
   };
 
@@ -454,6 +462,29 @@ const EditCompany = () => {
     return filterDeals;
   };
 
+  // add machine
+  const handleInputMachineChange = (index, event) => {
+    const { name, value } = event.target;
+    const newMachines = [...machines];
+    newMachines[index][name] = value;
+    setMachines(newMachines);
+  };
+
+  const handleSelectTypeChange = (index, selectedOption) => {
+    const newMachines = [...machines];
+    newMachines[index].type = selectedOption.value;
+    setMachines(newMachines);
+  };
+
+  const addMachine = () => {
+    setMachines([...machines, { id: Date.now(), name: "", model: "", sn: "", type: "" }]);
+  };
+
+  const removeMachine = (id) => {
+    const newMachines = machines.filter((machine) => machine.id !== id);
+    setMachines(newMachines);
+  };
+
   const handleChangeTelp = (index, value) => {
     const newTelp = [...telephone];
     if (newTelp[index]) {
@@ -486,6 +517,7 @@ const EditCompany = () => {
       window.removeEventListener("beforeunload", clearLocalStorage);
     };
   }, [uid, token]);
+
   const updateCompany = async (e) => {
     e.preventDefault();
     const formData = new FormData();
@@ -518,9 +550,9 @@ const EditCompany = () => {
       });
     }
     formData.append("_method", "put");
-    console.log("FormData Content:");
+    // console.log("FormData Content:");
     for (const pair of formData.entries()) {
-      console.log(pair[0] + ": " + pair[1]);
+      // console.log(pair[0] + ": " + pair[1]);
     }
     setButtonDisable(true);
     try {
@@ -1174,7 +1206,7 @@ const EditCompany = () => {
                         //   onClick={handleShowCanvasDeals}
                         className="text-primary text-decoration-none fw-semibold"
                         style={{ cursor: "pointer" }}
-                        // onClick={handleOpenCanvasContact}
+                      // onClick={handleOpenCanvasContact}
                       >
                         <i
                           class="bi bi-plus-lg"
@@ -1197,8 +1229,8 @@ const EditCompany = () => {
                   </Card.Header>
                   <Card.Body>
                     {parentCompanyLocalStorage &&
-                    Array.isArray(parentCompanyLocalStorage) &&
-                    parentCompanyLocalStorage.length > 0 ? (
+                      Array.isArray(parentCompanyLocalStorage) &&
+                      parentCompanyLocalStorage.length > 0 ? (
                       <Card className="shadow p-2">
                         <div className="row d-flex">
                           <div className="col-md-10">
@@ -1315,6 +1347,78 @@ const EditCompany = () => {
                         handleInputChange({ target: { name: "notes", value } })
                       }
                     />
+                  </Card.Body>
+                </Card>
+
+                <Card className="shadow">
+                  <Card.Header>
+                    <h6 className="fw-bold mt-2">Add Machine</h6>
+
+                  </Card.Header>
+
+                  <Card.Body>
+                    {machines.map((machine, index) => (
+                      <div className="mb-5" key={index}>
+                        <h6 className="fw-bolder">Machine {index + 1}</h6>
+                        {index > 0 && (
+                          <Button
+                            variant="danger"
+                            size="sm"
+                            onClick={() => removeMachine(machine.id)}
+                          >
+                            Delete
+                          </Button>
+                        )}
+
+                        <hr />
+                        <Form.Group className="mb-3">
+                          <Form.Label>Name</Form.Label>
+                          <Form.Control
+                            type="text"
+                            name="name"
+                            value={machine.name}
+                            onChange={(e) => handleInputMachineChange(index, e)}
+                            placeholder="Input Machine Name"
+                          />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                          <Form.Label>Model</Form.Label>
+                          <Form.Control
+                            type="text"
+                            name="model"
+                            value={machine.model}
+                            onChange={(e) => handleInputMachineChange(index, e)}
+                            placeholder="Input Model Machine"
+                          />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                          <Form.Label>Serial Number</Form.Label>
+                          <Form.Control
+                            type="text"
+                            name="sn"
+                            value={machine.sn}
+                            onChange={(e) => handleInputMachineChange(index, e)}
+                            placeholder="Input Serial Number"
+                          />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                          <Form.Label>Type</Form.Label>
+                          <Select
+                            options={machineOptions}
+                            value={machineOptions.find((e) => e.value === machine.type)}
+                            onChange={(selectedOption) => handleSelectTypeChange(index, selectedOption)}
+                            placeholder="Select Type Machine"
+                          />
+                        </Form.Group>
+                      </div>
+                    ))}
+
+                    <Button variant="primary" onClick={addMachine}>
+                      <FontAwesomeIcon icon={faPlus} className="me-2" /> Add Machine
+                    </Button>
                   </Card.Body>
                 </Card>
 
