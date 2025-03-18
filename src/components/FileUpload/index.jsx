@@ -2,7 +2,7 @@ import { faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useState } from 'react';
 
-const FileUpload = ({ label, sectionId, onFileChange }) => {
+const FileUpload = ({ label, sectionId, onFileChange, disable }) => {
     const [files, setFiles] = useState([{ id: 1, file: null, fileName: "No files selected" }]);
 
 
@@ -42,6 +42,7 @@ const FileUpload = ({ label, sectionId, onFileChange }) => {
                         className="form-control d-none"
                         id={`fileInput-${sectionId}-${file.id}`} // Pastikan ID unik berdasarkan sectionId
                         onChange={(e) => handleFileChange(e, file.id)}
+                        disabled={disable}
                     />
                     <label htmlFor={`fileInput-${sectionId}-${file.id}`} className="btn btn-outline-secondary">
                         Browse
@@ -57,9 +58,11 @@ const FileUpload = ({ label, sectionId, onFileChange }) => {
                 </div>
             ))}
 
-            <button className="btn btn-primary mt-2 w-100" type="button" onClick={addFileInput}>
-                <FontAwesomeIcon icon={faPlus} style={{ fontSize: '12px', marginRight: '5px' }} /> Add Photo
-            </button>
+            {!disable && (
+                <button className="btn btn-primary mt-2 w-100" type="button" onClick={addFileInput}>
+                    <FontAwesomeIcon icon={faPlus} style={{ fontSize: '12px', marginRight: '5px' }} /> Add Photo
+                </button>
+            )}
         </div>
     );
 };

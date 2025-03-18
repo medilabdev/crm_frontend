@@ -15,6 +15,8 @@ import axios from "axios";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import GeneratePDF from "../../components/PDF";
 import Logo from "../../assets/img/iss_logo.png"
+import Modals from "../../components/Modals";
+import Swal from "sweetalert2";
 
 const renderTooltipDownloadPdf = (props) => (
     <Tooltip {...props}>Download PDF</Tooltip>
@@ -23,142 +25,206 @@ const renderTooltipAction = (props) => (
     <Tooltip {...props}>Status</Tooltip>
 );
 
-const options = [
-    { value: 'PT. Prima Indo Medilab', label: 'PT. Prima Indo Medilab' },
-    { value: 'PT. Interskala Sehat Sejahtera', label: 'PT. Interskala Sehat Sejahtera' },
-];
-
-// icon
-const columns = [
-    {
-        name: <><FontAwesomeIcon icon={faExclamationCircle} className="me-2" /> Action</>,
-        width: "100px",
-        selector: row => {
-            const data = {
-                logo: Logo,
-                technician: {
-                    name: "Hengki Ibrahim",
-                    signature: Logo,
-                    dateArrived: "2025-03-17 10:30:00",
-                    dateReport: "2025-03-17 10:30:00",
-                },
-                customer: {
-                    name: row.company.name,
-                    address: row.company.address,
-                },
-                completion: "Instalasi 12 Mesin dan 6 Diod",
-                jobDescription: "Instalasi 12 Mesin dan 6 Diod",
-                machines: [
-                    { model: "MKID1", serialNumber: "123456789" },
-                    { model: "MKID2", serialNumber: "987654321" },
-                    { model: "MKID1", serialNumber: "123456789" },
-                    { model: "MKID2", serialNumber: "987654321" },
-
-                ],
-                purposeOfVisit: "01JP4X4S4ZMN9VFJ08PGFFMR5V",
-                signatures: {
-                    name: row.signature_name,
-                    signature: `${process.env.REACT_APP_BACKEND_URL}/assets/technician-ticket/signatures/${row.ulid}`
-                }
-            };
-
-            return (
-                <div className="d-flex gap-2">
-                    {/* Button untuk ubah status (selalu muncul) */}
-                    {row.is_completed !== 3 && (
-                        <OverlayTrigger placement="top" overlay={renderTooltipAction}>
-                            <button className="btn">
-                                <FontAwesomeIcon icon={faCheckCircle} color="#444442" />
-                            </button>
-                        </OverlayTrigger>
-
-                    )
-                    }
-
-                    {/* Button PDF hanya muncul jika is_completed = 3 */}
-                    {row.is_completed === 3 && (
-                        <PDFDownloadLink document={<GeneratePDF data={data} />} fileName="ticket_activity_report.pdf">
-                            {({ loading }) => (loading ? "Loading..." : <OverlayTrigger placement="top" overlay={renderTooltipDownloadPdf}>
-                                <button className="btn">
-                                    <FontAwesomeIcon icon={faFilePdf} color="red" />
-                                </button>
-                            </OverlayTrigger>)}
-                        </PDFDownloadLink>
-
-                    )}
-                </div>
-            )
-        },
-    },
-    {
-        name: <><FontAwesomeIcon icon={faBriefcase} className="me-2" /> Job</>, // Tambahkan ikon koper di header kolom
-        selector: row => {
-            return (<a href={`/activity-technician/${row.ulid}/detail`} className="text-decoration-none">{row.visit_purpose.name}</a>)
-        },
-        sortable: true,
-    },
-    {
-        name: <><FontAwesomeIcon icon={faBuildingCircleExclamation} className="me-2" /> Customer</>,
-        selector: row => {
-            return (
-                <div style={{ border: "1px solid #ABABAC", borderRadius: "3px", padding: "4px 6px" }}>
-                    {row.company.name}
-                </div>
-            )
-        },
-        sortable: true,
-    },
-    {
-        name: <><FontAwesomeIcon icon={faSyncAlt} className="me-2" /> Status</>,
-        selector: row => row.is_completed, // Gunakan nilai angka untuk sorting
-        cell: row => {
-            if (row.is_completed === 0) {
-                return (
-                    <div style={{ backgroundColor: "#FBE8CC", padding: "4px 10px", borderRadius: "3px", color: "#AC7449" }}>
-                        <span><FontAwesomeIcon icon={faExclamationCircle} className="me-2" />Awaiting Status</span>
-                    </div>
-                );
-            } else if (row.is_completed === 1) {
-                return (
-                    <div style={{ backgroundColor: "#EB82F5", padding: "4px 10px", borderRadius: "3px", color: "#FEF2FF" }}>
-                        <span><FontAwesomeIcon icon={faExclamationCircle} className="me-2" />In Queue</span>
-                    </div>
-                );
-            } else if (row.is_completed === 2) {
-                return (
-                    <div style={{ backgroundColor: "#E0D841", padding: "4px 10px", borderRadius: "3px", color: "#444442" }}>
-                        <span><FontAwesomeIcon icon={faExclamationCircle} className="me-2" />On Progress</span>
-                    </div>
-                );
-            } else if (row.is_completed === 3) {
-                return (
-                    <div style={{ backgroundColor: "#00FF1E40", padding: "4px 10px", borderRadius: "3px", color: "#004708B5" }}>
-                        <span><FontAwesomeIcon icon={faCheckCircle} className="me-2" />Completed</span>
-                    </div>
-                );
-            } else {
-                return (
-                    <div style={{ backgroundColor: "#FF8F8F40", padding: "4px 10px", borderRadius: "3px", color: "#FF0000B2" }}>
-                        <span><FontAwesomeIcon icon={faTimesCircle} className="me-2" />Not Completed</span>
-                    </div>
-                );
-            }
-        },
-        sortable: true,
-    },
-    {
-        name: <><FontAwesomeIcon icon={faCalendarDays} className="me-2" /> Date</>,
-        selector: row => <Moment format="DD MMM YYYY HH:mm" locale="id">{row.created_at}</Moment>,
-        sortable: true,
-    },
-];
+const statusOptions = [
+    { value: 'Waiting', label: 'A Waiting' },
+    { value: 'Queued', label: 'In Queued' },
+    { value: 'In Progress', label: 'In Progress' },
+    { value: 'Completed', label: 'Completed' },
+    { value: 'Not Completed', label: 'Not Completed' },
+]
 
 const ActivityTechnician = () => {
     const [showFilter, setShowFilter] = useState(true);
     const [technicianData, setTechnicianData] = useState([]);
-
     const urlTechnicianData = `${process.env.REACT_APP_BACKEND_URL}/technician-tickets?rel=visit-purpose,company,details`;
     const token = localStorage.getItem('token');
+    const [statusTicket, setStatusTicket] = useState("");
+    const [modalData, setModalData] = useState(null);
+    const [showModal, setShowModal] = useState(false);
+
+    const handleShowModal = (data) => {
+        setModalData(data)
+        setStatusTicket(data.status);
+        setShowModal(true)
+    };
+    const handleCloseModal = () => setShowModal(false);
+
+    const handleStatusChange = (value) => {
+        setStatusTicket(value); // Mengatur status baru setelah perubahan
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+
+        Swal.fire({
+            title: "Process...",
+            text: "Please wait while we process your request.",
+            allowEscapeKey: false,
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        const ulid = modalData.ulid;
+        const formData = new FormData();
+
+        formData.append('_method', 'PATCH')
+        formData.append('status', statusTicket)
+
+        axios.post(`${process.env.REACT_APP_BACKEND_URL}/technician-tickets/${ulid}`, formData, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        }).then(response => {
+            if (response.data.data) {
+                Swal.fire({
+                    title: "Success!",
+                    text: response.data.data.alerts.success.message,
+                    icon: "success",
+                    confirmButtonText: "OK",
+                }).then(() => {
+                    window.location.reload();
+                });
+            }
+        }).catch(err => {
+            console.error(err.response.data);
+
+            Swal.fire({
+                title: "Error!",
+                text: "Failed to submit data. Please try again.",
+                icon: "error",
+                confirmButtonText: "OK",
+            });
+        })
+
+    }
+
+    const options = [
+        { value: 'PT. Prima Indo Medilab', label: 'PT. Prima Indo Medilab' },
+        { value: 'PT. Interskala Sehat Sejahtera', label: 'PT. Interskala Sehat Sejahtera' },
+    ];
+
+
+    // icon
+    const columns = [
+        {
+            name: <><FontAwesomeIcon icon={faExclamationCircle} className="me-2" /> Action</>,
+            width: "100px",
+            selector: row => {
+                const data = {
+                    logo: Logo,
+                    technician: {
+                        name: "Hengki Ibrahim",
+                        signature: Logo,
+                        dateArrived: "2025-03-17 10:30:00",
+                        dateReport: "2025-03-17 10:30:00",
+                    },
+                    customer: {
+                        name: row.company.name,
+                        address: row.company.address,
+                    },
+                    completion: "Instalasi 12 Mesin dan 6 Diod",
+                    jobDescription: "Instalasi 12 Mesin dan 6 Diod",
+                    machines: row.technician_ticket_details,
+                    purposeOfVisit: row.visit_purpose,
+                    signatures: {
+                        name: row.signature_name,
+                        signature: `${process.env.REACT_APP_BACKEND_URL}/assets/technician-ticket/signatures/${row.ulid}`
+                    },
+                    status: row.status
+                };
+
+                return (
+                    <div className="d-flex gap-2">
+                        {/* Button untuk ubah status (selalu muncul) */}
+                        {row.status !== "Completed" && (
+                            <OverlayTrigger placement="top" overlay={renderTooltipAction}>
+                                <button type="button" className="btn" onClick={(e) => handleShowModal(row)}>
+                                    <FontAwesomeIcon icon={faCheckCircle} color="#444442" />
+                                </button>
+                            </OverlayTrigger>
+
+                        )
+                        }
+
+                        {/* Button PDF hanya muncul jika is_completed = 3 */}
+                        {row.status === "Completed" && (
+                            <PDFDownloadLink document={<GeneratePDF data={data} />} fileName="ticket_activity_report.pdf">
+                                {({ loading }) => (loading ? "Loading..." : <OverlayTrigger placement="top" overlay={renderTooltipDownloadPdf}>
+                                    <button className="btn">
+                                        <FontAwesomeIcon icon={faFilePdf} color="red" />
+                                    </button>
+                                </OverlayTrigger>)}
+                            </PDFDownloadLink>
+
+                        )}
+                    </div>
+                )
+            },
+        },
+        {
+            name: <><FontAwesomeIcon icon={faBriefcase} className="me-2" /> Job</>, // Tambahkan ikon koper di header kolom
+            selector: row => {
+                return (<a href={`/activity-technician/${row.ulid}/detail`} className="text-decoration-none">{row.visit_purpose.name}</a>)
+            },
+            sortable: true,
+        },
+        {
+            name: <><FontAwesomeIcon icon={faBuildingCircleExclamation} className="me-2" /> Customer</>,
+            selector: row => {
+                return (
+                    <div style={{ border: "1px solid #ABABAC", borderRadius: "3px", padding: "4px 6px" }}>
+                        {row.company.name}
+                    </div>
+                )
+            },
+            sortable: true,
+        },
+        {
+            name: <><FontAwesomeIcon icon={faSyncAlt} className="me-2" /> Status</>,
+            selector: row => row.status, // Gunakan nilai angka untuk sorting
+            cell: row => {
+                if (row.status === "Waiting") {
+                    return (
+                        <div style={{ backgroundColor: "#FBE8CC", padding: "4px 10px", borderRadius: "3px", color: "#AC7449" }}>
+                            <span><FontAwesomeIcon icon={faExclamationCircle} className="me-2" />Awaiting Status</span>
+                        </div>
+                    );
+                } else if (row.status === "Queued") {
+                    return (
+                        <div style={{ backgroundColor: "#EB82F5", padding: "4px 10px", borderRadius: "3px", color: "#FEF2FF" }}>
+                            <span><FontAwesomeIcon icon={faExclamationCircle} className="me-2" />In Queue</span>
+                        </div>
+                    );
+                } else if (row.status === "In Progress") {
+                    return (
+                        <div style={{ backgroundColor: "#E0D841", padding: "4px 10px", borderRadius: "3px", color: "#444442" }}>
+                            <span><FontAwesomeIcon icon={faExclamationCircle} className="me-2" />On Progress</span>
+                        </div>
+                    );
+                } else if (row.status === "Completed") {
+                    return (
+                        <div style={{ backgroundColor: "#00FF1E40", padding: "4px 10px", borderRadius: "3px", color: "#004708B5" }}>
+                            <span><FontAwesomeIcon icon={faCheckCircle} className="me-2" />Completed</span>
+                        </div>
+                    );
+                } else {
+                    return (
+                        <div style={{ backgroundColor: "#FF8F8F40", padding: "4px 10px", borderRadius: "3px", color: "#FF0000B2" }}>
+                            <span><FontAwesomeIcon icon={faTimesCircle} className="me-2" />Not Completed</span>
+                        </div>
+                    );
+                }
+            },
+            sortable: true,
+        },
+        {
+            name: <><FontAwesomeIcon icon={faCalendarDays} className="me-2" /> Date</>,
+            selector: row => <Moment format="DD MMM YYYY HH:mm" locale="id">{row.created_at}</Moment>,
+            sortable: true,
+        },
+    ];
 
     const toggleFilter = () => {
         setShowFilter(prevState => !prevState);
@@ -181,6 +247,7 @@ const ActivityTechnician = () => {
                     Authorization: `Bearer ${token}`,
                 },
             });
+
             return response;
         } catch (error) {
             if (error.response?.status === 401) {
@@ -274,6 +341,21 @@ const ActivityTechnician = () => {
                     </Card>
                 </div>
             </Main>
+
+            {showModal && (
+                <form onSubmit={handleSubmit}>
+                    <Modals submit={handleSubmit} show={showModal} close={handleCloseModal} title={`Change Status (${modalData.company.name})`} buttonAction={true} buttonActionTitle="Save">
+                        <label htmlFor="" className="mb-2">Status</label>
+                        <Select
+                            className="w-100"
+                            placeholder="Select Machine"
+                            options={statusOptions}
+                            value={statusOptions?.find(option => option.value === statusTicket)}
+                            onChange={(e) => handleStatusChange(e.value)}
+                        />
+                    </Modals>
+                </form>
+            )}
         </div>
     );
 };

@@ -138,6 +138,7 @@ const GeneratePDF = ({ data }) => {
                             if (index % 2 === 0) {
                                 acc.push([machine, data.machines[index + 1] || null]);
                             }
+
                             return acc;
                         }, []).map(([leftMachine, rightMachine], index) => (
                             <View style={styles.row} key={index}>
@@ -171,7 +172,7 @@ const GeneratePDF = ({ data }) => {
                 {/* Purpose of visit Pekerjaan */}
                 <View style={styles.section}>
                     <Text style={styles.title}>PURPOSE OF VISIT</Text>
-                    <Text style={styles.text}>{data.completion}</Text>
+                    <Text style={styles.text}>{data.visit_purpose}</Text>
                 </View>
 
                 {/* Suggestion & Feedback Pekerjaan */}
@@ -197,7 +198,7 @@ const GeneratePDF = ({ data }) => {
                     </View>
                 </View>
 
-                <Text style={styles.title}>Task : Completed</Text>
+                <Text style={styles.title}>Task : {data.status}</Text>
 
             </Page>
         </Document>

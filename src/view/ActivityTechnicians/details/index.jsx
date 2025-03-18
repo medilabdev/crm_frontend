@@ -8,13 +8,15 @@ import './detail.css'
 import { Breadcrumb, Button, Card, Form, InputGroup } from 'react-bootstrap'
 import Select from "react-select"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faBuilding, faEye, faPaperPlane, faPlus, faSave, faTrash } from '@fortawesome/free-solid-svg-icons'
+import { faBuilding, faClock, faEye, faPaperPlane, faPencilSquare, faPlus, faSave, faTrash } from '@fortawesome/free-solid-svg-icons'
 import ImageMachine from '../../../assets/img/MK-HDF 1.png'
 import FileUpload from '../../../components/FileUpload'
 import { useParams } from 'react-router-dom'
 import Swal from "sweetalert2";
 import SignatureCanvas from "react-signature-canvas";
 import axios from 'axios'
+import Modals from '../../../components/Modals/index'
+import moment from 'moment/moment'
 
 const DetailActivity = () => {
     const { uid } = useParams();
@@ -28,6 +30,7 @@ const DetailActivity = () => {
     const [isCompleted, setIsCompleted] = useState(null);
     const [isEdit, setIsEdit] = useState(false)
     const technicianAuth = localStorage.getItem('uid');
+    const [workingStarted, setWorkingStarted] = useState(null);
 
     const [drafts, setDrafts] = useState({
         detail_uid: uid, // Gunakan id_detail jika ada, jika tidak buat random
@@ -89,10 +92,10 @@ const DetailActivity = () => {
         setLoading(true); // Set loading jadi true sebelum mulai request
 
         const formData = new FormData();
-        const conclusion = selectedConclusion === "completed" ? 1 : 2
+        const conclusion = selectedConclusion === "Completed" ? "Completed" : "Not Completed"
 
         formData.append("_method", "PATCH");
-        formData.append("is_completed", conclusion);
+        formData.append("status", conclusion);
 
         if (signatureImage) {
             formData.append("signature[file]", signatureImage)
@@ -254,7 +257,6 @@ const DetailActivity = () => {
         });
     };
 
-
     // Simpan tanda tangan sebagai gambar
     const saveSignature = () => {
         if (sigCanvas.current) {
@@ -286,6 +288,69 @@ const DetailActivity = () => {
 
         return new File([u8arr], filename, { type: mime });
     };
+
+    // working start
+    const handleWorkingStart = () => {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'Do you want to start this work?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, start it!',
+            cancelButtonText: 'No, cancel',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: "Process...",
+                    text: "Please wait while we process your request.",
+                    allowEscapeKey: false,
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                const formData = new FormData();
+
+                formData.append('_method', 'PATCH')
+                formData.append('status', 'In Progress')
+                formData.append('started_at', moment.utc(Date.now()).format('YYYY-MM-DD HH:mm'))
+
+                axios.post(`${process.env.REACT_APP_BACKEND_URL}/technician-tickets/${ulidParams}`, formData, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }).then(response => {
+                    if (response.data.data) {
+                        Swal.fire({
+                            title: "Success!",
+                            text: response.data.data.alerts.success.message,
+                            icon: "success",
+                            confirmButtonText: "OK",
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    }
+                }).catch(err => {
+                    console.error(err.response.data);
+
+                    Swal.fire({
+                        title: "Error!",
+                        text: "Failed to submit data. Please try again.",
+                        icon: "error",
+                        confirmButtonText: "OK",
+                    });
+                })
+            } else if (result.isDismissed) {
+                // Aksi jika user menekan 'Cancel'
+                Swal.fire('Cancelled', 'The work has not started.', 'info');
+            }
+        });
+    }
+
+    const handleEditData = () => {
+        setIsEdit(!isEdit);
+    }
 
     useEffect(() => {
         const fetchPurposeData = async () => {
@@ -335,10 +400,13 @@ const DetailActivity = () => {
             });
         }
 
-        if (technicianDetailData.is_completed) {
-            setIsCompleted(technicianDetailData.is_completed)
+        if (technicianDetailData.status) {
+            setIsCompleted(technicianDetailData.status)
         };
 
+        if (technicianDetailData.started_at) {
+            setWorkingStarted(technicianDetailData.started_at)
+        }
 
         const getDataMachineByCompany = async () => {
             const response = await fetchDataApi(urlMachinesByCompany, token);
@@ -392,6 +460,19 @@ const DetailActivity = () => {
                             <Breadcrumb.Item active>Create Activity Transaction</Breadcrumb.Item>
                         </Breadcrumb>
                     </div>
+                    <div className="d-flex gap-5 align-items-center mb-3">
+                        <Button variant="primary" type="submit" disabled={workingStarted ? true : false} onClick={(e) => handleWorkingStart()}><FontAwesomeIcon icon={faClock} className='me-2' /> Start Work</Button>
+
+                        {workingStarted && isCompleted === "Completed" && (
+                            <Button variant="light" type="button" onClick={handleEditData}>
+                                <FontAwesomeIcon icon={faPencilSquare} className='me-2' /> Edit
+                            </Button>
+                        )}
+
+
+                        <h5 className='fw-bolder'>Status : {technicianDetailData.status}</h5>
+
+                    </div>
 
                     <Card className="shadow-sm p-4">
                         <div className="row">
@@ -407,7 +488,10 @@ const DetailActivity = () => {
                                                 value={item.ulid}
                                                 checked={selectedPurpose === item.ulid}
                                                 onChange={handlePurposeChange}
-                                                disabled={isCompleted === 3 && !isEdit}
+                                                disabled={
+                                                    (isCompleted === "Completed" && !isEdit) ||
+                                                    (workingStarted && isCompleted === "Completed" && !isEdit) || !workingStarted
+                                                }
                                             />
                                             <span>{item.name}</span>
                                         </div>
@@ -429,7 +513,9 @@ const DetailActivity = () => {
                                         options={selectDataMachines()}
                                         value={selectDataMachines()?.find(option => option.value === section.machine)}
                                         onChange={(e) => handleInputChange(section.id, "machine", e.value)}
-                                        isDisabled={isCompleted === 3 && !isEdit}
+                                        isDisabled={(isCompleted === "Completed" && !isEdit) ||
+                                            (workingStarted && isCompleted === "Completed" && !isEdit) || !workingStarted
+                                        }
                                     />
                                 </InputGroup>
 
@@ -441,7 +527,8 @@ const DetailActivity = () => {
                                         placeholder="Type job description..."
                                         value={jobDescData ? jobDescData : section.jobdesc}
                                         onChange={(e) => handleInputChange(section.id, "jobdesc", e.target.value)}
-                                        disabled={isCompleted === 3 && !isEdit}
+                                        disabled={(isCompleted === "Completed" && !isEdit) ||
+                                            (workingStarted && isCompleted === "Completed" && !isEdit) || !workingStarted}
                                     />
                                 </InputGroup>
 
@@ -453,21 +540,22 @@ const DetailActivity = () => {
                                         placeholder="Type notes..."
                                         value={section.notes}
                                         onChange={(e) => handleInputChange(section.id, "notes", e.target.value)}
-                                        disabled={isCompleted === 3 && !isEdit}
+                                        disabled={(isCompleted === "Completed" && !isEdit) ||
+                                            (workingStarted && isCompleted === "Completed" && !isEdit) || !workingStarted}
                                     />
                                 </InputGroup>
 
                                 {technicianDetailData.technician_ticket_details && technicianDetailData.technician_ticket_details.length > 0 ? (technicianDetailData.technician_ticket_details[index].technician_ticket_photos && technicianDetailData.technician_ticket_details[index].technician_ticket_photos.length > 0 ? (
                                     <div className="row my-3">
                                         <label htmlFor="" className='fw-bolder mb-2' style={{ fontSize: '1rem' }}>Photos</label>
-                                        {technicianDetailData.technician_ticket_details[index].technician_ticket_photos.map((item) => {
+                                        {technicianDetailData.technician_ticket_details[index].technician_ticket_photos.map((item, i) => {
                                             const fileName = item.photo_path;
                                             const parts = fileName.split('.')
                                             const nameWithoutExt = parts.slice(0, -1).join('.'); // Gabungkan kembali tanpa ekstensi
                                             const extension = parts.slice(-1)[0];
 
                                             return (
-                                                <div className="col-lg-3 col-sm-6 mb-3">
+                                                <div className="col-lg-3 col-sm-6 mb-3" key={i}>
                                                     <div className="d-flex align-items-center p-3 border rounded shadow-sm bg-light w-100" style={{ maxWidth: "400px" }}>
                                                         {/* Icon File */}
                                                         <div className="me-3">
@@ -496,13 +584,14 @@ const DetailActivity = () => {
                                     </div>
                                 ) : "") : ""}
 
-                                {isCompleted === 3 && !isEdit ? "" : (
+                                {isCompleted === "Completed" && !isEdit ? "" : (
                                     <>
                                         <InputGroup className="custom-textarea mb-3">
                                             <InputGroup.Text className="input-label">Upload Photo</InputGroup.Text>
 
 
-                                            <FileUpload label="Upload Photo" sectionId={section.id} onFileChange={handleFileChange} />
+                                            <FileUpload label="Upload Photo" sectionId={section.id} disable={(isCompleted === "Completed" && !isEdit) ||
+                                                (workingStarted && isCompleted === "Completed" && !isEdit) || !workingStarted} onFileChange={handleFileChange} />
                                         </InputGroup>
 
                                         {index !== 0 && (
@@ -514,7 +603,6 @@ const DetailActivity = () => {
                                         )}
                                     </>
                                 )}
-
                             </Card>
                         ))}
 
@@ -528,10 +616,11 @@ const DetailActivity = () => {
                                         <input
                                             type="radio"
                                             name="conclusion"
-                                            value="completed"
-                                            checked={selectedConclusion === "completed" || isCompleted === 3}
-                                            onChange={() => setSelectedConclusion("completed")}
-                                            disabled={isCompleted === 3 && !isEdit}
+                                            value="Completed"
+                                            checked={selectedConclusion === "Completed"}
+                                            onChange={() => setSelectedConclusion("Completed")}
+                                            disabled={(isCompleted === "Completed" && !isEdit) ||
+                                                (workingStarted && isCompleted === "Completed" && !isEdit) || !workingStarted}
                                         /> Task Completed
                                     </label>
 
@@ -539,16 +628,17 @@ const DetailActivity = () => {
                                         <input
                                             type="radio"
                                             name="conclusion"
-                                            value="not_completed"
-                                            checked={selectedConclusion === "not_completed" || isCompleted === 4}
-                                            onChange={() => setSelectedConclusion("not_completed")}
-                                            disabled={isCompleted === 3 && !isEdit}
+                                            value="Not Completed"
+                                            checked={selectedConclusion === "Not Completed"}
+                                            onChange={() => setSelectedConclusion("Not Completed")}
+                                            disabled={(isCompleted === "Completed" && !isEdit) ||
+                                                (workingStarted && isCompleted === "Completed" && !isEdit) || !workingStarted}
                                         /> Task Not Completed
                                     </label>
                                 </div>
                             </InputGroup>
 
-                            {selectedConclusion === "completed" && (
+                            {selectedConclusion === "Completed" && (
                                 <div className="mt-3">
                                     <p>Apakah mau tanda tangan client disini?</p>
                                     <div className="d-flex gap-4">
@@ -563,31 +653,33 @@ const DetailActivity = () => {
                             )}
 
                             {signatureClient === "yes" && (
-                                <div className="flex flex-col items-center gap-4 p-4 border mt-3">
-                                    <SignatureCanvas
-                                        ref={sigCanvas}
-                                        penColor="black"
-                                        canvasProps={{ width: 400, height: 200, className: "border-2" }}
-                                    />
+                                <div className="container">
+                                    <div className="flex flex-col items-center gap-4 p-4 border mt-3">
+                                        <SignatureCanvas
+                                            ref={sigCanvas}
+                                            penColor="black"
+                                            canvasProps={{ width: 400, height: 200, className: "border-2" }}
+                                        />
 
-                                    <div className="d-flex gap-3">
-                                        <Button onClick={saveSignature}>Simpan</Button>
-                                        <Button variant="destructive" onClick={clearSignature}>Hapus</Button>
-                                    </div>
-
-                                    {imageURL && (
-                                        <div className="mt-4">
-                                            <h5 className="fw-bolder">Hasil Tanda Tangan:</h5>
-                                            <img src={imageURL} alt="Signature" className="border-2" />
+                                        <div className="d-flex gap-3">
+                                            <Button onClick={saveSignature}>Simpan</Button>
+                                            <Button variant="destructive" onClick={clearSignature}>Hapus</Button>
                                         </div>
-                                    )}
+
+                                        {imageURL && (
+                                            <div className="mt-4">
+                                                <h5 className="fw-bolder">Hasil Tanda Tangan:</h5>
+                                                <img src={imageURL} alt="Signature" className="border-2" />
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             )}
                         </Card>
 
-                        <div className={`${isCompleted === 3 && !isEdit ? 'd-none' : ''} floating-buttons`}>
+                        <div className={`${isCompleted === "Completed" && !isEdit ? 'd-none' : ''} floating-buttons`}>
                             <Button variant="success" type="submit"><FontAwesomeIcon icon={faPaperPlane} className='me-2' /> Submit</Button>
-                            <Button variant="primary" type="button" onClick={(e) => handleSaveDraft()}><FontAwesomeIcon icon={faSave} className='me-2' />Draft</Button>
+                            {/* <Button variant="primary" type="button" onClick={(e) => handleSaveDraft()}><FontAwesomeIcon icon={faSave} className='me-2' />Draft</Button> */}
 
                             <Button variant="warning" onClick={addSection}>
                                 <FontAwesomeIcon icon={faPlus} className="me-2" /> Add Section
@@ -595,6 +687,7 @@ const DetailActivity = () => {
                         </div>
                     </Form>
                 </div>
+                <Modals></Modals>
             </Main>
         </div>
     )
