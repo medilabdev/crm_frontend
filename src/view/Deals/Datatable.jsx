@@ -371,7 +371,7 @@ const DataTableComponet = ({
     {
       name: "Owner/Created",
       selector: (row) => {
-        // console.log(row);
+        const updatedAt = new Date(row.updated_at);
         const date = new Date(row.created_at);
         const formatDate = {
           year: "numeric",
@@ -382,6 +382,8 @@ const DataTableComponet = ({
         };
         const formatResult = new Intl.DateTimeFormat("en-US", formatDate);
         const time = formatResult.format(date);
+        const updatedTime = formatResult.format(updatedAt);
+      
         return (
           <div>
             <p
@@ -402,7 +404,13 @@ const DataTableComponet = ({
                 color: "#191919",
               }}
             >
-              {time}
+              {row?.created_at === row?.updated_at
+                ? time
+                : (
+                  <>
+                    <strong>Created:</strong> {time} <br /> <strong>Updated:</strong> {updatedTime}
+                  </>
+                )}
             </p>
           </div>
         );

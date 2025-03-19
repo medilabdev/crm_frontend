@@ -25,6 +25,8 @@ import { useSelector } from "react-redux";
 import { getListOwner } from "../../action/FormOwner";
 import { getListCompany } from "../../action/FormCompany";
 import { getListContact } from "../../action/FormContact";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const Deals = () => {
   const token = localStorage.getItem("token");
@@ -47,6 +49,12 @@ const Deals = () => {
   const [totalRows, setTotalRows] = useState(0);
   const [ownerDeals, setOwnerDeals] = useState([]);
   const [formSearch, setFormSearch] = useState({});
+
+  const [startCreated, setStartCreated] = useState(null)
+  const [endCreated, setEndCreated] = useState(null);
+  
+  const [startUpdated, setStartUpdated] = useState(null)
+  const [endUpdated, setEndUpdated] = useState(null)
 
   const fetchData = async () => {
     try {
@@ -196,7 +204,14 @@ const Deals = () => {
       }
       params.page = pagination.page;
       params.limit = pagination.limit;
-
+      params.created_at = {
+        start: startCreated,
+        end: endCreated,
+      };
+      params.updated_at = {
+        start: startUpdated,
+        end: endUpdated,
+      };
       const response = await axios.get(
         `${process.env.REACT_APP_BACKEND_URL}/deals`,
         {
@@ -421,6 +436,23 @@ const Deals = () => {
   const handlePagePerChange = (pageSize, page) => {
     setPagination((prev) => ({ ...prev, pageSize, page }));
   };
+  
+
+  const handleCreatedChange = (dates) => {
+    const [start, end] = dates;
+    const startDateOnly = start ? start.toLocaleDateString() : null
+    const endDateOnly = end ? end.toLocaleDateString() : null    
+    setStartCreated(startDateOnly);
+    setEndCreated(endDateOnly);
+  };
+
+  const handleUpdatedChange = (dates) => {
+    const [start, end] = dates; 
+    const startDateOnly = start ? start.toLocaleDateString() : null
+    const endDateOnly = end ? end.toLocaleDateString() : null
+    setStartUpdated(startDateOnly);
+    setEndUpdated(endDateOnly);
+  };
 
   return (
     <body id="body">
@@ -556,24 +588,28 @@ const Deals = () => {
                       />
                     </div>
                     <div className="mb-1">
-                      <label htmlFor="date">Created</label>
-                      <input
-                        type="date"
-                        name="created_at"
-                        className="form-control"
-                        onChange={handleSearchMultiple}
-                        style={{ fontSize: "0.85rem" }}
-                      />
+                      <label htmlFor="date">Created</label>  <br />
+                      <DatePicker 
+                      selectsRange 
+                      startDate={startCreated ? new Date(startCreated) : null} 
+                      endDate={endCreated ? new Date(endCreated) : null} 
+                      onChange={handleCreatedChange} 
+                      isClearable 
+                      className="form-control" 
+                      dateFormat="dd/MM/yyyy"  
+                      disabledKeyboardNavigation/>
                     </div>
                     <div className="mb-1">
-                      <label htmlFor="date">Updated</label>
-                      <input
-                        type="date"
-                        name="updated_at"
-                        className="form-control"
-                        onChange={handleSearchMultiple}
-                        style={{ fontSize: "0.85rem" }}
-                      />
+                      <label htmlFor="date">Updated</label> <br />
+                      <DatePicker 
+                      selectsRange startDate={startUpdated ? new Date(startUpdated) : null} 
+                      endDate={endUpdated ? new Date(endUpdated) : null } 
+                      onChange={handleUpdatedChange} 
+                      isClearable 
+                      className="form-control" 
+                      placeholder="Select Date"
+                      dateFormat="dd/MM/yyyy" 
+                      disabledKeyboardNavigation/>
                     </div>
                     <button
                       type="button"

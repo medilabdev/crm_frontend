@@ -562,6 +562,7 @@ const SingleCompany = () => {
                       required
                     />
                   </Form.Group>
+                  {process.env.REACT_APP_BACKEND_URL === "https://api-crm-iss.medilabjakarta.id/api" ? 
                   <Form.Group className="mb-3">
                     <Form.Label controlId="floatingInput">
                       <span>
@@ -577,7 +578,8 @@ const SingleCompany = () => {
                       options={TypeCompany()}
                       required
                     />
-                  </Form.Group>
+                  </Form.Group> : ''
+                  }
                   <Form.Label>
                     Telp.No/WhatApp
                     <span style={{ color: "red" }} className="fs-6">
