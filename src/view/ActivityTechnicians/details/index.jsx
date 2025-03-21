@@ -9,7 +9,6 @@ import { Breadcrumb, Button, Card, Form, InputGroup } from 'react-bootstrap'
 import Select from "react-select"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faBuilding, faClock, faEye, faPaperPlane, faPencilSquare, faPlus, faSave, faTrash } from '@fortawesome/free-solid-svg-icons'
-import ImageMachine from '../../../assets/img/MK-HDF 1.png'
 import FileUpload from '../../../components/FileUpload'
 import { useParams } from 'react-router-dom'
 import Swal from "sweetalert2";
@@ -20,7 +19,7 @@ import moment from 'moment/moment'
 
 const DetailActivity = () => {
     const { uid } = useParams();
-    const [sections, setSections] = useState([{ id: 1, machine: '', jobdesc: '', notes: '', photos: [] }]);
+    const [sections, setSections] = useState([{ id: 1, ulid: '', machine: '', jobdesc: '', notes: '', photos: [] }]);
     const [purposeOfVisitData, setPurposeOfVisitData] = useState([]);
     const [selectedPurpose, setSelectedPurpose] = useState('');
     const [technicianDetailData, setTechnicianDetailData] = useState([]);
@@ -31,6 +30,7 @@ const DetailActivity = () => {
     const [isEdit, setIsEdit] = useState(false)
     const technicianAuth = localStorage.getItem('uid');
     const [workingStarted, setWorkingStarted] = useState(null);
+    const [customerName, setCustomerName] = useState("");
 
     const [drafts, setDrafts] = useState({
         detail_uid: uid, // Gunakan id_detail jika ada, jika tidak buat random
@@ -80,6 +80,11 @@ const DetailActivity = () => {
         );
     };
 
+    const handleInput = (e) => {
+        setCustomerName(e.target.value)
+
+    }
+
     // handle purpose change
     const handlePurposeChange = (event) => {
         setSelectedPurpose(event.target.value);
@@ -99,14 +104,22 @@ const DetailActivity = () => {
 
         if (signatureImage) {
             formData.append("signature[file]", signatureImage)
-            formData.append("signature[name]", "Hosea Leonardo")
+            formData.append("signature[name]", customerName)
         };
+
 
         if (sections.length > 0) {
             sections.forEach((item, index) => {
-                formData.append(`details[${index}][machine_ulid]`, item.machine);
+                if (item.machine) {
+                    formData.append(`details[${index}][machine_ulid]`, item.machine);
+                }
+
+                if (item.ulid) {
+                    formData.append(`details[${index}][ulid]`, item.ulid || "");
+                }
+
                 formData.append(`details[${index}][jobdesc]`, item.jobdesc || "");
-                formData.append(`details[${index}][notes]`, item.notes || "");
+                formData.append(`details[${index}][notes]`, item.notes === null || item.notes === undefined ? "" : String(item.notes));
                 formData.append(`details[${index}][technician_user_uid]`, technicianAuth);
 
                 if (item.photos.length > 0) {
@@ -150,7 +163,7 @@ const DetailActivity = () => {
 
             Swal.fire({
                 title: "Error!",
-                text: "Failed to submit data. Please try again.",
+                text: `${error.response.data.data.message}`,
                 icon: "error",
                 confirmButtonText: "OK",
             });
@@ -381,7 +394,7 @@ const DetailActivity = () => {
             setJobDescData(technicianDetailData.jobdesc);
         }
 
-        if (technicianDetailData?.machines && technicianDetailData?.machines.length > 0) {
+        if (technicianDetailData?.machines && technicianDetailData?.machines.length > 0 || technicianDetailData.technician_ticket_details && technicianDetailData.technician_ticket_details.length > 0) {
             setSections(prevSections => {
                 // Buat mapping dari ID mesin lama ke foto yang sudah diupload
                 const existingPhotosMap = prevSections.reduce((acc, section) => {
@@ -392,9 +405,10 @@ const DetailActivity = () => {
                 // Buat array section baru dan tetap menyimpan foto lama
                 return technicianDetailData.technician_ticket_details.map((item, index) => ({
                     id: index + 1,
+                    ulid: item.ulid,
                     machine: item.machine_ulid || "",
                     jobdesc: item.jobdesc,
-                    notes: item.jobdesc,
+                    notes: item.notes,
                     photos: existingPhotosMap[item.machine] || [], // Ambil foto lama jika ada
                 }));
             });
@@ -402,6 +416,7 @@ const DetailActivity = () => {
 
         if (technicianDetailData.status) {
             setIsCompleted(technicianDetailData.status)
+            setSelectedConclusion(technicianDetailData.status)
         };
 
         if (technicianDetailData.started_at) {
@@ -460,18 +475,17 @@ const DetailActivity = () => {
                             <Breadcrumb.Item active>Create Activity Transaction</Breadcrumb.Item>
                         </Breadcrumb>
                     </div>
-                    <div className="d-flex gap-5 align-items-center mb-3">
-                        <Button variant="primary" type="submit" disabled={workingStarted ? true : false} onClick={(e) => handleWorkingStart()}><FontAwesomeIcon icon={faClock} className='me-2' /> Start Work</Button>
+                    <div className="d-flex gap-3 align-items-center mb-3">
+                        <Button variant="primary" type="submit" className='rounded-1' disabled={workingStarted ? true : false} onClick={(e) => handleWorkingStart()}><FontAwesomeIcon icon={faClock} className='me-2' /> Start Work</Button>
 
                         {workingStarted && isCompleted === "Completed" && (
-                            <Button variant="light" type="button" onClick={handleEditData}>
+                            <Button variant="warning" className="px-5 rounded-1" type="button" onClick={handleEditData}>
                                 <FontAwesomeIcon icon={faPencilSquare} className='me-2' /> Edit
                             </Button>
                         )}
-
-
-                        <h5 className='fw-bolder'>Status : {technicianDetailData.status}</h5>
-
+                    </div>
+                    <div className="mb-3">
+                        <h5 className='fw-bolder'>Status : <span className='badge bg-success'>{technicianDetailData.status}</span></h5>
                     </div>
 
                     <Card className="shadow-sm p-4">
@@ -638,7 +652,7 @@ const DetailActivity = () => {
                                 </div>
                             </InputGroup>
 
-                            {selectedConclusion === "Completed" && (
+                            {(selectedConclusion === "Completed" && isEdit) || (selectedConclusion === "Completed" && isCompleted !== "Completed") ? (
                                 <div className="mt-3">
                                     <p>Apakah mau tanda tangan client disini?</p>
                                     <div className="d-flex gap-4">
@@ -650,16 +664,24 @@ const DetailActivity = () => {
                                         </label>
                                     </div>
                                 </div>
-                            )}
+                            ) : ""}
+
 
                             {signatureClient === "yes" && (
-                                <div className="container">
-                                    <div className="flex flex-col items-center gap-4 p-4 border mt-3">
-                                        <SignatureCanvas
-                                            ref={sigCanvas}
-                                            penColor="black"
-                                            canvasProps={{ width: 400, height: 200, className: "border-2" }}
-                                        />
+                                <>
+                                    <div className="mt-4">
+                                        <label htmlFor="" className='fw-bolder mb-2' style={{ fontSize: "1rem" }}>Customer Name</label>
+                                        <input type="text" className='form-control' name="customer_name" onChange={(e) => handleInput(e)} />
+                                    </div>
+
+                                    <div className="d-flex flex-column align-items-center gap-4 p-4 border mt-3 w-100">
+                                        <div className="signature-container">
+                                            <SignatureCanvas
+                                                ref={sigCanvas}
+                                                penColor="black"
+                                                canvasProps={{ className: "signature-canvas" }}
+                                            />
+                                        </div>
 
                                         <div className="d-flex gap-3">
                                             <Button onClick={saveSignature}>Simpan</Button>
@@ -669,12 +691,13 @@ const DetailActivity = () => {
                                         {imageURL && (
                                             <div className="mt-4">
                                                 <h5 className="fw-bolder">Hasil Tanda Tangan:</h5>
-                                                <img src={imageURL} alt="Signature" className="border-2" />
+                                                <img src={imageURL} alt="Signature" className="border-2 img-fluid" />
                                             </div>
                                         )}
                                     </div>
-                                </div>
+                                </>
                             )}
+
                         </Card>
 
                         <div className={`${isCompleted === "Completed" && !isEdit ? 'd-none' : ''} floating-buttons`}>

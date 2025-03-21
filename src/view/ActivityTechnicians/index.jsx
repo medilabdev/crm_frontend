@@ -17,6 +17,7 @@ import GeneratePDF from "../../components/PDF";
 import Logo from "../../assets/img/iss_logo.png"
 import Modals from "../../components/Modals";
 import Swal from "sweetalert2";
+import moment from 'moment'
 
 const renderTooltipDownloadPdf = (props) => (
     <Tooltip {...props}>Download PDF</Tooltip>
@@ -36,7 +37,7 @@ const statusOptions = [
 const ActivityTechnician = () => {
     const [showFilter, setShowFilter] = useState(true);
     const [technicianData, setTechnicianData] = useState([]);
-    const urlTechnicianData = `${process.env.REACT_APP_BACKEND_URL}/technician-tickets?rel=visit-purpose,company,details`;
+    const urlTechnicianData = `${process.env.REACT_APP_BACKEND_URL}/technician-tickets?rel=visit-purpose,company,details,details.machine,details.technician`;
     const token = localStorage.getItem('token');
     const [statusTicket, setStatusTicket] = useState("");
     const [modalData, setModalData] = useState(null);
@@ -100,6 +101,15 @@ const ActivityTechnician = () => {
 
     }
 
+    const handelWithoutSignature = () => {
+        Swal.fire({
+            title: "Action required",
+            text: "The client has not signed or given their feedback. Kindly remind them to do so.",
+            icon: "warning",
+            confirmButtonText: "OK",
+        })
+    }
+
     const options = [
         { value: 'PT. Prima Indo Medilab', label: 'PT. Prima Indo Medilab' },
         { value: 'PT. Interskala Sehat Sejahtera', label: 'PT. Interskala Sehat Sejahtera' },
@@ -112,20 +122,22 @@ const ActivityTechnician = () => {
             name: <><FontAwesomeIcon icon={faExclamationCircle} className="me-2" /> Action</>,
             width: "100px",
             selector: row => {
+                console.log(row);
+
                 const data = {
                     logo: Logo,
                     technician: {
-                        name: "Hengki Ibrahim",
+                        name: row?.technician_ticket_details[0]?.technician?.name,
                         signature: Logo,
-                        dateArrived: "2025-03-17 10:30:00",
-                        dateReport: "2025-03-17 10:30:00",
+                        dateArrived: row.started_at ? moment(row.started_at).add('7', 'hours').format("dddd, DD MMM YYYY HH:mm") : "",
+                        dateReport: row.completed_at ? moment(row.completed_at).add('7', 'hours').format("dddd, DD MMM YYYY HH:mm") : "",
                     },
                     customer: {
                         name: row.company.name,
                         address: row.company.address,
                     },
-                    completion: "Instalasi 12 Mesin dan 6 Diod",
-                    jobDescription: "Instalasi 12 Mesin dan 6 Diod",
+                    // completion: "Instalasi 12 Mesin dan 6 Diod",
+                    // jobDescription: "Instalasi 12 Mesin dan 6 Diod",
                     machines: row.technician_ticket_details,
                     purposeOfVisit: row.visit_purpose,
                     signatures: {
@@ -149,7 +161,7 @@ const ActivityTechnician = () => {
                         }
 
                         {/* Button PDF hanya muncul jika is_completed = 3 */}
-                        {row.status === "Completed" && (
+                        {row.status === "Completed" && row.signature_path && (
                             <PDFDownloadLink document={<GeneratePDF data={data} />} fileName="ticket_activity_report.pdf">
                                 {({ loading }) => (loading ? "Loading..." : <OverlayTrigger placement="top" overlay={renderTooltipDownloadPdf}>
                                     <button className="btn">
@@ -157,6 +169,16 @@ const ActivityTechnician = () => {
                                     </button>
                                 </OverlayTrigger>)}
                             </PDFDownloadLink>
+
+                        )}
+
+                        {/* button pdf without signature customer */}
+                        {row.status === "Completed" && !row.signature_path && (
+                            <OverlayTrigger placement="top" overlay={renderTooltipDownloadPdf}>
+                                <button type="button" className="btn" onClick={(e) => handelWithoutSignature()}>
+                                    <FontAwesomeIcon icon={faFilePdf} color="red" />
+                                </button>
+                            </OverlayTrigger>
 
                         )}
                     </div>

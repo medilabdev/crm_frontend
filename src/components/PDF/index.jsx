@@ -55,7 +55,13 @@ const styles = StyleSheet.create({
     },
     text: {
         fontSize: 10,
-        marginBottom: 5
+        marginBottom: 5,
+        textAlign: "justify"
+    },
+    textBold: {
+        fontSize: 10,
+        marginBottom: 5,
+        fontWeight: "bold"
     },
     table: {
         fontSize: 10,
@@ -118,23 +124,23 @@ const GeneratePDF = ({ data }) => {
                 </View>
 
                 {/* Deskripsi Pekerjaan */}
-                <View style={styles.section}>
+                {/* <View style={styles.section}>
                     <Text style={styles.title}>JOB DESCRIPTION</Text>
                     <Text style={styles.text}>{data.jobDescription}</Text>
-                </View>
+                </View> */}
 
                 {/* Completion Pekerjaan */}
-                <View style={styles.section}>
+                {/* <View style={styles.section}>
                     <Text style={styles.title}>COMPLETION</Text>
                     <Text style={styles.text}>{data.completion}</Text>
-                </View>
+                </View> */}
 
                 {/* Tabel Mesin dengan Dua Kolom */}
                 <View style={styles.section}>
-                    <Text style={styles.title}>MACHINE</Text>
+                    <Text style={styles.title}>DETAILS</Text>
                     <View style={styles.machineContainer}>
                         {data.machines.reduce((acc, machine, index) => {
-                            // Jika index genap, buat pasangan dengan item berikutnya (jika ada)
+                            // Jika index genap , buat pasangan dengan item berikutnya (jika ada)
                             if (index % 2 === 0) {
                                 acc.push([machine, data.machines[index + 1] || null]);
                             }
@@ -146,9 +152,17 @@ const GeneratePDF = ({ data }) => {
                                 <View style={styles.col}>
                                     {leftMachine && (
                                         <View style={styles.machineBox}>
-                                            <Text style={styles.text}>Model : {leftMachine.model}</Text>
-                                            <Text style={styles.text}>Serial Number : {leftMachine.serialNumber}</Text>
-                                            <Text style={styles.text}>Problem : {leftMachine.problem}</Text>
+                                            {leftMachine?.machine && (
+                                                <>
+                                                    <Text style={styles.title}>MACHINE</Text>
+                                                    <Text style={styles.text}><Text style={styles.textBold}>Name</Text> : {leftMachine?.machine?.name}</Text>
+                                                    <Text style={styles.text}><Text style={styles.textBold}>Model</Text> : {leftMachine?.machine?.model}</Text>
+                                                    <Text style={styles.text}><Text style={styles.textBold}>Serial Number</Text> : {leftMachine?.machine?.sn}</Text>
+                                                </>
+                                            )}
+
+                                            <Text style={styles.text}><Text style={styles.textBold}>Job Description</Text> : {leftMachine?.jobdesc}</Text>
+                                            <Text style={styles.text}><Text style={styles.textBold}>Notes</Text> : {leftMachine?.notes}</Text>
                                         </View>
                                     )}
                                 </View>
@@ -157,9 +171,18 @@ const GeneratePDF = ({ data }) => {
                                 <View style={styles.col}>
                                     {rightMachine && (
                                         <View style={styles.machineBox}>
-                                            <Text style={styles.text}>Model : {rightMachine.model}</Text>
-                                            <Text style={styles.text}>Serial Number : {rightMachine.serialNumber}</Text>
-                                            <Text style={styles.text}>Problem : {rightMachine.problem}</Text>
+                                            {rightMachine?.machine && (
+                                                <>
+                                                    <Text style={styles.title}>MACHINE</Text>
+                                                    <Text style={styles.text}><Text style={styles.textBold}>Name</Text> : {rightMachine?.machine?.name}</Text>
+                                                    <Text style={styles.text}><Text style={styles.textBold}>Model</Text> : {rightMachine?.machine?.model}</Text>
+                                                    <Text style={styles.text}><Text style={styles.textBold}>Serial Number</Text> : {rightMachine?.machine?.sn}</Text>
+                                                </>
+                                            )}
+
+                                            <Text style={styles.text}><Text style={styles.textBold}>Job Description</Text> : {rightMachine?.jobdesc}</Text>
+                                            <Text style={styles.text}><Text style={styles.textBold}>Notes</Text> : {rightMachine?.notes}</Text>
+
                                         </View>
                                     )}
                                 </View>
@@ -172,7 +195,7 @@ const GeneratePDF = ({ data }) => {
                 {/* Purpose of visit Pekerjaan */}
                 <View style={styles.section}>
                     <Text style={styles.title}>PURPOSE OF VISIT</Text>
-                    <Text style={styles.text}>{data.visit_purpose}</Text>
+                    <Text style={styles.text}>{data.purposeOfVisit.name}</Text>
                 </View>
 
                 {/* Suggestion & Feedback Pekerjaan */}
