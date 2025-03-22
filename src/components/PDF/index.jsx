@@ -201,7 +201,7 @@ const GeneratePDF = ({ data }) => {
                 {/* Suggestion & Feedback Pekerjaan */}
                 <View style={styles.section}>
                     <Text style={styles.title}>SUGGESTION & FEEDBACK</Text>
-                    <Text style={styles.text}>{data.completion}</Text>
+                    <Text style={styles.text}>{data.feedback}</Text>
                 </View>
 
                 {/* Signature */}

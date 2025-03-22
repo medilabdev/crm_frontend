@@ -122,8 +122,6 @@ const ActivityTechnician = () => {
             name: <><FontAwesomeIcon icon={faExclamationCircle} className="me-2" /> Action</>,
             width: "100px",
             selector: row => {
-                console.log(row);
-
                 const data = {
                     logo: Logo,
                     technician: {
@@ -144,7 +142,8 @@ const ActivityTechnician = () => {
                         name: row.signature_name,
                         signature: `${process.env.REACT_APP_BACKEND_URL}/assets/technician-ticket/signatures/${row.ulid}`
                     },
-                    status: row.status
+                    status: row.status,
+                    feedback: row.feedback
                 };
 
                 return (

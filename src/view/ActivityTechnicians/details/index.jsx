@@ -31,6 +31,7 @@ const DetailActivity = () => {
     const technicianAuth = localStorage.getItem('uid');
     const [workingStarted, setWorkingStarted] = useState(null);
     const [customerName, setCustomerName] = useState("");
+    const [customerFeedback, setCustomerFeedback] = useState("")
 
     const [drafts, setDrafts] = useState({
         detail_uid: uid, // Gunakan id_detail jika ada, jika tidak buat random
@@ -85,6 +86,10 @@ const DetailActivity = () => {
 
     }
 
+    const handleInputFeedback = (e) => {
+        setCustomerFeedback(e.target.value)
+    }
+
     // handle purpose change
     const handlePurposeChange = (event) => {
         setSelectedPurpose(event.target.value);
@@ -102,11 +107,17 @@ const DetailActivity = () => {
         formData.append("_method", "PATCH");
         formData.append("status", conclusion);
 
+
         if (signatureImage) {
             formData.append("signature[file]", signatureImage)
             formData.append("signature[name]", customerName)
         };
 
+        if (customerFeedback) {
+            console.log("clclcl");
+
+            formData.append("feedback", customerFeedback);
+        }
 
         if (sections.length > 0) {
             sections.forEach((item, index) => {
@@ -117,6 +128,12 @@ const DetailActivity = () => {
                 if (item.ulid) {
                     formData.append(`details[${index}][ulid]`, item.ulid || "");
                 }
+
+                if (item.ulid) {
+                    formData.append(`details[${index}][ulid]`, item.ulid || "");
+                }
+
+
 
                 formData.append(`details[${index}][jobdesc]`, item.jobdesc || "");
                 formData.append(`details[${index}][notes]`, item.notes === null || item.notes === undefined ? "" : String(item.notes));
@@ -419,6 +436,14 @@ const DetailActivity = () => {
             setSelectedConclusion(technicianDetailData.status)
         };
 
+        if (technicianDetailData.signature_name) {
+            setCustomerName(technicianDetailData.signature_name)
+        }
+
+        if (technicianDetailData.feedback) {
+            setCustomerFeedback(technicianDetailData.feedback)
+        }
+
         if (technicianDetailData.started_at) {
             setWorkingStarted(technicianDetailData.started_at)
         }
@@ -669,9 +694,13 @@ const DetailActivity = () => {
 
                             {signatureClient === "yes" && (
                                 <>
-                                    <div className="mt-4">
+                                    <div className="mt-4 mb-3">
                                         <label htmlFor="" className='fw-bolder mb-2' style={{ fontSize: "1rem" }}>Customer Name</label>
-                                        <input type="text" className='form-control' name="customer_name" onChange={(e) => handleInput(e)} />
+                                        <input type="text" className='form-control' name="customer_name" value={customerName} onChange={(e) => handleInput(e)} />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label htmlFor="" className='fw-bolder mb-2' style={{ fontSize: "1rem" }}>Customer Feedback</label>
+                                        <textarea className='form-control' name="customer_feedback" value={customerFeedback} onChange={(e) => handleInputFeedback(e)} />
                                     </div>
 
                                     <div className="d-flex flex-column align-items-center gap-4 p-4 border mt-3 w-100">
@@ -680,6 +709,7 @@ const DetailActivity = () => {
                                                 ref={sigCanvas}
                                                 penColor="black"
                                                 canvasProps={{ className: "signature-canvas" }}
+                                                className="w-100"
                                             />
                                         </div>
 
