@@ -35,14 +35,19 @@ const statusOptions = [
 ]
 
 const ActivityTechnician = () => {
+    // ========= Init state ==========
     const [showFilter, setShowFilter] = useState(true);
     const [technicianData, setTechnicianData] = useState([]);
-    const urlTechnicianData = `${process.env.REACT_APP_BACKEND_URL}/technician-tickets?rel=visit-purpose,company,details,details.machine,details.technician`;
+    const [originalTechnicianData, setOriginalTechnicianData] = useState([]);
     const token = localStorage.getItem('token');
     const [statusTicket, setStatusTicket] = useState("");
     const [modalData, setModalData] = useState(null);
     const [showModal, setShowModal] = useState(false);
+    const [filter, setFilter] = useState("");
+    const [companyData, setCompanyData] = useState([])
+    const [filterData, setFilterData] = useState([])
 
+    // ====== handle input ===========
     const handleShowModal = (data) => {
         setModalData(data)
         setStatusTicket(data.status);
@@ -110,13 +115,7 @@ const ActivityTechnician = () => {
         })
     }
 
-    const options = [
-        { value: 'PT. Prima Indo Medilab', label: 'PT. Prima Indo Medilab' },
-        { value: 'PT. Interskala Sehat Sejahtera', label: 'PT. Interskala Sehat Sejahtera' },
-    ];
-
-
-    // icon
+    // column datatable
     const columns = [
         {
             name: <><FontAwesomeIcon icon={faExclamationCircle} className="me-2" /> Action</>,
@@ -251,14 +250,50 @@ const ActivityTechnician = () => {
         setShowFilter(prevState => !prevState);
     };
 
+    const handleApplyFilter = () => {
+        setTechnicianData(filterData)
+    }
+
+    const handleClearFilter = () => {
+        setFilter("");
+        setFilterData([]);
+        setTechnicianData(originalTechnicianData);
+    }
+
+    const handleFilterData = async (e) => {
+        const urlFilter = `${process.env.REACT_APP_BACKEND_URL}/technician-tickets?company=${e.value}&rel=visit-purpose,company,details,details.machine,details.technician`;
+
+        const response = await fetchDataApi(urlFilter, token);
+        if (response) setFilterData(response.data.data);
+    }
+
     useEffect(() => {
         const fetchDataListTechnician = async () => {
+            const urlTechnicianData = `${process.env.REACT_APP_BACKEND_URL}/technician-tickets?rel=visit-purpose,company,details,details.machine,details.technician`;
             const response = await fetchDataApi(urlTechnicianData, token);
-            if (response) setTechnicianData(response.data.data);
+            if (response) {
+                setTechnicianData(response.data.data)
+                setOriginalTechnicianData(response.data.data)
+            };
         }
 
+        const fetchDataCompany = async () => {
+            const urlCompanyData = `${process.env.REACT_APP_BACKEND_URL}/companies`;
+            const response = await fetchDataApi(urlCompanyData, token);
+            if (response) setCompanyData(setDataCompany(response.data.data));
+        }
+
+        fetchDataCompany()
         fetchDataListTechnician()
     }, []);
+
+    const setDataCompany = (data) => {
+        return data.map(item => ({
+            value: item.uid,
+            label: item.name
+        }));
+    }
+
 
     // fetch data api
     const fetchDataApi = useCallback(async (url, token) => {
@@ -321,6 +356,8 @@ const ActivityTechnician = () => {
                                                     type="text"
                                                     id="search"
                                                     placeholder="Search..."
+                                                    value={filter}
+                                                    onChange={e => setFilter(e.target.value)}
                                                 />
                                             </InputGroup>
                                         </div>
@@ -345,18 +382,19 @@ const ActivityTechnician = () => {
                                         <Form.Label>Select Owner</Form.Label>
                                         <Select
                                             placeholder="Select Owner"
-                                            options={options}
-                                        // onChange={(e) => setResultOwner(e)}
+                                            options={companyData}
+                                            onChange={(e) => handleFilterData(e)}
                                         />
                                     </Form.Group>
 
                                 </div>
-                                <button className="btn btn-primary" style={{ width: "100%", borderRadius: "3px" }}>Apply Filter</button>
+                                <button type="button" className="btn btn-primary mb-3" style={{ width: "100%", borderRadius: "3px" }} onClick={() => handleApplyFilter()}>Apply Filter</button>
+                                <button type="button" className="btn btn-danger" style={{ width: "100%", borderRadius: "3px" }} onClick={() => handleClearFilter()}>Clear</button>
 
                             </div>
 
                             <div className={showFilter ? "col-12" : "col-md-9"}>
-                                <Datatables columns={columns} data={technicianData} />
+                                <Datatables columns={columns} data={technicianData} filterText={filter} />
                             </div>
                         </div>
                     </Card>

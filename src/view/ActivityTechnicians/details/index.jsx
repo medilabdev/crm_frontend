@@ -343,7 +343,7 @@ const DetailActivity = () => {
                 const formData = new FormData();
 
                 formData.append('_method', 'PATCH')
-                formData.append('status', 'In Progress')
+                formData.append('status', 'Queued')
                 formData.append('started_at', moment.utc(Date.now()).format('YYYY-MM-DD HH:mm'))
 
                 axios.post(`${process.env.REACT_APP_BACKEND_URL}/technician-tickets/${ulidParams}`, formData, {
@@ -584,10 +584,10 @@ const DetailActivity = () => {
                                     />
                                 </InputGroup>
 
-                                {technicianDetailData.technician_ticket_details && technicianDetailData.technician_ticket_details.length > 0 ? (technicianDetailData.technician_ticket_details[index].technician_ticket_photos && technicianDetailData.technician_ticket_details[index].technician_ticket_photos.length > 0 ? (
+                                {technicianDetailData?.technician_ticket_details && technicianDetailData?.technician_ticket_details?.length > 0 ? (technicianDetailData?.technician_ticket_details[index]?.technician_ticket_photos && technicianDetailData?.technician_ticket_details[index]?.technician_ticket_photos?.length > 0 ? (
                                     <div className="row my-3">
                                         <label htmlFor="" className='fw-bolder mb-2' style={{ fontSize: '1rem' }}>Photos</label>
-                                        {technicianDetailData.technician_ticket_details[index].technician_ticket_photos.map((item, i) => {
+                                        {technicianDetailData?.technician_ticket_details[index]?.technician_ticket_photos?.map((item, i) => {
                                             const fileName = item.photo_path;
                                             const parts = fileName.split('.')
                                             const nameWithoutExt = parts.slice(0, -1).join('.'); // Gabungkan kembali tanpa ekstensi

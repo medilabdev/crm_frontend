@@ -17,10 +17,29 @@ const customStyles = {
     },
 };
 
-const Datatables = ({ columns, data }) => {
+const Datatables = ({ columns, data, filterText }) => {
+    const filteredData = data.filter(item => {
+        const companyName = item.company?.name?.toLowerCase() || '';
+        const visitPurposeName = item.visit_purpose?.name?.toLowerCase() || '';
+        const status = item.status.toLowerCase() || '';
+        const keyword = filterText.toLowerCase();
+
+        return companyName.includes(keyword) || visitPurposeName.includes(keyword) || status.includes(keyword);
+    });
+
     return (
-        <DataTable columns={columns} data={data} pagination fixedHeader={true} // Pastikan properti ini berupa boolean
-            fixedHeaderScrollHeight="500px" customStyles={customStyles} highlightOnHover pointerOnHover />
+        <DataTable
+            columns={columns}
+            data={filteredData}
+            pagination
+            fixedHeader
+            fixedHeaderScrollHeight="500px"
+            customStyles={customStyles}
+            highlightOnHover
+            pointerOnHover
+            noDataComponent="Data tidak ditemukan"
+            persistTableHead
+        />
     )
 }
 
