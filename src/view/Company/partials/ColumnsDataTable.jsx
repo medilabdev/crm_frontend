@@ -19,12 +19,11 @@ export const CustomStyles = {
   headCells: {
    style: {
      fontSize: "2rem", // Sesuaikan ukuran font header
-     fontWeight: "bold", // Atur agar teks lebih tebal
+     fontWeight: "semibold", // Atur agar teks lebih tebal
      textTransform: "uppercase", // Atur huruf menjadi kapital
      color: "black", // Sesuaikan warna jika perlu
      backgroundColor: "#F7F9F2", // Sesuaikan warna latar belakang header jika diperlukan
      padding: "9px 12px", // Sesuaikan padding untuk header
-     borderTop: "2px solid #CBDCEB",
    },
  },
  cells: {

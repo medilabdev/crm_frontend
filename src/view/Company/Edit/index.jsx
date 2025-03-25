@@ -608,28 +608,40 @@ const EditCompany = () => {
                     }
                 )
                 .then(async (res) => {
-                    if (machines && machines.filter(machine => machine.name.trim() !== "").length > 0) {
-                        machines.forEach((item, index) => {
-                            formDataForMachine.append(`data[${index}][company_uid]`, uid)
-                            formDataForMachine.append(`data[${index}][name]`, item.name)
-                            formDataForMachine.append(`data[${index}][model]`, item.model)
-                            formDataForMachine.append(`data[${index}][sn]`, item.sn)
-                            formDataForMachine.append(`data[${index}][type]`, item.type)
-                        })
+                    if (process.env.REACT_APP_IS_COMPANY === "iss") {
+                        if (machines && machines.filter(machine => machine.name.trim() !== "").length > 0) {
+                            machines.forEach((item, index) => {
+                                formDataForMachine.append(`data[${index}][company_uid]`, uid)
+                                formDataForMachine.append(`data[${index}][name]`, item.name)
+                                formDataForMachine.append(`data[${index}][model]`, item.model)
+                                formDataForMachine.append(`data[${index}][sn]`, item.sn)
+                                formDataForMachine.append(`data[${index}][type]`, item.type)
+                            })
 
-                        const response = await createMachine(formDataForMachine, token)
+                            const response = await createMachine(formDataForMachine, token)
 
-                        if (response.data.success) {
+                            if (response.data.success) {
+                                Swal.fire({
+                                    title: 'Sucessfully',
+                                    text: `${res.data.message} & ${response.data.message}`,
+                                    icon: "success",
+                                }).then((res) => {
+                                    if (res.isConfirmed) {
+                                        window.location.reload();
+                                    }
+                                });
+                            };
+                        } else {
                             Swal.fire({
-                                title: 'Sucessfully',
-                                text: `${res.data.message} & ${response.data.message}`,
+                                title: "Succesfully",
+                                text: res.data.message,
                                 icon: "success",
                             }).then((res) => {
                                 if (res.isConfirmed) {
                                     window.location.reload();
                                 }
                             });
-                        };
+                        }
                     } else {
                         Swal.fire({
                             title: "Succesfully",
@@ -1026,8 +1038,7 @@ const EditCompany = () => {
                                                     </span>
                                                 </span>
                                             }
-                                            className="mb-3"
-                                        >
+                                            className="mb-3">
                                             <Form.Control
                                                 type="text"
                                                 value={editCompany.address}
@@ -1481,96 +1492,98 @@ const EditCompany = () => {
                                     </Card.Body>
                                 </Card>
 
-                                <Card className="shadow">
-                                    <Card.Header>
-                                        <h6 className="fw-bold mt-2">Machines</h6>
-                                    </Card.Header>
+                                {process.env.REACT_APP_IS_COMPANY === "iss" ? (
+                                    <Card className="shadow">
+                                        <Card.Header>
+                                            <h6 className="fw-bold mt-2">Machines</h6>
+                                        </Card.Header>
 
-                                    <Card.Body>
-                                        <div className="w-100 mb-3">
-                                            <Button variant="primary" size="sm" className="w-100" onClick={() => handleButtonCreateMachine()}>
-                                                <FontAwesomeIcon icon={!isButtonCreateMachine ? faPlus : faChevronUp} className="me-2" /> {!isButtonCreateMachine ? "Add Machine" : "Hide Add Machine"}
-                                            </Button>
-                                        </div>
-
-                                        {isButtonCreateMachine && (
-                                            <>
-                                                {machines.map((machine, index) => (
-                                                    <div className="mb-5" key={index}>
-                                                        <h6 className="fw-bolder">Machine {index + 1}</h6>
-                                                        {index > 0 && (
-                                                            <Button
-                                                                variant="danger"
-                                                                size="sm"
-                                                                onClick={() => removeMachine(machine.id)}
-                                                            >
-                                                                Delete
-                                                            </Button>
-                                                        )}
-
-                                                        <hr />
-                                                        <Form.Group className="mb-3">
-                                                            <Form.Label>Name</Form.Label>
-                                                            <Form.Control
-                                                                type="text"
-                                                                name="name"
-                                                                value={machine.name}
-                                                                onChange={(e) => handleInputMachineChange(index, e)}
-                                                                placeholder="Input Machine Name"
-                                                            />
-                                                        </Form.Group>
-
-                                                        <Form.Group className="mb-3">
-                                                            <Form.Label>Model</Form.Label>
-                                                            <Form.Control
-                                                                type="text"
-                                                                name="model"
-                                                                value={machine.model}
-                                                                onChange={(e) => handleInputMachineChange(index, e)}
-                                                                placeholder="Input Model Machine"
-                                                            />
-                                                        </Form.Group>
-
-                                                        <Form.Group className="mb-3">
-                                                            <Form.Label>Serial Number</Form.Label>
-                                                            <Form.Control
-                                                                type="text"
-                                                                name="sn"
-                                                                value={machine.sn}
-                                                                onChange={(e) => handleInputMachineChange(index, e)}
-                                                                placeholder="Input Serial Number"
-                                                            />
-                                                        </Form.Group>
-
-                                                        <Form.Group className="mb-3">
-                                                            <Form.Label>Type</Form.Label>
-                                                            <Select
-                                                                options={machineOptions}
-                                                                value={machineOptions.find((e) => e.value === machine.type)}
-                                                                onChange={(selectedOption) => handleSelectTypeChange(index, selectedOption)}
-                                                                placeholder="Select Type Machine"
-                                                            />
-                                                        </Form.Group>
-                                                    </div>
-                                                ))}
-
-                                                <Button variant="success" size="sm" onClick={addMachine}>
-                                                    <FontAwesomeIcon icon={faPlus} className="me-2" /> Add Others Machine
+                                        <Card.Body>
+                                            <div className="w-100 mb-3">
+                                                <Button variant="primary" size="sm" className="w-100" onClick={() => handleButtonCreateMachine()}>
+                                                    <FontAwesomeIcon icon={!isButtonCreateMachine ? faPlus : faChevronUp} className="me-2" /> {!isButtonCreateMachine ? "Add Machine" : "Hide Add Machine"}
                                                 </Button>
-                                            </>
-                                        )}
+                                            </div>
 
-                                        <DataTable
-                                            columns={columnMachine}
-                                            data={machineData}
-                                            customStyles={customStyles}
-                                            pagination
-                                            defaultSortFieldId={1}
-                                            paginationComponentOptions={paginationComponentOptions}
-                                        />
+                                            {isButtonCreateMachine && (
+                                                <>
+                                                    {machines.map((machine, index) => (
+                                                        <div className="mb-5" key={index}>
+                                                            <h6 className="fw-bolder">Machine {index + 1}</h6>
+                                                            {index > 0 && (
+                                                                <Button
+                                                                    variant="danger"
+                                                                    size="sm"
+                                                                    onClick={() => removeMachine(machine.id)}
+                                                                >
+                                                                    Delete
+                                                                </Button>
+                                                            )}
 
-                                    </Card.Body>
-                                </Card>
+                                                            <hr />
+                                                            <Form.Group className="mb-3">
+                                                                <Form.Label>Name</Form.Label>
+                                                                <Form.Control
+                                                                    type="text"
+                                                                    name="name"
+                                                                    value={machine.name}
+                                                                    onChange={(e) => handleInputMachineChange(index, e)}
+                                                                    placeholder="Input Machine Name"
+                                                                />
+                                                            </Form.Group>
+
+                                                            <Form.Group className="mb-3">
+                                                                <Form.Label>Model</Form.Label>
+                                                                <Form.Control
+                                                                    type="text"
+                                                                    name="model"
+                                                                    value={machine.model}
+                                                                    onChange={(e) => handleInputMachineChange(index, e)}
+                                                                    placeholder="Input Model Machine"
+                                                                />
+                                                            </Form.Group>
+
+                                                            <Form.Group className="mb-3">
+                                                                <Form.Label>Serial Number</Form.Label>
+                                                                <Form.Control
+                                                                    type="text"
+                                                                    name="sn"
+                                                                    value={machine.sn}
+                                                                    onChange={(e) => handleInputMachineChange(index, e)}
+                                                                    placeholder="Input Serial Number"
+                                                                />
+                                                            </Form.Group>
+
+                                                            <Form.Group className="mb-3">
+                                                                <Form.Label>Type</Form.Label>
+                                                                <Select
+                                                                    options={machineOptions}
+                                                                    value={machineOptions.find((e) => e.value === machine.type)}
+                                                                    onChange={(selectedOption) => handleSelectTypeChange(index, selectedOption)}
+                                                                    placeholder="Select Type Machine"
+                                                                />
+                                                            </Form.Group>
+                                                        </div>
+                                                    ))}
+
+                                                    <Button variant="success" size="sm" onClick={addMachine}>
+                                                        <FontAwesomeIcon icon={faPlus} className="me-2" /> Add Others Machine
+                                                    </Button>
+                                                </>
+                                            )}
+
+                                            <DataTable
+                                                columns={columnMachine}
+                                                data={machineData}
+                                                customStyles={customStyles}
+                                                pagination
+                                                defaultSortFieldId={1}
+                                                paginationComponentOptions={paginationComponentOptions}
+                                            />
+
+                                        </Card.Body>
+                                    </Card>
+                                ) : ""}
 
                                 <Card className="shadow">
                                     <Card.Header>

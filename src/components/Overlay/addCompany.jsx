@@ -308,6 +308,7 @@ const OverlayAddCompany = ({ visible, onClose }) => {
               onChange={handleInputChange}
             />
           </Form.Group>
+          {process.env.REACT_APP_BACKEND_URL === "https://api-crm-iss.medilabjakarta.id/api" ?  
           <Form.Group className="mb-3" controlId="formBasicEmail">
             <Form.Label>
               Type Hospital <span className="text-danger fs-5">*</span>
@@ -317,6 +318,7 @@ const OverlayAddCompany = ({ visible, onClose }) => {
               onChange={(e) => handleInputTypeHospital(e)}
             />
           </Form.Group>
+          : ''}
           <Form.Group>
             <Form.Label>
               Telephone <span className="text-danger fs-5">*</span>
