@@ -8,7 +8,7 @@ import './detail.css'
 import { Breadcrumb, Button, Card, Form, InputGroup } from 'react-bootstrap'
 import Select from "react-select"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faBuilding, faClock, faEye, faPaperPlane, faPencilSquare, faPlus, faSave, faTrash } from '@fortawesome/free-solid-svg-icons'
+import { faBuilding, faClock, faEye, faPaperPlane, faPencilSquare, faPlay, faPlus, faSave, faStop, faTrash } from '@fortawesome/free-solid-svg-icons'
 import FileUpload from '../../../components/FileUpload'
 import { useParams } from 'react-router-dom'
 import Swal from "sweetalert2";
@@ -19,7 +19,7 @@ import moment from 'moment/moment'
 
 const DetailActivity = () => {
     const { uid } = useParams();
-    const [sections, setSections] = useState([{ id: 1, ulid: '', machine: '', jobdesc: '', notes: '', photos: [] }]);
+    const [sections, setSections] = useState([{ id: 1, ulid: '', machine: '', jobdesc: '', notes: '', photos: [], progress: [] }]);
     const [purposeOfVisitData, setPurposeOfVisitData] = useState([]);
     const [selectedPurpose, setSelectedPurpose] = useState('');
     const [technicianDetailData, setTechnicianDetailData] = useState([]);
@@ -49,7 +49,7 @@ const DetailActivity = () => {
 
     // url  
     const urlVisitPurpose = `${process.env.REACT_APP_BACKEND_URL}/visit-purposes`;
-    const urlTechnicianDetail = `${process.env.REACT_APP_BACKEND_URL}/technician-tickets/${ulidParams}?rel=details,machines,company,visit-purpose,details.photos`;
+    const urlTechnicianDetail = `${process.env.REACT_APP_BACKEND_URL}/technician-tickets/${ulidParams}?rel=details,machines,company,visit-purpose,details.photos,details.progress`;
     const urlMachinesByCompany = `${process.env.REACT_APP_BACKEND_URL}/machines?company=${company}`
     const token = localStorage.getItem("token");
 
@@ -114,8 +114,6 @@ const DetailActivity = () => {
         };
 
         if (customerFeedback) {
-            console.log("clclcl");
-
             formData.append("feedback", customerFeedback);
         }
 
@@ -126,17 +124,17 @@ const DetailActivity = () => {
                 }
 
                 if (item.ulid) {
-                    formData.append(`details[${index}][ulid]`, item.ulid || "");
+                    formData.append(`details[${index}][ulid]`, item.ulid || " ");
                 }
 
-                if (item.ulid) {
-                    formData.append(`details[${index}][ulid]`, item.ulid || "");
+                if (item.jobdesc) {
+                    formData.append(`details[${index}][jobdesc]`, item.jobdesc === null || item.jobdesc === undefined ? " " : String(item.jobdesc));
                 }
 
+                if (item.notes) {
+                    formData.append(`details[${index}][notes]`, item.notes === null || item.notes === undefined ? " " : String(item.notes));
+                }
 
-
-                formData.append(`details[${index}][jobdesc]`, item.jobdesc || "");
-                formData.append(`details[${index}][notes]`, item.notes === null || item.notes === undefined ? "" : String(item.notes));
                 formData.append(`details[${index}][technician_user_uid]`, technicianAuth);
 
                 if (item.photos.length > 0) {
@@ -180,7 +178,7 @@ const DetailActivity = () => {
 
             Swal.fire({
                 title: "Error!",
-                text: `${error.response.data.data.message}`,
+                text: `${error.response.data.message}`,
                 icon: "error",
                 confirmButtonText: "OK",
             });
@@ -216,7 +214,7 @@ const DetailActivity = () => {
     }
 
     const addSection = () => {
-        setSections(prevSections => [...prevSections, { id: prevSections.length + 1, machine: '', jobdesc: '', notes: '', photos: [] }]);
+        setSections(prevSections => [...prevSections, { id: prevSections.length + 1, machine: '', jobdesc: '', notes: '', photos: [], progress: [] }]);
     };
 
     const removeSection = (id) => {
@@ -378,6 +376,138 @@ const DetailActivity = () => {
         });
     }
 
+    // handle start task
+    const handleStartTask = (ulid, index, sections) => {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'Do you want to start this task?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, start it!',
+            cancelButtonText: 'No, cancel',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: "Process...",
+                    text: "Please wait while we process your request.",
+                    allowEscapeKey: false,
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                const formData = new FormData();
+
+                formData.append('_method', 'PATCH')
+                sections.forEach((item, i) => {
+                    if (item.ulid === ulid) {
+                        formData.append(`details[${index}][ulid]`, ulid);
+                        formData.append(`details[${index}][progress][0][start]`, true);
+                    } else {
+                        formData.append(`details[${i}][ulid]`, item.ulid || "");
+                    }
+                })
+
+                axios.post(`${process.env.REACT_APP_BACKEND_URL}/technician-tickets/${ulidParams}`, formData, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }).then(response => {
+                    if (response.data.data) {
+                        Swal.fire({
+                            title: "Success!",
+                            text: response.data.data.alerts.success.message,
+                            icon: "success",
+                            confirmButtonText: "OK",
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    }
+                }).catch(err => {
+                    console.error(err.response.data);
+
+                    Swal.fire({
+                        title: "Error!",
+                        text: "Failed to submit data. Please try again.",
+                        icon: "error",
+                        confirmButtonText: "OK",
+                    });
+                })
+            } else if (result.isDismissed) {
+                // Aksi jika user menekan 'Cancel'
+                Swal.fire('Cancelled', 'The work has not started.', 'info');
+            }
+        });
+    }
+
+    // handle end task
+    const handleEndTask = (ulid, index, sections) => {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'Do you want to Finish this task?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, start it!',
+            cancelButtonText: 'No, cancel',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: "Process...",
+                    text: "Please wait while we process your request.",
+                    allowEscapeKey: false,
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                const formData = new FormData();
+
+                formData.append('_method', 'PATCH')
+                formData.append(`details[${index}][ulid]`, ulid);
+                console.log(sections);
+
+                sections.forEach((item, i) => {
+                    if (item.ulid === ulid) {
+                        formData.append(`details[${index}][progress][0][finish]`, true);
+                    } else {
+                        formData.append(`details[${i}][ulid]`, item.ulid || "");
+                    }
+                });
+
+                axios.post(`${process.env.REACT_APP_BACKEND_URL}/technician-tickets/${ulidParams}`, formData, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }).then(response => {
+                    if (response.data.data) {
+                        Swal.fire({
+                            title: "Success!",
+                            text: response.data.data.alerts.success.message,
+                            icon: "success",
+                            confirmButtonText: "OK",
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    }
+                }).catch(err => {
+                    console.error(err.response.data);
+
+                    Swal.fire({
+                        title: "Error!",
+                        text: "Failed to submit data. Please try again.",
+                        icon: "error",
+                        confirmButtonText: "OK",
+                    });
+                })
+            } else if (result.isDismissed) {
+                // Aksi jika user menekan 'Cancel'
+                Swal.fire('Cancelled', 'The work has not started.', 'info');
+            }
+        });
+    }
+
     const handleEditData = () => {
         setIsEdit(!isEdit);
     }
@@ -411,6 +541,7 @@ const DetailActivity = () => {
             setJobDescData(technicianDetailData.jobdesc);
         }
 
+
         if (technicianDetailData?.machines && technicianDetailData?.machines.length > 0 || technicianDetailData.technician_ticket_details && technicianDetailData.technician_ticket_details.length > 0) {
             setSections(prevSections => {
                 // Buat mapping dari ID mesin lama ke foto yang sudah diupload
@@ -427,6 +558,7 @@ const DetailActivity = () => {
                     jobdesc: item.jobdesc,
                     notes: item.notes,
                     photos: existingPhotosMap[item.machine] || [], // Ambil foto lama jika ada
+                    progress: item.technician_ticket_progress || [],
                 }));
             });
         }
@@ -544,6 +676,12 @@ const DetailActivity = () => {
                     <Form onSubmit={handleSubmit}>
                         {sections.map((section, index) => (
                             <Card className="shadow-sm p-4 mb-4" key={section.id}>
+                                <div className="mb-3 d-flex gap-3">
+                                    <Button type="button" variant="primary" onClick={() => handleStartTask(section.ulid, index, sections)} disabled={section.progress.length > 0 && section.progress[0].started_at ? true : false}><FontAwesomeIcon icon={faPlay} className='me-2' /> Start Task</Button>
+
+                                    <Button type="button" variant="danger" onClick={() => handleEndTask(section.ulid, index, sections)} disabled={section.progress.length > 0 && section.progress[0].finished_at ? true : false}><FontAwesomeIcon icon={faStop} className='me-2' /> Finish Task</Button>
+                                </div>
+
                                 <InputGroup className="custom-textarea mb-3">
                                     <InputGroup.Text className="input-label">Machine</InputGroup.Text>
                                     <Select

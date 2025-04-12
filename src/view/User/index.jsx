@@ -46,8 +46,8 @@ const User = () => {
   const [totalRows, setTotalRows] = useState(0)
   const [pending, setPending] = useState(true)
   const [pagination, setPagination] = useState({
-    page:1,
-    limit:10
+    page: 1,
+    limit: 10
   });
   const handleChangePage = (page) => {
     setPagination((e) => ({ ...e, page }));
@@ -59,19 +59,19 @@ const User = () => {
   const getData = async (token, search, pagination, retryCount = 0) => {
     try {
       const params = {}
-      if(search){
+      if (search) {
         params.search = search
       }
       params.page = pagination.page;
       params.limit = pagination.limit;
       const response = await axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        params:params
-      })
-      
+        .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          params: params
+        })
+
       setData(response.data?.data)
       setTotalRows(response.data?.pagination?.totalData);
     } catch (error) {
@@ -79,7 +79,7 @@ const User = () => {
         localStorage.clear();
         window.location.href = "/login";
       }
-      else if(error.response && error.response.status === 429){
+      else if (error.response && error.response.status === 429) {
         const maxRetries = 3;
         if (retryCount < maxRetries) {
           setTimeout(() => {
@@ -94,23 +94,23 @@ const User = () => {
     }
   };
 
-  
+
 
   const getAllRoles = async (token, retryCount = 0) => {
     try {
       const response = await axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/roles`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+        .get(`${process.env.REACT_APP_BACKEND_URL}/roles`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
       setRoles(response.data.data)
     } catch (error) {
       if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
         localStorage.clear();
         window.location.href = "/login";
       }
-      else if(error.response && error.response.status === 429){
+      else if (error.response && error.response.status === 429) {
         const maxRetries = 3;
         if (retryCount < maxRetries) {
           setTimeout(() => {
@@ -125,21 +125,21 @@ const User = () => {
     }
   };
 
-  const getPrimaryTeam = async(token, retryCount = 0) => {
+  const getPrimaryTeam = async (token, retryCount = 0) => {
     try {
       const resposne = await axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/teams`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+        .get(`${process.env.REACT_APP_BACKEND_URL}/teams`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
       setPrimary(resposne.data.data)
     } catch (error) {
       if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
         localStorage.clear();
         window.location.href = "/login";
       }
-      else if(error.response && error.response.status === 429){
+      else if (error.response && error.response.status === 429) {
         const maxRetries = 3;
         if (retryCount < maxRetries) {
           setTimeout(() => {
@@ -154,21 +154,21 @@ const User = () => {
     }
   };
 
-  const getAllUser = async(token, retryCount = 0) => {
+  const getAllUser = async (token, retryCount = 0) => {
     try {
       const response = await axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+        .get(`${process.env.REACT_APP_BACKEND_URL}/users`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
       setUser(response.data.data)
     } catch (error) {
       if (error.response.status === 401 && error.response.data.message === "Unauthenticated.") {
         localStorage.clear();
         window.location.href = "/login";
       }
-      else if(error.response && error.response.status === 429){
+      else if (error.response && error.response.status === 429) {
         const maxRetries = 3;
         if (retryCount < maxRetries) {
           setTimeout(() => {
@@ -183,10 +183,10 @@ const User = () => {
     }
   };
 
-  const getAllPosition = async(token, retryCount = 0) => {
+  const getAllPosition = async (token, retryCount = 0) => {
     try {
-      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/positions`, {
-        headers:{
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/positions?limit=1000`, {
+        headers: {
           Authorization: `Bearer ${token}`
         }
       })
@@ -196,7 +196,7 @@ const User = () => {
         localStorage.clear();
         window.location.href = "/login";
       }
-      else if(error.response && error.response.status === 429){
+      else if (error.response && error.response.status === 429) {
         const maxRetries = 3;
         if (retryCount < maxRetries) {
           setTimeout(() => {
@@ -211,9 +211,9 @@ const User = () => {
     }
   };
 
- 
 
-  const fetchData = async() => {
+
+  const fetchData = async () => {
     try {
       setPending(true)
       await getData(token, search, pagination);
@@ -222,14 +222,14 @@ const User = () => {
       await getAllUser(token);
       await getAllPosition(token);
     } catch (error) {
-      console.error("error" , error);
-    }finally{
+      console.error("error", error);
+    } finally {
       setPending(false)
     }
   }
 
   useEffect(() => {
-  fetchData()
+    fetchData()
   }, [token, search, pagination]);
 
   // show redirect
@@ -246,33 +246,33 @@ const User = () => {
       selector: (row) => (
         <a href={`users/${row.uid}`} className="text-decoration-none">
           <div className="image-name">
-          <div className="d-flex align-items-center">
-            <img
-              src={row.image ? row.image : IconImage}
-              alt={row.image}
-              className="rounded-circle"
-              style={{
-                width: "40px",
-                height: "40px",
-                marginRight: "10px",
-              }}
-            />
-            <div className="mt-3">
-              <a href={`users/${row.uid}`} className="fw-semibold text-decoration-none" style={{ whiteSpace: "normal", color:"black", fontWeight:"080"}}>{row.name}</a>
-              <p
-                className="mt-1"
+            <div className="d-flex align-items-center">
+              <img
+                src={row.image ? row.image : IconImage}
+                alt={row.image}
+                className="rounded-circle"
                 style={{
-                  fontSize: "11px",
-                  color:"black"
-                }}A
-              >
-                {row.email}
-              </p>
+                  width: "40px",
+                  height: "40px",
+                  marginRight: "10px",
+                }}
+              />
+              <div className="mt-3">
+                <a href={`users/${row.uid}`} className="fw-semibold text-decoration-none" style={{ whiteSpace: "normal", color: "black", fontWeight: "080" }}>{row.name}</a>
+                <p
+                  className="mt-1"
+                  style={{
+                    fontSize: "11px",
+                    color: "black"
+                  }} A
+                >
+                  {row.email}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
         </a>
-        
+
       ),
       left: true,
       width: "270px",
@@ -329,7 +329,7 @@ const User = () => {
   ];
 
   function handleFilter(event) {
-    if(event.key === "Enter"){
+    if (event.key === "Enter") {
       const value = event.target.value.toLowerCase()
       setSearch(value)
     }

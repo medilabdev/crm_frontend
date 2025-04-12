@@ -31,7 +31,7 @@ const Position = () => {
   };
   const getPosition = () => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/positions`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}/positions?limit=1000`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -182,7 +182,7 @@ const Position = () => {
             <Card className="shadow">
               <div className="container">
                 <div className="row">
-                <SidebarProperties />
+                  <SidebarProperties />
                   <div className="col-md-9">
                     <div>
                       <button
@@ -195,7 +195,7 @@ const Position = () => {
                       <button
                         className="btn btn-danger mt-5 ms-4"
                         style={{ fontSize: "0.85rem" }}
-                        // onClick={handleSubmitDeleteSelect}
+                      // onClick={handleSubmitDeleteSelect}
                       >
                         Delete Position
                       </button>
