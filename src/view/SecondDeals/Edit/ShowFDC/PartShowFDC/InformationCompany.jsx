@@ -2,6 +2,8 @@ import React from 'react'
 import { Card, Table } from 'react-bootstrap'
 
 const InformationCompany = ({ show, CompanyName }) => {
+  console.log(show);
+  
   return (
     <>
     <Card className="mb-3 uniform-spacing col-md">
@@ -12,7 +14,7 @@ const InformationCompany = ({ show, CompanyName }) => {
               <tr>
                 <td style={{ width: "350px" }}>Nama Perusahaan</td>
                 <td style={{ width: "5px", textAlign: "center" }}>:</td>
-                <td> {CompanyName || "-"}</td>
+                <td> {show?.company?.name || "-"}</td>
               </tr>
               <tr>
                 <td style={{ width: "350px" }}>Nama Pemilik Perusahaan</td>

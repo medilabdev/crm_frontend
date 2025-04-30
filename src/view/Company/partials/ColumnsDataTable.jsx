@@ -20,7 +20,6 @@ export const CustomStyles = {
    style: {
      fontSize: "2rem", // Sesuaikan ukuran font header
      fontWeight: "semibold", // Atur agar teks lebih tebal
-     textTransform: "uppercase", // Atur huruf menjadi kapital
      color: "black", // Sesuaikan warna jika perlu
      backgroundColor: "#F7F9F2", // Sesuaikan warna latar belakang header jika diperlukan
      padding: "9px 12px", // Sesuaikan padding untuk header
@@ -61,11 +60,8 @@ const ColumnsDataTable = ({
         <a
           href={`/company/${row.uid}/edit`}
           target="_blank"
-          className="image-name text-decoration-none fw-semibold"  
-          style={{
-            whiteSpace: "normal",
-            color: "#191919",
-          }}
+          className="image-name text-decoration-none"  
+          style={{ whiteSpace: "normal", color: "black", fontWeight: 600 ,fontFamily:"Nunito Sans, sans-serif", fontSize:"0.9rem" }}
         >
               {row.name}
           
@@ -144,22 +140,41 @@ const ColumnsDataTable = ({
         </div>
       ),
       sortable: true,
-      right: true,
+      center: true,
       hide: 'md'
       // width: "130px",
     },
     {
       id: 3,
       name: "Type",
-      selector: (row) => (
-        <div className="badge bg-primary fw-medium">
-          {row?.company_type?.name}
-        </div>
-      ),
-      sortable: true,
-      width: "150px",
-      hide: 'md'
+      selector: (row) => {
+        const type = row?.company_type?.name ?? "Unknown";
+    
+        // Mapping warna berdasarkan tipe
+        const getBadgeClass = (type) => {
+          switch (type.toLowerCase()) {
+            case "badan":
+              return "btn btn-danger btn-sm fw-medium";
+            case "cabang":
+              return "btn btn-success btn-sm fw-medium";
+            case "faskes":
+              return "btn btn-warning btn-sm fw-medium text-dark";
+            case "distributor":
+              return "btn btn-info btn-sm fw-medium";
+            default:
+              return "btn btn-secondary btn-sm fw-medium";
+          }
+        };
+    
+        return (
+          <div className={getBadgeClass(type)}>
+            {type}
+          </div>
+        );
+      },
+      center: true,
     },
+    
     {
       id: 4,
       name: "Owner (Created/Updated)",
@@ -198,34 +213,36 @@ const ColumnsDataTable = ({
         );
       },
       sortable: true,
-      width: "200px",
+      width: "210px",
       hide:"md",
     },
-
     {
       id: 6,
       name: "Action",
       selector: (row) => (
-        <div className="action-icon">
+        <div className="d-flex gap-2 justify-content-center">
           <a
-            className="icon-button text-dark"
-            title="edit"
             href={`/company/${row.uid}/edit`}
             target="_blank"
+            className="btn btn-outline-primary btn-sm d-flex align-items-center"
+            title="Edit"
           >
-            <FontAwesomeIcon icon={faPenToSquare} className="fs-6" />
+            <FontAwesomeIcon icon={faPenToSquare}/>
+            
           </a>
           <button
-            className="ms-2 icon-button"
-            title="delete"
             onClick={() => setDeleteCompany(row.uid)}
+            className="btn btn-outline-danger btn-sm d-flex align-items-center"
+            title="Delete"
           >
-            <FontAwesomeIcon icon={faTrash} className="fs-6" />
+            <FontAwesomeIcon icon={faTrash} />
+        
           </button>
         </div>
       ),
-      // width: "150px",
-    },
+      width: "180px",
+    }
+    
   ];
   const ExpandedComponent = ({data}) => {
     const associatedContact = data?.associate?.slice(0, 3)
@@ -339,3 +356,4 @@ const ColumnsDataTable = ({
 };
 
 export default ColumnsDataTable;
+

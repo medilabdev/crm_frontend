@@ -10,6 +10,7 @@ import {
     Col,
     FloatingLabel,
     Form,
+    Row,
 } from "react-bootstrap";
 import ReactQuill from "react-quill";
 import { useParams } from "react-router-dom";
@@ -580,9 +581,9 @@ const EditCompany = () => {
         }
         formData.append("_method", "put");
         // console.log("FormData Content:");
-        for (const pair of formData.entries()) {
+        // for (const pair of formData.entries()) {
             // console.log(pair[0] + ": " + pair[1]);
-        }
+        // }
 
         setButtonDisable(true);
 
@@ -833,8 +834,8 @@ const EditCompany = () => {
             if (res.isConfirmed) {
                 const formData = new FormData();
                 formData.append("associate_uid", uid);
-                axios
-                    .post(
+                try {
+                    axios.post(
                         `${process.env.REACT_APP_BACKEND_URL}/companies/delete/item/contact`,
                         formData,
                         {
@@ -846,6 +847,11 @@ const EditCompany = () => {
                     .then(() => {
                         window.location.reload();
                     });
+                } catch (error) {
+                    console.log(error);
+                    
+                }
+              
             }
         });
     };
@@ -900,7 +906,6 @@ const EditCompany = () => {
                                     <button
                                         className="btn btn-primary me-2"
                                         type="submit"
-                                        disabled={isButtonDisable}
                                     >
                                         Save Changes
                                     </button>
@@ -1041,6 +1046,7 @@ const EditCompany = () => {
                                             className="mb-3">
                                             <Form.Control
                                                 type="text"
+                                                name="address"
                                                 value={editCompany.address}
                                                 onChange={handleInputChange}
                                                 placeholder="name@example.com"
@@ -1259,80 +1265,54 @@ const EditCompany = () => {
                                         </h5>
                                     </Card.Header>
                                     <Card.Body>
-                                        {oldAssociate?.map((data, index) =>
-                                            data.contact ? (
-                                                <Card className="shadow p-2">
-                                                    <div className="row d-flex">
-                                                        <>
-                                                            <Col md={10} sm={10} key={index}>
-                                                                <div className="d-flex">
-                                                                    <img
-                                                                        src={IconContact}
-                                                                        alt={IconContact}
-                                                                        className="m-2"
-                                                                        style={{ width: "30px", height: "30px" }}
-                                                                    />
-                                                                    <Col md={12} sm={12}>
-                                                                        <p
-                                                                            className="ms-1"
-                                                                            style={{
-                                                                                fontSize: "10px",
-                                                                                whiteSpace: "normal",
-                                                                            }}
-                                                                        >
-                                                                            Name :{" "}
-                                                                            <strong className="ms-2">
-                                                                                {data?.contact?.name ?? "-"}
-                                                                            </strong>
-                                                                        </p>
-                                                                        <p
-                                                                            className="ms-1"
-                                                                            style={{
-                                                                                fontSize: "10px",
-                                                                                whiteSpace: "normal",
-                                                                            }}
-                                                                        >
-                                                                            No.Telp :{" "}
-                                                                            <strong
-                                                                                className="ms-2"
-                                                                                style={{
-                                                                                    fontSize: "10px",
-                                                                                    marginTop: "-8px",
-                                                                                }}
-                                                                            >
-                                                                                {data?.contact?.phone?.[0]?.number ??
-                                                                                    "-"}
-                                                                            </strong>
-                                                                        </p>
-                                                                        <p
-                                                                            className="ms-1"
-                                                                            style={{
-                                                                                fontSize: "10px",
-                                                                                marginTop: "-8px",
-                                                                            }}
-                                                                        >
-                                                                            Email :{" "}
-                                                                            <strong className="ms-2">
-                                                                                {data?.contact?.email ?? "-"}
-                                                                            </strong>
-                                                                        </p>
-                                                                    </Col>
-                                                                </div>
-                                                            </Col>
-                                                            <Col md={2} sm={2} style={{ marginTop: "-8px" }}>
-                                                                <a
-                                                                    onClick={() => handleDeleteContact(data.uid)}
-                                                                    style={{ cursor: "pointer" }}
-                                                                    className="ms-1"
-                                                                >
-                                                                    <i className="bi bi-x fs-5 text-danger"></i>
-                                                                </a>
-                                                            </Col>
-                                                        </>
-                                                    </div>
-                                                </Card>
-                                            ) : null
+                                        {console.log(oldAssociate)}
+                                    {oldAssociate?.map((data, index) =>
+                                        data.contact ? (
+                                            
+                                            <Card key={index} className="shadow-sm p-2 mb-2 position-relative">
+                                            <div className="d-flex justify-content-between">
+                                                {/* Icon kiri atas */}
+                                                <div>
+                                                <img
+                                                    src={IconContact}
+                                                    alt="contact-icon"
+                                                    style={{ width: "24px", height: "24px", objectFit: "contain" }}
+                                                />
+                                                </div>
+
+                                                {/* Tombol hapus kanan atas */}
+                                                <button
+                                                type="button"
+                                                onClick={() => handleDeleteContact(data.uid)}
+                                                className="btn btn-link text-danger p-0"
+                                                style={{ fontSize: "1.2rem", lineHeight: 1 }}
+                                                title="Hapus kontak"
+                                                >
+                                                <i className="bi bi-x"></i>
+                                                </button>
+                                            </div>
+                                            <a href={`/contact/${data.contact_uid}`} className="text-decoration-none text-black" target="_blank">
+                                            {/* Konten info kontak */}
+                                            <div className="mt-2 ps-1 text-decoration-none" style={{ fontSize: "0.8rem", lineHeight: "1.4" }}>
+                                                <p className="mb-1">
+                                                <strong>Name:</strong>{" "}
+                                                <span className="ms-1">{data.contact.name ?? "-"}</span>
+                                                </p>
+                                                <p className="mb-1">
+                                                <strong>No. Telp:</strong>{" "}
+                                                <span className="ms-1">{data.contact.primary_phone?.number ?? "-"}</span>
+                                                </p>
+                                                <p className="mb-0">
+                                                <strong>Email:</strong>{" "}
+                                                <span className="ms-1">{data.contact.email ?? "-"}</span>
+                                                </p>
+                                            </div>
+                                            </a>
+                                            </Card>
+                                        ) : null
                                         )}
+
+
                                         <FloatingLabel controlId="floatingInput" className="mb-3">
                                             <Select
                                                 closeMenuOnSelect={false}
@@ -1373,73 +1353,54 @@ const EditCompany = () => {
                                         {parentCompanyLocalStorage &&
                                             Array.isArray(parentCompanyLocalStorage) &&
                                             parentCompanyLocalStorage.length > 0 ? (
-                                            <Card className="shadow p-2">
-                                                <div className="row d-flex">
-                                                    <div className="col-md-10">
-                                                        <div className="d-flex">
-                                                            <img
-                                                                src={IconCompany}
-                                                                className="ms-1 me-3 mt-3"
-                                                                alt={IconCompany}
-                                                                style={{ width: "30px", height: "30px" }}
-                                                            />
-                                                            <Col md={10} sm={10}>
-                                                                <p
-                                                                    className="ms-1"
-                                                                    style={{
-                                                                        fontSize: "10px",
-                                                                        whiteSpace: "normal",
-                                                                    }}
-                                                                >
-                                                                    Name Company : <br />
-                                                                    <strong className="mt-1">
-                                                                        {oldParentCompany.parent?.name}
-                                                                    </strong>
-                                                                </p>
-                                                                <p
-                                                                    className="ms-1"
-                                                                    style={{
-                                                                        fontSize: "10px",
-                                                                        marginTop: "-8px",
-                                                                    }}
-                                                                >
-                                                                    Type : <br />
-                                                                    <strong className="mt-1">
-                                                                        {
-                                                                            oldParentCompany.parent?.company_type
-                                                                                ?.name
-                                                                        }
-                                                                    </strong>
-                                                                </p>
-                                                                <p
-                                                                    className="ms-1"
-                                                                    style={{
-                                                                        fontSize: "10px",
-                                                                        marginTop: "-8px",
-                                                                        whiteSpace: "normal",
-                                                                    }}
-                                                                >
-                                                                    No.Telp : <br />
-                                                                    <strong className="mt-1">
-                                                                        {oldParentCompany?.phone?.[0]?.number ||
-                                                                            "-"}
-                                                                    </strong>
-                                                                </p>
-                                                            </Col>
-                                                            <Col md={2} sm={2}>
-                                                                <a
-                                                                    onClick={deleteLocalStorageParent}
-                                                                    className="ms-1"
-                                                                    style={{ cursor: "pointer" }}
-                                                                >
-                                                                    <i className="bi bi-x fs-5 text-danger"></i>
-                                                                </a>
-                                                            </Col>
-                                                        </div>
+                                                <Card className="shadow p-2">
+                                                <div className="row">
+                                                  <div className="col-md-10 d-flex">
+                                                    {/* Icon Company */}
+                                                    <img
+                                                      src={IconCompany}
+                                                      alt="Company Icon"
+                                                      className="ms-1 me-3 mt-3"
+                                                      style={{ width: "30px", height: "30px", objectFit: "contain" }}
+                                                    />
+                                              
+                                                    {/* Company Info */}
+                                                    <div className="flex-grow-1">
+                                                      <p className="ms-1 mb-1" style={{ fontSize: "10px", whiteSpace: "normal" }}>
+                                                        Name Company: <br />
+                                                        <strong>{oldParentCompany.parent?.name || "-"}</strong>
+                                                      </p>
+                                              
+                                                      <p className="ms-1 mb-1" style={{ fontSize: "10px", marginTop: "-8px" }}>
+                                                        Type: <br />
+                                                
+                                                        <strong>{oldParentCompany.parent?.company_type?.name || "-"}</strong>
+                                                      </p>
+                                              
+                                                      <p className="ms-1 mb-0" style={{ fontSize: "10px", marginTop: "-8px", whiteSpace: "normal" }}>
+                                                        No. Telp: <br />
+                                                        <strong>{oldParentCompany?.phone?.[0]?.number || "-"}</strong>
+                                                      </p>
                                                     </div>
+                                              
+                                                    {/* Delete Button */}
+                                                    <div className="d-flex align-items-start">
+                                                      <button
+                                                        type="button"
+                                                        onClick={deleteLocalStorageParent}
+                                                        className="btn btn-link text-danger p-0 ms-2"
+                                                        style={{ fontSize: "1.2rem" }}
+                                                        title="Hapus Perusahaan"
+                                                      >
+                                                        <i className="bi bi-x"></i>
+                                                      </button>
+                                                    </div>
+                                                  </div>
                                                 </div>
-                                            </Card>
+                                              </Card>                                              
+                                            
                                         ) : (
+                                            <>
                                             <Form.Group className="mb-3">
                                                 <Select
                                                     options={selectComp()}
@@ -1451,23 +1412,25 @@ const EditCompany = () => {
                                                         });
                                                     }}
                                                 />
+                                                
                                             </Form.Group>
+                                              <div className="text-center">
+                                              <a
+                                                  //   onClick={handleShowCanvasDeals}
+                                                  className="text-primary text-decoration-none fw-semibold"
+                                                  style={{ cursor: "pointer" }}
+                                                  onClick={handleOpenCanvasCompany}
+                                              >
+                                                  <i
+                                                      class="bi bi-plus-lg"
+                                                      style={{ fontSize: "15px" }}
+                                                  ></i>
+                                                  <span className="fs-6"> Create Another Company</span>
+                                              </a>
+                                          </div></>
                                         )}
 
-                                        <div className="text-center">
-                                            <a
-                                                //   onClick={handleShowCanvasDeals}
-                                                className="text-primary text-decoration-none fw-semibold"
-                                                style={{ cursor: "pointer" }}
-                                                onClick={handleOpenCanvasCompany}
-                                            >
-                                                <i
-                                                    class="bi bi-plus-lg"
-                                                    style={{ fontSize: "15px" }}
-                                                ></i>
-                                                <span className="fs-6"> Create Another Company</span>
-                                            </a>
-                                        </div>
+                                      
                                     </Card.Body>
                                 </Card>
                                 <OverlayAddCompany

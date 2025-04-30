@@ -405,7 +405,7 @@ const SingleCompany = () => {
     });
   };
 
-  const handleSubmitContact = async (e) => {
+  const handleSubmitCompany = async (e) => {
     e.preventDefault();
     const formData = new FormData();
     for (const uid of resultContact) {
@@ -452,18 +452,36 @@ const SingleCompany = () => {
           });
         });
     } catch (err) {
-      if (err.response) {
-        Swal.fire({
-          text: err.response.data.message,
-          icon: "warning",
-        });
-      } else {
-        Swal.fire({
-          text: "Something went wrong !",
-          icon: "error",
-        });
-      }
+      console.error("Company creation error:", err);
+    
+      let errorMessage = "Terjadi kesalahan. Silakan coba lagi.";
+    
+      // if (err.response) {
+      //   const { data, status } = err.response;
+    
+      //   // Jika ada validasi Laravel (status 422)
+      //   if (status === 422 && data.errors) {
+      //     errorMessage = Object.values(data.errors)
+      //       .map((msgs) => msgs.join(" "))
+      //       .join("\n");
+      //   }
+      //   // Jika duplicate entry atau error SQL
+      //   else if (data.error?.includes("Duplicate entry") || data.message?.includes("Duplicate entry")) {
+      //     errorMessage = "Data duplikat terdeteksi. Periksa kembali nama perusahaan atau kontak yang diinput.";
+      //   }
+      //   // Jika hanya ada message umum
+      //   else if (data.message) {
+      //     errorMessage = data.message;
+      //   }
+      // }
+    
+      // Swal.fire({
+      //   title: "Gagal Membuat Perusahaan",
+      //   text: errorMessage,
+      //   icon: "error",
+      // });
     }
+    
   };
 
   useEffect(() => {
@@ -506,7 +524,7 @@ const SingleCompany = () => {
             </div>
           </div>
 
-          <form onSubmit={handleSubmitContact} className="row">
+          <form onSubmit={handleSubmitCompany} className="row">
             <Col md={4}>
               <Card className="shadow">
                 <Card.Header>
@@ -562,7 +580,7 @@ const SingleCompany = () => {
                       required
                     />
                   </Form.Group>
-                  {process.env.REACT_APP_BACKEND_URL === "https://api-crm-iss.medilabjakarta.id/api" ? 
+                  {process.env.REACT_APP_BACKEND_URL !== "https://api-crm.medilabjakarta.id/api" ? 
                   <Form.Group className="mb-3">
                     <Form.Label controlId="floatingInput">
                       <span>

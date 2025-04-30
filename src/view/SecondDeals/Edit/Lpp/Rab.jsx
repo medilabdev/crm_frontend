@@ -11,72 +11,57 @@ import EditModalSupport from "./modals/EditModalSupport";
 import AddModalsFee from "./modals/AddModalsFee";
 import EditModalFee from "./Edit/EditModalFee";
 
-const DataTableRab = ({rab, handleRab, supportKerjaSama, handleSupportKerjaSama, feeAction, handleFeeAction}) => {
-  let NoAlkes = [];
-  let Alkes = [];
-
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key.startsWith("RAB")) {
-      const data = JSON.parse(localStorage.getItem(key));
-      data.forEach((item) => {
-        if (item.is_alkes === "no") {
-          NoAlkes.push({ ...item });
-        } else if (item.is_alkes === "yes") {
-          Alkes.push({ ...item });
-        }
-      });
-    }
-  }
+const DataTableRab = ({
+  rab, handleRab, supportKerjaSama, handleSupportKerjaSama, feeAction, handleFeeAction, rabData, setRabData, supportData, setSupportData, feeData, setFeeData
+}) => {
   const [ShowModalRab, setShowModalRab] = useState(false);
-  const [data, setData] = useState([]);
+  const [editSupportData, setEditSupportData] = useState({});
+
+  const handleAddRab = (newRab) => {
+    const updated = [...rabData, newRab];
+    setRabData(updated);
+  }
+
+  const handleAddSupport = (newSupport)=> {
+    const updated = [...supportData, newSupport];
+    setSupportData(updated);
+  }
+
+  const handleAddFee = (newFee) => {
+    const updated = [...feeData, newFee];
+    setFeeData(updated);
+  }
+
+
+  const Alkes = rabData.filter((item) => item.is_alkes === "yes");
+  const NonAlkes = rabData.filter((item) => item.is_alkes === "no");
+
   const handleShowRab = () => setShowModalRab(true);
   const handleCloseRab = () => setShowModalRab(false);
   const [editDataModal, setEditDataModal] = useState(false);
   const [editDataRab, setEditDataRab] = useState({});
 
-
-  const handleCloseEdit = () => setEditDataModal(false);
-  const handleEditRab = (
-    id,
-    item,
-    is_alkes,
-    nilai_estimasi_biaya,
-    qty,
-    total_estimasi_biaya,
-    note
-  ) => {
-    setEditDataRab({
-      id: id,
-      item: item,
-      is_alkes: is_alkes,
-      nilai_estimasi_biaya: nilai_estimasi_biaya,
-      qty: qty,
-      total_estimasi_biaya: total_estimasi_biaya,
-      note: note,
-    });
-    setEditDataModal(true);
-  };
-
-  let allDataRab = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key.startsWith("RAB")) {
-      const data = JSON.parse(localStorage.getItem(key));
-      allDataRab.push(data);
-    }
-  }
-
- let totalPriceRab = 0
- if(NoAlkes){
-  NoAlkes.map((data) => totalPriceRab += data?.total_estimasi_biaya)
- } 
+  let totalPriceRab = 0
+  if(NonAlkes){
+    NonAlkes.map((data) => totalPriceRab += data?.total_estimasi_biaya)
+  } 
 
   const handleDeleteItem = (id) => {
-    const data = allDataRab[0].filter((rab) => rab.id !== id);
-    setData(data);
-    localStorage.setItem("RAB", JSON.stringify(data));
+    const updated =rabData.filter((item) => item.id !== id);
+    setRabData(updated);
   };
+
+  const handlerOpenEditRab = (rabItem) =>{
+    setEditDataRab(rabItem);
+    setEditDataModal(true);
+  }
+
+  const handlerSaveEditRab = (updateRab) => {
+    const updatedList = rabData.map((item) => item.id === updateRab.id ? updateRab : item )
+    setRabData(updatedList)
+    setEditDataModal(false);
+    setEditDataRab(null);
+  }
 
   const ColumnsTable = [
     {
@@ -100,6 +85,20 @@ const DataTableRab = ({rab, handleRab, supportKerjaSama, handleSupportKerjaSama,
     {
       name: "Catatan Realisasi",
       selector: (row) => row.note,
+      cell: (row) => (
+        <div
+          style={{
+            maxWidth: "200px",
+            whiteSpace: "normal", // biar bisa multiline
+            overflowWrap: "break-word",
+            wordBreak: "break-word",
+          }}
+        >
+          {row.note}
+        </div>
+      ),
+      grow: 1, // biar fleksibel tapi tidak over-extend
+      wrap: true, // jika pakai react-data-table-component
     },
     {
       name: "Action",
@@ -107,17 +106,7 @@ const DataTableRab = ({rab, handleRab, supportKerjaSama, handleSupportKerjaSama,
         <>
           <button
             style={{ border: "none", backgroundColor: "white" }}
-            onClick={() =>
-              handleEditRab(
-                row.id,
-                row.item,
-                row.is_alkes,
-                row.nilai_estimasi_biaya,
-                row.qty,
-                row.total_estimasi_biaya,
-                row.note
-              )
-            }
+            onClick={() =>  handlerOpenEditRab(row)}
           >
             <FontAwesomeIcon icon={faPenToSquare} />
           </button>
@@ -131,6 +120,7 @@ const DataTableRab = ({rab, handleRab, supportKerjaSama, handleSupportKerjaSama,
       ),
     },
   ];
+
   const customStyle = {
     headRow: {
       style: {
@@ -157,41 +147,25 @@ const DataTableRab = ({rab, handleRab, supportKerjaSama, handleSupportKerjaSama,
   const [ShowModalSupport, setShowModalSupport] = useState(false);
   const handleShowSupport = () => setShowModalSupport(true);
   const handleCloseSupport = () => setShowModalSupport(false);
-
   const [editSupportModal, setEditSuportModal] = useState(false)
-  const [editSupport, setEditSupport] = useState({})
-  const handleCloseEditSupport = () => setEditSuportModal(false)
-  const handleEditSupport = (
-    id, 
-    item,
-    nilai_estimasi_biaya,
-    qty,
-    total_estimasi_biaya,
-    note
-  ) => {
-    setEditSupport({
-      id : id, 
-      item : item,
-      nilai_estimasi_biaya : nilai_estimasi_biaya,
-      qty : qty,
-      total_estimasi_biaya : total_estimasi_biaya,
-      note: note
-    })
-    setEditSuportModal(true)
+
+
+  const handlerOpenEditSupport = (supportItem) =>{
+    setEditSupportData(supportItem);
+    setEditSuportModal(true);
+  }
+
+  const handlerSaveEditSupport = (updateRab) => {
+    const updatedList = supportData.map((item) => item.id === updateRab.id ? updateRab : item )
+    setSupportData(updatedList)
+    setEditSuportModal(false);
+    setEditSupportData(null);
   }
   
-  const allDataSupport = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key.startsWith("SupportKerjaSama")) {
-      const data = JSON.parse(localStorage.getItem(key));
-      allDataSupport.push(data);
-    }
-  }
+
   const handleDeleteSupport = (id) => {
-    const data = allDataSupport[0].filter((support) => support.id !== id);
-    setData(data);
-    localStorage.setItem("SupportKerjaSama", JSON.stringify(data));
+    const updated =supportData.filter((item) => item.id !== id);
+    setSupportData(updated);
   };
  
 
@@ -217,6 +191,20 @@ const DataTableRab = ({rab, handleRab, supportKerjaSama, handleSupportKerjaSama,
     {
       name: "Catatan Realisasi",
       selector: (row) => row.note,
+      cell: (row) => (
+        <div
+          style={{
+            maxWidth: "200px",
+            whiteSpace: "normal", // biar bisa multiline
+            overflowWrap: "break-word",
+            wordBreak: "break-word",
+          }}
+        >
+          {row.note}
+        </div>
+      ),
+      grow: 1, // biar fleksibel tapi tidak over-extend
+      wrap: true, // jika pakai react-data-table-component
     },
     {
       name: "Action",
@@ -224,16 +212,7 @@ const DataTableRab = ({rab, handleRab, supportKerjaSama, handleSupportKerjaSama,
         <>
           <button
             style={{ border: "none", backgroundColor: "white" }}
-            onClick={() =>
-              handleEditSupport(
-                row.id,
-                row.item,
-                row.nilai_estimasi_biaya,
-                row.qty,
-                row.total_estimasi_biaya,
-                row.note
-              )
-            }
+            onClick={() => handlerOpenEditSupport(row)}
           >
             <FontAwesomeIcon icon={faPenToSquare} />
           </button>
@@ -250,8 +229,8 @@ const DataTableRab = ({rab, handleRab, supportKerjaSama, handleSupportKerjaSama,
 
 
   let totalPriceSupport = 0
-  if(allDataSupport[0]){
-  allDataSupport[0]?.map((data) => totalPriceSupport += data?.total_estimasi_biaya)
+  if(supportData){
+    supportData?.map((data) => totalPriceSupport += data?.total_estimasi_biaya)
   } 
 
 
@@ -264,36 +243,29 @@ const handleOpenFee = () => setShowAddFee(true);
 const [editFeeModal, setEditFeeModal] = useState(false)
 const [editDataFee, setEditDataFee] = useState({})
 
-const handleCloseEditFee =() => setEditFeeModal(false)
-const handleEditFee =(id, name, nilai, qty, total, note) => {
-  setEditDataFee({
-    id:id,
-    name:name,
-    nilai:nilai,
-    qty:qty,
-    total:total,
-    note: note,
-  })
-  setEditFeeModal(true)
+const handlerOpenEditFee = (feeitem) => {
+  setEditDataFee(feeitem);
+  setEditFeeModal(true);
 }
-const allDataFee = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key.startsWith("FeeTindakan")) {
-      const data = JSON.parse(localStorage.getItem(key));
-      allDataFee.push(data);
-    }
-  }
+
+const handlerSaveEditFee = (updateItem) => {
+  const updatedList = feeData.map((item) => item.id === updateItem.id ? updateItem : item )
+  setFeeData(updatedList);
+  setEditFeeModal(false);
+  setEditDataFee(null);
+}
+
 
   let totalPriceFee = 0
-  if(allDataFee[0]){
-  allDataFee[0]?.map((data) => totalPriceFee += data?.total)
+  if(feeData){
+  feeData.map((data) => totalPriceFee += data?.total)
   } 
+  
 const handleDeleteFE = (id) => {
-  const data = allDataFee[0].filter((rab) => rab.id !== id);
-  setData(data);
-  localStorage.setItem("FeeTindakan", JSON.stringify(data));
+  const updated =feeData.filter((item) => item.id !== id);
+  setFeeData(updated);
 };
+
 const ColumnsTableFee = [
   {
     name: "Nama Penerima",
@@ -314,6 +286,20 @@ const ColumnsTableFee = [
   {
     name: "Catatan Realisasi",
     selector: (row) => row.note,
+    cell: (row) => (
+      <div
+        style={{
+          maxWidth: "200px",
+          whiteSpace: "normal", // biar bisa multiline
+          overflowWrap: "break-word",
+          wordBreak: "break-word",
+        }}
+      >
+        {row.note}
+      </div>
+    ),
+    grow: 1, // biar fleksibel tapi tidak over-extend
+    wrap: true, // jika pakai react-data-table-component
   },
   {
     name: "Action",
@@ -322,16 +308,7 @@ const ColumnsTableFee = [
         <button
           type="button"
           style={{ border: "none", backgroundColor: "white" }}
-          onClick={() =>
-            handleEditFee(
-              row.id,
-              row.name,
-              row.nilai,
-              row.qty,
-              row.total,
-              row.note
-            )
-          }
+          onClick={() => handlerOpenEditFee(row)}
         >
           <FontAwesomeIcon icon={faPenToSquare} />
         </button>
@@ -348,7 +325,7 @@ const ColumnsTableFee = [
 ];
 
 
-  const ColumnsTableRekap = [
+const ColumnsTableRekap = [
     {
       name: "Item",
       selector: (row) => row.name,
@@ -361,7 +338,7 @@ const ColumnsTableFee = [
   ];
 
   
-  const dataRekap = [
+const dataRekap = [
     {
       name: "RAB Bangunan & Lainnya Terkain",
       nilai_estimasi: totalPriceRab,
@@ -376,6 +353,7 @@ const ColumnsTableFee = [
     },
   ];
 
+  
   return (
     <>
      <div className="mb-3">
@@ -422,7 +400,7 @@ const ColumnsTableFee = [
         <DataTable
           className="mb-2"
           columns={ColumnsTable}
-          data={NoAlkes}
+          data={NonAlkes}
           customStyles={customStyle}
           dense
         />
@@ -440,12 +418,12 @@ const ColumnsTableFee = [
                   </div>
                 </div>
         </Card.Body>
-        <ModalsRab show={ShowModalRab} handleClose={handleCloseRab} />
+        <ModalsRab show={ShowModalRab} handleClose={handleCloseRab} onSave={handleAddRab} />
         <EditModalsRab
           show={editDataModal}
-          handleClose={handleCloseEdit}
+          handleClose={() => setEditDataModal(false)}
           data={editDataRab}
-          dataOld={allDataRab[0]}
+          onSave={handlerSaveEditRab}
         />
       </Card>
     </div>
@@ -488,7 +466,7 @@ const ColumnsTableFee = [
             className="p-2"
             columns={ColumnsTableSupport}
             customStyles={customStyle}
-            data={allDataSupport[0]}
+            data={supportData}
           />
                 <div className="row">
                     <div className="mt-3 me-3">
@@ -504,8 +482,12 @@ const ColumnsTableFee = [
                     </div>
                   </div>
           </Card.Body>
-          <AddModalSupport show={ShowModalSupport} handleClose={handleCloseSupport} />
-          <EditModalSupport  show={editSupportModal} handleClose={handleCloseEditSupport} data={editSupport} dataOld={allDataSupport[0]}/>
+          <AddModalSupport show={ShowModalSupport} handleClose={handleCloseSupport} onSave={handleAddSupport}/>
+          <EditModalSupport 
+          show={editSupportModal} 
+          handleClose={() => setEditSupportData(false)} 
+          data={editSupportData} 
+          onSave={handlerSaveEditSupport}/>
         </Card>
       </div>
     </div> : ""}
@@ -547,7 +529,7 @@ const ColumnsTableFee = [
            <DataTable
              className="p-2"
              columns={ColumnsTableFee}
-             data={allDataFee[0]}
+             data={feeData}
              customStyles={customStyle}
            />
                  <div className="row">
@@ -564,12 +546,12 @@ const ColumnsTableFee = [
                      </div>
                    </div>
            </Card.Body>
-           <AddModalsFee show={showAddFee} handleClose={handleCloseFee} />
+           <AddModalsFee show={showAddFee} handleClose={handleCloseFee} onSave={handleAddFee}/>
            <EditModalFee
              show={editFeeModal}
-             handleClose={handleCloseEditFee}
+             handleClose={() => setEditFeeModal(false)}
              data={editDataFee}
-             dataOld={allDataFee[0]}
+             onSave={handlerSaveEditFee}
            />
          </Card>
        </div>

@@ -1,155 +1,159 @@
-import React, { useEffect, useState } from 'react'
-import { Button, Modal, ModalHeader } from 'react-bootstrap'
+import React, { useEffect, useState } from 'react';
+import { Button, Modal } from 'react-bootstrap';
 
-const AddModalRab = ({show, handleClose}) => {
-    const [inputData, setInputData] = useState({})
-    const [inputEst, setInputEst] = useState("");
+const AddModalRab = ({ show, handleClose, onSave }) => {
+  const [inputData, setInputData] = useState({
+    item_uid: '',
+    is_alkes: '',
+    qty: '',
+    realization_note: '',
+  });
 
-    const handleInput = (e) => {
-        setInputData({
-            ...inputData,
-            [e.target.name]:e.target.value
-        })
-    }
+  const [inputEst, setInputEst] = useState('');
+  const [resultValue, setResultValue] = useState(0);
 
-    const handleInputDataRP = (event) => {
-        const rawValue = event.target.value;
-        const formattedValue = formatCurrency(rawValue);
-        setInputEst(formattedValue);
-      };
-    
-      const formatCurrency = (value) => {
-        const sanitizedValue = value.replace(/[^\d]/g, "");
-        const formattedValue = Number(sanitizedValue).toLocaleString("id-ID");
-        return formattedValue;
-      };
-      const [resultValue, setResultValue] = useState();
+  const handleInput = (e) => {
+    const { name, value } = e.target;
+    setInputData(prev => ({ ...prev, [name]: value }));
+  };
 
-      const inputWithoutSeparator = inputEst.length > 0 ? inputEst.replace(/\./g, "") : "";
-      const tempOne = parseFloat(inputWithoutSeparator);
-      const tempTwo = parseFloat(inputData.qty);
-    
-      useEffect(() => {
-        const result_estimasi_charge = tempOne * tempTwo;
-        setResultValue(result_estimasi_charge);
-      }, [tempOne, tempTwo]);
+  const handleInputDataRP = (e) => {
+    const rawValue = e.target.value;
+    const formattedValue = formatCurrency(rawValue);
+    setInputEst(formattedValue);
+  };
 
-      const handleSubmit = (e) => {
-        e.preventDefault();
-        if (Object.keys(inputData).length > 0) {
-          const dataExist = JSON.parse(localStorage.getItem("rabEdit")) || [];
-          const id = `data_${Date.now()}`;
-          const Payload = {
-            id: id,
-            item_uid: inputData.item_uid,
-            is_alkes: inputData.is_alkes,
-            estimated_cost: tempOne,
-            qty: inputData.qty,
-            total_estimated_cost: resultValue,
-            realization_note: inputData.realization_note,
-          };
-          dataExist.push(Payload);
-          localStorage.setItem("rabEdit", JSON.stringify(dataExist));
-          setInputData({
-            item_uid: "",
-            estimated_cost: 0,
-            realization_note: "",
-            qty: "",
-          });
-          setInputEst(0);
-          handleClose();
-        }
-      };
-    
+  const formatCurrency = (value) => {
+    const sanitized = value.replace(/[^\d]/g, '');
+    return Number(sanitized || 0).toLocaleString('id-ID');
+  };
+
+  const getNumericValue = (val) => parseFloat(val?.toString().replace(/\./g, '')) || 0;
+
+  useEffect(() => {
+    const total = getNumericValue(inputEst) * parseFloat(inputData.qty || 0);
+    setResultValue(total);
+  }, [inputEst, inputData.qty]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    const payload = {
+      id: `rab_${Date.now()}`,
+      item_uid: inputData.item_uid,
+      is_alkes: inputData.is_alkes,
+      estimated_cost: getNumericValue(inputEst),
+      qty: parseFloat(inputData.qty),
+      total_estimated_cost: resultValue,
+      realization_note: inputData.realization_note,
+    };
+
+    onSave(payload);
+    resetForm();
+    handleClose();
+  };
+
+  const resetForm = () => {
+    setInputData({
+      item_uid: '',
+      is_alkes: '',
+      qty: '',
+      realization_note: '',
+    });
+    setInputEst('');
+    setResultValue(0);
+  };
+
   return (
-  <>
- <Modal show={show} onHide={handleClose} placement="end">
+    <Modal show={show} onHide={handleClose} centered>
       <Modal.Header closeButton>
-        <Modal.Title>Tambah Data</Modal.Title>
+        <Modal.Title>Tambah Data RAB</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <div class="form-floating mb-3">
+        <div className="form-floating mb-3">
           <input
             type="text"
-            class="form-control"
-            id="floatingInput"
             name="item_uid"
+            className="form-control"
+            value={inputData.item_uid}
             onChange={handleInput}
-            placeholder="name@example.com"
+            placeholder="Item"
           />
-          <label for="floatingInput">Item</label>
+          <label>Item</label>
         </div>
+
         <div className="mb-3">
-          <label htmlFor="">Apakah Alat Kesehatan</label>
+          <label>Apakah Alat Kesehatan</label>
           <select
             name="is_alkes"
-            id=""
             className="form-control"
+            value={inputData.is_alkes}
             onChange={handleInput}
           >
-            <option value="">Select Choose</option>
+            <option value="">Pilih</option>
             <option value="yes">Iya</option>
             <option value="no">Tidak</option>
           </select>
         </div>
-        <div class="form-floating mb-3">
+
+        <div className="form-floating mb-3">
           <input
             type="text"
-            class="form-control"
-            value={inputEst || 0}
+            className="form-control"
+            value={inputEst}
             onChange={handleInputDataRP}
-            id="floatingInput"
-            placeholder="name@example.com"
+            placeholder="Estimasi Biaya"
           />
-          <label for="floatingInput">Nilai Estimasi Biaya</label>
+          <label>Nilai Estimasi Biaya</label>
         </div>
-        <div class="form-floating mb-3">
+
+        <div className="form-floating mb-3">
           <input
             type="number"
-            class="form-control"
             name="qty"
+            className="form-control"
+            value={inputData.qty}
             onChange={handleInput}
-            id="floatingInput"
-            placeholder="name@example.com"
+            placeholder="Qty"
           />
-          <label for="floatingInput">Qty</label>
+          <label>Qty</label>
         </div>
-        <div class="form-floating mb-3">
+
+        <div className="form-floating mb-3">
           <input
             type="text"
-            class="form-control"
-            name="total_estimasi_biaya"
-            value={resultValue || 0}
-            id="floatingInput"
-            placeholder="name@example.com"
-          />
-          <label for="floatingInput">Total Estimasi Biaya</label>
-        </div>
-        <div className="mb-3">
-          <label htmlFor="" style={{ fontWeight: "600" }}>
-            Catatan Realisasi
-          </label>
-          <textarea
-            id=""
-            cols="30"
-            rows="5"
-            name="realization_note"
-            onChange={handleInput}
             className="form-control"
+            readOnly
+            value={`Rp. ${new Intl.NumberFormat().format(resultValue || 0)}`}
+            placeholder="Total"
+          />
+          <label>Total Estimasi Biaya</label>
+        </div>
+
+        <div className="mb-3">
+          <label>Catatan Realisasi</label>
+          <textarea
+            name="realization_note"
+            className="form-control"
+            rows="3"
+            value={inputData.realization_note}
+            onChange={handleInput}
           ></textarea>
         </div>
       </Modal.Body>
-      <Modal.Footer className="mb-4">
-        <Button variant="secondary" className="me-2" onClick={handleClose}>
-          Close
+      <Modal.Footer>
+        <Button variant="secondary" onClick={() => {
+          resetForm();
+          handleClose();
+        }}>
+          Batal
         </Button>
-        <Button variant="primary" className="me-3" onClick={handleSubmit}>
-          Save Changes
+        <Button variant="primary" onClick={handleSubmit}>
+          Simpan
         </Button>
       </Modal.Footer>
     </Modal>
-  </>
-  )
-}
+  );
+};
 
-export default AddModalRab
+export default AddModalRab;

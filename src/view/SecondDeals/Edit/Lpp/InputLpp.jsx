@@ -36,6 +36,10 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
     categoryType:''
   })
 
+   const [rabData, setRabData] = useState([])
+   const [supportData, setSupportData] = useState([]);
+   const [feeData, setFeeData] = useState([]);
+
   const [showOverlay, setShowOverlay] = useState(false);
   const [priceFormat, setPriceFormat] = useState(
     inputData !== null ? inputData.price : ""
@@ -189,37 +193,26 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
 
 
   const actionDuringCoperationQty = (firstQty + secondQty) * tindakanPerbulan * (inputData.collaboration_period * 12);
-  console.log(firstQty, secondQty, tindakanPerbulan, inputData.collaboration_period) ;
   
-  let tempSupport = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key.startsWith("SupportKerjaSama")) {
-      const data = JSON.parse(localStorage.getItem(key));
-      tempSupport.push(data);
-    }
-  }
-
-  let FeeData = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key.startsWith("FeeTindakan")) {
-      const data = JSON.parse(localStorage.getItem(key));
-      FeeData.push(data);
-    }
-  }
-  let RabData = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key.startsWith("RAB")) {
-      const data = JSON.parse(localStorage.getItem(key));
-      RabData.push(data);
-    }
-  }
+  // const getParsedData = (prefix) => {
+  //   const result = [];
+  //   for (let i = 0; i < localStorage.length; i++) {
+  //     const key = localStorage.key(i);
+  //     if (key.startsWith(prefix)) {
+  //       const data = JSON.parse(localStorage.getItem(key));
+  //       result.push(data);
+  //     }
+  //   }
+  //   return result;
+  // };
+  
+  // const RabData = getParsedData("RAB");
+  // const FeeData = getParsedData("FeeTindakan");
+  // const tempSupport = getParsedData("SupportKerjaSama");
+  
 
  
   const [inputTimeline, setInputTimeline] = useState([]);
- 
 
   const handleInputTimeline = (event, processIndex, weekIndex) => {
     const isChecked = event.target.checked ? 1 : 0;
@@ -237,8 +230,8 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
     "Training",
     "1st Running Patient",
   ];
-
-  console.log(inputTimeline);
+  console.log("rab", rabData, "support", supportData, "fee", feeData);
+  
   
   const [categoryType, setCategoryType] = useState("");
 
@@ -385,8 +378,8 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
           actionDuringCoperationQty || ""
         );
         formData.append("is_rab", Rab || "");
-        if (Array.isArray(RabData[0]) && RabData[0].length > 0) {
-          RabData[0].forEach((rab, index) => {
+        if (Array.isArray(rabData) && rabData.length > 0) {
+          rabData.forEach((rab, index) => {
             formData.append(`rab[${index}][item_uid]`, rab?.item || "");
             formData.append(`rab[${index}][is_alkes]`, rab?.is_alkes || "");
             formData.append(
@@ -402,8 +395,8 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
           });
         }
         formData.append("is_support", supportKerjaSama || "");
-        if (Array.isArray(tempSupport[0]) && tempSupport[0].length > 0) {
-          tempSupport[0].forEach((support, index) => {
+        if (Array.isArray(supportData) && supportData.length > 0) {
+          supportData.forEach((support, index) => {
             formData.append(`support[${index}][item_uid]`, support?.item || "");
             formData.append(
               `support[${index}][estimated_cost]`,
@@ -422,8 +415,8 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
         }
 
         formData.append("is_fee", feeAction || "");
-        if (Array.isArray(FeeData[0]) && FeeData[0].length > 0) {
-          FeeData[0].forEach((fee, index) => {
+        if (Array.isArray(feeData) && feeData.length > 0) {
+          feeData.forEach((fee, index) => {
             formData.append(`fee[${index}][recieve_name]`, fee?.name || "");
             let valueFee = (fee?.nilai ? fee.nilai.toString().replace(/\./g, "") : "");
             formData.append(`fee[${index}][value]`, valueFee || "");
@@ -942,7 +935,7 @@ const InputLpp = ({ data, listCompany, uidDeals }) => {
         <label htmlFor="">Tindakan Selama Bekerja Sama</label>
       </div>
      
-      <DataTableRab rab={Rab} handleRab={handleRab} supportKerjaSama={supportKerjaSama} handleSupportKerjaSama={handleSupportKerjaSama} feeAction={feeAction} handleFeeAction={handleFeeAction}/>
+      <DataTableRab rab={Rab} handleRab={handleRab} supportKerjaSama={supportKerjaSama} handleSupportKerjaSama={handleSupportKerjaSama} feeAction={feeAction} handleFeeAction={handleFeeAction} rabData={rabData} setRabData={setRabData} supportData={supportData} setSupportData={setSupportData} feeData={feeData} setFeeData={setFeeData} />
  
       <div className="mb-2">
         <h6 className="fw-bold ms-2 mt-3">Catatan Tambahan</h6>

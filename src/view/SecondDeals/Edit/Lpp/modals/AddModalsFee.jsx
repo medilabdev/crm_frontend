@@ -1,15 +1,18 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 
-const AddModalsFee = ({ show, handleClose }) => {
+const AddModalsFee = ({ show, handleClose, onSave }) => {
   const [inputData, setInputData] = useState([]);
+  const [inputEst, setInputEst] = useState([]);
+  const [resultValue, setResultValue] = useState(0);
+
   const handleInput = (e) => {
     setInputData({
       ...inputData,
       [e.target.name]: e.target.value,
     });
   };
-  const [inputEst, setInputEst] = useState([]);
+  
   const handleInputDataRP = (event) => {
     const rawValue = event.target.value;
     const formattedValue = formatCurrency(rawValue);
@@ -19,39 +22,32 @@ const AddModalsFee = ({ show, handleClose }) => {
   const formatCurrency = (value) => {
     const sanitizedValue = value.replace(/[^\d]/g, "");
     const formattedValue = Number(sanitizedValue).toLocaleString("id-ID");
-
     return formattedValue;
   };
   const inputWithoutSeparator =
-    inputEst.length > 0 ? inputEst.replace(/\./g, "") : "";
+  inputEst.length > 0 ? inputEst.replace(/\./g, "") : "";
   const tempOne = parseFloat(inputWithoutSeparator);
   const tempTwo = parseFloat(inputData.qty);
   const result_estimasi_charge = tempOne * tempTwo;
+  useEffect(() => {
+    const result_estimasi_charge = tempOne * tempTwo;
+    setResultValue(result_estimasi_charge);
+  }, [tempOne, tempTwo])
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (Object.keys(inputData).length > 0) {
-      const dataExist = JSON.parse(localStorage.getItem("FeeTindakan")) || [];
-      const id = `data_${Date.now()}`;
-      const payload = {
-        id: id,
-        name: inputData.name,
-        nilai: inputEst,
-        qty: inputData.qty,
-        total: result_estimasi_charge,
-        note: inputData.note,
-      };
-      dataExist.push(payload);
-      localStorage.setItem("FeeTindakan", JSON.stringify(dataExist));
-      setInputData({
-        item: "",
-        name: "",
-        nilai: "",
-        qty: "",
-        note: "",
-      });
-      setInputEst(0);
-      handleClose();
+    const newFee = {
+      id: `data_${Date.now()}`,
+      name: inputData.name,
+      nilai: tempOne,
+      qty: inputData.qty,
+      total: resultValue,
+      note: inputData.note,
     }
+    onSave(newFee);
+    setInputData({})
+    setInputEst(0);
+    handleClose();
+    
   };
   return (
     <Modal show={show} onHide={handleClose} centered>

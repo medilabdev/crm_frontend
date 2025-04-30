@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import { Button, Modal } from 'react-bootstrap';
 
-const EditModalSupport = ({show, handleClose, data, dataOld}) => {
+const EditModalSupport = ({show, handleClose, data, onSave}) => {
     const [inputData, setInputData] = useState([])
     const [inputRp, setInputRp] = useState("")
     const [resultValue, setResultValue] = useState("")
+    
     const handleInput = (e) => {
         setInputData({
           ...inputData,
@@ -33,20 +34,12 @@ const EditModalSupport = ({show, handleClose, data, dataOld}) => {
 
       const handleSubmit = (e) => {
         e.preventDefault();
-        const dataUpdate = dataOld.map((item) => {
-            if (item.id === inputData.id) {
-              return {
-                id: inputData.id,
-                item: inputData.item,
-                nilai_estimasi_biaya: inputRpResult,
-                qty: inputData.qty,
-                total_estimasi_biaya: resultValue,
-                note: inputData.note,
-              };
-            }
-            return item;
-          });
-          localStorage.setItem("SupportKerjaSama", JSON.stringify(dataUpdate));
+        const updatedItem = {
+          ...inputData, 
+          nilai_estimasi_biaya:inputRpResult,
+          total_estimasi_biaya: resultValue
+        }
+        onSave(updatedItem);
           handleClose()
       }
       useEffect(() => {

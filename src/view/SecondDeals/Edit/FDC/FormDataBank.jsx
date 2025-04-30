@@ -13,7 +13,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useEffect, useState } from "react";
 
-const FormDataBank = ({ handleInputChange }) => {
+const FormDataBank = ({ handleBankInputChange }) => {
   const [inputData, setInputData] = useState([]);
   const addForm = () => {
     setInputData([
@@ -56,8 +56,8 @@ const FormDataBank = ({ handleInputChange }) => {
                     type="text"
                     placeholder="Input in here"
                     className="form-control"
-                    name={`nameBank[${index}]`}
-                    onBlur={(e) => handleInputChange(e, index, "nameBank")}
+                    name="nameBank"
+                    onChange={(e) => handleBankInputChange(e, index, "nameBank")}
                   />
                   <label htmlFor="floatingInput">
                     <FontAwesomeIcon icon={faBuildingColumns} /> Nama Bank
@@ -70,8 +70,8 @@ const FormDataBank = ({ handleInputChange }) => {
                     type="text"
                     placeholder="Input in here"
                     className="form-control"
-                    name={`cabang[${index}]`}
-                    onBlur={(e) => handleInputChange(e, index, "cabang")}
+                    name="cabang"
+                    onChange={(e) => handleBankInputChange(e, index, "cabang")}
                   />
                   <label htmlFor="floatingInput">
                     <FontAwesomeIcon icon={faCodeBranch} /> Cabang
@@ -86,8 +86,8 @@ const FormDataBank = ({ handleInputChange }) => {
                     type="text"
                     placeholder="Input in here"
                     className="form-control"
-                    name={`nameAccount[${index}]`}
-                    onBlur={(e) => handleInputChange(e, index, "nameAccount")}
+                    name="nameAccount"
+                    onChange={(e) => handleBankInputChange(e, index, "nameAccount")}
                   />
                   <label htmlFor="floatingInput">
                     <FontAwesomeIcon icon={faUserTie} /> Nama Account (A/N)
@@ -100,8 +100,8 @@ const FormDataBank = ({ handleInputChange }) => {
                     type="text"
                     placeholder="Input in here"
                     className="form-control"
-                    name={`cityBank[${index}]`}
-                    onBlur={(e) => handleInputChange(e, index, "cityBank")} 
+                    name="cityBank"
+                    onChange={(e) => handleBankInputChange(e, index, "cityBank")} 
                   />
                   <label htmlFor="floatingInput">
                     <FontAwesomeIcon icon={faCity} /> Kota
@@ -116,8 +116,8 @@ const FormDataBank = ({ handleInputChange }) => {
                     type="text"
                     placeholder="Input in here"
                     className="form-control"
-                    name={`noRek[${index}]`}
-                    onBlur={(e) => handleInputChange(e, index, "noRek")}
+                    name="noRek"
+                    onChange={(e) => handleBankInputChange(e, index, "noRek")}
                   />
                   <label htmlFor="floatingInput">
                     <FontAwesomeIcon icon={faCreditCard} /> No. Rekening
@@ -130,8 +130,8 @@ const FormDataBank = ({ handleInputChange }) => {
                     type="text"
                     placeholder="Input in here"
                     className="form-control"
-                    name={`mataUang[${index}]`}
-                    onBlur={(e) => handleInputChange(e, index, "mataUang")}
+                    name="mataUang"
+                    onChange={(e) => handleBankInputChange(e, index, "mataUang")}
                   />
                   <label htmlFor="floatingInput">
                     <FontAwesomeIcon icon={faMoneyBill} /> Mata Uang
@@ -144,8 +144,8 @@ const FormDataBank = ({ handleInputChange }) => {
                 type="text"
                 placeholder="Input in here"
                 className="form-control"
-                name={`swiftCode[${index}]`}
-                onBlur={(e) => handleInputChange(e, index, "swiftCode")}
+                name="swiftCode"
+                onChange={(e) => handleBankInputChange(e, index, "swiftCode")}
               />
               <label htmlFor="floatingInput">
                 <FontAwesomeIcon icon={faCode} /> Swift Code
