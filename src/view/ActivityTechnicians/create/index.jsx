@@ -22,7 +22,7 @@ const CreateTechnicianTicket = () => {
 
 
     // url api
-    const urlCompany = `${process.env.REACT_APP_BACKEND_URL}/companies`;
+    const urlCompany = `${process.env.REACT_APP_BACKEND_URL}/companies?limit=10000`;
     const urlVisitPurpose = `${process.env.REACT_APP_BACKEND_URL}/visit-purposes`;
     const token = localStorage.getItem("token");
 
