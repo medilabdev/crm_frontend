@@ -10,6 +10,8 @@ import {
     Col,
     FloatingLabel,
     Form,
+    OverlayTrigger,
+    Tooltip,
 } from "react-bootstrap";
 import ReactQuill from "react-quill";
 import { useParams } from "react-router-dom";
@@ -28,7 +30,7 @@ import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import { GetDataTypeHospital } from "../../../action/TypeHospital";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronUp, faPlus } from "@fortawesome/free-solid-svg-icons";
+import { faChevronUp, faPlus, faTrash } from "@fortawesome/free-solid-svg-icons";
 const EditCompany = () => {
     const { uid } = useParams();
     const token = localStorage.getItem("token");
@@ -62,6 +64,10 @@ const EditCompany = () => {
 
     const dispatch = useDispatch()
     const { DataTypeHospital } = useSelector((state) => state.GetTypeHospital)
+
+    const renderTooltipAction = (props, context) => (
+        <Tooltip {...props}>{context}</Tooltip>
+    );
 
     const getDeals = async (retryCount = 0) => {
         try {
@@ -544,6 +550,55 @@ const EditCompany = () => {
         };
     }, [uid, token]);
 
+    const handleDeleteMachine = (ulid) => {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'This action will delete the machine.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel',
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: "Process...",
+                    text: "Please wait while we process your request.",
+                    allowEscapeKey: false,
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                const response = await axios.delete(`${process.env.REACT_APP_BACKEND_URL}/machines/${ulid}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }).then(res => {
+                    Swal.fire({
+                        title: 'Success',
+                        text: res.data.message,
+                        icon: "success",
+                    });
+
+                    getMachineByCompany()
+
+                }).catch((error) => {
+                    console.error(error);
+
+                    Swal.fire({
+                        title: "Error!",
+                        text: "Failed to delete data. Please try again.",
+                        icon: "error",
+                        confirmButtonText: "OK",
+                    });
+                });
+
+                return response
+            }
+        });
+    };
+
 
     const updateCompany = async (e) => {
         e.preventDefault();
@@ -767,6 +822,16 @@ const EditCompany = () => {
                 );
             },
             // width: "140px",
+        },
+        {
+            name: "Action",
+            selector: (row) => {
+                return (<OverlayTrigger placement="top" overlay={(props) => renderTooltipAction(props, "Hapus Data Mesin")}>
+                    <button type="button" className="btn" onClick={(e) => handleDeleteMachine(row.ulid)}>
+                        <FontAwesomeIcon icon={faTrash} color="#444442" />
+                    </button>
+                </OverlayTrigger>);
+            },
         },
     ];
 
