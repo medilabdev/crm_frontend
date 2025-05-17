@@ -729,6 +729,7 @@ const Company = () => {
                     pending={pending}
                     totalRows={totalRows}
                     setDeleteCompany={setDeleteCompany}
+                    customStyles={CustomStyles}
                   />
                 </div>
               </div>

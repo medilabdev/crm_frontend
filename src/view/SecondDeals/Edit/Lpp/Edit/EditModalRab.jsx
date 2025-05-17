@@ -1,161 +1,156 @@
-import React, { useEffect, useState } from 'react'
-import { Button, Modal, Offcanvas } from "react-bootstrap";
-import { json } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Button, Modal } from 'react-bootstrap';
 
-const EditModalRab = ({ show, handleClose, data, dataAll}) => {
-    const [InputData, SetInputData] = useState({});
-    const [isAlkes, setIsAlkes] = useState({})
-    const [inputEst, setInputEst] = useState("");
-    const [resultValue, setResultValue] = useState("");
-    
-    useEffect(() => {
-      SetInputData(data);
-      setIsAlkes(data?.is_alkes)
-      setInputEst(data?.estimated_cost ? data?.estimated_cost.toString() : "")
-    }, [data])
-      const handleInput = (e) => {
-        SetInputData({
-          ...InputData,
-          [e.target.name]: e.target.value,
-        });
-      };
+const EditModalRab = ({ show, handleClose, data, onSave }) => {
+  const [inputData, setInputData] = useState({
+    item_uid: '',
+    is_alkes: '',
+    estimated_cost: '',
+    qty: '',
+    realization_note: '',
+  });
 
-      const handleAlkes = (e) => {
-        setIsAlkes(e.target.value)
-      }
+  const [inputEst, setInputEst] = useState('');
+  const [resultValue, setResultValue] = useState(0);
 
-    const handleInputDataRP = (event) => {
-        const rawValue = event.target.value;
-        const formattedValue = formatCurrency(rawValue);
-        setInputEst(formattedValue);
-      };
+  useEffect(() => {
+    if (data) {
+      setInputData({
+        item_uid: data.item_uid || '',
+        is_alkes: data.is_alkes || '',
+        qty: data.qty || '',
+        realization_note: data.realization_note || '',
+      });
+      setInputEst(data.estimated_cost ? data.estimated_cost.toString() : '');
+    }
+  }, [data]);
 
-    const formatCurrency = (value) => {
-      const sanitizedValue = value.replace(/[^\d]/g, "")
-      return new Intl.NumberFormat('id-ID').format(parseInt(sanitizedValue));
-      };
+  const handleInput = (e) => {
+    const { name, value } = e.target;
+    setInputData((prev) => ({ ...prev, [name]: value }));
+  };
 
-    let DataEst = parseInt(inputEst.replace(/\./g, ""), 10)
-    let inputQty = parseFloat(InputData.qty)
+  const handleInputEst = (e) => {
+    const formatted = formatCurrency(e.target.value);
+    setInputEst(formatted);
+  };
 
-    useEffect(() => {
-      const result_price = DataEst * inputQty
-      setResultValue(result_price)
-    }, [DataEst, inputQty])
+  const formatCurrency = (value) => {
+    const clean = value.replace(/[^\d]/g, '');
+    return Number(clean || 0).toLocaleString('id-ID');
+  };
+
+  const getNumericValue = (val) => parseFloat(val?.toString().replace(/\./g, '')) || 0;
+
+  useEffect(() => {
+    const total = getNumericValue(inputEst) * parseFloat(inputData.qty || 0);
+    setResultValue(total);
+  }, [inputEst, inputData.qty]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const dataUpdate = dataAll.map((item) => {
-      if(item.id == data.id){
-        return{
-          ...item, 
-          id:InputData.id,
-          item_uid: InputData.item_uid,
-          is_alkes:isAlkes,
-          estimated_cost: DataEst,
-          qty:InputData.qty,
-          total_estimated_cost:resultValue, 
-          realization_note:InputData.realization_note
-        }
-      }
-      return item
-    })
-    localStorage.setItem('rabEdit', JSON.stringify(dataUpdate))
+
+    const updatedData = {
+      ...data,
+      item_uid: inputData.item_uid,
+      is_alkes: inputData.is_alkes,
+      estimated_cost: getNumericValue(inputEst),
+      qty: parseFloat(inputData.qty),
+      total_estimated_cost: resultValue,
+      realization_note: inputData.realization_note,
+    };
+
+    onSave(updatedData);
     handleClose()
   };
 
   return (
-    <Modal show={show} onHide={handleClose} placement="end">
-    <Modal.Header closeButton>
-      <Modal.Title>Tambah Data</Modal.Title>
-    </Modal.Header>
-    <Modal.Body>
-      <div class="form-floating mb-3">
-        <input
-          type="text"
-          class="form-control"
-          id="floatingInput"
-          name="item_uid"
-          value={InputData.item_uid || ""}
-          onChange={handleInput}
-          placeholder="name@example.com"
-        />
-        <label for="floatingInput">Item</label>
-      </div>
-      <div className="mb-3">
-        <label htmlFor="">Apakah Alat Kesehatan</label>
-        <select
-          name="is_alkes"
-          id=""
-          onChange={handleAlkes}
-          value={isAlkes}
-          className="form-control"
-        >
-          <option value="">Select Choose</option>
-          <option value="yes">Iya</option>
-          <option value="no">Tidak</option>
-        </select>
-      </div>
-      <div class="form-floating mb-3">
-        <input
-          type="text"
-          class="form-control"
-          id="floatingInput"
-          value={inputEst || 0}
-          onChange={handleInputDataRP}
-          placeholder="name@example.com"
-        />
-        <label for="floatingInput">Nilai Estimasi Biaya</label>
-      </div>
-      <div class="form-floating mb-3">
-        <input
-          type="number"
-          class="form-control"
-          name="qty"
-          value={InputData.qty || ""}
-          onChange={handleInput}
-          id="floatingInput"
-          placeholder="name@example.com"
-        />
-        <label for="floatingInput">Qty</label>
-      </div>
-      <div class="form-floating mb-3">
-        <input
-          type="text"
-          class="form-control"
-          name="total_estimasi_biaya"
-          value={resultValue || 0}
-          id="floatingInput"
-          placeholder="name@example.com"
-        />
-        <label for="floatingInput">Total Estimasi Biaya</label>
-      </div>
-      <div className="mb-3">
-        
-        <label htmlFor="" style={{ fontWeight: "600" }}>
-          Catatan Realisasi
-        </label>
-        <textarea
-          id=""
-          cols="30"
-          rows="5"
-          name="realization_note"
-          onChange={handleInput}
-          className="form-control"
-          value={InputData.realization_note || ""}
-        />
-      </div>
-    </Modal.Body>
-    <Modal.Footer className="mb-4">
-      <Button variant="secondary" className="me-2" onClick={handleClose}>
-        Close
-      </Button>
-      <Button variant="primary" className="me-3" onClick={handleSubmit}>
-        Save Changes
-      </Button>
-    </Modal.Footer>
-  </Modal>
-  )
-}
+    <Modal show={show} onHide={handleClose} centered>
+      <Modal.Header closeButton>
+        <Modal.Title>Edit Data RAB</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <div className="form-floating mb-3">
+          <input
+            type="text"
+            className="form-control"
+            name="item_uid"
+            value={inputData.item_uid}
+            onChange={handleInput}
+            placeholder="Item"
+          />
+          <label>Item</label>
+        </div>
 
-export default EditModalRab
+        <div className="mb-3">
+          <label>Apakah Alat Kesehatan</label>
+          <select
+            name="is_alkes"
+            className="form-control"
+            value={inputData.is_alkes}
+            onChange={handleInput}
+          >
+            <option value="">Pilih</option>
+            <option value="yes">Iya</option>
+            <option value="no">Tidak</option>
+          </select>
+        </div>
+
+        <div className="form-floating mb-3">
+          <input
+            type="text"
+            className="form-control"
+            value={inputEst}
+            onChange={handleInputEst}
+            placeholder="Estimasi Biaya"
+          />
+          <label>Nilai Estimasi Biaya</label>
+        </div>
+
+        <div className="form-floating mb-3">
+          <input
+            type="number"
+            className="form-control"
+            name="qty"
+            value={inputData.qty}
+            onChange={handleInput}
+            placeholder="Qty"
+          />
+          <label>Qty</label>
+        </div>
+
+        <div className="form-floating mb-3">
+          <input
+            type="text"
+            className="form-control"
+            readOnly
+            value={`Rp. ${new Intl.NumberFormat().format(resultValue || 0)}`}
+            placeholder="Total"
+          />
+          <label>Total Estimasi Biaya</label>
+        </div>
+
+        <div className="mb-3">
+          <label>Catatan Realisasi</label>
+          <textarea
+            name="realization_note"
+            className="form-control"
+            rows="3"
+            value={inputData.realization_note}
+            onChange={handleInput}
+          />
+        </div>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="secondary" onClick={handleClose}>
+          Batal
+        </Button>
+        <Button variant="primary" onClick={handleSubmit}>
+          Simpan
+        </Button>
+      </Modal.Footer>
+    </Modal>
+  );
+};
+
+export default EditModalRab;

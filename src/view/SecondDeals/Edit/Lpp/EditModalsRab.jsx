@@ -1,11 +1,24 @@
 import React, { useEffect, useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 
-const EditModalsRab = ({ show, handleClose, data, dataOld }) => {
+const EditModalsRab = ({ show, handleClose, data, onSave }) => {
   const [inputData, setInputData] = useState({});
-  const [isAlkes, setIsAlkes] = useState({});
+  const [isAlkes, setIsAlkes] = useState("");
   const [inputRp, setInputRp] = useState("");
-  const [resultValue, setResultValue] = useState("");
+  const [resultValue, setResultValue] = useState(0);
+
+  useEffect(() => {
+    if (data) {
+      setInputData(data);
+      setIsAlkes(data?.is_alkes || "");
+      setInputRp(
+        data?.nilai_estimasi_biaya
+          ? data.nilai_estimasi_biaya.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+          : ""
+      );
+    }
+  }, [data]);
+
   const handleInput = (e) => {
     setInputData({
       ...inputData,
@@ -14,137 +27,119 @@ const EditModalsRab = ({ show, handleClose, data, dataOld }) => {
   };
 
   const handleAlkes = (e) => {
-    setIsAlkes(e.target.value)
-  }
-  useEffect(() => {
-    setInputData(data);
-    setIsAlkes(data?.is_alkes)
-    setInputRp(data?.nilai_estimasi_biaya ? data.nilai_estimasi_biaya.toString() : "")
-  }, [data]);
+    setIsAlkes(e.target.value);
+  };
 
-  let inputRpResult = parseInt(inputRp.replace(/\./g, ""), 12);
-  let inputQty = parseFloat(inputData.qty)
-  
-  useEffect(()=>{
-    const result_price = inputQty * inputRpResult
-    setResultValue(result_price)
-  },[inputRpResult, inputQty])
+  const handleInputDataRP = (e) => {
+    const rawValue = e.target.value;
+    const formatted = formatCurrency(rawValue);
+    setInputRp(formatted);
+  };
 
-  const handleInputDataRP =(event) => {
-    const rawValue = event.target.value
-    const formatedValue = formatCurrency(rawValue)
-    setInputRp(formatedValue)
-  }
-  
   const formatCurrency = (value) => {
-    const sanitizedValue = value.replace(/[^\d]/g, "")
-    return new Intl.NumberFormat('id-ID').format(parseInt(sanitizedValue));
-  }
+    const cleaned = value.replace(/[^\d]/g, "");
+    return Number(cleaned).toLocaleString("id-ID");
+  };
+
+  useEffect(() => {
+    const nilai = parseInt(inputRp.replace(/\./g, "")) || 0;
+    const qty = parseFloat(inputData.qty) || 0;
+    setResultValue(nilai * qty);
+  }, [inputRp, inputData.qty]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const dataUpdate = dataOld.map((item) => {
-      if(item.id == inputData.id){
-        return{
-          ...item,
-          id:inputData.id,
-          item:inputData.item,
-          is_alkes: isAlkes,
-          nilai_estimasi_biaya:inputRpResult,
-          qty: inputData.qty,
-          total_estimasi_biaya: resultValue,
-          note:inputData.note
-        }
-      }
-      return item
-    })
-    localStorage.setItem("RAB", JSON.stringify(dataUpdate));
-    handleClose()
+
+    const updatedItem = {
+      ...inputData,
+      is_alkes: isAlkes,
+      nilai_estimasi_biaya: parseInt(inputRp.replace(/\./g, "")) || 0,
+      total_estimasi_biaya: resultValue,
+    };
+
+    onSave(updatedItem); // ⬅️ Kirim ke parent untuk update
+    handleClose();
   };
+
   return (
     <Modal show={show} onHide={handleClose} centered>
       <Modal.Header closeButton>
         <Modal.Title>Edit Data RAB</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <div class="form-floating mb-3">
+        <div className="form-floating mb-3">
           <input
             type="text"
-            class="form-control"
-            id="floatingInput"
+            className="form-control"
             name="item"
-            onChange={handleInput}
             value={inputData.item || ""}
-            placeholder="name@example.com"
+            onChange={handleInput}
+            placeholder="Item"
           />
-          <label for="floatingInput">Item</label>
+          <label>Item</label>
         </div>
         <div className="mb-3">
-          <label htmlFor="">Apakah Alat Kesehatan</label>
-          <select name="is_alkes" id="" className="form-control" value={isAlkes} onChange={handleAlkes}>
-            <option value="">Select Choose</option>
+          <label>Apakah Alat Kesehatan</label>
+          <select
+            className="form-control"
+            name="is_alkes"
+            value={isAlkes}
+            onChange={handleAlkes}
+          >
+            <option value="">Pilih</option>
             <option value="yes">Ya</option>
             <option value="no">Tidak</option>
           </select>
         </div>
-        <div class="form-floating mb-3">
-        
+        <div className="form-floating mb-3">
           <input
             type="text"
-            class="form-control"
+            className="form-control"
             name="nilai_estimasi_biaya"
+            value={inputRp}
             onChange={handleInputDataRP}
-            value={inputRp || 0}
-            id="floatingInput"
-            placeholder="name@example.com"
+            placeholder="Nilai Estimasi"
           />
-          <label for="floatingInput">Nilai Estimasi Biaya</label>
+          <label>Nilai Estimasi Biaya</label>
         </div>
-        <div class="form-floating mb-3">
+        <div className="form-floating mb-3">
           <input
             type="number"
-            class="form-control"
+            className="form-control"
             name="qty"
-            onChange={handleInput}
             value={inputData.qty || ""}
-            id="floatingInput"
-            placeholder="name@example.com"
+            onChange={handleInput}
+            placeholder="Qty"
           />
-          <label for="floatingInput">Qty</label>
+          <label>Qty</label>
         </div>
-        <div class="form-floating mb-3">
+        <div className="form-floating mb-3">
           <input
-            type="number"
-            class="form-control"
-            name="total_estimasi_biaya"
-            value={resultValue || ""}
-            id="floatingInput"
-            placeholder="name@example.com"
+            type="text"
+            className="form-control"
+            readOnly
+            value={`Rp. ${new Intl.NumberFormat().format(resultValue)}`}
+            placeholder="Total Estimasi"
           />
-          <label for="floatingInput">Total Estimasi Biaya</label>
+          <label>Total Estimasi Biaya</label>
         </div>
         <div className="mb-3">
-          <label htmlFor="" style={{ fontWeight: "600" }}>
-            Catatan Realisasi
-          </label>
+          <label>Catatan Realisasi</label>
           <textarea
-            id=""
-            cols="30"
-            rows="5"
             name="note"
-            onChange={handleInput}
+            rows="3"
             className="form-control"
-          >
-            {inputData.note}
-          </textarea>
+            value={inputData.note || ""}
+            onChange={handleInput}
+          ></textarea>
         </div>
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={handleClose}>
-          Close
+          Batal
         </Button>
         <Button variant="primary" onClick={handleSubmit}>
-          Save Changes
+          Simpan Perubahan
         </Button>
       </Modal.Footer>
     </Modal>

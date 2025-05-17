@@ -60,10 +60,12 @@ const TopButton = ({
   const uidFqp = data?.fqp_document?.need_approval?.uid ?? null ;
   const uidLpp = data?.lpp_document?.need_approval?.uid ?? null ;
   const uidRoi = data?.need_approval?.uid ?? null
+  console.log(data);
   
   
   
   const uidForm = statusLevel === "leads" ? uidFqp : statusLevel === "Approaching" ? uidLpp : statusLevel === "Decide" ? uidRoi : '' ;
+  
 
   
   const handleApprove = async (e) => {
@@ -230,8 +232,12 @@ const TopButton = ({
               />
               Task
             </button>
-          {((position === "pRGYXVKdzCPoQ8" && statusLevel === "leads") || (position === "pRGYXVKdzCPoQ8" && statusLevel === "Approaching") || (position === "adsfasdf1321" && statusLevel === "Decide") || (position ==="pRGYXVKdzCPoQ1" && statusLevel === "Decide")) && uidForm ? (
+          {((position === "pRGYXVKdzCPoQ8" && statusLevel === "leads") ||
+           (position === "pRGYXVKdzCPoQ8" && statusLevel === "Approaching") || 
+           (position === 'adsfasdf1321' && statusLevel === 'Decide') || 
+           (position ==="pRGYXVKdzCPoQ1" && statusLevel === "Decide")) && uidForm ? (
               <>
+      
               <HandleApprove handleApprove={handleApprove} handleReject={handleReject}/>
               </>
           ): "" }
@@ -262,7 +268,7 @@ const TopButton = ({
             </button>
           ) : (
             ""
-          )}
+          )}       
           {(position === "pRGYXVKdzCPoQ8" ||
             position === "_dLjLFdH-Nw8vg8U" ||
             position === "pRGYXVKdzCPoQ1" || 

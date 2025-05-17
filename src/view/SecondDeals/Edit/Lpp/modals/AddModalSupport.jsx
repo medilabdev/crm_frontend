@@ -1,15 +1,17 @@
 import React, { useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 
-const AddModalSupport = ({ show, handleClose }) => {
+const AddModalSupport = ({ show, handleClose, onSave }) => {
   const [inputData, setInputData] = useState([]);
+  const [inputEst, setInputEst] = useState([]);
+  const [resultValue, setResultValue] = useState(0);
   const handleInput = (e) => {
     setInputData({
       ...inputData,
       [e.target.name]: e.target.value,
     });
   };
-  const [inputEst, setInputEst] = useState([]);
+
   const handleInputDataRP = (event) => {
     const rawValue = event.target.value;
     const formattedValue = formatCurrency(rawValue);
@@ -23,35 +25,24 @@ const AddModalSupport = ({ show, handleClose }) => {
   };
 
   const inputWithoutSeparator =
-    inputEst.length > 0 ? inputEst.replace(/\./g, "") : "";
+  inputEst.length > 0 ? inputEst.replace(/\./g, "") : "";
   const tempOne = parseFloat(inputWithoutSeparator);
   const tempTwo = parseFloat(inputData.qty);
   const result_estimasi_charge = tempOne * tempTwo;
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (Object.keys(inputData).length > 0) {
-      const dataExist =
-        JSON.parse(localStorage.getItem("SupportKerjaSama")) || [];
-      const id = `data_${Date.now()}`;
-      const Payload = {
-        id: id,
-        item: inputData.item,
-        nilai_estimasi_biaya: tempOne,
-        qty: tempTwo,
-        total_estimasi_biaya: result_estimasi_charge,
-        note: inputData.note,
-      };
-      dataExist.push(Payload);
-      localStorage.setItem("SupportKerjaSama", JSON.stringify(dataExist));
-      setInputData({
-        item: "",
-        total_estimasi_biaya: "",
-        note: "",
-        qty: "",
-      });
-      setInputEst(0);
-      handleClose();
+    const newRab = {
+      id: `data_${Date.now()}`,
+      item: inputData.item,
+      nilai_estimasi_biaya: tempOne,
+      qty: tempTwo,
+      total_estimasi_biaya: result_estimasi_charge,
+      note: inputData.note,
     }
+    onSave(newRab);
+    setInputData({})
+    setInputEst(0);
+    handleClose();
   };
 
   return (

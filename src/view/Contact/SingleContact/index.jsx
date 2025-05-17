@@ -314,18 +314,20 @@ const SingleContact = () => {
       formData.append("city", inputContact.city);
       formData.append("remarks", inputContact.remarks);
       formData.append("source_uid", inputContact.source_uid);
+      formData.append("postal_code", inputContact.postal_code);
       formData.append("owner_user_uid", inputContact.owner_user_uid);
+      formData.append("notes", inputContact.notes);
       for (const phone of inputContact?.phone_number) {
         formData.append(`phone_number[]`, phone);
       }
       resultDeals.forEach((deals, index) => {
         formData.append(`deals_uid[${index}]`, deals);
       });
-      // console.log("FormData Content:");
-      // for (const pair of formData.entries()) {
-      //   console.log(pair[0] + ": " + pair[1]);
-      // }
-      setButtonDisabled(true);
+      console.log("FormData Content:");
+      for (const pair of formData.entries()) {
+        console.log(pair[0] + ": " + pair[1]);
+      }
+      // setButtonDisabled(true);
       const addContact = await axios
         .post(`${process.env.REACT_APP_BACKEND_URL}/contacts`, formData, {
           headers: {
@@ -344,17 +346,29 @@ const SingleContact = () => {
           });
         });
     } catch (err) {
+      // console.error("Error detail:", err);
+
+      let errorMessage = "Terjadi kesalahan. Silakan coba lagi.";
       if (err.response) {
-        Swal.fire({
-          text: err.response.data.message,
-          icon: "warning",
-        });
-      } else {
-        Swal.fire({
-          text: "Something went wrong !",
-          icon: "error",
-        });
-      }
+        const errorData = err.response.data;
+    
+        // Deteksi pesan duplicate email dari error SQL
+        if (
+          errorData.error?.includes("Duplicate entry") &&
+          errorData.error?.includes("contacts_email_unique")
+        ) {
+          errorMessage = "Email sudah digunakan, silakan gunakan email lain.";
+        } else if (errorData.message) {
+          // Gunakan pesan standar dari server jika ada
+          errorMessage = errorData.message;
+        }
+      }    
+    Swal.fire({
+      title: "Error",
+      text: errorMessage,
+      icon: "error",
+    });
+
     }
   };
   return (
@@ -668,7 +682,6 @@ const SingleContact = () => {
                 <button
                   className="btn btn-primary me-2"
                   type="submit"
-                  disabled={isButtonDisabled}
                 >
                   Save Changes
                 </button>

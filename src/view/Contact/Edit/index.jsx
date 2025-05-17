@@ -184,6 +184,7 @@ const EditContact = () => {
       const telp_number = contactDetail?.phone?.map((phone) => phone);
       const companyOld = contactDetail?.associate?.map((data) => data);
       setOldComp(companyOld);
+      
       setEditContact({
         name: contactDetail.name,
         birthday: contactDetail.birthday,
@@ -452,23 +453,23 @@ const EditContact = () => {
       });
     }
     formData.append("_method", "put");
-    // for (const pair of formData.entries()) {
-    //   console.log(pair[0] + ": " + pair[1]);
-    // }
-    setButtonDisabled(true);
+    for (const pair of formData.entries()) {
+      console.log(pair[0] + ": " + pair[1]);
+    }
     axios
-      .post(`${process.env.REACT_APP_BACKEND_URL}/contacts/${uid}`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => {
-        Swal.fire({
-          title: res.data.message,
-          text: "Successfully updated contact",
-          icon: "success",
-        }).then((res) => {
-          if (res.isConfirmed) {
+    .post(`${process.env.REACT_APP_BACKEND_URL}/contacts/${uid}`, formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    .then((res) => {
+      setButtonDisabled(true);
+      Swal.fire({
+        title: res.data.message,
+        text: "Successfully updated contact",
+        icon: "success",
+      }).then((res) => {
+        if (res.isConfirmed) {
             window.location.reload();
           }
         });
@@ -537,7 +538,8 @@ const EditContact = () => {
       }
     });
   };
-
+  // console.log(editContact);
+  
   return (
     <body id="body">
       <Topbar />
@@ -712,6 +714,7 @@ const EditContact = () => {
                   >
                     <Form.Control
                       type="text"
+                      name="address"
                       value={editContact.address}
                       onChange={handleInput}
                       placeholder="@gmail"
@@ -1015,7 +1018,6 @@ const EditContact = () => {
               </Card>
               <Card className="shadow">
                 <Card.Header>
-                  {" "}
                   <h6 className="fw-bold mt-2">History</h6>
                 </Card.Header>
                 <Card.Body>

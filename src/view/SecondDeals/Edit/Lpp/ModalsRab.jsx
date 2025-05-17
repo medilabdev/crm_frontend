@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Button, Modal, Offcanvas } from "react-bootstrap";
 
-const ModalsRab = ({ show, handleClose }) => {
+const ModalsRab = ({ show, handleClose, onSave }) => {
   const [InputData, SetInputData] = useState({});
   const [inputEst, setInputEst] = useState([]);
+  const [resultValue, setResultValue] = useState(0);
+  
   const handleInput = (e) => {
     SetInputData({
       ...InputData,
@@ -23,8 +25,6 @@ const ModalsRab = ({ show, handleClose }) => {
     return formattedValue;
   };
 
-  const [resultValue, setResultValue] = useState();
-
   const inputWithoutSeparator = inputEst.length > 0 ? inputEst.replace(/\./g, "") : "";
   const tempOne = parseFloat(inputWithoutSeparator);
   const tempTwo = parseFloat(InputData.qty);
@@ -36,30 +36,21 @@ const ModalsRab = ({ show, handleClose }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (Object.keys(InputData).length > 0) {
-      const dataExist = JSON.parse(localStorage.getItem("RAB")) || [];
-      const id = `data_${Date.now()}`;
-      const Payload = {
-        id: id,
-        item: InputData.item,
-        is_alkes: InputData.is_alkes,
-        nilai_estimasi_biaya: tempOne,
-        qty: InputData.qty,
-        total_estimasi_biaya: resultValue,
-        note: InputData.note,
-      };
-      dataExist.push(Payload);
-      localStorage.setItem("RAB", JSON.stringify(dataExist));
-      SetInputData({
-        item: "",
-        total_estimasi_biaya: 0,
-        note: "",
-        qty: "",
-      });
+    const newRab = {
+      id: `data_${Date.now()}`,
+      item: InputData.item,
+      is_alkes: InputData.is_alkes,
+      nilai_estimasi_biaya: tempOne,
+      qty: InputData.qty,
+      total_estimasi_biaya: resultValue,
+      note: InputData.note,
+    }
+      onSave(newRab);
+      SetInputData({});
       setInputEst(0);
       handleClose();
-    }
   };
+
 
   return (
     <Modal show={show} onHide={handleClose} placement="end">

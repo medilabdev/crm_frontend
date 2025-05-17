@@ -40,8 +40,13 @@ const InputFDC = ({ data }) => {
     });
   };
 
+  
+
   const handleInputChange = (e, groupIndex, position) => {
     const { name, value } = e.target;
+
+    const match = name.match(/^([^\[]+)/); // ambil sebelum tanda '['
+    const fieldName = match ? match[1] : name; 
     // Update formData dengan nama, posisi, dan field
     setFormDataDireksi((prevData) => ({
       ...prevData,
@@ -54,7 +59,26 @@ const InputFDC = ({ data }) => {
       ...prevFields,
       [`direksi[${groupIndex}][${name}]`]: true,
     }));
+    
+  
+  };  
+
+  const handleBankInputChange = (e, index, field) => {
+    const { value } = e.target;
+  
+    setInputBank((prevData) => {
+      const newData = [...prevData];
+      if (!newData[index]) {
+        newData[index] = {};
+      }
+      newData[index][field] = value;
+      return newData;
+    });
   };
+  
+  
+
+
   
   const HospitalType = data?.company?.hospital_type || null;
   const groups = [
@@ -150,6 +174,8 @@ const InputFDC = ({ data }) => {
       </div>
     </div>
   );
+
+  
   
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -212,7 +238,7 @@ const InputFDC = ({ data }) => {
         });
         formData.append("business_license_file", izinDagang || "");
         if (inputBank && inputBank.length > 0) {
-          inputBank.forEach((item, index) => {
+          inputBank.forEach((item, index) => {            
             formData.append(`bank[${index}][bank_name]`, item.nameBank || "");
             formData.append(`bank[${index}][branch_bank]`, item.cabang || "");
             formData.append(
@@ -228,6 +254,7 @@ const InputFDC = ({ data }) => {
             formData.append(`bank[${index}][swift_code]`, item.swiftCode || "");
           });
         }
+        
         groups.forEach((group, index) => {
           // Tambahkan posisi
           formData.append(`direksi[${index}][position]`, group.position);
@@ -238,7 +265,9 @@ const InputFDC = ({ data }) => {
             formData.append(fieldName, formDataDireksi[fieldName] || ""); // Gunakan nilai dari formDataDireksi jika ada, atau kosongkan
           });
         });
-  
+        // for (const pair of formData.entries()) {
+        //   console.log(pair[0] + ": " + pair[1]);
+        // }
         const response = await axios.post(
           `${process.env.REACT_APP_BACKEND_URL}/v2/fdc-document`,
           formData,
@@ -248,6 +277,7 @@ const InputFDC = ({ data }) => {
             },
           }
         );
+        
         Swal.close();
         await Swal.fire({
           title: response.data.message,
@@ -279,7 +309,7 @@ const InputFDC = ({ data }) => {
       <CompanyInformation data={data} handleInput={handleInput} />
       <DataPajak handleInput={handleInput} />
         <FormDireksiAndPic handleInputChange={handleInputChange} touchedFields={touchedFields} formDataDireksi={formDataDireksi} groups={groups} />
-        <FormDataBank handleInputChange={handleInputChange} />
+        <FormDataBank handleBankInputChange={handleBankInputChange} />
 
         <div className="header-box mt-2">
           <FontAwesomeIcon icon={faFolderPlus} className="me-2" /> DOKUMEN YANG HARUS DILENGKAPI

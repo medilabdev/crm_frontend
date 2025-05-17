@@ -10,10 +10,6 @@ import { GetDataRegionalBpjs } from "../../../../action/RegionalBpjs";
 import { GetDataFaskes } from "../../../../action/DataFaskes";
 import { CategoryType } from "../../../../action/CategoryType";
 import EditRab from "../Lpp/Edit/EditRab";
-import DataTableRab from "../Lpp/Rab";
-import EditSupport from "../Lpp/Edit/EditSupport";
-import EditFee from "../Lpp/Edit/EditFee";
-import EditRekap from "../Lpp/Edit/EditRekap";
 import EditTimeline from "../Lpp/Edit/EditTimeline";
 import Swal from "sweetalert2"
 import AddRegBPJS from "../Lpp/modals/addRegBPJS";
@@ -28,10 +24,6 @@ const EditLpp = ({ data, listCompany, uidDeals, dataFqp }) => {
     tindakanPerbulan:'',
     needApproval:''
   })
-  
-  const [showOverlay, setShowOverlay] = useState(false);
-  const handleShow = () => setShowOverlay(true);
-  const handleClose = () => setShowOverlay(false);
 
   const [showModalBpjs, setShowModalBpjs] = useState(false)
   const handleShowBpjs = () => setShowModalBpjs(true)
@@ -65,25 +57,9 @@ const EditLpp = ({ data, listCompany, uidDeals, dataFqp }) => {
       },
     }),
   });
-  console.log(dataLpp);
   
   const dispatch = useDispatch();
-  const selectCompany = () => {
-    const result = [];
-    if (Array.isArray(listCompany)) {
-      listCompany.map((data) => {
-        const finalResult = {
-          label: `${data.name} - (${data.company_type?.name})`,
-          value: data.uid,
-          type: data.company_type_uid,
-        };
-        result.push(finalResult);
-      });
-    } else {
-      // console.error("listResult is not an array or is not yet initialized.");
-    }
-    return result;
-  };
+ 
   const { CategoryTypeData } = useSelector((state) => state.CategoryType);
   const { fasksesData } = useSelector((state) => state.DataFaskes);
   const { BpjsData } = useSelector((state) => state.BpjsRegional);
@@ -103,6 +79,7 @@ const EditLpp = ({ data, listCompany, uidDeals, dataFqp }) => {
     }
     return result;
   };
+
   const selectBpjs = () => {
     const result = [];
     if (Array.isArray(BpjsData)) {
@@ -118,6 +95,7 @@ const EditLpp = ({ data, listCompany, uidDeals, dataFqp }) => {
     }
     return result;
   };
+
   const SelectCategory = () => {
     const result = [];
     if (Array.isArray(CategoryTypeData)) {
@@ -133,6 +111,8 @@ const EditLpp = ({ data, listCompany, uidDeals, dataFqp }) => {
     }
     return result;
   };
+
+
   const [priceFormat, setPriceFormat] = useState(
     dataLpp !== null ? dataLpp?.price : 0
   );
@@ -185,38 +165,24 @@ const EditLpp = ({ data, listCompany, uidDeals, dataFqp }) => {
                     
 
   const actionDuringCoperationQty = (firstQty + secondQty) *  actionMachinePerMonthQty * (dataLpp?.collaboration_period * 12);
+  const [rabData, setRabData] = useState([]);
+  const [supportData, setSupportData] = useState([])
+  const [feeData, setFeeData] = useState([])
 
   useEffect(() => {
     dispatch(GetDataRegionalBpjs(token));
     dispatch(GetDataFaskes(token));
     dispatch(CategoryType(token));
-    
-    const clearRab = () => {
-      localStorage.removeItem("RAB")
+    if(data?.rab){
+      setRabData(data?.rab)
     }
-    const ClearEditRab = () => {
-      localStorage.removeItem("rabEdit")
+    if(data?.support){
+      setSupportData(data?.support)
     }
-    const ClearEditFee = () => {
-      localStorage.removeItem("feeEdit")
+    if(data?.fee){
+      setFeeData(data?.fee);
     }
-    const ClearEditSupport = () => {
-      localStorage.removeItem("supportEdit")
-    }
-
-    window.addEventListener("beforeunload", clearRab)
-    window.addEventListener("beforeunload", ClearEditRab);
-    window.addEventListener("beforeunload", ClearEditFee);
-    window.addEventListener("beforeunload", ClearEditSupport);
-
-    return () => {
-      window.addEventListener("beforeunload", clearRab)
-      window.addEventListener("beforeunload", ClearEditRab);
-      window.addEventListener("beforeunload", ClearEditFee);
-      window.addEventListener("beforeunload", ClearEditSupport);
-    };
-
-  }, [dispatch]);
+  }, [dispatch, data]);
 
   const [TimelineData, setTimelineData] = useState(data?.timeline)
   const handleChangeTimeline = (index, valueIndex) => {
@@ -226,33 +192,6 @@ const EditLpp = ({ data, listCompany, uidDeals, dataFqp }) => {
   };
 
   
-
-  let RabData = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key.startsWith("rabEdit")) {
-      const data = JSON.parse(localStorage.getItem(key));
-      RabData.push(data);
-    }
-  }
-
-  let SupportData = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key.startsWith("supportEdit")) {
-      const data = JSON.parse(localStorage.getItem(key));
-      SupportData.push(data);
-    }
-  }
-
-  let FeeData = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key.startsWith("feeEdit")) {
-      const data = JSON.parse(localStorage.getItem(key));
-      FeeData.push(data);
-    }
-  }
 
   const handleUpdate = async(e) => {
     e.preventDefault()
@@ -369,8 +308,8 @@ const EditLpp = ({ data, listCompany, uidDeals, dataFqp }) => {
         formData.append("action_during_cooperation_qty", actionDuringCoperationQty)
         formData.append("postscript", dataLpp?.postscript || "")
 
-        if (Array.isArray(RabData[0]) && RabData[0].length > 0) {
-          RabData[0].forEach((rab, index) => {
+        if (Array.isArray(rabData) && rabData.length > 0) {
+          rabData.forEach((rab, index) => {
             formData.append(`rab[${index}][item_uid]`, rab?.item_uid || "");
             formData.append(`rab[${index}][is_alkes]`, rab?.is_alkes || "");
             formData.append(
@@ -385,8 +324,8 @@ const EditLpp = ({ data, listCompany, uidDeals, dataFqp }) => {
             formData.append(`rab[${index}][realization_note]`, rab?.realization_note || "");
           });
         }
-        if (Array.isArray(SupportData[0]) && SupportData[0].length > 0) {
-          SupportData[0].forEach((support, index) => {
+        if (Array.isArray(supportData) && supportData.length > 0) {
+          supportData.forEach((support, index) => {
             formData.append(`support[${index}][item_uid]`, support?.item_uid || "");
             formData.append(
               `support[${index}][estimated_cost]`,
@@ -401,8 +340,8 @@ const EditLpp = ({ data, listCompany, uidDeals, dataFqp }) => {
           });
         }
 
-        if (Array.isArray(FeeData[0]) && FeeData[0].length > 0) {
-          FeeData[0].forEach((fee, index) => {
+        if (Array.isArray(feeData) && feeData.length > 0) {
+          feeData.forEach((fee, index) => {
             formData.append(`fee[${index}][recieve_name]`, fee?.recieve_name || "");
             formData.append(
               `fee[${index}][value]`,
@@ -888,17 +827,8 @@ const EditLpp = ({ data, listCompany, uidDeals, dataFqp }) => {
         <label htmlFor="">Tindakan Selama Bekerja Sama</label>
       </div>
       <div className="mb-2">
-      <EditRab data={dataLpp?.rab} dataSupport={dataLpp?.support} dataFee={dataLpp?.fee} />
+      <EditRab rabData={rabData} setRabData={setRabData} feeData={feeData} setFeeData={setFeeData} supportData={supportData} setSupportData={setSupportData} />
       </div>
-      {/* <div className="mb-2">
-      <EditSupport data={dataLpp?.support} />
-      </div>
-      <div className="mb-2">
-      <EditFee data={dataLpp?.fee} />
-      </div> */}
-      {/* <div className="mb-2">
-        <EditRekap />
-      </div> */}
       <div className="mb-2">
         <h6 className="fw-bold ms-2 mt-3">Catatan Tambahan</h6>
         <ReactQuill

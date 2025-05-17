@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Image from "../../../../src/assets/img/LOGO_MEDIALYS_ICON.png";
+import ImageIss from "../../../../src/assets/img/iss.png";
 import IconImage from "../../../../src/assets/img/man.png";
 import "./style.css";
 import axios from "axios";
@@ -58,7 +59,7 @@ function Topbar() {
       })
       .catch((error) => console.error(error));
   };
-
+  const resultImage = process.env.REACT_APP_BACKEND_URL === "https://api-crm.medilabjakarta.id/api" ? Image : ImageIss;
   // console.log(isSidebarToggled);
   return (
     <header id="header" className="header fixed-top d-flex align-items-center">
@@ -71,7 +72,7 @@ function Topbar() {
           href="\"
           className="logo d-flex align-items-center text-decoration-none"
         >
-          <img src={Image} style={{ width: "25px", marginLeft: "0.3rem" }} />
+          <img src={resultImage} style={{ width: "25px", marginLeft: "0.3rem" }} />
           <span
             className="title"
             style={{

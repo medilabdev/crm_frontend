@@ -60,6 +60,20 @@ const DataTableFeeAction = () => {
     {
       name: "Catatan Realisasi",
       selector: (row) => row.note,
+      cell: (row) => (
+        <div
+          style={{
+            maxWidth: "200px",
+            whiteSpace: "normal", // biar bisa multiline
+            overflowWrap: "break-word",
+            wordBreak: "break-word",
+          }}
+        >
+          {row.note}
+        </div>
+      ),
+      grow: 1, // biar fleksibel tapi tidak over-extend
+      wrap: true, // jika pakai react-data-table-component
     },
     {
       name: "Action",
