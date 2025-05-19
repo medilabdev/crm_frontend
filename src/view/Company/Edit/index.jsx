@@ -417,7 +417,8 @@ const EditCompany = () => {
 
     const machineOptions = [
         { value: "Active", label: "Active" },
-        { value: "Backup", label: "Backup" }
+        { value: "Backup", label: "Backup" },
+        { value: "Isolation", label: "Isolation" },
     ]
 
     const contactSelect = () => {
