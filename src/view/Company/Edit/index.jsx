@@ -10,7 +10,8 @@ import {
     Col,
     FloatingLabel,
     Form,
-    Row,
+    Row, OverlayTrigger,
+    Tooltip,
 } from "react-bootstrap";
 import ReactQuill from "react-quill";
 import { useParams } from "react-router-dom";
@@ -29,7 +30,7 @@ import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import { GetDataTypeHospital } from "../../../action/TypeHospital";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronUp, faPlus } from "@fortawesome/free-solid-svg-icons";
+import { faChevronUp, faPlus, faTrash } from "@fortawesome/free-solid-svg-icons";
 const EditCompany = () => {
     const { uid } = useParams();
     const token = localStorage.getItem("token");
@@ -63,6 +64,10 @@ const EditCompany = () => {
 
     const dispatch = useDispatch()
     const { DataTypeHospital } = useSelector((state) => state.GetTypeHospital)
+
+    const renderTooltipAction = (props, context) => (
+        <Tooltip {...props}>{context}</Tooltip>
+    );
 
     const getDeals = async (retryCount = 0) => {
         try {
@@ -412,7 +417,8 @@ const EditCompany = () => {
 
     const machineOptions = [
         { value: "Active", label: "Active" },
-        { value: "Backup", label: "Backup" }
+        { value: "Backup", label: "Backup" },
+        { value: "Isolation", label: "Isolation" },
     ]
 
     const contactSelect = () => {
@@ -545,6 +551,55 @@ const EditCompany = () => {
         };
     }, [uid, token]);
 
+    const handleDeleteMachine = (ulid) => {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'This action will delete the machine.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel',
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: "Process...",
+                    text: "Please wait while we process your request.",
+                    allowEscapeKey: false,
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                const response = await axios.delete(`${process.env.REACT_APP_BACKEND_URL}/machines/${ulid}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }).then(res => {
+                    Swal.fire({
+                        title: 'Success',
+                        text: res.data.message,
+                        icon: "success",
+                    });
+
+                    getMachineByCompany()
+
+                }).catch((error) => {
+                    console.error(error);
+
+                    Swal.fire({
+                        title: "Error!",
+                        text: "Failed to delete data. Please try again.",
+                        icon: "error",
+                        confirmButtonText: "OK",
+                    });
+                });
+
+                return response
+            }
+        });
+    };
+
 
     const updateCompany = async (e) => {
         e.preventDefault();
@@ -582,7 +637,7 @@ const EditCompany = () => {
         formData.append("_method", "put");
         // console.log("FormData Content:");
         // for (const pair of formData.entries()) {
-            // console.log(pair[0] + ": " + pair[1]);
+        // console.log(pair[0] + ": " + pair[1]);
         // }
 
         setButtonDisable(true);
@@ -769,6 +824,16 @@ const EditCompany = () => {
             },
             // width: "140px",
         },
+        {
+            name: "Action",
+            selector: (row) => {
+                return (<OverlayTrigger placement="top" overlay={(props) => renderTooltipAction(props, "Hapus Data Mesin")}>
+                    <button type="button" className="btn" onClick={(e) => handleDeleteMachine(row.ulid)}>
+                        <FontAwesomeIcon icon={faTrash} color="#444442" />
+                    </button>
+                </OverlayTrigger>);
+            },
+        },
     ];
 
     const customStyles = {
@@ -844,14 +909,14 @@ const EditCompany = () => {
                             },
                         }
                     )
-                    .then(() => {
-                        window.location.reload();
-                    });
+                        .then(() => {
+                            window.location.reload();
+                        });
                 } catch (error) {
                     console.log(error);
-                    
+
                 }
-              
+
             }
         });
     };
@@ -1267,50 +1332,50 @@ const EditCompany = () => {
                                     </Card.Header>
                                     <Card.Body>
                                         {console.log(oldAssociate)}
-                                    {oldAssociate?.map((data, index) =>
-                                        data.contact ? (
-                                            
-                                            <Card key={index} className="shadow-sm p-2 mb-2 position-relative">
-                                            <div className="d-flex justify-content-between">
-                                                {/* Icon kiri atas */}
-                                                <div>
-                                                <img
-                                                    src={IconContact}
-                                                    alt="contact-icon"
-                                                    style={{ width: "24px", height: "24px", objectFit: "contain" }}
-                                                />
-                                                </div>
+                                        {oldAssociate?.map((data, index) =>
+                                            data.contact ? (
 
-                                                {/* Tombol hapus kanan atas */}
-                                                <button
-                                                type="button"
-                                                onClick={() => handleDeleteContact(data.uid)}
-                                                className="btn btn-link text-danger p-0"
-                                                style={{ fontSize: "1.2rem", lineHeight: 1 }}
-                                                title="Hapus kontak"
-                                                >
-                                                <i className="bi bi-x"></i>
-                                                </button>
-                                            </div>
-                                            <a href={`/contact/${data.contact_uid}`} className="text-decoration-none text-black" target="_blank">
-                                            {/* Konten info kontak */}
-                                            <div className="mt-2 ps-1 text-decoration-none" style={{ fontSize: "0.8rem", lineHeight: "1.4" }}>
-                                                <p className="mb-1">
-                                                <strong>Name:</strong>{" "}
-                                                <span className="ms-1">{data.contact.name ?? "-"}</span>
-                                                </p>
-                                                <p className="mb-1">
-                                                <strong>No. Telp:</strong>{" "}
-                                                <span className="ms-1">{data.contact.primary_phone?.number ?? "-"}</span>
-                                                </p>
-                                                <p className="mb-0">
-                                                <strong>Email:</strong>{" "}
-                                                <span className="ms-1">{data.contact.email ?? "-"}</span>
-                                                </p>
-                                            </div>
-                                            </a>
-                                            </Card>
-                                        ) : null
+                                                <Card key={index} className="shadow-sm p-2 mb-2 position-relative">
+                                                    <div className="d-flex justify-content-between">
+                                                        {/* Icon kiri atas */}
+                                                        <div>
+                                                            <img
+                                                                src={IconContact}
+                                                                alt="contact-icon"
+                                                                style={{ width: "24px", height: "24px", objectFit: "contain" }}
+                                                            />
+                                                        </div>
+
+                                                        {/* Tombol hapus kanan atas */}
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleDeleteContact(data.uid)}
+                                                            className="btn btn-link text-danger p-0"
+                                                            style={{ fontSize: "1.2rem", lineHeight: 1 }}
+                                                            title="Hapus kontak"
+                                                        >
+                                                            <i className="bi bi-x"></i>
+                                                        </button>
+                                                    </div>
+                                                    <a href={`/contact/${data.contact_uid}`} className="text-decoration-none text-black" target="_blank">
+                                                        {/* Konten info kontak */}
+                                                        <div className="mt-2 ps-1 text-decoration-none" style={{ fontSize: "0.8rem", lineHeight: "1.4" }}>
+                                                            <p className="mb-1">
+                                                                <strong>Name:</strong>{" "}
+                                                                <span className="ms-1">{data.contact.name ?? "-"}</span>
+                                                            </p>
+                                                            <p className="mb-1">
+                                                                <strong>No. Telp:</strong>{" "}
+                                                                <span className="ms-1">{data.contact.primary_phone?.number ?? "-"}</span>
+                                                            </p>
+                                                            <p className="mb-0">
+                                                                <strong>Email:</strong>{" "}
+                                                                <span className="ms-1">{data.contact.email ?? "-"}</span>
+                                                            </p>
+                                                        </div>
+                                                    </a>
+                                                </Card>
+                                            ) : null
                                         )}
 
 
@@ -1354,84 +1419,84 @@ const EditCompany = () => {
                                         {parentCompanyLocalStorage &&
                                             Array.isArray(parentCompanyLocalStorage) &&
                                             parentCompanyLocalStorage.length > 0 ? (
-                                                <Card className="shadow p-2">
+                                            <Card className="shadow p-2">
                                                 <div className="row">
-                                                  <div className="col-md-10 d-flex">
-                                                    {/* Icon Company */}
-                                                    <img
-                                                      src={IconCompany}
-                                                      alt="Company Icon"
-                                                      className="ms-1 me-3 mt-3"
-                                                      style={{ width: "30px", height: "30px", objectFit: "contain" }}
-                                                    />
-                                              
-                                                    {/* Company Info */}
-                                                    <div className="flex-grow-1">
-                                                      <p className="ms-1 mb-1" style={{ fontSize: "10px", whiteSpace: "normal" }}>
-                                                        Name Company: <br />
-                                                        <strong>{oldParentCompany.parent?.name || "-"}</strong>
-                                                      </p>
-                                              
-                                                      <p className="ms-1 mb-1" style={{ fontSize: "10px", marginTop: "-8px" }}>
-                                                        Type: <br />
-                                                
-                                                        <strong>{oldParentCompany.parent?.company_type?.name || "-"}</strong>
-                                                      </p>
-                                              
-                                                      <p className="ms-1 mb-0" style={{ fontSize: "10px", marginTop: "-8px", whiteSpace: "normal" }}>
-                                                        No. Telp: <br />
-                                                        <strong>{oldParentCompany?.phone?.[0]?.number || "-"}</strong>
-                                                      </p>
+                                                    <div className="col-md-10 d-flex">
+                                                        {/* Icon Company */}
+                                                        <img
+                                                            src={IconCompany}
+                                                            alt="Company Icon"
+                                                            className="ms-1 me-3 mt-3"
+                                                            style={{ width: "30px", height: "30px", objectFit: "contain" }}
+                                                        />
+
+                                                        {/* Company Info */}
+                                                        <div className="flex-grow-1">
+                                                            <p className="ms-1 mb-1" style={{ fontSize: "10px", whiteSpace: "normal" }}>
+                                                                Name Company: <br />
+                                                                <strong>{oldParentCompany.parent?.name || "-"}</strong>
+                                                            </p>
+
+                                                            <p className="ms-1 mb-1" style={{ fontSize: "10px", marginTop: "-8px" }}>
+                                                                Type: <br />
+
+                                                                <strong>{oldParentCompany.parent?.company_type?.name || "-"}</strong>
+                                                            </p>
+
+                                                            <p className="ms-1 mb-0" style={{ fontSize: "10px", marginTop: "-8px", whiteSpace: "normal" }}>
+                                                                No. Telp: <br />
+                                                                <strong>{oldParentCompany?.phone?.[0]?.number || "-"}</strong>
+                                                            </p>
+                                                        </div>
+
+                                                        {/* Delete Button */}
+                                                        <div className="d-flex align-items-start">
+                                                            <button
+                                                                type="button"
+                                                                onClick={deleteLocalStorageParent}
+                                                                className="btn btn-link text-danger p-0 ms-2"
+                                                                style={{ fontSize: "1.2rem" }}
+                                                                title="Hapus Perusahaan"
+                                                            >
+                                                                <i className="bi bi-x"></i>
+                                                            </button>
+                                                        </div>
                                                     </div>
-                                              
-                                                    {/* Delete Button */}
-                                                    <div className="d-flex align-items-start">
-                                                      <button
-                                                        type="button"
-                                                        onClick={deleteLocalStorageParent}
-                                                        className="btn btn-link text-danger p-0 ms-2"
-                                                        style={{ fontSize: "1.2rem" }}
-                                                        title="Hapus Perusahaan"
-                                                      >
-                                                        <i className="bi bi-x"></i>
-                                                      </button>
-                                                    </div>
-                                                  </div>
                                                 </div>
-                                              </Card>                                              
-                                            
+                                            </Card>
+
                                         ) : (
                                             <>
-                                            <Form.Group className="mb-3">
-                                                <Select
-                                                    options={selectComp()}
-                                                    onChange={(e) => {
-                                                        const parentUid = e.value;
-                                                        setEditCompany({
-                                                            ...editCompany,
-                                                            parent_company_uid: parentUid,
-                                                        });
-                                                    }}
-                                                />
-                                                
-                                            </Form.Group>
-                                              <div className="text-center">
-                                              <a
-                                                  //   onClick={handleShowCanvasDeals}
-                                                  className="text-primary text-decoration-none fw-semibold"
-                                                  style={{ cursor: "pointer" }}
-                                                  onClick={handleOpenCanvasCompany}
-                                              >
-                                                  <i
-                                                      class="bi bi-plus-lg"
-                                                      style={{ fontSize: "15px" }}
-                                                  ></i>
-                                                  <span className="fs-6"> Create Another Company</span>
-                                              </a>
-                                          </div></>
+                                                <Form.Group className="mb-3">
+                                                    <Select
+                                                        options={selectComp()}
+                                                        onChange={(e) => {
+                                                            const parentUid = e.value;
+                                                            setEditCompany({
+                                                                ...editCompany,
+                                                                parent_company_uid: parentUid,
+                                                            });
+                                                        }}
+                                                    />
+
+                                                </Form.Group>
+                                                <div className="text-center">
+                                                    <a
+                                                        //   onClick={handleShowCanvasDeals}
+                                                        className="text-primary text-decoration-none fw-semibold"
+                                                        style={{ cursor: "pointer" }}
+                                                        onClick={handleOpenCanvasCompany}
+                                                    >
+                                                        <i
+                                                            class="bi bi-plus-lg"
+                                                            style={{ fontSize: "15px" }}
+                                                        ></i>
+                                                        <span className="fs-6"> Create Another Company</span>
+                                                    </a>
+                                                </div></>
                                         )}
 
-                                      
+
                                     </Card.Body>
                                 </Card>
                                 <OverlayAddCompany
