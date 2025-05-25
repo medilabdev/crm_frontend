@@ -580,7 +580,7 @@ const SingleCompany = () => {
                       required
                     />
                   </Form.Group>
-                  {process.env.REACT_APP_BACKEND_URL !== "https://api-crm.medilabjakarta.id/api" ? 
+                  {process.env.REACT_APP_BACKEND_URL === "https://api-crm.medilabjakarta.id/api" ? 
                   <Form.Group className="mb-3">
                     <Form.Label controlId="floatingInput">
                       <span>
@@ -594,7 +594,7 @@ const SingleCompany = () => {
                       name="owner_user_uid"
                       onChange={handleInputTypeHospital}
                       options={TypeCompany()}
-                      required
+                      
                     />
                   </Form.Group> : ''
                   }

@@ -1037,6 +1037,7 @@ const EditCompany = () => {
                                                 placeholder="Select Owner"
                                             />
                                         </Form.Group>
+                                        {process.env.REACT_APP_BACKEND_URL === "https://api-crm-iss.medilabjakarta.id/api" ?  
                                         <Form.Group className="mb-3">
                                             <Select
                                                 options={TypeHospital()}
@@ -1051,7 +1052,7 @@ const EditCompany = () => {
                                                 }
                                                 placeholder="Select Type Hospital"
                                             />
-                                        </Form.Group>
+                                        </Form.Group> : ''}
                                         {telephone?.map((tel, index) => (
                                             <div key={index}>
                                                 <Form.Group className="mb-3">
