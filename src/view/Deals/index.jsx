@@ -52,7 +52,7 @@ const Deals = () => {
 
   const [startCreated, setStartCreated] = useState(null)
   const [endCreated, setEndCreated] = useState(null);
-  
+
   const [startUpdated, setStartUpdated] = useState(null)
   const [endUpdated, setEndUpdated] = useState(null)
 
@@ -69,14 +69,14 @@ const Deals = () => {
   };
 
   useEffect(() => {
-      try {
-        setPending(true);
-         getDeals(token, search, ownerDeals, formSearch, pagination);
-      } catch (error) {
-        console.error("error in fetch data", error);
-      } finally {
-        setPending(false);
-      }
+    try {
+      setPending(true);
+      getDeals(token, search, ownerDeals, formSearch, pagination);
+    } catch (error) {
+      console.error("error in fetch data", error);
+    } finally {
+      setPending(false);
+    }
   }, [token, search, ownerDeals, formSearch, pagination])
 
 
@@ -436,18 +436,18 @@ const Deals = () => {
   const handlePagePerChange = (pageSize, page) => {
     setPagination((prev) => ({ ...prev, pageSize, page }));
   };
-  
+
 
   const handleCreatedChange = (dates) => {
     const [start, end] = dates;
     const startDateOnly = start ? start.toLocaleDateString() : null
-    const endDateOnly = end ? end.toLocaleDateString() : null    
+    const endDateOnly = end ? end.toLocaleDateString() : null
     setStartCreated(startDateOnly);
     setEndCreated(endDateOnly);
   };
 
   const handleUpdatedChange = (dates) => {
-    const [start, end] = dates; 
+    const [start, end] = dates;
     const startDateOnly = start ? start.toLocaleDateString() : null
     const endDateOnly = end ? end.toLocaleDateString() : null
     setStartUpdated(startDateOnly);
@@ -589,27 +589,27 @@ const Deals = () => {
                     </div>
                     <div className="mb-1">
                       <label htmlFor="date">Created</label>  <br />
-                      <DatePicker 
-                      selectsRange 
-                      startDate={startCreated ? new Date(startCreated) : null} 
-                      endDate={endCreated ? new Date(endCreated) : null} 
-                      onChange={handleCreatedChange} 
-                      isClearable 
-                      className="form-control" 
-                      dateFormat="dd/MM/yyyy"  
-                      disabledKeyboardNavigation/>
+                      <DatePicker
+                        selectsRange
+                        startDate={startCreated ? new Date(startCreated) : null}
+                        endDate={endCreated ? new Date(endCreated) : null}
+                        onChange={handleCreatedChange}
+                        isClearable
+                        className="form-control"
+                        dateFormat="dd/MM/yyyy"
+                        disabledKeyboardNavigation />
                     </div>
                     <div className="mb-1">
                       <label htmlFor="date">Updated</label> <br />
-                      <DatePicker 
-                      selectsRange startDate={startUpdated ? new Date(startUpdated) : null} 
-                      endDate={endUpdated ? new Date(endUpdated) : null } 
-                      onChange={handleUpdatedChange} 
-                      isClearable 
-                      className="form-control" 
-                      placeholder="Select Date"
-                      dateFormat="dd/MM/yyyy" 
-                      disabledKeyboardNavigation/>
+                      <DatePicker
+                        selectsRange startDate={startUpdated ? new Date(startUpdated) : null}
+                        endDate={endUpdated ? new Date(endUpdated) : null}
+                        onChange={handleUpdatedChange}
+                        isClearable
+                        className="form-control"
+                        placeholder="Select Date"
+                        dateFormat="dd/MM/yyyy"
+                        disabledKeyboardNavigation />
                     </div>
                     <button
                       type="button"
@@ -634,7 +634,7 @@ const Deals = () => {
                 <div className="row">
                   <div className="col">
                     <button
-                    className="btn btn-primary mt-3"
+                      className="btn btn-primary mt-3"
                       onClick={toggleSideFilter}
                       style={{ fontSize: "0.85rem" }}
                     >

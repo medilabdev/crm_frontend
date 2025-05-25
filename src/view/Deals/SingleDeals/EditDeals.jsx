@@ -627,7 +627,7 @@ const EditDeals = () => {
           {row.files ? (
             <a
               className="text-decoration-none"
-              href={`https://api-crm.medilabjakarta.id/storage/file/deals/${row.files?.file}`}
+              href={`${process.env.REACT_APP_BACKEND_IMAGE}/storage/file/deals/${row.files?.file}`}
               style={{ whiteSpace: "normal", fontSize: "0.75rem" }}
             >
               {row.files?.file}
@@ -951,8 +951,8 @@ const EditDeals = () => {
                 <Card.Body>
                   <div>
                     {companyStorage &&
-                    Array.isArray(companyStorage) &&
-                    companyStorage.length > 0 ? (
+                      Array.isArray(companyStorage) &&
+                      companyStorage.length > 0 ? (
                       <Card className="shadow p-2">
                         <div className="row d-flex">
                           <div className="col-md-10">
