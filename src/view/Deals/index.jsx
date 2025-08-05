@@ -27,6 +27,7 @@ import { getListCompany } from "../../action/FormCompany";
 import { getListContact } from "../../action/FormContact";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import ExportWithModal from "./Modals/ExportWithModal";
 
 const Deals = () => {
   const token = localStorage.getItem("token");
@@ -55,6 +56,8 @@ const Deals = () => {
 
   const [startUpdated, setStartUpdated] = useState(null)
   const [endUpdated, setEndUpdated] = useState(null)
+
+  const [showExportModal, setShowExportModal] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -175,6 +178,7 @@ const Deals = () => {
     const select = e.selectedRows.map((row) => row.uid);
     setSelectUid(select);
   };
+
   const getDeals = async (
     token,
     term,
@@ -267,6 +271,7 @@ const Deals = () => {
     };
     setFormSearch(formSearchMultiple);
   };
+
   // console.log(searchStage.label);
   const handleDeleteSelect = async (e) => {
     e.preventDefault();
@@ -323,12 +328,15 @@ const Deals = () => {
       }
     }
   };
+
   const toggleSideFilter = () => {
     setIsSideFilter(!isSideFilter);
   };
+
   const filterClass = isSideFilter
     ? "col-md-3 d-block border-end"
     : "col-md-0 d-none";
+
   const boardKanbanDatatable = isSideFilter ? "col-md-9" : "col-md-12";
   const IconFilter = isSideFilter ? faX : faFilter;
 
@@ -454,6 +462,10 @@ const Deals = () => {
     setEndUpdated(endDateOnly);
   };
 
+  const handleExportClick = () => {
+    setShowExportModal(true);
+  };
+
   return (
     <body id="body">
       <Topbar />
@@ -461,7 +473,13 @@ const Deals = () => {
       <Main>
         <div className="container">
           <BreadcrumbDeals />
-          <TopButton handleDeleteSelect={handleDeleteSelect} />
+          <TopButton handleDeleteSelect={handleDeleteSelect} onExportClick={handleExportClick} owner={ownerDeals} />
+
+          {showExportModal && (
+            <ExportWithModal
+              onClose={() => setShowExportModal(false)} owners={selectOwner()}
+            />
+          )}
 
           <Card className="shadow">
             <div className="row">
