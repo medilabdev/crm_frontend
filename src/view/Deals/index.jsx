@@ -349,7 +349,7 @@ const Deals = () => {
 
   const selectOwner = () => {
     const result = [];
-    if (Array.isArray(listResultOwner)) {
+    if (listResultOwner && Array.isArray(listResultOwner)) {
       listResultOwner.map((data) => {
         const finalResult = {
           label: `${data.name}`,
@@ -357,9 +357,8 @@ const Deals = () => {
         };
         result.push(finalResult);
       });
-    } else {
-      console.error("listResult is not an array or is not yet initialized.");
     }
+
     return result;
   };
 
@@ -389,7 +388,7 @@ const Deals = () => {
 
   const selectCompany = () => {
     const result = [];
-    if (Array.isArray(listResult)) {
+    if (listResult && Array.isArray(listResult)) {
       listResult.map((data) => {
         const finalResult = {
           label: `${data.name}`,
@@ -397,9 +396,8 @@ const Deals = () => {
         };
         result.push(finalResult);
       });
-    } else {
-      console.error("listResult is not an array or is not yet initialized.");
     }
+
     return result;
   };
 
@@ -413,9 +411,8 @@ const Deals = () => {
         };
         result.push(finalResult);
       });
-    } else {
-      console.error("listResult is not an array or is not yet initialized.");
     }
+
     return result;
   };
 
@@ -489,7 +486,7 @@ const Deals = () => {
                     <div className="row mt-3">
                       <div className="col">
                         <h6>
-                          <i class="bi bi-funnel ml"></i>
+                          <i className="bi bi-funnel ml"></i>
                           <span className="fw-semibold ms-2 fs-6">Filter</span>
                         </h6>
                       </div>
@@ -572,7 +569,7 @@ const Deals = () => {
                     <div className="row mt-5">
                       <div className="col">
                         <h6>
-                          <i class="bi bi-currency-dollar"></i>
+                          <i className="bi bi-currency-dollar"></i>
                           <span className="fw-semibold ms-2 fs-6">Deals</span>
                         </h6>
                       </div>

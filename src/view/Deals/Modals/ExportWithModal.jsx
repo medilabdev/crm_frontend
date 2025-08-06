@@ -2,25 +2,15 @@ import axios from 'axios';
 import React, { useState } from 'react'
 import Select from "react-select";
 import Swal from 'sweetalert2';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 
 const ExportWithModal = ({ onClose, owners }) => {
-    const [owner, setOwner] = useState('');
+    const [owner, setOwner] = useState(null);
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
 
     const token = localStorage.getItem("token");
-
-    const formatDate = {
-        year: "numeric",
-        month: "long",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-    };
-
-    const formatResult = new Intl.DateTimeFormat("id-ID", formatDate);
 
     const exportExcel = async () => {
         Swal.fire({
@@ -41,7 +31,7 @@ const ExportWithModal = ({ onClose, owners }) => {
                         Authorization: `Bearer ${token}`,
                     },
                     params: {
-                        owner,
+                        owner: owner.value,
                         start_date: startDate,
                         end_date: endDate,
                     },
@@ -51,105 +41,86 @@ const ExportWithModal = ({ onClose, owners }) => {
             const result = response.data;
             if (result.error) throw new Error(result.message);
 
-            const aoaData = [
-                ['No', 'Deal Name', 'Stage', 'Company', 'Contact', 'History', 'Created Date', 'Updated Date']
+            const workbook = new ExcelJS.Workbook();
+            const worksheet = workbook.addWorksheet('Deals');
+
+            worksheet.columns = [
+                { header: 'No', key: 'no', width: 5 },
+                { header: 'Deal Name', key: 'deal_name', width: 30 },
+                { header: 'Stage', key: 'stage', width: 15 },
+                { header: 'Company', key: 'company', width: 25 },
+                { header: 'Contact', key: 'contact', width: 25 },
+                { header: 'History', key: 'history', width: 40 },
+                { header: 'Created Date', key: 'created_at', width: 20 },
+                { header: 'Updated Date', key: 'updated_at', width: 20 },
             ];
 
-            let rowIndex = 1;
-            const merges = [];
+            let rowIndex = 2;
 
             if (result.rows.length > 0) {
                 result.rows.forEach((deal, index) => {
-                    const contacts = deal.contact_person?.map(cp => cp.contact?.name || '-') || ['-'];
-                    const histories = deal.history?.map(h => h.note?.replace(/<\/?[^>]+(>|$)/g, "") || '-') || ['-'];
-
+                    const contacts = deal.contact_person?.map(cp => `${cp.contact?.name} (${cp.contact?.phone[0].number})` || '-') || ['-'];
+                    const histories = deal.history?.map(h => `${h.note?.replace(/<\/?[^>]+(>|$)/g, "")} (${new Date(h.created_at).toLocaleString('id-ID')})` || '-') || ['-'];
                     const rowCount = Math.max(contacts.length, histories.length);
-                    const startRow = rowIndex;
 
-                    // 3. Loop baris berdasarkan kombinasi contact x history
                     for (let i = 0; i < rowCount; i++) {
-                        aoaData.push([
-                            i === 0 ? index + 1 : '',
-                            i === 0 ? deal.deal_name : '',
-                            i === 0 ? deal.staging?.name ?? '-' : '',
-                            i === 0 ? deal.company?.name ?? '-' : '',
-                            contacts[i] ?? '',
-                            histories[i] ?? '',
-                            i === 0 ? (formatResult.format(new Date(deal.created_at)) ?? '-') : '',
-                            i === 0 ? (formatResult.format(new Date(deal.updated_at)) ?? '-') : '',
-                        ]);
-                        rowIndex++;
+                        const newRow = worksheet.addRow({
+                            no: i === 0 ? index + 1 : '',
+                            deal_name: i === 0 ? deal.deal_name : '',
+                            stage: i === 0 ? deal.staging?.name ?? '-' : '',
+                            company: i === 0 ? deal.company?.name ?? '-' : '',
+                            contact: contacts[i] ?? '',
+                            history: histories[i] ?? '',
+                            created_at: i === 0 ? new Date(deal.created_at).toLocaleString('id-ID') : '',
+                            updated_at: i === 0 ? new Date(deal.updated_at).toLocaleString('id-ID') : '',
+                        });
+
+                        newRow.getCell(6).alignment = { wrapText: true };
+
+                        // (Opsional) Set tinggi baris jika history-nya panjang
+                        newRow.height = 40; // Atau hitung dinamis kalau perlu
                     }
 
-                    // 4. Merge kolom tertentu jika baris lebih dari 1
                     if (rowCount > 1) {
-                        [0, 1, 2, 3, 6, 7].forEach(colIndex => {
-                            merges.push({
-                                s: { r: startRow, c: colIndex },
-                                e: { r: startRow + rowCount - 1, c: colIndex },
-                            });
+                        [1, 2, 3, 4, 7, 8].forEach(col => {
+                            worksheet.mergeCells(rowIndex, col, rowIndex + rowCount - 1, col);
                         });
                     }
+
+                    rowIndex += rowCount;
                 });
 
-                // 5. Buat worksheet dan merge
-                const worksheet = XLSX.utils.aoa_to_sheet(aoaData);
-                worksheet['!merges'] = merges;
-
-                // 6. Set lebar kolom
-                worksheet['!cols'] = [
-                    { wch: 5 },   // No
-                    { wch: 30 },  // Deal Name
-                    { wch: 15 },  // Stage
-                    { wch: 25 },  // Company
-                    { wch: 25 },  // Contact
-                    { wch: 40 },  // History
-                    { wch: 20 },  // Created Date
-                    { wch: 20 },  // Updated Date
-                ];
-
-                // 7. Tambahkan tinggi header (opsional)
-                worksheet['!rows'] = [{ hpt: 25 }]; // Header tinggi 25pt
-
-                // 8. Style header: bold + center + border
-                const range = XLSX.utils.decode_range(worksheet['!ref']);
-                for (let C = range.s.c; C <= range.e.c; ++C) {
-                    const cellAddress = XLSX.utils.encode_cell({ r: 0, c: C });
-                    if (worksheet[cellAddress]) {
-                        worksheet[cellAddress].s = {
-                            font: { bold: true },
-                            alignment: { horizontal: 'center', vertical: 'center' },
-                            border: {
-                                top: { style: "thin", color: { rgb: "000000" } },
-                                bottom: { style: "thin", color: { rgb: "000000" } },
-                                left: { style: "thin", color: { rgb: "000000" } },
-                                right: { style: "thin", color: { rgb: "000000" } }
-                            }
-                        };
-                    }
-                }
-
-                // 9. Simpan workbook
-                const workbook = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(workbook, worksheet, 'Deals Export');
-
-                const excelBuffer = XLSX.write(workbook, {
-                    bookType: 'xlsx',
-                    type: 'array',
-                    cellStyles: true, // agar style header berfungsi
+                // Style header
+                worksheet.getRow(1).eachCell(cell => {
+                    cell.font = { bold: true };
+                    cell.alignment = { vertical: 'middle', horizontal: 'center' };
+                    cell.border = {
+                        top: { style: 'thin' },
+                        left: { style: 'thin' },
+                        bottom: { style: 'thin' },
+                        right: { style: 'thin' }
+                    };
                 });
 
-                const blobData = new Blob([excelBuffer], {
-                    type: 'application/octet-stream',
-                });
+                worksheet.autoFilter = {
+                    from: 'A1',
+                    to: 'H1' // Kolom terakhir = H (Updated Date)
+                };
 
-                saveAs(blobData, 'ExportedDeals.xlsx');
+                const buffer = await workbook.xlsx.writeBuffer();
+
+                saveAs(new Blob([buffer]), `Export Deals ${owner.label}.xlsx`);
             }
 
             Swal.fire({
                 icon: 'success',
                 title: 'Success',
                 text: 'Deals exported successfully!',
+                timer: 5000, // otomatis tutup dalam 5 detik
+                timerProgressBar: true,
+                didOpen: () => {
+                    Swal.showLoading(); // tampilkan loading animasi kecil
+                }
             });
 
             onClose();
@@ -177,7 +148,7 @@ const ExportWithModal = ({ onClose, owners }) => {
                             <Select
                                 options={owners}
                                 onChange={(e) => {
-                                    setOwner(e.value);
+                                    setOwner(e);
                                 }}
                                 placeholder="Select Owner"
                             />
