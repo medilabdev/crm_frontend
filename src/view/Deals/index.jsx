@@ -27,6 +27,7 @@ import { getListCompany } from "../../action/FormCompany";
 import { getListContact } from "../../action/FormContact";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import ExportWithModal from "./Modals/ExportWithModal";
 
 const Deals = () => {
   const token = localStorage.getItem("token");
@@ -55,6 +56,8 @@ const Deals = () => {
 
   const [startUpdated, setStartUpdated] = useState(null)
   const [endUpdated, setEndUpdated] = useState(null)
+
+  const [showExportModal, setShowExportModal] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -175,6 +178,7 @@ const Deals = () => {
     const select = e.selectedRows.map((row) => row.uid);
     setSelectUid(select);
   };
+
   const getDeals = async (
     token,
     term,
@@ -267,6 +271,7 @@ const Deals = () => {
     };
     setFormSearch(formSearchMultiple);
   };
+
   // console.log(searchStage.label);
   const handleDeleteSelect = async (e) => {
     e.preventDefault();
@@ -323,12 +328,15 @@ const Deals = () => {
       }
     }
   };
+
   const toggleSideFilter = () => {
     setIsSideFilter(!isSideFilter);
   };
+
   const filterClass = isSideFilter
     ? "col-md-3 d-block border-end"
     : "col-md-0 d-none";
+
   const boardKanbanDatatable = isSideFilter ? "col-md-9" : "col-md-12";
   const IconFilter = isSideFilter ? faX : faFilter;
 
@@ -341,7 +349,7 @@ const Deals = () => {
 
   const selectOwner = () => {
     const result = [];
-    if (Array.isArray(listResultOwner)) {
+    if (listResultOwner && Array.isArray(listResultOwner)) {
       listResultOwner.map((data) => {
         const finalResult = {
           label: `${data.name}`,
@@ -349,9 +357,8 @@ const Deals = () => {
         };
         result.push(finalResult);
       });
-    } else {
-      console.error("listResult is not an array or is not yet initialized.");
     }
+
     return result;
   };
 
@@ -381,7 +388,7 @@ const Deals = () => {
 
   const selectCompany = () => {
     const result = [];
-    if (Array.isArray(listResult)) {
+    if (listResult && Array.isArray(listResult)) {
       listResult.map((data) => {
         const finalResult = {
           label: `${data.name}`,
@@ -389,9 +396,8 @@ const Deals = () => {
         };
         result.push(finalResult);
       });
-    } else {
-      console.error("listResult is not an array or is not yet initialized.");
     }
+
     return result;
   };
 
@@ -405,9 +411,8 @@ const Deals = () => {
         };
         result.push(finalResult);
       });
-    } else {
-      console.error("listResult is not an array or is not yet initialized.");
     }
+
     return result;
   };
 
@@ -454,6 +459,10 @@ const Deals = () => {
     setEndUpdated(endDateOnly);
   };
 
+  const handleExportClick = () => {
+    setShowExportModal(true);
+  };
+
   return (
     <body id="body">
       <Topbar />
@@ -461,7 +470,13 @@ const Deals = () => {
       <Main>
         <div className="container">
           <BreadcrumbDeals />
-          <TopButton handleDeleteSelect={handleDeleteSelect} />
+          <TopButton handleDeleteSelect={handleDeleteSelect} onExportClick={handleExportClick} owner={ownerDeals} />
+
+          {showExportModal && (
+            <ExportWithModal
+              onClose={() => setShowExportModal(false)} owners={selectOwner()}
+            />
+          )}
 
           <Card className="shadow">
             <div className="row">
@@ -471,7 +486,7 @@ const Deals = () => {
                     <div className="row mt-3">
                       <div className="col">
                         <h6>
-                          <i class="bi bi-funnel ml"></i>
+                          <i className="bi bi-funnel ml"></i>
                           <span className="fw-semibold ms-2 fs-6">Filter</span>
                         </h6>
                       </div>
@@ -554,7 +569,7 @@ const Deals = () => {
                     <div className="row mt-5">
                       <div className="col">
                         <h6>
-                          <i class="bi bi-currency-dollar"></i>
+                          <i className="bi bi-currency-dollar"></i>
                           <span className="fw-semibold ms-2 fs-6">Deals</span>
                         </h6>
                       </div>

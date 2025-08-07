@@ -51,6 +51,7 @@ function Topbar() {
       .then((response) => {
         localStorage.clear();
         sessionStorage.clear();
+
         Swal.fire({
           title: "Logout Berhasil",
           text: response.data.message,
@@ -65,7 +66,7 @@ function Topbar() {
   return (
     <header id="header" className="header fixed-top d-flex align-items-center">
       <div className="d-flex align-items-center justify-content-between ms-3">
-      <i
+        <i
           className="bi bi-list toggle-sidebar-btn"
           style={{ fontSize: "1.8rem" }}
         />
@@ -86,7 +87,7 @@ function Topbar() {
             HARISSA CRM
           </span>
         </a>
-      
+
       </div>
       <nav className="header-nav ms-auto">
         <ul className="d-flex align-items-center">
@@ -102,71 +103,71 @@ function Topbar() {
               </span>
             </a>
             {/* End Notification Icon */}
-            <ul className="dropdown-menu dropdown-menu-end dropdown-menu-arrow notifications">
-              <li className="dropdown-header">
-                You have 4 new notifications
-                <a href="#">
-                  <span className="badge rounded-pill bg-primary p-2 ms-2">
-                    View all
-                  </span>
-                </a>
-              </li>
-              <li>
-                <hr className="dropdown-divider" />
-              </li>
-              <li className="notification-item">
-                <i className="bi bi-exclamation-circle text-warning" />
-                <div>
-                  <h4>Lorem Ipsum</h4>
-                  <p>Quae dolorem earum veritatis oditseno</p>
-                  <p>30 min. ago</p>
-                </div>
-              </li>
-              <li>
-                <hr className="dropdown-divider" />
-              </li>
-              <li className="notification-item">
-                <i className="bi bi-x-circle text-danger" />
-                <div>
-                  <h4>Atque rerum nesciunt</h4>
-                  <p>Quae dolorem earum veritatis oditseno</p>
-                  <p>1 hr. ago</p>
-                </div>
-              </li>
-              <li>
-                <hr className="dropdown-divider" />
-              </li>
-              <li className="notification-item">
-                <i className="bi bi-check-circle text-success" />
-                <div>
-                  <h4>Sit rerum fuga</h4>
-                  <p>Quae dolorem earum veritatis oditseno</p>
-                  <p>2 hrs. ago</p>
-                </div>
-              </li>
-              <li>
-                <hr className="dropdown-divider" />
-              </li>
-              <li className="notification-item">
-                <i className="bi bi-info-circle text-primary" />
-                <div>
-                  <h4>Dicta reprehenderit</h4>
-                  <p>Quae dolorem earum veritatis oditseno</p>
-                  <p>4 hrs. ago</p>
-                </div>
-              </li>
-              <li>
-                <hr className="dropdown-divider" />
-              </li>
-              <li className="dropdown-footer">
-                <a href="#">Show all notifications</a>
-              </li>
-            </ul>
-            {/* End Notification Dropdown Items */}
+          <ul className="dropdown-menu dropdown-menu-end dropdown-menu-arrow notifications">
+            <li className="dropdown-header">
+              You have 4 new notifications
+              <a href="#">
+                <span className="badge rounded-pill bg-primary p-2 ms-2">
+                  View all
+                </span>
+              </a>
+            </li>
+            <li>
+              <hr className="dropdown-divider" />
+            </li>
+            <li className="notification-item">
+              <i className="bi bi-exclamation-circle text-warning" />
+              <div>
+                <h4>Lorem Ipsum</h4>
+                <p>Quae dolorem earum veritatis oditseno</p>
+                <p>30 min. ago</p>
+              </div>
+            </li>
+            <li>
+              <hr className="dropdown-divider" />
+            </li>
+            <li className="notification-item">
+              <i className="bi bi-x-circle text-danger" />
+              <div>
+                <h4>Atque rerum nesciunt</h4>
+                <p>Quae dolorem earum veritatis oditseno</p>
+                <p>1 hr. ago</p>
+              </div>
+            </li>
+            <li>
+              <hr className="dropdown-divider" />
+            </li>
+            <li className="notification-item">
+              <i className="bi bi-check-circle text-success" />
+              <div>
+                <h4>Sit rerum fuga</h4>
+                <p>Quae dolorem earum veritatis oditseno</p>
+                <p>2 hrs. ago</p>
+              </div>
+            </li>
+            <li>
+              <hr className="dropdown-divider" />
+            </li>
+            <li className="notification-item">
+              <i className="bi bi-info-circle text-primary" />
+              <div>
+                <h4>Dicta reprehenderit</h4>
+                <p>Quae dolorem earum veritatis oditseno</p>
+                <p>4 hrs. ago</p>
+              </div>
+            </li>
+            <li>
+              <hr className="dropdown-divider" />
+            </li>
+            <li className="dropdown-footer">
+              <a href="#">Show all notifications</a>
+            </li>
+          </ul>
+          {/* End Notification Dropdown Items */}
           {/* </li> */}
           {/* End Notification Nav */}
           {/* <li className="nav-item dropdown"> */}
-            {/* <a className="nav-link nav-icon" href="#" data-bs-toggle="dropdown">
+          {/* <a className="nav-link nav-icon" href="#" data-bs-toggle="dropdown">
               <i
                 className="bi bi-chat-left-text"
                 style={{ fontSize: "1.4rem" }}
@@ -178,8 +179,8 @@ function Topbar() {
                 3
               </span>
             </a> */}
-            {/* End Messages Icon */}
-            {/* <ul className="dropdown-menu dropdown-menu-end dropdown-menu-arrow messages">
+          {/* End Messages Icon */}
+          {/* <ul className="dropdown-menu dropdown-menu-end dropdown-menu-arrow messages">
               <li className="dropdown-header">
                 You have 3 new messages
                 <a href="#">
@@ -205,7 +206,7 @@ function Topbar() {
                 </a>
               </li>
             </ul> */}
-            {/* End Messages Dropdown Items */}
+          {/* End Messages Dropdown Items */}
           {/* </li> */}
           {/* End Messages Nav */}
           <li className="nav-item dropdown pe-3">
