@@ -7,12 +7,18 @@ import { saveAs } from 'file-saver';
 
 const ExportWithModal = ({ onClose, owners }) => {
     const [owner, setOwner] = useState(null);
+    const [ownerError, setOwnerError] = useState('');
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
 
     const token = localStorage.getItem("token");
 
     const exportExcel = async () => {
+        if (!owner) {
+            setOwnerError('Owner wajib dipilih.');
+            return;
+        }
+
         Swal.fire({
             title: 'Exporting...',
             text: 'Please wait while generating Excel',
@@ -152,6 +158,7 @@ const ExportWithModal = ({ onClose, owners }) => {
                                 }}
                                 placeholder="Select Owner"
                             />
+                            {ownerError && <small className="text-danger">{ownerError}</small>}
                         </div>
 
                         <div className="mb-2">
