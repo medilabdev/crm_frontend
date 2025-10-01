@@ -25,6 +25,7 @@ const SingleCompany = () => {
     map_address: "",
     city: "",
     postal_code: "",
+    segmentation: "",
     number_of_employee: "",
     number_of_patient: "",
     parent_company_uid: "",
@@ -379,11 +380,6 @@ const SingleCompany = () => {
     }
     return result;
   }
-  
-
-  
-
-
 
   const handleInputOwner = (selected) => {
     setInputCompany({
@@ -420,6 +416,7 @@ const SingleCompany = () => {
     formData.append("map_address", inputCompany.map_address);
     formData.append("city", inputCompany.city);
     formData.append("postal_code", inputCompany.postal_code);
+    formData.append("segmentation", inputCompany.segmentation);
     formData.append("number_of_employee", inputCompany.number_of_employee);
     formData.append("number_of_patient", inputCompany.number_of_patient);
     formData.append("parent_company_uid", inputCompany.parent_company_uid);
@@ -747,6 +744,30 @@ const SingleCompany = () => {
                       onChange={handleInputCompany}
                     />
                   </FloatingLabel>
+                  <FloatingLabel
+                      label={
+                          <span>
+                              Company Segmentation
+                              <span style={{ color: "red" }} className="fs-6"> *</span>
+                          </span>
+                      }
+                      className="mb-3"
+                  >
+                    <Form.Select
+                        name="segmentation"
+                        value={inputCompany.segmentation}
+                        onChange={handleInputCompany}
+                        required
+                    >
+                        <option value="">-- Choose Segmentation --</option>
+                        <option value="Pemerintahan">Pemerintahan</option>
+                        <option value="Perusahaan Swasta">Perusahaan Swasta</option>
+                        <option value="Asuransi">Asuransi</option>
+                        <option value="Pendidikan">Pendidikan</option>
+                        <option value="HD">HD</option>
+                    </Form.Select>
+                  </FloatingLabel>
+
                 </Card.Body>
               </Card>
               <Card className="shadow mt-3">

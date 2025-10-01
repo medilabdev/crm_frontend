@@ -616,6 +616,7 @@ const EditCompany = () => {
         formData.append("map_address", editCompany.map_address || "");
         formData.append("city", editCompany.city || "");
         formData.append("postal_code", editCompany.postal_code || "");
+        formData.append("segmentation", editCompany.segmentation || "");
         formData.append("number_of_employee", editCompany.number_of_employee || "");
         formData.append("number_of_patient", editCompany.number_of_patient || "");
         formData.append("parent_company_uid", editCompany.parent_company_uid || "");
@@ -1208,6 +1209,22 @@ const EditCompany = () => {
                                                 value={editCompany.number_of_patient}
                                                 onChange={handleInputChange}
                                             />
+                                        </FloatingLabel>
+                                        
+                                        <FloatingLabel label="Company Segmentation" className="mb-3">
+                                            <Form.Select
+                                                name="segmentation"
+                                                value={editCompany.segmentation || ''} 
+                                                onChange={handleInputChange} 
+                                                required
+                                            >
+                                                <option value="">-- Choose Segmentation --</option>
+                                                <option value="Pemerintahan">Pemerintahan</option>
+                                                <option value="Perusahaan Swasta">Perusahaan Swasta</option>
+                                                <option value="Asuransi">Asuransi</option>
+                                                <option value="Pendidikan">Pendidikan</option>
+                                                <option value="HD">HD</option>
+                                            </Form.Select>
                                         </FloatingLabel>
                                     </Card.Body>
                                 </Card>
