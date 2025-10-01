@@ -3,15 +3,25 @@ import Topbar from "../../../components/Template/Topbar";
 import Sidebar from "../../../components/Template/Sidebar";
 import Main from "../../../components/Template/Main";
 import Footer from "../../../components/Template/Footer";
+import UploadContactModal from "../Modals/UploadContactModal"; 
 import { Card, Row, Col } from "react-bootstrap";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import DataTable from "react-data-table-component";
+
 const ShowCompany = () => {
   const { uid } = useParams();
   const token = localStorage.getItem("token");
   const [detailCompany, setCompanyDetail] = useState([]);
   const [dealsHistory, setDealsHistory] = useState([]);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+
+  const handleDownloadTemplate = () => {
+      const downloadUrl = `${process.env.REACT_APP_BACKEND_URL}/companies/${uid}/contacts/download-template`;
+      window.open(downloadUrl, '_blank');
+  };
+
+
   const getDetailCompany = () => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_URL}/companies/${uid}`, {
@@ -102,9 +112,20 @@ const ShowCompany = () => {
           </div>
           <div className="row">
             <Card className="shadow">
-              <Card.Title className="mt-3 ms-3">
-                <h5 className="fw-semibold">Data Company Detail</h5>
+              <Card.Title className="mt-3 ms-3 d-flex justify-content-between align-items-center">
+                <h5 className="fw-semibold mb-0">Data Company Detail</h5>
+                <div>
+                  <Button variant="outline-secondary" size="sm" className="me-2" onClick={handleDownloadTemplate}>
+                      Download Template
+                  </Button>
+                  <Button variant="primary" size="sm" onClick={() => setShowUploadModal(true)}>
+                      Upload Kontak
+                  </Button>
+                </div>
               </Card.Title>
+              
+
+
               <Card.Body>
                 <Row className="ms-2">
                   <Col lg={3} md={4} className="label">
@@ -152,6 +173,12 @@ const ShowCompany = () => {
           </div>
         </div>
         <Footer />
+        <UploadContactModal
+              show={showUploadModal}
+              onClose={() => setShowUploadModal(false)}
+              companyUid={uid}
+          />
+
       </Main>
     </body>
   );
