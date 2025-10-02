@@ -17,6 +17,7 @@ import TopSales from "./TopSales";
 import ContactRecap from "./ContactRecap";
 import CompanyRecap from "./CompanyRecap";
 import DealsRecap from "./DealsRecap";
+import ActivityDeals from "./ActivityDeals";
 
 function Dashboard() {
   return (
@@ -37,6 +38,11 @@ function Dashboard() {
             <ContactRecap />
             <CompanyRecap />
             <DealsRecap />
+          </div>
+          <div className="row mt-3">
+              <div className="col-12">
+                  <ActivityDeals />
+              </div>
           </div>
           
           {/* <div className="row">

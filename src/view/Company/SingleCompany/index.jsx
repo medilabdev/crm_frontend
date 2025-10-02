@@ -424,7 +424,10 @@ const SingleCompany = () => {
     formData.append("company_source_uid", inputCompany.company_source_uid);
     formData.append("company_type_uid", inputCompany.company_type_uid);
     formData.append("notes", inputCompany.notes);
-    formData.append("hospital_type_uid", inputCompany.hospital_type_uid);
+    if (inputCompany.hospital_type_uid) {
+        formData.append("hospital_type_uid", inputCompany.hospital_type_uid);
+    }
+
     // console.log("FormData Content:");
     // for (const pair of formData.entries()) {
     //   console.log(pair[0] + ": " + pair[1]);

@@ -24,6 +24,7 @@ const Auth = () => {
       [e.target.name]: e.target.value,
     });
   };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
@@ -33,7 +34,7 @@ const Auth = () => {
         {
           headers: {
             "Content-Type": "application/json",
-          },
+          }
         }
       );
       localStorage.clear();
@@ -66,7 +67,7 @@ const Auth = () => {
         });
       }
     } catch (error) {
-      // console.log(error);
+      console.log(error);
       if (error.response) {
         Swal.fire({
           text: error.response.data.message,
@@ -80,6 +81,7 @@ const Auth = () => {
       }
     }
   };
+  
   return (
     <body className="auth-body">
       <main className="auth-main color-auth">
