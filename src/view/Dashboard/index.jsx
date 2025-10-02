@@ -3,6 +3,7 @@ import Sidebar from "../../components/Template/Sidebar";
 import Topbar from "../../components/Template/Topbar";
 import Main from "../../components/Template/Main";
 import Footer from "../../components/Template/Footer";
+import { Tabs, Tab } from "react-bootstrap";
 import { LineChart } from "./LineChart";
 import { ChartBar } from "./ChartBar";
 import { DoughnutChart } from "./Doughnut";
@@ -18,6 +19,8 @@ import ContactRecap from "./ContactRecap";
 import CompanyRecap from "./CompanyRecap";
 import DealsRecap from "./DealsRecap";
 import ActivityDeals from "./ActivityDeals";
+import ActivityByDate from "./ActivityByDate";
+
 
 function Dashboard() {
   return (
@@ -43,6 +46,19 @@ function Dashboard() {
               <div className="col-12">
                   <ActivityDeals />
               </div>
+          </div>
+
+           <div className="row mt-3">
+            <div className="col-12">
+              <Tabs defaultActiveKey="by-deal" id="report-tabs" className="mb-3">
+                <Tab eventKey="by-deal" title="Report by Deal">
+                  <ActivityDeals />
+                </Tab>
+                <Tab eventKey="by-date" title="Report by Date">
+                  <ActivityByDate />
+                </Tab>
+              </Tabs>
+            </div>
           </div>
           
           {/* <div className="row">
