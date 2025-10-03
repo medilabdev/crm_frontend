@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Table } from 'react-bootstrap';
+import { Card, Table, Button } from 'react-bootstrap';
 import axios from 'axios';
 
 const SalesPerformanceReport = () => {
     const token = localStorage.getItem('token');
+    const userRole = localStorage.getItem('role_name');
+    const userPosition = localStorage.getItem('position_name');
+
     const [reportData, setReportData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const canExport = userRole?.toLowerCase() === 'owner' || userPosition?.toLowerCase() === 'direktur';
 
     useEffect(() => {
         const fetchReport = async () => {
@@ -17,7 +21,6 @@ const SalesPerformanceReport = () => {
                 setReportData(response.data.data);
             } catch (error) {
                 console.error("Failed to fetch sales performance report:", error);
-                // Di sini bisa ditambahkan state untuk menampilkan pesan error di UI
             } finally {
                 setIsLoading(false);
             }
@@ -25,6 +28,27 @@ const SalesPerformanceReport = () => {
 
         fetchReport();
     }, [token]);
+
+    const handleExport = async () => {
+        try {
+            const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/reports/performance/sales-summary/export`, {
+                headers: { Authorization: `Bearer ${token}` },
+                responseType: 'blob',
+            });
+
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'sales_performance_summary.xlsx');
+            document.body.appendChild(link);
+            link.click();
+            link.parentNode.removeChild(link);
+
+        } catch (error) {
+            console.error("Failed to export report:", error);
+            return;
+        }
+    }
 
     if (isLoading) {
         return <p>Loading sales performance report...</p>;
@@ -38,6 +62,12 @@ const SalesPerformanceReport = () => {
         <Card className="shadow">
             <Card.Header>
                 <Card.Title>Sales Performance Summary</Card.Title>
+                {canExport && (
+                    <Button variant="success" size="sm" onClick={handleExport}>
+                        Export to Excel
+                    </Button>
+                )}
+
             </Card.Header>
             <Card.Body>
                 {/* Kita gunakan komponen Table dari react-bootstrap untuk styling */}

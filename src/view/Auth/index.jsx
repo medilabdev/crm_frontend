@@ -57,6 +57,9 @@ const Auth = () => {
         localStorage.setItem("image", image);
         localStorage.setItem("role", role);
         localStorage.setItem("position", position);
+        localStorage.setItem("role_name", response.data.data.role_name);
+        localStorage.setItem("position_name", response.data.data.position_name);
+
         navigate("/");
         setButtonDisabled(true);
       } else {

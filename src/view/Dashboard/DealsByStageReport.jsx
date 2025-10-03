@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Select from 'react-select';
 import DataTable from 'react-data-table-component';
-import { Card } from 'react-bootstrap';
+import { Card, Button } from 'react-bootstrap';
 import axios from 'axios';
 
 const DealsByStageReport = () => {
@@ -12,16 +12,18 @@ const DealsByStageReport = () => {
     const [reportData, setReportData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [selectedStageName, setSelectedStageName] = useState('');
+    const [selectedStageUid, setSelectedStageUid] = useState('');
 
-    // Mengambil daftar stage untuk mengisi filter dropdown
+    const userRole = localStorage.getItem('role_name');
+    const userPosition = localStorage.getItem('position_name');
+    const canExport = userRole?.toLowerCase() === 'owner' || userPosition?.toLowerCase() === 'direktur';
+
     useEffect(() => {
         const fetchStages = async () => {
             try {
-                // Asumsi endpoint untuk mengambil daftar stage adalah /api/staging-masters
                 const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/staging-masters`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
-                // Ubah format data agar sesuai dengan react-select
                 const formattedStages = response.data.data.map(stage => ({
                     value: stage.uid,
                     label: stage.name,
@@ -34,16 +36,17 @@ const DealsByStageReport = () => {
         fetchStages();
     }, [token]);
 
-    // Fungsi yang dipanggil saat pengguna memilih stage dari dropdown
     const handleGenerateReport = async (selectedOption) => {
         if (!selectedOption) {
             setReportData([]);
             setSelectedStageName('');
+            setSelectedStageUid('');
             return;
         }
 
         const stagingUid = selectedOption.value;
         setSelectedStageName(selectedOption.label);
+        setSelectedStageUid(stagingUid);
         setIsLoading(true);
         setReportData([]);
 
@@ -59,6 +62,29 @@ const DealsByStageReport = () => {
             setIsLoading(false);
         }
     };
+
+    const handleExport = async () => {
+        if (!selectedStageUid) return;
+
+        try {
+            const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/reports/performance/deals-by-stage/export?staging_uid=${selectedStageUid}`, {
+                headers: { Authorization: `Bearer ${token}` },
+                responseType: 'blob',
+            });
+            
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `deals_in_stage_${selectedStageName}.xlsx`); // Nama file dinamis
+            document.body.appendChild(link);
+            link.click();
+            link.parentNode.removeChild(link);
+        } catch (error) {
+            console.error("Failed to export report:", error);
+            alert("Failed to export report.");
+        }
+    };
+
 
     // Definisi kolom untuk tabel
     const columns = [
@@ -76,6 +102,11 @@ const DealsByStageReport = () => {
         <Card className="shadow">
             <Card.Header>
                 <Card.Title>Deals by Stage Report</Card.Title>
+                {canExport && (
+                    <Button variant="success" size="sm" onClick={handleExport} disabled={!selectedStageUid || isLoading}>
+                        Export to Excel
+                    </Button>
+                )}
             </Card.Header>
             <Card.Body>
                 <div className="row">
