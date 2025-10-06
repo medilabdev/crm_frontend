@@ -472,6 +472,8 @@ const SingleDeals = () => {
       ),
     },
   ];
+
+  
   // custom style
   const customStyle = {
     headRow: {
@@ -520,10 +522,12 @@ const SingleDeals = () => {
   }, [token, dealSize, totalPrice]);
 
   const [selectFile, setSelectFile] = useState(null);
+
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     setSelectFile(file);
   };
+
   const handleSubmitDeals = (e) => {
     e.preventDefault();
     try {
@@ -602,6 +606,7 @@ const SingleDeals = () => {
       }
     }
   };
+
   return (
     <body id="body">
       <Topbar />

@@ -851,7 +851,8 @@ const EditDeals = () => {
                   {pipeline.map((data) => (
                     <div className="form-check form-check-inline ms-3">
                       <input
-                        type="checkbox"
+                        type="radio"
+                        name="pipeline"
                         className="form-check-input me-2"
                         value={data.uid}
                         checked={data.uid === selectedPipeline}

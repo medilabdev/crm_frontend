@@ -20,6 +20,247 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { useMediaQuery } from "react-responsive";
 
+
+
+const ExpandedProductComponent = ({ data }) => {
+    return (
+        <div style={{ padding: '15px 30px', backgroundColor: '#f8f9fa', borderTop: '1px solid #dee2e6' }}>
+            <h6 className="fw-bold">Products in this Deal:</h6>
+            {data.detail_product && data.detail_product.length > 0 ? (
+                <ul className="list-unstyled">
+                    {data.detail_product.map(detail => (
+                        <li key={detail.uid}>
+                            - {detail.product ? detail.product.name : 'N/A'} 
+                            <span className="text-muted"> (Qty: {detail.qty})</span>
+                        </li>
+                    ))}
+                </ul>
+            ) : (
+                <p className="text-muted">No products associated with this deal.</p>
+            )}
+        </div>
+    );
+};
+
+ 
+const ExpandedComponent = ({ data }) => {
+  const token = localStorage.getItem("token");
+  const uid = localStorage.getItem("uid");
+  const role = localStorage.getItem("role");
+
+  const associatedCompanies = data?.associate
+    ?.slice(0, 3)
+    .map((item) => item?.company?.name)
+    .filter((name) => name)
+    .join(" & ");
+
+  const associatedContact = data?.associate
+    ?.slice(0, 3)
+    .map((item) => item?.contact?.name)
+    .filter((name) => name)
+    .join(" & ");
+
+  const date = new Date(data.created_at);
+  const update = new Date(data.updated_at);
+  const formatOptions = {
+    year: "numeric",
+    month: "long",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  };
+  const formate = new Intl.DateTimeFormat("en-US", formatOptions);
+  const time = formate.format(date);
+  const updated = formate.format(update);
+  return (
+    <>
+      <div>
+        <div
+          className="mt-3 "
+          style={{
+            marginLeft: "1rem",
+            marginBottom: "1rem",
+            fontWeight: 600,
+            whiteSpace: "nowrap",
+          }}
+        >
+          <span style={{ fontWeight: 400 }}>Stage : </span>
+          {data?.staging?.name}
+        </div>
+        <div
+          className="mt-3 "
+          style={{
+            marginLeft: "1rem",
+            marginBottom: "1rem",
+            fontWeight: 600,
+            whiteSpace: "nowrap",
+          }}
+        >
+          <span style={{ fontWeight: 400 }}>Jumlah : </span>
+          Rp. {new Intl.NumberFormat().format(data?.deal_size)}
+        </div>
+        <div
+          className="mt-3 "
+          style={{
+            marginLeft: "1rem",
+            marginBottom: "1rem",
+            fontWeight: 600,
+            whiteSpace: "nowrap",
+          }}
+        >
+          <span style={{ fontWeight: 400 }}>Assosiasi Perusahaan : </span>
+          {associatedCompanies}
+        </div>
+        <div
+          className="mt-3 "
+          style={{
+            marginLeft: "1rem",
+            marginBottom: "1rem",
+            fontWeight: 600,
+            whiteSpace: "nowrap",
+          }}
+        >
+          <span style={{ fontWeight: 400 }}>Assosiasi Kontak : </span>
+          {associatedContact}
+        </div>
+        <div
+          className="mt-3 "
+          style={{
+            marginLeft: "1rem",
+            marginBottom: "1rem",
+            fontWeight: 600,
+            whiteSpace: "nowrap",
+          }}
+        >
+          <span style={{ fontWeight: 400 }}>Owner : </span>
+          {data?.owner?.name}
+        </div>
+        <div
+          className="mt-3 "
+          style={{
+            marginLeft: "1rem",
+            marginBottom: "1rem",
+            fontWeight: 600,
+            whiteSpace: "nowrap",
+          }}
+        >
+          <span style={{ fontWeight: 400 }}>Dibuat : </span>
+          {time}
+        </div>
+        {data?.created_at !== data?.updated_at ? (
+          <div
+            className="mt-3 "
+            style={{
+              marginLeft: "1rem",
+              marginBottom: "1rem",
+              fontWeight: 600,
+              whiteSpace: "nowrap",
+            }}
+          >
+            <span style={{ fontWeight: 400 }}>Diperbarui : </span>
+            {updated}
+          </div>
+        ) : (
+          ""
+        )}
+        <div
+          className="mt-3 d-flex"
+          style={{
+            marginLeft: "1rem",
+            marginBottom: "1rem",
+            fontWeight: 600,
+            whiteSpace: "nowrap",
+          }}
+        >
+          <span style={{ fontWeight: 400 }}>Action : </span>
+          <div className="ms-3">
+          {data?.owner_user_uid === uid || role === "hG5sy_dytt95" ? (
+            <>
+              <a
+                href={`/deals/${data.uid}/edit`}
+                className=" btn btn-primary "
+                title="edit"
+                target="_blank"
+              >
+                Edit
+              </a>
+
+              <button
+                className="btn btn-danger ms-2"
+                title="delete"
+                onClick={() => {
+                  Swal.fire({
+                    title: "Konfirmasi",
+                    text: "Apakah kamu yakin ingin menghapus ini deals ini?",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "Ya, Hapus!",
+                    cancelButtonText: "Batal",
+                  }).then((res) => {
+                    if (res.isConfirmed) {
+                      const formData = new FormData();
+                      formData.append("deals_uid[]", data.uid);
+                      // console.log("FormData:", Object.fromEntries(formData.entries()));
+                      axios
+                        .post(
+                          `${process.env.REACT_APP_BACKEND_URL}/deals/item/delete`,
+                          formData,
+                          {
+                            headers: {
+                              Authorization: `Bearer ${token}`,
+                            },
+                          }
+                        )
+                        .then((res) => {
+                          Swal.fire({
+                            title: res.data.message,
+                            text: "Successfully delete deals",
+                            icon: "success",
+                          }).then((res) => {
+                            if (res.isConfirmed) {
+                              window.location.reload();
+                            }
+                          });
+                        })
+                        .catch((err) => {
+                          if (
+                            err.response.data.message === "Delete failed!"
+                          ) {
+                            Swal.fire({
+                              title: "Delete Failed",
+                              text: "Tidak dapat menghapus, data master ini terkait dengan data lainnya",
+                              icon: "warning",
+                            });
+                          }
+                        });
+                    }
+                  });
+                }}
+              >
+                Delete
+              </button>
+            </>
+          ) : null}
+        </div>
+        </div>
+        
+      </div>
+    </>
+  );
+};
+
+
+const ConditionalExpandedComponent = ({ data, isMobile }) => {
+   
+    if (isMobile) {
+        return <ExpandedComponent data={data} />;
+    } else {
+        return <ExpandedProductComponent data={data} />;
+    }
+};
+
 const DataTableComponet = ({
   data,
   selectUidDataTable,
@@ -35,246 +276,52 @@ const DataTableComponet = ({
   const navigate = useNavigate();
 
   const isMobile = useMediaQuery({ maxWidth: 767 });
-  const ExpandedComponent = ({ data }) => {
-    const associatedCompanies = data?.associate
-      ?.slice(0, 3)
-      .map((item) => item?.company?.name)
-      .filter((name) => name)
-      .join(" & ");
-
-    const associatedContact = data?.associate
-      ?.slice(0, 3)
-      .map((item) => item?.contact?.name)
-      .filter((name) => name)
-      .join(" & ");
-
-    const date = new Date(data.created_at);
-    const update = new Date(data.updated_at);
-    const formatOptions = {
-      year: "numeric",
-      month: "long",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    };
-    const formate = new Intl.DateTimeFormat("en-US", formatOptions);
-    const time = formate.format(date);
-    const updated = formate.format(update);
-    return (
-      <>
-        <div>
-          <div
-            className="mt-3 "
-            style={{
-              marginLeft: "1rem",
-              marginBottom: "1rem",
-              fontWeight: 600,
-              whiteSpace: "nowrap",
-            }}
-          >
-            <span style={{ fontWeight: 400 }}>Stage : </span>
-            {data?.staging?.name}
-          </div>
-          <div
-            className="mt-3 "
-            style={{
-              marginLeft: "1rem",
-              marginBottom: "1rem",
-              fontWeight: 600,
-              whiteSpace: "nowrap",
-            }}
-          >
-            <span style={{ fontWeight: 400 }}>Jumlah : </span>
-            Rp. {new Intl.NumberFormat().format(data?.deal_size)}
-          </div>
-          <div
-            className="mt-3 "
-            style={{
-              marginLeft: "1rem",
-              marginBottom: "1rem",
-              fontWeight: 600,
-              whiteSpace: "nowrap",
-            }}
-          >
-            <span style={{ fontWeight: 400 }}>Assosiasi Perusahaan : </span>
-            {associatedCompanies}
-          </div>
-          <div
-            className="mt-3 "
-            style={{
-              marginLeft: "1rem",
-              marginBottom: "1rem",
-              fontWeight: 600,
-              whiteSpace: "nowrap",
-            }}
-          >
-            <span style={{ fontWeight: 400 }}>Assosiasi Kontak : </span>
-            {associatedContact}
-          </div>
-          <div
-            className="mt-3 "
-            style={{
-              marginLeft: "1rem",
-              marginBottom: "1rem",
-              fontWeight: 600,
-              whiteSpace: "nowrap",
-            }}
-          >
-            <span style={{ fontWeight: 400 }}>Owner : </span>
-            {data?.owner?.name}
-          </div>
-          <div
-            className="mt-3 "
-            style={{
-              marginLeft: "1rem",
-              marginBottom: "1rem",
-              fontWeight: 600,
-              whiteSpace: "nowrap",
-            }}
-          >
-            <span style={{ fontWeight: 400 }}>Dibuat : </span>
-            {time}
-          </div>
-          {data?.created_at !== data?.updated_at ? (
-            <div
-              className="mt-3 "
-              style={{
-                marginLeft: "1rem",
-                marginBottom: "1rem",
-                fontWeight: 600,
-                whiteSpace: "nowrap",
-              }}
-            >
-              <span style={{ fontWeight: 400 }}>Diperbarui : </span>
-              {updated}
-            </div>
-          ) : (
-            ""
-          )}
-           <div
-            className="mt-3 d-flex"
-            style={{
-              marginLeft: "1rem",
-              marginBottom: "1rem",
-              fontWeight: 600,
-              whiteSpace: "nowrap",
-            }}
-          >
-            <span style={{ fontWeight: 400 }}>Action : </span>
-            <div className="ms-3">
-            {data?.owner_user_uid === uid || role === "hG5sy_dytt95" ? (
-              <>
-                <a
-                  href={`/deals/${data.uid}/edit`}
-                  className=" btn btn-primary "
-                  title="edit"
-                  target="_blank"
-                >
-                  Edit
-                </a>
-
-                <button
-                  className="btn btn-danger ms-2"
-                  title="delete"
-                  onClick={() => {
-                    Swal.fire({
-                      title: "Konfirmasi",
-                      text: "Apakah kamu yakin ingin menghapus ini deals ini?",
-                      icon: "warning",
-                      showCancelButton: true,
-                      confirmButtonColor: "#3085d6",
-                      cancelButtonColor: "#d33",
-                      confirmButtonText: "Ya, Hapus!",
-                      cancelButtonText: "Batal",
-                    }).then((res) => {
-                      if (res.isConfirmed) {
-                        const formData = new FormData();
-                        formData.append("deals_uid[]", data.uid);
-                        // console.log("FormData:", Object.fromEntries(formData.entries()));
-                        axios
-                          .post(
-                            `${process.env.REACT_APP_BACKEND_URL}/deals/item/delete`,
-                            formData,
-                            {
-                              headers: {
-                                Authorization: `Bearer ${token}`,
-                              },
-                            }
-                          )
-                          .then((res) => {
-                            Swal.fire({
-                              title: res.data.message,
-                              text: "Successfully delete deals",
-                              icon: "success",
-                            }).then((res) => {
-                              if (res.isConfirmed) {
-                                window.location.reload();
-                              }
-                            });
-                          })
-                          .catch((err) => {
-                            if (
-                              err.response.data.message === "Delete failed!"
-                            ) {
-                              Swal.fire({
-                                title: "Delete Failed",
-                                text: "Tidak dapat menghapus, data master ini terkait dengan data lainnya",
-                                icon: "warning",
-                              });
-                            }
-                          });
-                      }
-                    });
-                  }}
-                >
-                  Delete
-                </button>
-              </>
-            ) : null}
-          </div>
-          </div>
-          
-        </div>
-      </>
-    );
-  };
+  
   const columns = [
     {
-      name: "Name",
-      cell: (row) => {
-        const createdDate = new Date(row?.created_at);
-        const currentDate = new Date();
-        const twoDaysAgo = new Date(currentDate);
-        twoDaysAgo?.setDate(currentDate.getDate() - 2);
-        const isNew = createdDate > twoDaysAgo;
-        const updatedDate = new Date(row?.updated_at);
-        const isUpdate = updatedDate > twoDaysAgo;
-        return (
-          <div>
-            <a
-              href={`deals/${row.uid}/edit`}
-              target="_blank"
-              className="text-decoration-none"
-              style={{
-                whiteSpace: "normal",
-                color: "#191919",
-                fontWeight: "500",
-              }}
-            >
-              {row.deal_name}
-            </a>
-            {isNew
-              ? isNew && <span className="badge bg-primary ms-2">New</span>
-              : isUpdate
-                ? isUpdate && (
-                    <span className="badge bg-success ms-2">Update</span>
-                  )
-                : ""}
-          </div>
-        );
-      },
-      sortable: true,
-      width: "150px",
+        name: "Company Name", // 1. Header diubah
+        cell: (row) => {
+            // 2. Logika fallback: Prioritaskan nama perusahaan
+            const displayName = row.company ? row.company.name : row.deal_name;
+            // 3. Subtext dinamis: jika ada nama company, subtext-nya adalah nama deal
+            const displaySubtext = row.company ? row.deal_name : (row.position || "-");
+
+            // ... (logika badge New/Update tidak berubah)
+            const createdDate = new Date(row?.created_at);
+            const currentDate = new Date();
+            const twoDaysAgo = new Date(currentDate);
+            twoDaysAgo?.setDate(currentDate.getDate() - 2);
+            const isNew = createdDate > twoDaysAgo;
+            const updatedDate = new Date(row?.updated_at);
+            const isUpdate = updatedDate > twoDaysAgo;
+
+            return (
+                <div>
+                    <a
+                        href={`deals/${row.uid}/edit`}
+                        target="_blank"
+                        className="text-decoration-none"
+                        style={{
+                            whiteSpace: "normal",
+                            color: "#191919",
+                            fontWeight: "500",
+                        }}
+                    >
+                        {displayName} 
+                    </a>
+                    {isNew
+                        ? isNew && <span className="badge bg-primary ms-2">New</span>
+                        : isUpdate
+                            ? isUpdate && (
+                                <span className="badge bg-success ms-2">Update</span>
+                            )
+                            : ""}
+                    <div style={{ fontSize: "0.75rem", color: "#666" }}>{displaySubtext}</div>
+                </div>
+            );
+        },
+        sortable: true,
+        width: "250px",
     },
     {
       name: "Stage",
@@ -499,33 +546,37 @@ const DataTableComponet = ({
   return (
     <div>
       <DataTable
-        columns={columns}
-        data={data}
-        defaultSortFieldId={1}
-        pagination
-        paginationServer
-        paginationPerPage={paginationPerPage}
-        paginationComponentOptions={{
-          noRowsPerPage: true,
-        }}
-        selectableRows
-        onSelectedRowsChange={selectUidDataTable}
-        progressPending={pending}
-        paginationTotalRows={paginationTotalRows}
-        onChangePage={handleChangePage}
-        onChangeRowsPerPage={handlePagePerChange}
-        responsive
-        highlightOnHover
-        expandableRows={isMobile}
-        expandableRowsComponent={isMobile ? ExpandedComponent : null}
-        expandableIcon={
-          isMobile
-            ? {
-                collapsed: <FontAwesomeIcon icon={faChevronRight} />,
-                expanded: <FontAwesomeIcon icon={faChevronDown} isExpanded />,
+          columns={columns}
+          data={data}
+          defaultSortFieldId={1}
+          pagination
+          paginationServer
+          paginationPerPage={paginationPerPage}
+          paginationComponentOptions={{
+              noRowsPerPage: true,
+          }}
+          selectableRows
+          onSelectedRowsChange={selectUidDataTable}
+          progressPending={pending}
+          paginationTotalRows={paginationTotalRows}
+          onChangePage={handleChangePage}
+          onChangeRowsPerPage={handlePagePerChange}
+          responsive
+          highlightOnHover
+          
+          expandableRows={true}
+          expandableRowsComponent={ConditionalExpandedComponent}
+          expandableRowsComponentProps={{ isMobile: isMobile }}
+          expandableRowDisabled={row => !isMobile && (!row.detail_product || row.detail_product.length === 0)}
+
+          expandableIcon={
+              isMobile
+              ? {
+                  collapsed: <FontAwesomeIcon icon={faChevronRight} />,
+                  expanded: <FontAwesomeIcon icon={faChevronDown} />,
               }
-            : null
-        }
+              : undefined
+          }
       />
     </div>
   );
