@@ -60,6 +60,7 @@ import FillTaskWeekly from "../view/Weekly/FillTaskWeekly";
 import ActivityTechnician from "../view/ActivityTechnicians";
 import DetailActivity from "../view/ActivityTechnicians/details";
 import CreateTechnicianTicket from "../view/ActivityTechnicians/create";
+import ApprovalCenter from "../view/Contact/ApprovalCenter";
 
 const Login = ({ children }) => {
   const token = localStorage.getItem("token");
@@ -150,6 +151,7 @@ function Router() {
             </Login>
           }
         />
+        <Route exact path="/approvals/contact-deletions" element={<ApprovalCenter />} />
         <Route
           exact
           path="/company"

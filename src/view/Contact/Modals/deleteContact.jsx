@@ -5,48 +5,51 @@ import Swal from "sweetalert2";
 
 const DeleteContact = ({ visible, onClose, uid }) => {
   const token = localStorage.getItem("token");
-  const arrUid = [uid];
-  const deleteContact = async () => {
+
+  // Nama fungsi diubah agar lebih sesuai
+  const requestDeleteContact = async () => {
     try {
-      const formData = new FormData();
-      formData.append("contact_uid[]", arrUid);
+      // URL diubah ke endpoint request-delete
       await axios.post(
-        `${process.env.REACT_APP_BACKEND_URL}/contacts/delete/item`,
-        formData,
+        `${process.env.REACT_APP_BACKEND_URL}/contacts/${uid}/request-delete`,
+        {}, // Body kosong
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
+      // Pesan sukses diubah
       Swal.fire({
-        title: "Successfully delete contact",
-        text: "Successfully delete contact",
+        title: "Request Sent!",
+        text: "Your request to delete the contact has been sent for approval.",
         icon: "success",
       });
       onClose();
-      window.location.reload();
+      window.location.reload(); // Reload untuk update UI
     } catch (err) {
-      console.error("gagal menghapus contact");
+      const message = err.response?.data?.message || "Failed to send request.";
+      Swal.fire("Error!", message, "error");
+      onClose();
     }
   };
+
   return (
-    <>
-      <Modal show={visible} onHide={onClose} centered>
-        <Modal.Header closeButton>Delete Contact</Modal.Header>
-        <Modal.Body>
-          <h5>Are you sure delete this contact</h5>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={onClose}>
-            Close
-          </Button>
-          <Button variant="danger" onClick={deleteContact}>
-            Delete
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    </>
+    <Modal show={visible} onHide={onClose} centered>
+      <Modal.Header closeButton>Request Delete Contact</Modal.Header>
+      <Modal.Body>
+        <h5>Are you sure you want to request deletion for this contact?</h5>
+        <p className="text-muted small">This action will be sent to an admin for approval.</p>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="secondary" onClick={onClose}>
+          Cancel
+        </Button>
+        <Button variant="danger" onClick={requestDeleteContact}>
+          Yes, Send Request
+        </Button>
+      </Modal.Footer>
+    </Modal>
   );
 };
 

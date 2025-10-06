@@ -58,7 +58,7 @@ const ColumnsDataTable = ({
       return (
        <div>  
         <a
-          href={`/company/${row.uid}/edit`}
+          href={`/company/${row.uid}`}
           target="_blank"
           className="image-name text-decoration-none"  
           style={{ whiteSpace: "normal", color: "black", fontWeight: 600 ,fontFamily:"Nunito Sans, sans-serif", fontSize:"0.9rem" }}

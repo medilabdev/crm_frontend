@@ -16,10 +16,32 @@ const ShowCompany = () => {
   const [dealsHistory, setDealsHistory] = useState([]);
   const [showUploadModal, setShowUploadModal] = useState(false);
 
-  const handleDownloadTemplate = () => {
-      const downloadUrl = `${process.env.REACT_APP_BACKEND_URL}/companies/${uid}/contacts/download-template`;
-      window.open(downloadUrl, '_blank');
+  const handleDownloadTemplate = async () => {
+      try {
+          const response = await axios.get(
+              `${process.env.REACT_APP_BACKEND_URL}/companies/${uid}/contacts/download-template`,
+              {
+                  headers: { Authorization: `Bearer ${token}` },
+                  responseType: 'blob', // Ini penting untuk menerima file
+              }
+          );
+
+          // Buat URL sementara dari data blob yang diterima
+          const url = window.URL.createObjectURL(new Blob([response.data]));
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', 'contact_upload_template.xlsx'); // Nama file saat di-download
+          document.body.appendChild(link);
+          link.click();
+          link.parentNode.removeChild(link); // Hapus link setelah selesai
+          window.URL.revokeObjectURL(url); // Bersihkan memori
+
+      } catch (error) {
+          console.error("Failed to download template:", error);
+          alert("Failed to download template. Please check the console.");
+      }
   };
+
 
 
   const getDetailCompany = () => {
@@ -83,6 +105,7 @@ const ShowCompany = () => {
       sortable: true,
     },
   ];
+
 
   return (
     <body id="body">

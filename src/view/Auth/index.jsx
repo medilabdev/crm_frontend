@@ -37,6 +37,8 @@ const Auth = () => {
           }
         }
       );
+    console.log(response);
+
       localStorage.clear();
       sessionStorage.clear();
       if (response.data.message !== "Login successful!") {
