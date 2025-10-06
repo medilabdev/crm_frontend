@@ -8,6 +8,7 @@ import { useState } from "react";
 import axios from "axios";
 import { useEffect } from "react";
 import Select from "react-select";
+import CreatableSelect from 'react-select/creatable';
 import OverlayAddCompany from "../../../components/Overlay/addCompany";
 import ReactQuill from "react-quill";
 import OverlayAddContact from "../../../components/Overlay/addContact";
@@ -22,6 +23,7 @@ const SingleDeals = () => {
   const [owner, setOwner] = useState([]);
   const [priority, setPriority] = useState([]);
   const [dealCategory, setDealCategory] = useState([]);
+  const [projectCategories, setProjectCategories] = useState([]);
   const [companies, setCompanies] = useState([]);
   const [contact, setContact] = useState([]);
   const [pipeline, setPipeline] = useState([]);
@@ -69,6 +71,7 @@ const SingleDeals = () => {
     priority: "",
     deal_status: "",
     deal_category: "",
+    project_category_uid: "", 
     staging: "",
     company_uid: "",
     product_uid: "",
@@ -118,6 +121,14 @@ const SingleDeals = () => {
   const mantionUsersUid = (e) => {
     setMentionUsers(e.map((opt) => opt.value));
   };
+
+  const handleInputProjectCategory = (selectedOption) => {
+      setInputDeals(prevDeals => ({
+          ...prevDeals,
+          project_category_uid: selectedOption ? selectedOption.value : "",
+      }));
+  };
+
   // ambil data owner
   const getOwnerUser = async (retryCount = 0) => {
     try {
@@ -257,6 +268,18 @@ const SingleDeals = () => {
       }
     }
   };
+
+  const getProjectCategories = async () => {
+      try {
+          const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/project-categories`, {
+              headers: { Authorization: `Bearer ${token}` },
+          });
+          setProjectCategories(response.data.data);
+      } catch (error) {
+          console.error("Failed to fetch project categories:", error);
+      }
+  };
+
 
   // ambil data contact
   const getContact = async (retryCount = 0) => {
@@ -468,11 +491,20 @@ const SingleDeals = () => {
     },
   };
 
+  const projectCategorySelectOptions = () => {
+      return projectCategories.map(cat => ({
+          value: cat.uid,
+          label: cat.name,
+      }));
+  };
+
+
   useEffect(() => {
     getOwnerUser(token);
     getPriority(token);
     getDealCategory(token);
     getCompanies(token);
+    getProjectCategories(token); 
     getContact(token);
     getPipeline(token);
     setPrice(totalPrice);
@@ -507,6 +539,7 @@ const SingleDeals = () => {
       formData.append("deal_status", inputDeals.deal_status);
       formData.append("priority_uid", inputDeals.priority ?? "");
       formData.append("deal_category", inputDeals.deal_category || "");
+      formData.append("project_category_uid", inputDeals.project_category_uid || "");
       formData.append("staging_uid", selectedPipeline);
       formData.append("owner_user_uid", inputDeals.owner_user_uid);
       formData.append("company_uid", inputDeals.company_uid || "");
@@ -708,6 +741,17 @@ const SingleDeals = () => {
                       onChange={(e) => handleInputDealCategory(e)}
                     />
                   </Form.Group>
+
+                  <Form.Group className="mb-3">
+                    <Form.Label>Project Category</Form.Label>
+                    <CreatableSelect
+                        isClearable
+                        options={projectCategorySelectOptions()}
+                        onChange={handleInputProjectCategory}
+                        placeholder="Select or create a project category..."
+                    />
+                  </Form.Group>
+
                 </Card.Body>
               </Card>
               <Card className="shadow">

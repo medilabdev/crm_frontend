@@ -5,6 +5,7 @@ import Main from "../../../components/Template/Main";
 import { Link, json, useParams } from "react-router-dom";
 import { Card, Col, FloatingLabel, Form, Row } from "react-bootstrap";
 import Select from "react-select";
+import CreatableSelect from 'react-select/creatable';
 import ReactQuill from "react-quill";
 import { useState } from "react";
 import { useEffect } from "react";
@@ -16,6 +17,8 @@ import AddProductOverlay from "../../../components/Overlay/addProduct";
 import Swal from "sweetalert2";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSackDollar } from "@fortawesome/free-solid-svg-icons";
+
+
 const EditDeals = () => {
   const token = localStorage.getItem("token");
   const { uid } = useParams();
@@ -35,10 +38,12 @@ const EditDeals = () => {
   const handleCloseProduct = () => setShowAddProduct(false);
   const handleShowProduct = () => setShowAddProduct(true);
   const [isButtonDisabled, setButtonDisabled] = useState(false);
+  const [projectCategories, setProjectCategories] = useState([]);
   // mention user
   const mantionUsersUid = (e) => {
     setMentionUsers(e.map((opt) => opt.value));
   };
+
   const getContact = async (retryCount = 0) => {
     try {
       const response = await axios.get(
@@ -82,6 +87,7 @@ const EditDeals = () => {
       allProduct.push(data);
     }
   }
+  
   let totalPrice = 0;
   if (allProduct[0]) {
     const totalPriceArray = allProduct.map((data) => {
@@ -156,6 +162,17 @@ const EditDeals = () => {
       } else {
         console.error("Unhandled error:", error);
       }
+    }
+  };
+
+  const getProjectCategories = async () => {
+    try {
+        const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/project-categories`, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        setProjectCategories(response.data.data);
+    } catch (error) {
+        console.error("Failed to fetch project categories:", error);
     }
   };
 
@@ -240,6 +257,8 @@ const EditDeals = () => {
         }
       );
       const dealsOld = response.data.data;
+      setSelectedPipeline(dealsOld.staging_uid);
+
       setValueDeals({
         deal_name: dealsOld.deal_name,
         priority_uid: dealsOld.priority_uid,
@@ -248,6 +267,8 @@ const EditDeals = () => {
         company_uid: dealsOld.company_uid,
         owner_user_uid: dealsOld.owner_user_uid,
         deal_size: dealsOld.deal_size,
+        project_category_uid: dealsOld.project_category_uid,
+
       });
       setHistory(dealsOld.history);
       localStorage.setItem(
@@ -363,6 +384,13 @@ const EditDeals = () => {
     return result;
   };
 
+  const projectCategorySelectOptions = () => {
+    return projectCategories.map(cat => ({
+        value: cat.uid,
+        label: cat.name,
+    }));
+  };
+
   const selectCompany = () => {
     const result = [];
     company?.map((data) => {
@@ -425,12 +453,21 @@ const EditDeals = () => {
     const file = e.target.files[0];
     setSelectFile(file);
   };
+
+  const handleInputProjectCategory = (selectedOption) => {
+    setValueDeals(prevDeals => ({
+        ...prevDeals,
+        project_category_uid: selectedOption ? selectedOption.value : "",
+    }));
+  };
+
   useEffect(() => {
     getPipeline();
     getDealsValueOld(token, uid);
     getOwner();
     getPriority();
     getDealsCategory();
+    getProjectCategories();
     getCompany();
     getContact();
     const clearDataProductLocalStorage = () => {
@@ -483,6 +520,7 @@ const EditDeals = () => {
   };
 
   const [dataCompany, setDataCompany] = useState([]);
+
   const handleDeleteCompany = (company) => {
     Swal.fire({
       title: "Konfirmasi",
@@ -668,6 +706,7 @@ const EditDeals = () => {
   const handleCheckboxChange = (uid) => {
     setSelectedPipeline(uid === selectedPipeline ? null : uid);
   };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const formData = new FormData();
@@ -676,6 +715,8 @@ const EditDeals = () => {
     formData.append("priority", valueDeals.priority_uid);
     formData.append("deal_status", valueDeals.deal_status);
     formData.append("deal_category", valueDeals.deal_category);
+    formData.append("project_category_uid", valueDeals.project_category_uid || "");
+
     formData.append("staging_uid", selectedPipeline ?? "");
     formData.append("company_uid", valueDeals.company_uid || "");
     formData.append("owner_user_uid", valueDeals.owner_user_uid);
@@ -732,6 +773,10 @@ const EditDeals = () => {
         }
       });
   };
+
+  console.log("Value Deals:", valueDeals);
+  console.log("Pipeline:", pipeline); 
+  console.log("Selected Pipeline:", selectedPipeline);
   return (
     <body id="body">
       <Topbar />
@@ -936,6 +981,18 @@ const EditDeals = () => {
                         })
                       }
                     />
+                  </Form.Group>
+
+                  <Form.Group className="mb-3">
+                      <Form.Label>Project Category</Form.Label>
+                      <CreatableSelect
+                          isClearable
+                          options={projectCategorySelectOptions()}
+                          // Mencari dan menampilkan nilai yang sudah tersimpan di state
+                          value={projectCategorySelectOptions().find(c => c.value === valueDeals.project_category_uid)}
+                          onChange={handleInputProjectCategory}
+                          placeholder="Select or create a project category..."
+                      />
                   </Form.Group>
                 </Card.Body>
               </Card>
