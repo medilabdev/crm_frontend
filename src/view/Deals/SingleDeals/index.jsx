@@ -1,4 +1,5 @@
 import React from "react";
+import DatePicker from "react-datepicker";
 import Topbar from "../../../components/Template/Topbar";
 import Sidebar from "../../../components/Template/Sidebar";
 import Main from "../../../components/Template/Main";
@@ -17,6 +18,7 @@ import DataTable from "react-data-table-component";
 import Swal from "sweetalert2";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSackDollar } from "@fortawesome/free-solid-svg-icons";
+
 
 const SingleDeals = () => {
   const token = localStorage.getItem("token");
@@ -78,6 +80,7 @@ const SingleDeals = () => {
     notes: "",
     gps: "",
     owner_user_uid: "",
+    planned_implementation_date: null
   });
   const [inputContact, setInputContact] = useState([]);
   const handleInputDeals = (e) => {
@@ -89,9 +92,10 @@ const SingleDeals = () => {
 
   const [selectedPipeline, setSelectedPipeline] = useState(null);
 
-  const handleCheckboxChange = (uid) => {
-    setSelectedPipeline(uid === selectedPipeline ? null : uid);
+  const handleCheckboxChange = (stageObject) => {
+    setSelectedPipeline(stageObject.uid);
   };
+
 
   const handleInputOwner = (e) => {
     setInputDeals({
@@ -533,84 +537,114 @@ const SingleDeals = () => {
     setSelectFile(file);
   };
 
-  const handleSubmitDeals = (e) => {
-    e.preventDefault();
-    try {
-      const formData = new FormData();
-      for (const uidContact of inputContact) {
-        formData.append("contact_person[]", uidContact || "");
-      }
-      mentionUsers.forEach((ment, index) => {
-        formData.append(`mention_user[${index}]`, ment);
-      });
-      formData.append("deal_name", inputDeals.deal_name);
-      formData.append("deal_size", price || "");
-      formData.append("deal_status", inputDeals.deal_status);
-      formData.append("priority_uid", inputDeals.priority ?? "");
-      formData.append("deal_category", inputDeals.deal_category || "");
-      formData.append("project_category_uid", inputDeals.project_category_uid || "");
-      formData.append("staging_uid", selectedPipeline);
-      formData.append("owner_user_uid", inputDeals.owner_user_uid);
-      formData.append("company_uid", inputDeals.company_uid || "");
-      formData.append("notes", inputDeals.notes ? inputDeals.notes : "");
-      formData.append("file", selectFile || "");
-      if (Array.isArray(allData[0]) && allData[0].length > 0) {
-        allData[0].forEach((product, index) => {
-          formData.append(
-            `products[${index}][product_uid]`,
-            product.product_uid || ""
-          );
-          formData.append(`products[${index}][qty]`, product.qty || "");
-          formData.append(
-            `products[${index}][discount_type]`,
-            product.discount_type || ""
-          );
-          formData.append(
-            `products[${index}][discount]`,
-            product.discount || ""
-          );
-          formData.append(
-            `products[${index}][total_price]`,
-            product.total_price || ""
-          );
-        });
-      }
-      // for (const pair of formData.entries()) {
-      //   console.log(pair[0] + ": " + pair[1]);
-      // }
-      setButtonDisabled(true);
-      axios
-        .post(`${process.env.REACT_APP_BACKEND_URL}/deals`, formData, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        .then((res) => {
-          Swal.fire({
-            title: res.data.message,
-            text: "Successfullly created deals",
-            icon: "success",
-          }).then((res) => {
-            if (res.isConfirmed) {
-              window.location.href = "/deals";
-            }
-          });
-        });
-      // }
-    } catch (err) {
-      if (err.response) {
-        Swal.fire({
-          text: err.response.data.message,
-          icon: "warning",
-        });
-      } else {
-        Swal.fire({
-          text: "Something went wrong !",
-          icon: "error",
-        });
-      }
+  const handleSubmitDeals = async (e) => {
+  e.preventDefault();
+
+  try {
+    const formData = new FormData();
+
+    // Contact person
+    for (const uidContact of inputContact) {
+      formData.append("contact_person[]", uidContact || "");
     }
-  };
+
+    // Mention users
+    mentionUsers.forEach((ment, index) => {
+      formData.append(`mention_user[${index}]`, ment);
+    });
+
+    // Deals data
+    formData.append("deal_name", inputDeals.deal_name);
+    formData.append("deal_size", price || "");
+    formData.append("deal_status", inputDeals.deal_status);
+    formData.append("priority_uid", inputDeals.priority ?? "");
+    formData.append("deal_category", inputDeals.deal_category || "");
+    formData.append("project_category_uid", inputDeals.project_category_uid || "");
+    formData.append("staging_uid", selectedPipeline ?? "");
+    formData.append("owner_user_uid", inputDeals.owner_user_uid);
+    formData.append("company_uid", inputDeals.company_uid || "");
+    formData.append("notes", inputDeals.notes ? inputDeals.notes : "");
+    formData.append("file", selectFile || "");
+
+    // Planned implementation date
+    if (inputDeals.planned_implementation_date) {
+      const date = inputDeals.planned_implementation_date;
+      const formattedDate = `${date.getFullYear()}-${String(
+        date.getMonth() + 1
+      ).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+      formData.append("planned_implementation_date", formattedDate);
+    }
+
+    // Products
+    if (Array.isArray(allData[0]) && allData[0].length > 0) {
+      allData[0].forEach((product, index) => {
+        formData.append(
+          `products[${index}][product_uid]`,
+          product.product_uid || ""
+        );
+        formData.append(`products[${index}][qty]`, product.qty || "");
+        formData.append(
+          `products[${index}][discount_type]`,
+          product.discount_type || ""
+        );
+        formData.append(
+          `products[${index}][discount]`,
+          product.discount || ""
+        );
+        formData.append(
+          `products[${index}][total_price]`,
+          product.total_price || ""
+        );
+      });
+    }
+
+    // Debugging kalau mau cek isi formData
+    // for (const pair of formData.entries()) {
+    //   console.log(pair[0] + ": " + pair[1]);
+    // }
+
+    setButtonDisabled(true);
+
+    // 🔥 Axios call pakai async/await
+    const res = await axios.post(
+      `${process.env.REACT_APP_BACKEND_URL}/deals`,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    // Success response
+    Swal.fire({
+      title: res.data.message,
+      text: "Successfully created deals",
+      icon: "success",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        window.location.href = "/deals";
+      }
+    });
+  } catch (err) {
+    // Error response dari backend
+    if (err.response) {
+      Swal.fire({
+        text: err.response.data.message || "Validation failed!",
+        icon: "warning",
+      });
+    } else {
+      Swal.fire({
+        text: "Something went wrong!",
+        icon: "error",
+      });
+    }
+  }
+};
+
+
+  const currentSelectedStage = pipeline.find(p => p.uid === selectedPipeline);
+
 
   return (
     <body id="body">
@@ -651,11 +685,12 @@ const SingleDeals = () => {
                   {pipeline.map((data) => (
                     <div className="form-check form-check-inline ms-3">
                       <input
-                        type="checkbox"
+                        type="radio"
+                        name="pipeline"
                         className="form-check-input me-2"
                         value={data.uid}
                         checked={data.uid === selectedPipeline}
-                        onChange={() => handleCheckboxChange(data.uid)}
+                        onChange={() => handleCheckboxChange(data)}
                         style={{
                           width: "15px",
                           height: "15px",
@@ -762,6 +797,29 @@ const SingleDeals = () => {
                     />
                   </Form.Group>
 
+                  {currentSelectedStage?.name === 'Approaching' && (
+                      <Card className="shadow mt-4">
+                          <Card.Body>
+                              <Form.Group>
+                                  <Form.Label>
+                                      <span className="text-danger">*</span> Planned Implementation Date
+                                  </Form.Label>
+                                  <DatePicker
+                                      selected={inputDeals.planned_implementation_date}
+                                      onChange={(date) => setInputDeals({ ...inputDeals, planned_implementation_date: date })}
+                                      className="form-control"
+                                      dateFormat="dd/MM/yyyy"
+                                      placeholderText="Select a date"
+                                      required // <-- Membuat field ini wajib diisi jika muncul
+                                  />
+                                  <Form.Text className="text-muted">
+                                      This date is mandatory for the Approaching stage.
+                                  </Form.Text>
+                              </Form.Group>
+                          </Card.Body>
+                      </Card>
+                    )}
+
                 </Card.Body>
               </Card>
               <Card className="shadow">
@@ -834,6 +892,9 @@ const SingleDeals = () => {
                 visible={showAddContact}
               />
             </div>
+            
+            
+
             <div className="col-md-8">
               <Card className="shadow">
                 <Card.Header>
@@ -925,6 +986,8 @@ const SingleDeals = () => {
                 </Card.Body>
               </Card>
             </div>
+            
+
           </form>
         </div>
       </Main>

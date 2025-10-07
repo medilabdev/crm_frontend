@@ -1,4 +1,5 @@
 import React from "react";
+import DatePicker from "react-datepicker";
 import Topbar from "../../../components/Template/Topbar";
 import Sidebar from "../../../components/Template/Sidebar";
 import Main from "../../../components/Template/Main";
@@ -257,7 +258,6 @@ const EditDeals = () => {
         }
       );
       const dealsOld = response.data.data;
-      setSelectedPipeline(dealsOld.staging_uid);
 
       setValueDeals({
         deal_name: dealsOld.deal_name,
@@ -268,8 +268,11 @@ const EditDeals = () => {
         owner_user_uid: dealsOld.owner_user_uid,
         deal_size: dealsOld.deal_size,
         project_category_uid: dealsOld.project_category_uid,
-
+        planned_implementation_date: dealsOld.planned_implementation_date ? new Date(dealsOld.planned_implementation_date) : null
       });
+
+      setSelectedPipeline(dealsOld.staging_uid);
+
       setHistory(dealsOld.history);
       localStorage.setItem(
         "DataProduct",
@@ -703,16 +706,17 @@ const EditDeals = () => {
     selectAllRowsItemText: "ALL",
   };
 
-  const handleCheckboxChange = (uid) => {
-    setSelectedPipeline(uid === selectedPipeline ? null : uid);
+  const handleCheckboxChange = (stageObject) => {
+      setSelectedPipeline(stageObject.uid);
   };
+
 
   const handleSubmit = (e) => {
     e.preventDefault();
     const formData = new FormData();
     formData.append("deal_name", valueDeals.deal_name);
     formData.append("deal_size", valueDeals.deal_size || totalPrice);
-    formData.append("priority", valueDeals.priority_uid);
+    formData.append("priority_uid", valueDeals.priority_uid);
     formData.append("deal_status", valueDeals.deal_status);
     formData.append("deal_category", valueDeals.deal_category);
     formData.append("project_category_uid", valueDeals.project_category_uid || "");
@@ -721,6 +725,13 @@ const EditDeals = () => {
     formData.append("company_uid", valueDeals.company_uid || "");
     formData.append("owner_user_uid", valueDeals.owner_user_uid);
     formData.append("file", selectFile || "");
+
+    if (valueDeals.planned_implementation_date) {
+        const date = new Date(valueDeals.planned_implementation_date);
+        const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        formData.append("planned_implementation_date", formattedDate);
+    }
+
     mentionUsers.forEach((ment, index) => {
       formData.append(`mention_user[${index}]`, ment);
     });
@@ -774,9 +785,7 @@ const EditDeals = () => {
       });
   };
 
-  console.log("Value Deals:", valueDeals);
-  console.log("Pipeline:", pipeline); 
-  console.log("Selected Pipeline:", selectedPipeline);
+  const currentSelectedStage = pipeline.find(p => p.uid === selectedPipeline);
   return (
     <body id="body">
       <Topbar />
@@ -848,30 +857,33 @@ const EditDeals = () => {
                       <i className="fw-semibold fs-6 ms-2">{stageOld?.name}</i>
                     </span>
                   </div>
-                  {pipeline.map((data) => (
-                    <div className="form-check form-check-inline ms-3">
-                      <input
-                        type="radio"
-                        name="pipeline"
-                        className="form-check-input me-2"
-                        value={data.uid}
-                        checked={data.uid === selectedPipeline}
-                        onChange={() => handleCheckboxChange(data.uid)}
-                        style={{
-                          width: "15px",
-                          height: "15px",
-                          borderColor: "#012970",
-                          boxShadow: "0 2 5px rgba(0, 0, 0, 0.3)",
-                        }}
-                      />
-                      <label
-                        className="form-check-label mt-1"
-                        style={{ fontWeight: 400, fontSize: "0.75rem" }}
-                      >
-                        {data.name}
-                      </label>
-                    </div>
-                  ))}
+                  {pipeline.map((data) => {
+                   
+                    return (
+                        <div className="form-check form-check-inline ms-3" key={data.uid}>
+                            <input
+                                type="radio"
+                                name="pipeline"
+                                className="form-check-input me-2"
+                                value={data.uid}
+                                checked={data.uid === selectedPipeline} 
+                                onChange={() => handleCheckboxChange(data)} 
+                                style={{
+                                    width: "15px",
+                                    height: "15px",
+                                    borderColor: "#012970",
+                                    boxShadow: "0 2 5px rgba(0, 0, 0, 0.3)",
+                                }}
+                            />
+                            <label
+                                className="form-check-label mt-1"
+                                style={{ fontWeight: 400, fontSize: "0.75rem" }}
+                            >
+                                {data.name}
+                            </label>
+                        </div>
+                    );
+                  })}
                 </Card.Body>
               </Card>
             </div>
@@ -1292,6 +1304,30 @@ const EditDeals = () => {
                   </Form.Group>
                 </Card.Body>
               </Card>
+
+              {
+                currentSelectedStage?.name === 'Approaching' && (
+                  <>
+                  <Card className="shadow mt-4">
+                    <Card.Body>
+                        <Form.Group>
+                            <Form.Label>
+                                <span className="text-danger">*</span> Planned Implementation Date
+                            </Form.Label>
+                            <DatePicker
+                                selected={valueDeals.planned_implementation_date}
+                                onChange={(date) => setValueDeals({ ...valueDeals, planned_implementation_date: date })}
+                                className="form-control"
+                                dateFormat="dd/MM/yyyy"
+                                placeholderText="Select a date"
+                                required
+                            />
+                        </Form.Group>
+                    </Card.Body>
+                </Card>
+                  </>
+                )
+              }
 
               <Card className="shadow">
                 <Card.Header>
