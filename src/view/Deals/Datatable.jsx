@@ -279,14 +279,11 @@ const DataTableComponet = ({
   
   const columns = [
     {
-        name: "Company Name", // 1. Header diubah
+        name: "Company Name", 
         cell: (row) => {
-            // 2. Logika fallback: Prioritaskan nama perusahaan
             const displayName = row.company ? row.company.name : row.deal_name;
-            // 3. Subtext dinamis: jika ada nama company, subtext-nya adalah nama deal
             const displaySubtext = row.company ? row.deal_name : (row.position || "-");
 
-            // ... (logika badge New/Update tidak berubah)
             const createdDate = new Date(row?.created_at);
             const currentDate = new Date();
             const twoDaysAgo = new Date(currentDate);
@@ -543,6 +540,7 @@ const DataTableComponet = ({
       hide:'sm'
     },
   ];
+  
   return (
     <div>
       <DataTable

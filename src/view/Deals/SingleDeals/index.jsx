@@ -86,22 +86,27 @@ const SingleDeals = () => {
       [e.target.name]: e.target.value,
     });
   };
+
   const [selectedPipeline, setSelectedPipeline] = useState(null);
+
   const handleCheckboxChange = (uid) => {
     setSelectedPipeline(uid === selectedPipeline ? null : uid);
   };
+
   const handleInputOwner = (e) => {
     setInputDeals({
       ...inputDeals,
       owner_user_uid: e.value,
     });
   };
+
   const handleInputPriority = (e) => {
     setInputDeals({
       ...inputDeals,
       priority: e.value,
     });
   };
+
   const handleInputDealCategory = (e) => {
     setInputDeals({
       ...inputDeals,
@@ -109,15 +114,18 @@ const SingleDeals = () => {
     });
   };
 
-  const handleCompanyUid = (e) => {
-    setInputDeals({
-      ...inputDeals,
-      company_uid: e.value,
-    });
+  const handleCompanyUid = (selectedOption) => {
+    setInputDeals((prevDeals) => ({
+      ...prevDeals,
+      company_uid: selectedOption ? selectedOption.value : "",
+      deal_name: selectedOption ? selectedOption.label : "",
+    }));
   };
+
   const handleContactUid = (e) => {
     setInputContact(e.map((opt) => opt.value));
   };
+  
   const mantionUsersUid = (e) => {
     setMentionUsers(e.map((opt) => opt.value));
   };
@@ -279,7 +287,6 @@ const SingleDeals = () => {
           console.error("Failed to fetch project categories:", error);
       }
   };
-
 
   // ambil data contact
   const getContact = async (retryCount = 0) => {
@@ -473,7 +480,6 @@ const SingleDeals = () => {
     },
   ];
 
-  
   // custom style
   const customStyle = {
     headRow: {
@@ -499,7 +505,6 @@ const SingleDeals = () => {
           label: cat.name,
       }));
   };
-
 
   useEffect(() => {
     getOwnerUser(token);
@@ -681,25 +686,25 @@ const SingleDeals = () => {
                   </h5>
                 </Card.Header>
                 <Card.Body>
-                  <FloatingLabel
-                    label={
-                      <span>
-                        Deal Name
-                        <span style={{ color: "red" }} className="fs-6">
-                          *
-                        </span>
-                      </span>
-                    }
-                    className="mb-3"
-                  >
-                    <Form.Control
-                      type="text"
-                      name="deal_name"
-                      onChange={handleInputDeals}
-                      placeholder="text"
-                      required
-                    />
+                  <FloatingLabel label={
+                          <span>
+                          Deal Name
+                          <span style={{ color: "red" }} className="fs-6">
+                              *
+                          </span>
+                          </span>
+                      }
+                      className="mb-3">
+                      <Form.Control
+                          type="text"
+                          placeholder="Deal Name"
+                          name="deal_name"
+                          value={inputDeals.deal_name} 
+                          onChange={handleInputDeals}
+                          required
+                      />
                   </FloatingLabel>
+
                   <FloatingLabel
                     label={<span>Deal Size</span>}
                     className="mb-3"
