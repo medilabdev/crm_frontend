@@ -4,7 +4,7 @@ import Topbar from "../../../components/Template/Topbar";
 import Sidebar from "../../../components/Template/Sidebar";
 import Main from "../../../components/Template/Main";
 import { Link, json, useParams } from "react-router-dom";
-import { Card, Col, FloatingLabel, Form, Row } from "react-bootstrap";
+import { Card, Col, FloatingLabel, Form, Row, Modal, Button } from "react-bootstrap";
 import Select from "react-select";
 import CreatableSelect from 'react-select/creatable';
 import ReactQuill from "react-quill";
@@ -40,6 +40,9 @@ const EditDeals = () => {
   const handleShowProduct = () => setShowAddProduct(true);
   const [isButtonDisabled, setButtonDisabled] = useState(false);
   const [projectCategories, setProjectCategories] = useState([]);
+  const [showHppModal, setShowHppModal] = useState(false);
+  const [hppFile, setHppFile] = useState(null);
+
   // mention user
   const mantionUsersUid = (e) => {
     setMentionUsers(e.map((opt) => opt.value));
@@ -710,9 +713,57 @@ const EditDeals = () => {
       setSelectedPipeline(stageObject.uid);
   };
 
+  const HppUploadModal = ({ show, onClose, onFileSelect, onSubmit }) => {
+    return (
+        <Modal show={show} onHide={onClose} centered>
+            <Modal.Header closeButton>
+                <Modal.Title>Upload HPP File</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                <p>To move this deal to "Closed Won", you must upload the HPP file.</p>
+                <Form.Group controlId="hppFile">
+                    <Form.Label><span className="text-danger">*</span> HPP File (PDF, XLSX, DOC)</Form.Label>
+                    <Form.Control 
+                        type="file" 
+                        accept=".pdf,.xlsx,.xls,.doc,.docx"
+                        onChange={(e) => onFileSelect(e.target.files[0])}
+                        required
+                    />
+                </Form.Group>
+            </Modal.Body>
+            <Modal.Footer>
+                <Button variant="secondary" onClick={onClose}>
+                    Cancel
+                </Button>
+                <Button variant="primary" onClick={onSubmit}>
+                    Confirm & Save Deal
+                </Button>
+            </Modal.Footer>
+        </Modal>
+    );
+  };
+
+
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const userPosition = localStorage.getItem('position_name');
+    const isSalesManager = userPosition?.toLowerCase() === 'sales manager';
+
+    // --- PERBAIKAN DI SINI ---
+    // 1. Cari objek stage yang lengkap dari daftar 'pipeline'
+    const currentSelectedStage = pipeline.find(p => p.uid === selectedPipeline);
+    // 2. Ambil namanya dari objek yang ditemukan
+    const selectedStageName = currentSelectedStage?.name;
+
+
+
+    if (isSalesManager && selectedStageName === 'Closed Won' && !hppFile) {
+        setShowHppModal(true); // Tampilkan modal
+        return; // Hentikan eksekusi fungsi untuk sementara
+    }
+
+
     const formData = new FormData();
     formData.append("deal_name", valueDeals.deal_name);
     formData.append("deal_size", valueDeals.deal_size || totalPrice);
@@ -725,6 +776,11 @@ const EditDeals = () => {
     formData.append("company_uid", valueDeals.company_uid || "");
     formData.append("owner_user_uid", valueDeals.owner_user_uid);
     formData.append("file", selectFile || "");
+
+    if (hppFile) {
+        formData.append("hpp_file", hppFile);
+    }
+
 
     if (valueDeals.planned_implementation_date) {
         const date = new Date(valueDeals.planned_implementation_date);
@@ -786,6 +842,8 @@ const EditDeals = () => {
   };
 
   const currentSelectedStage = pipeline.find(p => p.uid === selectedPipeline);
+  console.log("Current HPP File:", hppFile);
+
   return (
     <body id="body">
       <Topbar />
@@ -1347,6 +1405,18 @@ const EditDeals = () => {
             </div>
           </form>
         </div>
+
+      <HppUploadModal
+          show={showHppModal}
+          onClose={() => setShowHppModal(false)}
+          onFileSelect={(file) => setHppFile(file)}
+          onSubmit={() => {
+              setShowHppModal(false);
+              handleSubmit(new Event('submit'));
+          }}
+      />
+
+
       </Main>
     </body>
   );

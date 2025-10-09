@@ -4,7 +4,7 @@ import Topbar from "../../../components/Template/Topbar";
 import Sidebar from "../../../components/Template/Sidebar";
 import Main from "../../../components/Template/Main";
 import BreadcrumbSingleDeals from "../Component/BreadcrumbSingleDeals";
-import { Card, Col, FloatingLabel, Form, Row } from "react-bootstrap";
+import { Card, Col, FloatingLabel, Form, Row, Modal, Button } from "react-bootstrap";
 import { useState } from "react";
 import axios from "axios";
 import { useEffect } from "react";
@@ -47,6 +47,9 @@ const SingleDeals = () => {
   const [allProductData, setAllProductData] = useState([]);
   const [mentionUsers, setMentionUsers] = useState([]);
   const [dealSize, setDealSize] = useState([]);
+  const [showHppModal, setShowHppModal] = useState(false);
+  const [hppFile, setHppFile] = useState(null);
+
 
   const allData = [];
   for (let i = 0; i < localStorage.length; i++) {
@@ -339,6 +342,7 @@ const SingleDeals = () => {
         }
       );
       setPipeline(response.data.data);
+      console.log("Pipeline data:", response.data.data); // Debugging line
     } catch (error) {
       if (
         error.response.status === 401 &&
@@ -375,6 +379,7 @@ const SingleDeals = () => {
     });
     return result;
   };
+
   // select priority
   const prioritySelect = () => {
     const result = [];
@@ -510,6 +515,37 @@ const SingleDeals = () => {
       }));
   };
 
+  const HppUploadModal = ({ show, onClose, onFileSelect, onSubmit }) => {
+    return (
+        <Modal show={show} onHide={onClose} centered>
+            <Modal.Header closeButton>
+                <Modal.Title>Upload HPP File</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                <p>To move this deal to "Closed Won", you must upload the HPP file.</p>
+                <Form.Group controlId="hppFile">
+                    <Form.Label><span className="text-danger">*</span> HPP File (PDF, XLSX, DOC)</Form.Label>
+                    <Form.Control 
+                        type="file" 
+                        accept=".pdf,.xlsx,.xls,.doc,.docx"
+                        onChange={(e) => onFileSelect(e.target.files[0])}
+                        required
+                    />
+                </Form.Group>
+            </Modal.Body>
+            <Modal.Footer>
+                <Button variant="secondary" onClick={onClose}>
+                    Cancel
+                </Button>
+                <Button variant="primary" onClick={onSubmit}>
+                    Confirm & Save Deal
+                </Button>
+            </Modal.Footer>
+        </Modal>
+    );
+};
+
+
   useEffect(() => {
     getOwnerUser(token);
     getPriority(token);
@@ -538,109 +574,125 @@ const SingleDeals = () => {
   };
 
   const handleSubmitDeals = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  try {
-    const formData = new FormData();
+    const userPosition = localStorage.getItem('position_name');
+    const isSalesManager = userPosition?.toLowerCase() === 'sales manager';
 
-    // Contact person
-    for (const uidContact of inputContact) {
-      formData.append("contact_person[]", uidContact || "");
+    // Dapatkan stage yang dipilih (asumsi kamu punya state 'selectedPipeline' berisi objek stage)
+    const selectedStageName = selectedPipeline?.name;
+
+    if (isSalesManager && selectedStageName === 'Closed Won' && !hppFile) {
+        setShowHppModal(true); // Tampilkan modal
+        return; // Hentikan eksekusi fungsi untuk sementara
     }
 
-    // Mention users
-    mentionUsers.forEach((ment, index) => {
-      formData.append(`mention_user[${index}]`, ment);
-    });
 
-    // Deals data
-    formData.append("deal_name", inputDeals.deal_name);
-    formData.append("deal_size", price || "");
-    formData.append("deal_status", inputDeals.deal_status);
-    formData.append("priority_uid", inputDeals.priority ?? "");
-    formData.append("deal_category", inputDeals.deal_category || "");
-    formData.append("project_category_uid", inputDeals.project_category_uid || "");
-    formData.append("staging_uid", selectedPipeline ?? "");
-    formData.append("owner_user_uid", inputDeals.owner_user_uid);
-    formData.append("company_uid", inputDeals.company_uid || "");
-    formData.append("notes", inputDeals.notes ? inputDeals.notes : "");
-    formData.append("file", selectFile || "");
+    try {
+      const formData = new FormData();
 
-    // Planned implementation date
-    if (inputDeals.planned_implementation_date) {
-      const date = inputDeals.planned_implementation_date;
-      const formattedDate = `${date.getFullYear()}-${String(
-        date.getMonth() + 1
-      ).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-      formData.append("planned_implementation_date", formattedDate);
-    }
-
-    // Products
-    if (Array.isArray(allData[0]) && allData[0].length > 0) {
-      allData[0].forEach((product, index) => {
-        formData.append(
-          `products[${index}][product_uid]`,
-          product.product_uid || ""
-        );
-        formData.append(`products[${index}][qty]`, product.qty || "");
-        formData.append(
-          `products[${index}][discount_type]`,
-          product.discount_type || ""
-        );
-        formData.append(
-          `products[${index}][discount]`,
-          product.discount || ""
-        );
-        formData.append(
-          `products[${index}][total_price]`,
-          product.total_price || ""
-        );
-      });
-    }
-
-    // Debugging kalau mau cek isi formData
-    // for (const pair of formData.entries()) {
-    //   console.log(pair[0] + ": " + pair[1]);
-    // }
-
-    setButtonDisabled(true);
-
-    // 🔥 Axios call pakai async/await
-    const res = await axios.post(
-      `${process.env.REACT_APP_BACKEND_URL}/deals`,
-      formData,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      // Contact person
+      for (const uidContact of inputContact) {
+        formData.append("contact_person[]", uidContact || "");
       }
-    );
 
-    // Success response
-    Swal.fire({
-      title: res.data.message,
-      text: "Successfully created deals",
-      icon: "success",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        window.location.href = "/deals";
+      // Mention users
+      mentionUsers.forEach((ment, index) => {
+        formData.append(`mention_user[${index}]`, ment);
+      });
+
+      // Deals data
+      formData.append("deal_name", inputDeals.deal_name);
+      formData.append("deal_size", price || "");
+      formData.append("deal_status", inputDeals.deal_status);
+      formData.append("priority_uid", inputDeals.priority ?? "");
+      formData.append("deal_category", inputDeals.deal_category || "");
+      formData.append("project_category_uid", inputDeals.project_category_uid || "");
+      formData.append("staging_uid", selectedPipeline ?? "");
+      formData.append("owner_user_uid", inputDeals.owner_user_uid);
+      formData.append("company_uid", inputDeals.company_uid || "");
+      formData.append("notes", inputDeals.notes ? inputDeals.notes : "");
+      formData.append("file", selectFile || "");
+
+      // Planned implementation date
+      if (inputDeals.planned_implementation_date) {
+        const date = inputDeals.planned_implementation_date;
+        const formattedDate = `${date.getFullYear()}-${String(
+          date.getMonth() + 1
+        ).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+        formData.append("planned_implementation_date", formattedDate);
       }
-    });
-  } catch (err) {
-    // Error response dari backend
-    if (err.response) {
+
+      // Products
+      if (Array.isArray(allData[0]) && allData[0].length > 0) {
+        allData[0].forEach((product, index) => {
+          formData.append(
+            `products[${index}][product_uid]`,
+            product.product_uid || ""
+          );
+          formData.append(`products[${index}][qty]`, product.qty || "");
+          formData.append(
+            `products[${index}][discount_type]`,
+            product.discount_type || ""
+          );
+          formData.append(
+            `products[${index}][discount]`,
+            product.discount || ""
+          );
+          formData.append(
+            `products[${index}][total_price]`,
+            product.total_price || ""
+          );
+        });
+      }
+
+      if (hppFile) {
+        formData.append("hpp_file", hppFile);
+      }
+
+      // Debugging kalau mau cek isi formData
+      // for (const pair of formData.entries()) {
+      //   console.log(pair[0] + ": " + pair[1]);
+      // }
+
+      setButtonDisabled(true);
+
+      // 🔥 Axios call pakai async/await
+      const res = await axios.post(
+        `${process.env.REACT_APP_BACKEND_URL}/deals`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // Success response
       Swal.fire({
-        text: err.response.data.message || "Validation failed!",
-        icon: "warning",
+        title: res.data.message,
+        text: "Successfully created deals",
+        icon: "success",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = "/deals";
+        }
       });
-    } else {
-      Swal.fire({
-        text: "Something went wrong!",
-        icon: "error",
-      });
+    } catch (err) {
+      // Error response dari backend
+      if (err.response) {
+        Swal.fire({
+          text: err.response.data.message || "Validation failed!",
+          icon: "warning",
+        });
+      } else {
+        Swal.fire({
+          text: "Something went wrong!",
+          icon: "error",
+        });
+      }
     }
-  }
-};
+  };
 
 
   const currentSelectedStage = pipeline.find(p => p.uid === selectedPipeline);
@@ -990,6 +1042,18 @@ const SingleDeals = () => {
 
           </form>
         </div>
+
+          <HppUploadModal
+            show={showHppModal}
+            onClose={() => setShowHppModal(false)}
+            onFileSelect={(file) => setHppFile(file)}
+            // Saat tombol "Confirm" di modal di-klik, panggil handleSubmitDeals lagi
+            onSubmit={() => {
+                setShowHppModal(false); // Tutup modal
+                handleSubmitDeals(new Event('submit')); // Panggil ulang submit
+            }}
+        />
+
       </Main>
     </body>
   );
