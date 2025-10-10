@@ -271,7 +271,10 @@ const EditDeals = () => {
         owner_user_uid: dealsOld.owner_user_uid,
         deal_size: dealsOld.deal_size,
         project_category_uid: dealsOld.project_category_uid,
-        planned_implementation_date: dealsOld.planned_implementation_date ? new Date(dealsOld.planned_implementation_date) : null
+        planned_implementation_date: dealsOld.planned_implementation_date ? new Date(dealsOld.planned_implementation_date) : null,
+        next_project_date: dealsOld.next_project_date 
+                       ? new Date(dealsOld.next_project_date) 
+                       : null,
       });
 
       setSelectedPipeline(dealsOld.staging_uid);
@@ -426,9 +429,11 @@ const EditDeals = () => {
   if (allContact[0]) {
     contactLocalStorage = allContact[0]?.map((data) => data);
   }
+
   const uidRes = contactLocalStorage?.map((data) => data.contact_uid);
   const uniqCont = new Set([...resContact, ...(uidRes || [])]);
   const combineCont = Array.from(uniqCont);
+  
   const selectContact = () => {
     const result = [];
     contact?.map((data) => {
@@ -466,6 +471,14 @@ const EditDeals = () => {
         project_category_uid: selectedOption ? selectedOption.value : "",
     }));
   };
+
+  const handleDateChange = (date, fieldName) => {
+      setValueDeals(prevDeals => ({
+          ...prevDeals,
+          [fieldName]: date,
+      }));
+};
+
 
   useEffect(() => {
     getPipeline();
@@ -630,6 +643,7 @@ const EditDeals = () => {
   ];
 
   const companyStorage = [];
+
   for (let i = 0; i < localStorage.length; i++) {
     const keys = localStorage.key(i);
     if (keys.startsWith("companyStorage")) {
@@ -637,6 +651,7 @@ const EditDeals = () => {
       companyStorage.push(data);
     }
   }
+
   const dataHistory = [
     {
       name: "Created By",
@@ -704,6 +719,7 @@ const EditDeals = () => {
       width: "140px",
     },
   ];
+
   const paginationComponentOptions = {
     selectAllRowsItem: true,
     selectAllRowsItemText: "ALL",
@@ -743,26 +759,18 @@ const EditDeals = () => {
     );
   };
 
-
-
   const handleSubmit = (e) => {
     e.preventDefault();
     const userPosition = localStorage.getItem('position_name');
     const isSalesManager = userPosition?.toLowerCase() === 'sales manager';
 
-    // --- PERBAIKAN DI SINI ---
-    // 1. Cari objek stage yang lengkap dari daftar 'pipeline'
     const currentSelectedStage = pipeline.find(p => p.uid === selectedPipeline);
-    // 2. Ambil namanya dari objek yang ditemukan
     const selectedStageName = currentSelectedStage?.name;
 
-
-
     if (isSalesManager && selectedStageName === 'Closed Won' && !hppFile) {
-        setShowHppModal(true); // Tampilkan modal
-        return; // Hentikan eksekusi fungsi untuk sementara
+        setShowHppModal(true); 
+        return;
     }
-
 
     const formData = new FormData();
     formData.append("deal_name", valueDeals.deal_name);
@@ -786,6 +794,14 @@ const EditDeals = () => {
         const date = new Date(valueDeals.planned_implementation_date);
         const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
         formData.append("planned_implementation_date", formattedDate);
+    }
+
+    if (valueDeals.next_project_date) {
+        const date = new Date(valueDeals.next_project_date);
+        const formattedDate = `${date.getFullYear()}-${String(
+            date.getMonth() + 1
+        ).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+        formData.append("next_project_date", formattedDate);
     }
 
     mentionUsers.forEach((ment, index) => {
@@ -1065,8 +1081,40 @@ const EditDeals = () => {
                           placeholder="Select or create a project category..."
                       />
                   </Form.Group>
+                  {
+                    currentSelectedStage?.name === 'Approaching' && (
+                      <>
+                      <Form.Group>
+                          <Form.Label>
+                              <span className="text-danger">*</span> Planned Implementation Date
+                          </Form.Label>
+                          <DatePicker
+                              selected={valueDeals.planned_implementation_date}
+                              onChange={(date) => setValueDeals({ ...valueDeals, planned_implementation_date: date })}
+                              className="form-control"
+                              dateFormat="dd/MM/yyyy"
+                              placeholderText="Select a date"
+                              required
+                          />
+                      </Form.Group>
+                      </>
+                    )
+                  }
+
+                  <Form.Group as={Col} md={6} className="mb-3">
+                      <Form.Label>Next Project Date</Form.Label>
+                      <DatePicker
+                          selected={valueDeals.next_project_date}
+                          onChange={(date) => handleDateChange(date, 'next_project_date')}
+                          className="form-control"
+                          dateFormat="dd/MM/yyyy"
+                          placeholderText="Optional: Set a follow-up date"
+                          isClearable
+                      />
+                  </Form.Group>
                 </Card.Body>
               </Card>
+              
               <Card className="shadow mb-4">
                 <Card.Header>
                   <h5 className="mt-2">
@@ -1363,29 +1411,7 @@ const EditDeals = () => {
                 </Card.Body>
               </Card>
 
-              {
-                currentSelectedStage?.name === 'Approaching' && (
-                  <>
-                  <Card className="shadow mt-4">
-                    <Card.Body>
-                        <Form.Group>
-                            <Form.Label>
-                                <span className="text-danger">*</span> Planned Implementation Date
-                            </Form.Label>
-                            <DatePicker
-                                selected={valueDeals.planned_implementation_date}
-                                onChange={(date) => setValueDeals({ ...valueDeals, planned_implementation_date: date })}
-                                className="form-control"
-                                dateFormat="dd/MM/yyyy"
-                                placeholderText="Select a date"
-                                required
-                            />
-                        </Form.Group>
-                    </Card.Body>
-                </Card>
-                  </>
-                )
-              }
+              
 
               <Card className="shadow">
                 <Card.Header>

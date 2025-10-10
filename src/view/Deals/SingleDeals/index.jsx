@@ -59,17 +59,20 @@ const SingleDeals = () => {
       allData.push(data);
     }
   }
+
   let totalPrice = 0;
   if (allData[0]) {
     const totalPriceArray = allData.map((data) =>
       data.map((item) => (totalPrice += item.total_price))
     );
   }
+
   const [price, setPrice] = useState(0);
   const handlePrice = (e) => {
     const value = e.target.value;
     setPrice(value);
   };
+
   const [inputDeals, setInputDeals] = useState({
     deal_name: "",
     deal_size: "",
@@ -83,8 +86,10 @@ const SingleDeals = () => {
     notes: "",
     gps: "",
     owner_user_uid: "",
-    planned_implementation_date: null
+    planned_implementation_date: null,
+    next_project_date: null
   });
+  
   const [inputContact, setInputContact] = useState([]);
   const handleInputDeals = (e) => {
     setInputDeals({
@@ -623,6 +628,15 @@ const SingleDeals = () => {
         formData.append("planned_implementation_date", formattedDate);
       }
 
+        if (inputDeals.next_project_date) {
+          const date = inputDeals.next_project_date;
+          const formattedDate = `${date.getFullYear()}-${String(
+              date.getMonth() + 1
+          ).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+          formData.append("next_project_date", formattedDate);
+      }
+
+
       // Products
       if (Array.isArray(allData[0]) && allData[0].length > 0) {
         allData[0].forEach((product, index) => {
@@ -870,7 +884,20 @@ const SingleDeals = () => {
                               </Form.Group>
                           </Card.Body>
                       </Card>
-                    )}
+                  )}
+
+                  <Form.Group as={Col} md={6} className="mb-3">
+                    <Form.Label>Next Project Date</Form.Label>
+                    <DatePicker
+                        selected={inputDeals.next_project_date}
+                        onChange={(date) => setInputDeals({ ...inputDeals, next_project_date: date })}
+                        className="form-control"
+                        dateFormat="dd/MM/yyyy"
+                        placeholderText="Optional: Set a follow-up date"
+                        isClearable
+                    />
+                </Form.Group>
+
 
                 </Card.Body>
               </Card>
