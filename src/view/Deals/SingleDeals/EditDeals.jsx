@@ -31,7 +31,6 @@ const EditDeals = () => {
   const [contactDetail, setContactDetail] = useState({});
   const [products, setProducts] = useState([]);
   const productsRef = useRef(products);
-
   const [history, setHistory] = useState([]);
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [mentionUsers, setMentionUsers] = useState([]);

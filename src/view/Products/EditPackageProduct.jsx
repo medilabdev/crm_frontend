@@ -1,478 +1,297 @@
+// Ganti seluruh isi file EditPackageProduct.jsx Anda dengan ini
+
 import React, { useEffect, useState } from "react";
-import Topbar from "../../components/Template/Topbar";
-import Sidebar from "../../components/Template/Sidebar";
-import Main from "../../components/Template/Main";
-import { Link, useParams } from "react-router-dom";
-import Card from "../../components/Card";
-import makeAnimated from "react-select/animated";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Form } from "react-bootstrap";
 import Swal from "sweetalert2";
 import DataTable from "react-data-table-component";
 import Select from "react-select";
+import { Form, Button, Table, Spinner, Card } from "react-bootstrap";
+
+import Topbar from "../../components/Template/Topbar";
+import Sidebar from "../../components/Template/Sidebar";
+import Main from "../../components/Template/Main";
+
+import { searchMasterProducts } from "../../services/productService"; 
+import { useDebounce } from "../../hooks/useDebounce";
 
 const EditPackageProduct = () => {
   const { uid } = useParams();
   const token = localStorage.getItem("token");
-  const animated = makeAnimated();
-  const [dataProduct, setDataProduct] = useState([]);
-  const [editPackage, setEditPackage] = useState([]);
-  const [editProduct, setEditProduct] = useState([]);
-  const [selectUid, setSelectUid] = useState(false);
-  const [isAddProduct, setIsAddProduct] = useState(false);
-  const [selectedProduct, setSelectProduct] = useState(false);
+  const navigate = useNavigate();
 
-  const handleProduct = (e) => {
-    setSelectProduct(e.map((data) => data.value));
-  };
-  const toggleSideAdd = () => {
-    setIsAddProduct(!isAddProduct);
-  };
-  const addProduct = isAddProduct ? "row d-block" : "row d-none ";
+  // === STATE UTAMA PAKET ===
+  const [packageName, setPackageName] = useState('');
+  const [packageDiscountType, setPackageDiscountType] = useState('');
+  const [packageDiscount, setPackageDiscount] = useState(0);
+  const [packageItems, setPackageItems] = useState([]); // Daftar produk dalam paket ini
 
-  const selectProduct = () => {
-    const result = [];
-    dataProduct?.map((data) => {
-      const isProduct = editProduct.some(
-        (product) => product?.product?.uid === data.uid
-      );
-      if (!isProduct) {
-        const theme = {
-          value: data.uid,
-          label: data.name,
-        };
-        result.push(theme);
-      }
-    });
-    return result;
-  };
+  // === STATE UNTUK UI PENCARIAN PRODUK ===
+  const [sourceType, setSourceType] = useState('master');
+  const [crmProducts, setCrmProducts] = useState([]);
+  
+  const [masterCategory, setMasterCategory] = useState('');
+  const [masterSearchTerm, setMasterSearchTerm] = useState('');
+  const [masterSearchResults, setMasterSearchResults] = useState([]);
+  const [isMasterLoading, setIsMasterLoading] = useState(false);
+  const debouncedSearchTerm = useDebounce(masterSearchTerm, 400);
 
-  const getDetailPackage = () => {
-    axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/packages-product/${uid}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => {
-        const packageData = res.data.data;
-        const productPackage = packageData?.package_detail_with_product?.map(
-          (data) => data
-        );
-        // console.log(productPackage);
-
-        setEditPackage({
-          name: packageData.name,
-          discount: packageData.discount,
-          discount_type: packageData.discount_type,
-        });
-        setEditProduct(productPackage ? productPackage : []);
-      })
-      .catch((error) => {
-        if (error.response.data.message === "Unauthenticated.") {
-          localStorage.clear();
-          window.location.href = "/login";
-        }
-      });
-  };
-  const getProduct = (retryCount = 0) => {
-    axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/products/form/select`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => setDataProduct(res.data.data))
-      .catch(async(error) => {
-        if (error.response.data.message === "Unauthenticated.") {
-          localStorage.clear();
-          window.location.href = "/login";
-        }
-        if(error.response && error.response.status === 429 && retryCount < 3){
-          const delay = Math.pow(2, retryCount) * 2000;
-        await new Promise(resolve => setTimeout(resolve, delay))
-        await getProduct(retryCount + 1)
-        }
-      });
-  };
-
+  // === DATA FETCHING (DETAIL PAKET & PRODUK CRM) ===
   useEffect(() => {
-    getDetailPackage(token);
-    getProduct(token);
-  }, [token, uid]);
+    if (uid) {
+      // 1. Ambil detail paket yang akan diedit
+      axios.get(`${process.env.REACT_APP_BACKEND_URL}/packages-product/${uid}`, { headers: { Authorization: `Bearer ${token}` } })
+        .then(res => {
+          const packageData = res.data.data;
+          setPackageName(packageData.name);
+          setPackageDiscountType(packageData.discount_type || '');
+          setPackageDiscount(packageData.discount || 0);
+          
+          const initialItems = (packageData.package_detail_with_product || []).map(detail => ({
+            uid: detail.product.uid,
+            name: detail.product.name,
+            price: detail.product.price,
+          }));
+          setPackageItems(initialItems);
+        })
+        .catch(err => console.error("Failed to fetch package details", err));
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setEditPackage({
-      ...editPackage,
-      [name]: value,
-    });
+      // 2. Ambil daftar produk single dari CRM untuk opsi penambahan
+      axios.get(`${process.env.REACT_APP_BACKEND_URL}/products/form/select`, { headers: { Authorization: `Bearer ${token}` }})
+        .then((res) => setCrmProducts(res.data.data))
+        .catch((err) => console.error("Failed to fetch CRM products", err));
+    }
+  }, [uid, token]);
+
+  // === API CALL (MASTER PRODUCTS MCU) ===
+  useEffect(() => {
+    if (masterCategory) {
+      setIsMasterLoading(true);
+      searchMasterProducts(masterCategory, debouncedSearchTerm)
+        .then(results => {
+          setMasterSearchResults(results || []);
+        })
+        .catch(err => {
+          console.error("API call failed:", err);
+        })
+        .finally(() => {
+          setIsMasterLoading(false);
+        });
+    } else {
+      setMasterSearchResults([]);
+    }
+  }, [masterCategory, debouncedSearchTerm]);
+
+  const handleAddItemToList = (product) => {
+    if (packageItems.some(item => item.uid === product.uid)) {
+      Swal.fire({ text: 'Product is already in the package.', icon: 'warning', timer: 1500, showConfirmButton: false });
+      return;
+    }
+    const newItem = { uid: product.uid, name: product.name, price: product.price };
+    setPackageItems(prevItems => [...prevItems, newItem]);
+    setMasterSearchTerm('');
+    setMasterSearchResults([]);
   };
 
-  const updateSubmitPackage = (e) => {
+  const handleCrmItemToList = (selectedOption) => {
+     const product = crmProducts.find(p => p.uid === selectedOption.value);
+     if(product) handleAddItemToList(product);
+  };
+
+  const handleRemoveItem = (uidToRemove) => {
+    setPackageItems(prevItems => prevItems.filter(item => item.uid !== uidToRemove));
+  };
+  
+  const handleUpdatePackage = async (e) => {
     e.preventDefault();
+    
     const formData = new FormData();
-    formData.append("name", editPackage.name);
-    formData.append("discount_type", editPackage.discount_type);
-    formData.append("discount", editPackage.discount);
-    formData.append("_method", "put");
+    formData.append('_method', 'PUT');
+    formData.append('name', packageName);
+    formData.append('discount_type', packageDiscountType);
+    formData.append('discount', packageDiscount);
+    
+    packageItems.forEach((item, index) => {
+        formData.append(`products[${index}][uid]`, item.uid);
+        formData.append(`products[${index}][name]`, item.name);
+        formData.append(`products[${index}][price]`, item.price);
+    });
+
     try {
-      axios
-        .post(
-          `${process.env.REACT_APP_BACKEND_URL}/packages-product/${uid}`,
-          formData,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        )
-        .then((res) => {
-          Swal.fire({
-            title: res.data.message,
-            text: "Successfully Create Package",
-            icon: "success",
-          }).then((res) => {
-            if (res.isConfirmed) {
-              window.location.reload();
-            }
-          });
-        });
+      const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/packages-product/${uid}`, formData, { 
+        headers: { Authorization: `Bearer ${token}` } 
+      });
+      Swal.fire({ title: 'Success!', text: response.data.message, icon: 'success' })
+        .then(() => navigate('/products')); // Redirect ke halaman daftar
     } catch (error) {
-      if (error.response) {
-        Swal.fire({
-          text: error.response.data.message,
-          icon: "warning",
-        });
-      }
+      Swal.fire({ title: 'Error!', text: error.response?.data?.message || 'Failed to update package.', icon: 'error' });
     }
   };
-  const selectUidProduct = (e) => {
-    const select = e.selectedRows.map((row) => row.uid);
-    setSelectUid(select);
-  };
-
-  const columns = [
-    {
-      id: 1,
-      name: "Name Product",
-      selector: (row) => <p className="mt-1">{row?.product?.name}</p>,
-      sortable: true,
-    },
-    {
-      id: 2,
-      name: "Action",
-      selector: (row) => (
-        <button
-          onClick={() => {
-            Swal.fire({
-              title: "Konfirmasi",
-              text: "Apa anda yakin ingin menghapus item product ini?",
-              icon: "warning",
-              showCancelButton: true,
-              confirmButtonColor: "#3085d6",
-              cancelButtonColor: "#d33",
-              confirmButtonText: "Ya, Hapus!",
-              cancelButtonText: "Batal",
-            }).then((result) => {
-              if (result.isConfirmed) {
-                const formData = new FormData();
-                formData.append("package_uid", uid);
-                formData.append("package_item_uid[]", row.uid);
-                formData.append("_method", "delete");
-                axios
-                  .post(
-                    `${process.env.REACT_APP_BACKEND_URL}/packages-product/package/item/delete`,
-                    formData,
-                    {
-                      headers: { Authorization: `Bearer ${token}` },
-                    }
-                  )
-                  .then((res) => {
-                    Swal.fire({
-                      title: res.data.message,
-                      text: "Successfully delete item product",
-                      icon: "success",
-                    }).then((res) => {
-                      if (res.isConfirmed) {
-                        window.location.reload();
-                      }
-                    });
-                  });
-              } else {
-                Swal.fire({
-                  title: "Cancelled",
-                  text: "The item was not deleted.",
-                  icon: "error",
-                });
-              }
-            });
-          }}
-          className="icon-button"
-          title="delete"
-        >
-          <i className="bi bi-trash-fill danger"></i>
-        </button>
-      ),
-    },
+  
+  const crmProductOptions = crmProducts.map(p => ({ value: p.uid, label: p.name }));
+  const masterCategories = [
+    { value: 'checkups', label: 'Checkups' },
+    { value: 'radiology_checkups', label: 'Radiology' },
+    { value: 'pharmacy_checkups', label: 'Pharmacy' },
+    { value: 'hemodialysis_checkups', label: 'Hemodialysis' },
+    { value: 'medical_clinic_checkups', label: 'Medical Clinic' },
+    { value: 'package_checkups', label: 'Package Checkups' },
+    { value: 'general_practitioner_checkups', label: 'General Practitioner' },
+    { value: 'vaccine_checkups', label: 'Vaccine' },
+    { value: 'electromedicine_checkups', label: 'Electromedicine' },
   ];
 
-  const customStyle = {
-    headRow: {
-      style: {
-        backgroundColor: "#427D9D",
-        color: "white",
-        marginTop: "12px",
-        borderRadius: "5px",
-      },
-    },
-    cells: {
-      style: {
-        fontSize: "4px",
-        fontWeight: "600",
-        marginTop: "4px",
-      },
-    },
-  };
-  const handleDeleteSelected = async (e) => {
-    e.preventDefault();
-    const isResult = await Swal.fire({
-      title: "Apakah anda yakin",
-      text: "anda yakin untuk menghapusnya!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Ya, Hapus!",
-      cancelButtonText: "Batal",
-    });
-    if (isResult.isConfirmed) {
-      try {
-        const formData = new FormData();
-        for (const uidSelect of selectUid) {
-          formData.append("package_item_uid[]", uidSelect);
-        }
-        formData.append("package_uid", uid);
-        formData.append("_method", "delete");
-        axios
-          .post(
-            `${process.env.REACT_APP_BACKEND_URL}/packages-product/package/item/delete`,
-            formData,
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            }
-          )
-          .then((res) => {
-            Swal.fire({
-              title: res.data.message,
-              text: "Successfully delete product",
-              icon: "success",
-            }).then((res) => {
-              if (res.isConfirmed) {
-                window.location.reload();
-              }
-            });
-          });
-      } catch (error) {
-        if (error.response.data.message === "Unauthenticated.") {
-          Swal.fire({
-            title: error.response.data.message,
-            text: "Tolong Login Kembali",
-            icon: "warning",
-          });
-          localStorage.clear();
-          window.location.href = "/login";
-        }
-        if (error.message) {
-          Swal.fire({
-            text: error.response.data.message,
-            icon: "warning",
-          });
-        }
-      }
-    }
-  };
-
-  const handleSubmitProduct = (e) => {
-    e.preventDefault();
-    const formData = new FormData();
-    for (const product of selectedProduct) {
-      formData.append("product_item_uid[]", product);
-    }
-    formData.append("package_product_uid", uid);
-    try {
-      axios
-        .post(
-          `${process.env.REACT_APP_BACKEND_URL}/packages-product/add/item`,
-          formData,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        )
-        .then((res) => {
-          Swal.fire({
-            title: res.data.message,
-            text: "Successfully add item product",
-            icon: "success",
-          }).then((res) => {
-            if (res.isConfirmed) {
-              window.location.reload();
-            }
-          });
-        });
-    } catch (error) {
-      if (error.response) {
-        Swal.fire({
-          text: error.response.data.message,
-          icon: "warning",
-        });
-      } else {
-        Swal.fire({
-          text: "Something went wrong!",
-          icon: "error",
-        });
-      }
-    }
-  };
   return (
-    <body id="body">
+    <>
       <Topbar />
       <Sidebar />
       <Main>
-        <div className="container">
+        <div className="page-title">
           <div className="row">
-            <div className="col">
-              <div className="pagetitle">
-                <h1>Edit Package</h1>
-                <nav>
-                  <ol className="breadcrumb mt-2">
-                    <li className="breadcrumb-item">
-                      <Link to="/" className="text-decoration-none">
-                        Dashboard
-                      </Link>
-                    </li>
-                    <li className="breadcrumb-item">
-                      <Link to="/products" className="text-decoration-none">
-                        Package Product
-                      </Link>
-                    </li>
-                    <li className="breadcrumb-item active fw-bold">
-                      Edit Package Product
-                    </li>
-                  </ol>
-                </nav>
-              </div>
+            <div className="col-12 col-md-6 order-md-1 order-last">
+              <h3>Edit Package Product</h3>
             </div>
           </div>
-          <Card>
-            <div className="row">
-              <div className="col-md-6 mt-4">
-                <form onSubmit={updateSubmitPackage}>
-                  <Form.Group className="mb-2">
-                    <Form.Label>
-                      Name Package <span className="text-danger fs-5">*</span>
-                    </Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="name"
-                      value={editPackage.name}
-                      onChange={handleChange}
-                      required
-                    />
-                  </Form.Group>
-                  <Form.Group className="mb-2">
-                    <Form.Label>Type Diskon</Form.Label>
-                    <Form.Select
-                      name="discount_type"
-                      value={editPackage.discount_type}
-                      onChange={handleChange}
-                    >
-                      <option value="">Select Type</option>
-                      <option value="nominal">Nominal</option>
-                      <option value="percent">Percent</option>
-                    </Form.Select>
-                  </Form.Group>
-                  <Form.Group className="mb-2">
-                    <Form.Label>Diskon</Form.Label>
-                    <div className="input-group">
-                      <div className="input-group-prepend">
-                        <span className="input-group-text">
-                          {editPackage.discount_type === "nominal"
-                            ? "Rp."
-                            : "%"}
-                        </span>
-                      </div>
-                      <input
-                        type="number"
-                        className="form-control"
-                        name="discount"
-                        value={editPackage.discount}
-                        onChange={handleChange}
-                      />
-                    </div>
-                  </Form.Group>
-                  <div className="mt-3">
-                    <button className="btn btn-primary" type="submit">
-                      Save
-                    </button>
-                    <a className="btn btn-secondary ms-3" href="/products">
-                      Cancel
-                    </a>
-                  </div>
-                </form>
-              </div>
-              <div className="col-md-6">
-                <div className="mt-1 row">
-                  <div className="col">
-                    <button
-                      className="btn btn-outline-danger float-end mb-2"
-                      onClick={handleDeleteSelected}
-                    >
-                      Delete
-                    </button>
-                    <button
-                      className="btn btn-outline-primary float-end mb-2 me-2"
-                      onClick={toggleSideAdd}
-                    >
-                      Add Product
-                    </button>
-                  </div>
-                </div>
-                <div className={addProduct}>
-                  <form onSubmit={handleSubmitProduct} className="d-flex">
-                    <div className="col-md-9 ">
-                      <Form.Group className="mb-2 mt-3">
-                        <Select
-                          placeholder="Select Product..."
-                          closeMenuOnSelect={false}
-                          components={animated}
-                          options={selectProduct()}
-                          onChange={(selected) => handleProduct(selected)}
-                          isMulti
-                          name="product_uid[]"
-                        />
-                      </Form.Group>
-                    </div>
-                    <div className="col-md-3" style={{ marginTop: "17px" }}>
-                      <button className="btn btn-primary ms-4" type="submit">
-                        Submit
-                      </button>
-                    </div>
-                  </form>
-                </div>
-                <DataTable
-                  data={editProduct}
-                  columns={columns}
-                  customStyles={customStyle}
-                  selectableRows
-                  onSelectedRowsChange={selectUidProduct}
-                />
-              </div>
-            </div>
-          </Card>
         </div>
+        <Card>
+            <Card.Body>
+                <Form onSubmit={handleUpdatePackage}>
+                    {/* === BAGIAN 1: INFO PAKET === */}
+                    <Card className="mb-4">
+                        <Card.Body>
+                        <Form.Group className="mb-3">
+                            <Form.Label className="fw-bold">Package Name <span className="text-danger">*</span></Form.Label>
+                            <Form.Control type="text" value={packageName} onChange={(e) => setPackageName(e.target.value)} required />
+                        </Form.Group>
+                        <div className="d-flex">
+                            <Form.Group className="me-2 flex-fill">
+                            <Form.Label>Discount Type</Form.Label>
+                            <Form.Select value={packageDiscountType} onChange={e => setPackageDiscountType(e.target.value)}>
+                                <option value="">No Discount</option>
+                                <option value="percent">Percent</option>
+                                <option value="nominal">Nominal</option>
+                            </Form.Select>
+                            </Form.Group>
+                            <Form.Group className="flex-fill">
+                            <Form.Label>Discount Value</Form.Label>
+                            <Form.Control type="number" value={packageDiscount} onChange={e => setPackageDiscount(e.target.value)} disabled={!packageDiscountType} />
+                            </Form.Group>
+                        </div>
+                        </Card.Body>
+                    </Card>
+
+                    {/* === BAGIAN 2: DAFTAR ITEM YANG ADA DI PAKET === */}
+                    <Card className="mb-4">
+                        <Card.Header><h5 className="mb-0">Items in this Package</h5></Card.Header>
+                        <Card.Body>
+                        <Table striped size="sm">
+                            <tbody>
+                            {packageItems.length > 0 ? (
+                                packageItems.map(item => (
+                                <tr key={item.uid}>
+                                    <td>{item.name}</td>
+                                    <td className="text-end" style={{ width: '120px' }}>
+                                    <Button variant="outline-danger" size="sm" onClick={() => handleRemoveItem(item.uid)}>Remove</Button>
+                                    </td>
+                                </tr>
+                                ))
+                            ) : (
+                                <tr><td className="text-center text-muted">No items in this package.</td></tr>
+                            )}
+                            </tbody>
+                        </Table>
+                        </Card.Body>
+                    </Card>
+                    
+                    {/* === BAGIAN 3: AREA PENAMBAH PRODUK (ADDER) === */}
+                    <Card>
+                        <Card.Header><h5 className="mb-0">Add a New Item</h5></Card.Header>
+                        <Card.Body>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Product Source</Form.Label>
+                                <Form.Select value={sourceType} onChange={e => setSourceType(e.target.value)}>
+                                    <option value="master">Product Master (MCU)</option>
+                                    <option value="crm_single">Single Product (CRM)</option>
+                                </Form.Select>
+                            </Form.Group>
+                            
+                            <>
+                            
+
+                            {/* Tampilkan UI ini jika sumbernya adalah Master MCU */}
+                            {sourceType === "master" && (
+                              <>
+                                <Form.Group className="mb-3">
+                                  <Form.Label>Category</Form.Label>
+                                  <Form.Select
+                                    value={masterCategory}
+                                    onChange={(e) => setMasterCategory(e.target.value)}
+                                  >
+                                    <option value="">-- Select Category --</option>
+                                    {masterCategories.map((cat) => (
+                                      <option key={cat.value} value={cat.value}>
+                                        {cat.label}
+                                      </option>
+                                    ))}
+                                  </Form.Select>
+                                </Form.Group>
+
+                                {/* Tampilkan input pencarian HANYA jika kategori sudah dipilih */}
+                                {masterCategory && (
+                                  <div className="search-container">
+                                    <Form.Label>Search Product</Form.Label>
+                                    <Form.Control
+                                      type="text"
+                                      placeholder="Type to search..."
+                                      value={masterSearchTerm}
+                                      onChange={(e) => setMasterSearchTerm(e.target.value)}
+                                    />
+                                    {isMasterLoading && (
+                                      <Spinner animation="border" size="sm" className="search-spinner" />
+                                    )}
+
+                                    {/* Tampilkan hasil pencarian */}
+                                    {!isMasterLoading && masterSearchResults.length > 0 && (
+                                      <ul className="list-group search-results mt-1">
+                                        {masterSearchResults.map((product) => (
+                                          <li
+                                            key={product.uid}
+                                            className="list-group-item list-group-item-action"
+                                            onClick={() => handleAddItemToList(product)}
+                                          >
+                                            {product.name}
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    )}
+                                  </div>
+                                )}
+                              </>
+                            )}
+
+                            {/* Tampilkan UI ini jika sumbernya adalah produk dari CRM */}
+                            {sourceType === "crm_single" && (
+                              <Form.Group>
+                                <Form.Label>Select Product from CRM</Form.Label>
+                                <Select options={crmProductOptions} onChange={handleCrmItemToList} />
+                              </Form.Group>
+                            )}
+                          </>
+
+                        </Card.Body>
+                    </Card>
+                    
+                    {/* === TOMBOL SAVE UTAMA === */}
+                    <div className="mt-4">
+                        <Button type="submit" variant="primary" disabled={!packageName || packageItems.length === 0}>
+                        Save Changes
+                        </Button>
+                    </div>
+                </Form>
+            </Card.Body>
+        </Card>
       </Main>
-    </body>
+    </>
   );
 };
 
