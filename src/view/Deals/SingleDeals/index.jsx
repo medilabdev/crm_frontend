@@ -8,6 +8,7 @@ import { Card, Col, FloatingLabel, Form, Row, Modal, Button } from "react-bootst
 import { useState } from "react";
 import axios from "axios";
 import { useEffect } from "react";
+import { useParams } from "react-router-dom";
 import Select from "react-select";
 import CreatableSelect from 'react-select/creatable';
 import OverlayAddCompany from "../../../components/Overlay/addCompany";
@@ -22,6 +23,7 @@ import { faSackDollar } from "@fortawesome/free-solid-svg-icons";
 
 const SingleDeals = () => {
   const token = localStorage.getItem("token");
+  const { uid } = useParams();
   const [owner, setOwner] = useState([]);
   const [priority, setPriority] = useState([]);
   const [dealCategory, setDealCategory] = useState([]);
@@ -29,6 +31,9 @@ const SingleDeals = () => {
   const [companies, setCompanies] = useState([]);
   const [contact, setContact] = useState([]);
   const [pipeline, setPipeline] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [valueDeals, setValueDeals] = useState({}); // <-- PASTIKAN BARIS INI ADA
+
   // overlay add company
   const [showAddCampCanvas, setShowAddCampCanvas] = useState(false);
   const handleCloseAddCampCanvas = () => setShowAddCampCanvas(false);
@@ -548,28 +553,84 @@ const SingleDeals = () => {
             </Modal.Footer>
         </Modal>
     );
-};
+  };
 
+  // Fungsi ini akan dipanggil oleh overlay setelah produk disimpan
+  const handleProductsUpdate = () => {
+    const updatedProducts = JSON.parse(localStorage.getItem("DataProduct") || "[]");
+    setProducts(updatedProducts);
+  };
 
+  // GANTI TOTAL useEffect ANDA DENGAN INI
   useEffect(() => {
-    getOwnerUser(token);
-    getPriority(token);
-    getDealCategory(token);
-    getCompanies(token);
-    getProjectCategories(token); 
-    getContact(token);
-    getPipeline(token);
-    setPrice(totalPrice);
+    // --- FUNGSI BARU UNTUK MEMBEDAKAN CREATE vs EDIT ---
+    const initializeComponent = async () => {
+      // Panggil semua data pendukung yang dibutuhkan kedua mode
+      getPipeline();
+      getOwnerUser(token);
+      getPriority(token);
+      getDealCategory(token);
+      getCompanies(token);
+      getProjectCategories(token);
+      getContact(token);
 
-    // jika windows di reload maka data product akan hilang
-    const clearDataProductLocalStorage = () => {
-      localStorage.removeItem("DataProduct");
+      if (uid) {
+        // --- MODE EDIT ---
+        // Jika ada UID, ambil data deal yang sudah ada
+        try {
+          const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/deals/${uid}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const dealData = response.data.data;
+          
+          // ... (semua kode `setValueDeals`, `setSelectedPipeline` Anda)
+           setValueDeals({
+                deal_name: dealData.deal_name,
+                priority_uid: dealData.priority_uid,
+                deal_status: dealData.deal_status,
+                deal_category_uid: dealData.deal_category_uid,
+                company_uid: dealData.company_uid,
+                owner_user_uid: dealData.owner_user_uid,
+                deal_size: dealData.deal_size,
+                project_category_uid: dealData.project_category_uid,
+                planned_implementation_date: dealData.planned_implementation_date ? new Date(dealData.planned_implementation_date) : null,
+                next_project_date: dealData.next_project_date ? new Date(dealData.next_project_date) : null,
+            });
+            setSelectedPipeline(dealData.staging_uid);
+
+          // Standarisasi data produk dan simpan ke state & localStorage
+          const standardizedProducts = (dealData.detail_product || []).map(item => ({
+            id: item.id || item.uid,
+            product_uid: item.product_uid || item.package_product_uid,
+            product_name: item.product?.name || item.package_product?.name || item.product_name || 'Product Not Found',
+            qty: item.qty,
+            discount_type: item.discount_type,
+            discount: item.discount,
+            total_price: item.total_price,
+          }));
+          setProducts(standardizedProducts);
+          localStorage.setItem("DataProduct", JSON.stringify(standardizedProducts));
+
+        } catch (error) {
+          console.error("Failed to fetch deal data:", error);
+        }
+
+      } else {
+        // --- MODE CREATE ---
+        // Jika tidak ada UID, bersihkan meja kerja!
+        localStorage.removeItem("DataProduct");
+        localStorage.removeItem("companyStorage");
+        localStorage.removeItem("contactPerson");
+        setProducts([]); // Pastikan state produk di UI juga kosong
+      }
     };
-    window.addEventListener("beforeunload", clearDataProductLocalStorage);
-    return () => {
-      window.removeEventListener("beforeunload", clearDataProductLocalStorage);
-    };
-  }, [token, dealSize, totalPrice]);
+
+    initializeComponent();
+    
+  }, [token, uid]); // Dependency array sekarang hanya butuh token dan uid
+
+
+ 
 
   const [selectFile, setSelectFile] = useState(null);
 
@@ -638,27 +699,21 @@ const SingleDeals = () => {
 
 
       // Products
-      if (Array.isArray(allData[0]) && allData[0].length > 0) {
-        allData[0].forEach((product, index) => {
-          formData.append(
-            `products[${index}][product_uid]`,
-            product.product_uid || ""
-          );
+      const productsToSave = JSON.parse(localStorage.getItem("DataProduct") || "[]");
+
+     // 2. Lampirkan ke formData jika ada isinya
+      if (productsToSave.length > 0) {
+        productsToSave.forEach((product, index) => {
+          formData.append(`products[${index}][product_uid]`, product.product_uid || "");
+          formData.append(`products[${index}][product_name]`, product.product_name || "");
+
           formData.append(`products[${index}][qty]`, product.qty || "");
-          formData.append(
-            `products[${index}][discount_type]`,
-            product.discount_type || ""
-          );
-          formData.append(
-            `products[${index}][discount]`,
-            product.discount || ""
-          );
-          formData.append(
-            `products[${index}][total_price]`,
-            product.total_price || ""
-          );
+          formData.append(`products[${index}][discount_type]`, product.discount_type || "");
+          formData.append(`products[${index}][discount]`, product.discount || "");
+          formData.append(`products[${index}][total_price]`, product.total_price || "");
         });
       }
+
 
       if (hppFile) {
         formData.append("hpp_file", hppFile);
@@ -689,6 +744,7 @@ const SingleDeals = () => {
         icon: "success",
       }).then((result) => {
         if (result.isConfirmed) {
+          localStorage.removeItem("DataProduct");
           window.location.href = "/deals";
         }
       });
@@ -705,6 +761,8 @@ const SingleDeals = () => {
           icon: "error",
         });
       }
+
+      setButtonDisabled(false);
     }
   };
 
@@ -985,7 +1043,7 @@ const SingleDeals = () => {
                 <Card.Body>
                   <div>
                     <DataTable
-                      data={allData[0]}
+                      data={products}
                       columns={columns}
                       customStyles={customStyle}
                     />
@@ -1019,9 +1077,11 @@ const SingleDeals = () => {
                 </Card.Body>
               </Card>
               <AddProductOverlay
-                onClose={handleCloseProduct}
-                visible={showAddProduct}
+                  visible={showAddProduct}
+                  onClose={handleCloseProduct}
+                  onProductsUpdated={handleProductsUpdate}
               />
+
               <Card className="shadow">
                 <Card.Header>
                   <h6 className="fw-bold mt-2">Notes</h6>

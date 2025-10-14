@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState, useRef } from "react";
 import DatePicker from "react-datepicker";
 import Topbar from "../../../components/Template/Topbar";
 import Sidebar from "../../../components/Template/Sidebar";
@@ -8,8 +8,6 @@ import { Card, Col, FloatingLabel, Form, Row, Modal, Button } from "react-bootst
 import Select from "react-select";
 import CreatableSelect from 'react-select/creatable';
 import ReactQuill from "react-quill";
-import { useState } from "react";
-import { useEffect } from "react";
 import axios from "axios";
 import DataTable from "react-data-table-component";
 import IconPerson from "../../../assets/img/telephone-call.png";
@@ -31,6 +29,9 @@ const EditDeals = () => {
   const [company, setCompany] = useState([]);
   const [contact, setContact] = useState([]);
   const [contactDetail, setContactDetail] = useState({});
+  const [products, setProducts] = useState([]);
+  const productsRef = useRef(products);
+
   const [history, setHistory] = useState([]);
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [mentionUsers, setMentionUsers] = useState([]);
@@ -83,21 +84,8 @@ const EditDeals = () => {
     }
   };
 
-  const allProduct = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key.startsWith("DataProduct")) {
-      const data = JSON.parse(localStorage.getItem(key));
-      allProduct.push(data);
-    }
-  }
-  
-  let totalPrice = 0;
-  if (allProduct[0]) {
-    const totalPriceArray = allProduct.map((data) => {
-      data.map((item) => (totalPrice += item.total_price));
-    });
-  }
+   const totalPrice = products.reduce((sum, item) => sum + (item.total_price || 0), 0);
+
 
   const getCompany = async (retryCount = 0) => {
     try {
@@ -250,77 +238,89 @@ const EditDeals = () => {
     }
   };
 
-  const getDealsValueOld = async (token, uid, retryCount = 0) => {
-    try {
-      const response = await axios.get(
-        `${process.env.REACT_APP_BACKEND_URL}/deals/${uid}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+  useEffect(() => {
+    const getDealsValueOld = async () => {
+        try {
+            const response = await axios.get(
+              `${process.env.REACT_APP_BACKEND_URL}/deals/${uid}`,
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            const dealData = response.data.data;
+
+            // ... (kode Anda untuk setValueDeals, setSelectedPipeline, dll. tetap sama) ...
+            setValueDeals({
+                deal_name: dealData.deal_name,
+                priority_uid: dealData.priority_uid,
+                deal_status: dealData.deal_status,
+                deal_category_uid: dealData.deal_category_uid,
+                company_uid: dealData.company_uid,
+                owner_user_uid: dealData.owner_user_uid,
+                deal_size: dealData.deal_size,
+                project_category_uid: dealData.project_category_uid,
+                planned_implementation_date: dealData.planned_implementation_date ? new Date(dealData.planned_implementation_date) : null,
+                next_project_date: dealData.next_project_date ? new Date(dealData.next_project_date) : null,
+            });
+            setSelectedPipeline(dealData.staging_uid);
+            setHistory(dealData.history);
+
+            // --- STANDARISASI DATA PRODUK ---
+            const standardizedProducts = (dealData.detail_product || []).map(item => ({
+                id: item.id || item.uid,
+                product_uid: item.product_uid || item.package_product_uid,
+                product_name: item.product?.name || item.package_product?.name || item.product_name || 'Product Not Found',
+                qty: item.qty,
+                discount_type: item.discount_type,
+                discount: item.discount,
+                total_price: item.total_price,
+            }));
+
+            setProducts(standardizedProducts);
+            localStorage.setItem("DataProduct", JSON.stringify(standardizedProducts));
+
+        } catch (error) {
+            console.error("Failed to fetch deal data:", error);
+            if (error.response?.status === 401) {
+                localStorage.clear();
+                window.location.href = "/login";
+            }
         }
-      );
-      const dealsOld = response.data.data;
+    };
+    
+    // Panggil semua fungsi get
+    getDealsValueOld();
+    getPipeline();
+    getOwner();
+    getPriority();
+    getDealsCategory();
+    getProjectCategories();
+    getCompany();
+    getContact();
 
-      setValueDeals({
-        deal_name: dealsOld.deal_name,
-        priority_uid: dealsOld.priority_uid,
-        deal_status: dealsOld.deal_status,
-        deal_category_uid: dealsOld.deal_category_uid,
-        company_uid: dealsOld.company_uid,
-        owner_user_uid: dealsOld.owner_user_uid,
-        deal_size: dealsOld.deal_size,
-        project_category_uid: dealsOld.project_category_uid,
-        planned_implementation_date: dealsOld.planned_implementation_date ? new Date(dealsOld.planned_implementation_date) : null,
-        next_project_date: dealsOld.next_project_date 
-                       ? new Date(dealsOld.next_project_date) 
-                       : null,
-      });
+    // Listener untuk update UI jika localStorage diubah oleh overlay
+    const handleStorageChange = () => {
+      setProducts(JSON.parse(localStorage.getItem("DataProduct") || "[]"));
+    };
+    window.addEventListener('storage', handleStorageChange);
+    
+    // HAPUS LISTENER `beforeunload` YANG BERBAHAYA
+    return () => {
+        window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [token, uid]);
 
-      setSelectedPipeline(dealsOld.staging_uid);
+  useEffect(() => {
+  // Setiap kali 'products' berubah, update isi 'kotak' ref
+    productsRef.current = products;
+  }, [products]);
 
-      setHistory(dealsOld.history);
-      localStorage.setItem(
-        "DataProduct",
-        JSON.stringify(dealsOld?.detail_product)
-      );
-      setStageOld(dealsOld?.staging);
-      if (dealsOld?.contact_person) {
-        localStorage.setItem(
-          `contactPerson`,
-          JSON.stringify(dealsOld?.contact_person)
-        );
-        setContactDetail(dealsOld?.contact_person);
-      }
-      if (dealsOld?.company) {
-        localStorage.setItem(
-          "companyStorage",
-          JSON.stringify(dealsOld?.company)
-        );
-      }
-    } catch (error) {
-      if (
-        error.response.status === 401 &&
-        error.response.data.message === "Unauthenticated."
-      ) {
-        localStorage.clear();
-        window.location.href = "/login";
-      } else if (error.response && error.response.status === 429) {
-        const maxRetries = 3;
-        if (retryCount < maxRetries) {
-          setTimeout(() => {
-            getDealsValueOld(retryCount + 1);
-          }, 2000);
-        } else {
-          console.error(
-            "Max retry attempts reached. Unable to complete the request."
-          );
-        }
-      } else {
-        console.error("Unhandled error:", error);
-      }
-    }
+  const handleProductsUpdate = () => {
+    const updatedProducts = JSON.parse(localStorage.getItem("DataProduct") || "[]");
+    setProducts(updatedProducts);
+    console.log("PARENT STATE UPDATED:", updatedProducts); // Log untuk verifikasi
   };
+
+
+
 
   const getPipeline = async (retryCount = 0) => {
     try {
@@ -459,6 +459,7 @@ const EditDeals = () => {
       [e.target.name]: e.target.value,
     });
   };
+
   const [selectFile, setSelectFile] = useState(null);
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -477,35 +478,17 @@ const EditDeals = () => {
           ...prevDeals,
           [fieldName]: date,
       }));
-};
-
-
-  useEffect(() => {
-    getPipeline();
-    getDealsValueOld(token, uid);
-    getOwner();
-    getPriority();
-    getDealsCategory();
-    getProjectCategories();
-    getCompany();
-    getContact();
-    const clearDataProductLocalStorage = () => {
-      localStorage.removeItem("DataProduct");
-      localStorage.removeItem("companyStorage");
-      localStorage.removeItem("contactPerson");
-    };
-    window.addEventListener("beforeunload", clearDataProductLocalStorage);
-    return () => {
-      window.removeEventListener("beforeunload", clearDataProductLocalStorage);
-    };
-  }, [token, uid]);
-
-  const [dataProduct, setDataProduct] = useState([]);
-  const handleDeleteProduct = (productUid) => {
-    const upData = allProduct[0].filter((data) => data.id !== productUid);
-    setDataProduct(upData);
-    localStorage.setItem("DataProduct", JSON.stringify(upData));
   };
+
+
+  
+
+   const handleDeleteProduct = (productId) => {
+    const updatedProducts = products.filter(p => p.id !== productId);
+    setProducts(updatedProducts); // Update state
+    localStorage.setItem("DataProduct", JSON.stringify(updatedProducts)); // Sinkronkan localStorage
+  };
+
 
   const handleDeleteContact = (uid) => {
     Swal.fire({
@@ -759,7 +742,11 @@ const EditDeals = () => {
     );
   };
 
+  console.log("LIVE STATE of products:", products);
+
   const handleSubmit = (e) => {
+        console.log("STALE STATE in handleSubmit:", products);
+
     e.preventDefault();
     const userPosition = localStorage.getItem('position_name');
     const isSalesManager = userPosition?.toLowerCase() === 'sales manager';
@@ -773,6 +760,8 @@ const EditDeals = () => {
     }
 
     const formData = new FormData();
+    formData.append("_method", "put");
+
     formData.append("deal_name", valueDeals.deal_name);
     formData.append("deal_size", valueDeals.deal_size || totalPrice);
     formData.append("priority_uid", valueDeals.priority_uid);
@@ -810,21 +799,30 @@ const EditDeals = () => {
     combineCont.forEach((com, index) => {
       formData.append(`contact_person[${index}]`, com);
     });
-    allProduct[0].forEach((product, index) => {
-      formData.append(
-        `products[${index}][product_uid]`,
-        product.product_uid || product.package_product_uid
-      );
-      formData.append(`products[${index}][qty]`, product.qty);
-      formData.append(
-        `products[${index}][discount_type]`,
-        product.discount_type
-      );
-      formData.append(`products[${index}][discount]`, product.discount);
-      formData.append(`products[${index}][total_price]`, product.total_price);
-    });
+
+   const productsFromStorage = JSON.parse(localStorage.getItem("DataProduct") || "[]");
+
+
+   if (productsFromStorage.length > 0) {
+     productsFromStorage.forEach((product, index) => {
+       formData.append(`products[${index}][product_uid]`, product.product_uid || "");
+       formData.append(`products[${index}][product_name]`, product.product_name || "");
+       formData.append(`products[${index}][qty]`, product.qty || 1);
+       formData.append(`products[${index}][discount_type]`, product.discount_type || "none");
+       formData.append(`products[${index}][discount]`, product.discount || 0);
+       formData.append(`products[${index}][total_price]`, product.total_price || 0);
+     });
+   }
+
+
+
     formData.append("notes", valueDeals.notes ? valueDeals.notes : "");
-    formData.append("_method", "put");
+
+      console.log("--- FORM DATA SENT TO BACKEND ---");
+      for (const pair of formData.entries()) {
+        console.log(pair[0] + ": " + pair[1]);
+      }
+
     // for (const pair of formData.entries()) {
     //   console.log(pair[0] + ": " + pair[1]);
     // }
@@ -842,6 +840,7 @@ const EditDeals = () => {
           icon: "success",
         }).then((res) => {
           if (res.isConfirmed) {
+            localStorage.removeItem("DataProduct");
             window.location.reload();
           }
         });
@@ -858,7 +857,7 @@ const EditDeals = () => {
   };
 
   const currentSelectedStage = pipeline.find(p => p.uid === selectedPipeline);
-  console.log("Current HPP File:", hppFile);
+  // console.log("Current HPP File:", hppFile);
 
   return (
     <body id="body">
@@ -1332,7 +1331,7 @@ const EditDeals = () => {
                 <Card.Body>
                   <div>
                     <DataTable
-                      data={allProduct[0]}
+                      data={products}
                       customStyles={customStyles}
                       columns={columns}
                     />
@@ -1366,8 +1365,9 @@ const EditDeals = () => {
                 </Card.Body>
               </Card>
               <AddProductOverlay
-                onClose={handleCloseProduct}
                 visible={showAddProduct}
+                onClose={() => setShowAddProduct(false)}
+                onProductsUpdated={handleProductsUpdate} // Prop baru yang didedikasikan untuk update
               />
               <Card className="shadow">
                 <Card.Header>
