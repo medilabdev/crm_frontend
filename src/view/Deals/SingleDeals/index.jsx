@@ -54,29 +54,13 @@ const SingleDeals = () => {
   const [dealSize, setDealSize] = useState([]);
   const [showHppModal, setShowHppModal] = useState(false);
   const [hppFile, setHppFile] = useState(null);
-
-
-  const allData = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key.startsWith("DataProduct")) {
-      const data = JSON.parse(localStorage.getItem(key));
-      allData.push(data);
-    }
-  }
-
-  let totalPrice = 0;
-  if (allData[0]) {
-    const totalPriceArray = allData.map((data) =>
-      data.map((item) => (totalPrice += item.total_price))
-    );
-  }
-
-  const [price, setPrice] = useState(0);
-  const handlePrice = (e) => {
-    const value = e.target.value;
-    setPrice(value);
+  const [price, setPrice] = useState(0); // Tidak diperlukan lagi
+  const handlePrice = (e) => { // Tidak diperlukan lagi
+      const value = e.target.value;
+      setPrice(value);
   };
+
+  const totalPrice = products.reduce((sum, item) => sum + (item.total_price || 0), 0);
 
   const [inputDeals, setInputDeals] = useState({
     deal_name: "",
@@ -108,7 +92,6 @@ const SingleDeals = () => {
   const handleCheckboxChange = (stageObject) => {
     setSelectedPipeline(stageObject.uid);
   };
-
 
   const handleInputOwner = (e) => {
     setInputDeals({
@@ -444,7 +427,7 @@ const SingleDeals = () => {
 
   // handle delete product product
   const handleDeleteProduct = (productId) => {
-    const updateData = allData[0].filter((product) => product.id !== productId);
+    const updateData = products.filter((product) => product.id !== productId);
     setAllProductData(updateData);
     localStorage.setItem("DataProduct", JSON.stringify(updateData));
   };
@@ -575,15 +558,12 @@ const SingleDeals = () => {
       getContact(token);
 
       if (uid) {
-        // --- MODE EDIT ---
-        // Jika ada UID, ambil data deal yang sudah ada
         try {
           const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/deals/${uid}`, {
             headers: { Authorization: `Bearer ${token}` },
           });
           const dealData = response.data.data;
           
-          // ... (semua kode `setValueDeals`, `setSelectedPipeline` Anda)
            setValueDeals({
                 deal_name: dealData.deal_name,
                 priority_uid: dealData.priority_uid,
@@ -599,15 +579,27 @@ const SingleDeals = () => {
             setSelectedPipeline(dealData.staging_uid);
 
           // Standarisasi data produk dan simpan ke state & localStorage
-          const standardizedProducts = (dealData.detail_product || []).map(item => ({
-            id: item.id || item.uid,
-            product_uid: item.product_uid || item.package_product_uid,
-            product_name: item.product?.name || item.package_product?.name || item.product_name || 'Product Not Found',
-            qty: item.qty,
-            discount_type: item.discount_type,
-            discount: item.discount,
-            total_price: item.total_price,
-          }));
+          const standardizedProducts = (dealData.detail_product || []).map(item => {
+            // Menghitung harga satuan dari data yang ada di DB:
+            let unitPrice = 0;
+            if (item.product) {
+                // Produk Single/MCU
+                unitPrice = item.product.price; // Ambil harga satuan dari relasi product
+            } else if (item.package_product) {
+                // Produk Package
+                unitPrice = item.package_product.total_price; // Ambil harga total dari relasi package (karena package harganya sudah total)
+            }
+            
+            return {
+                id: item.id || item.uid,
+                product_uid: item.product_uid || item.package_product_uid,
+                product_name: item.product?.name || item.package_product?.name || item.product_name || 'Product Not Found',         price: unitPrice || 0,
+                qty: item.qty,
+                discount_type: item.discount_type,
+                discount: item.discount,
+                total_price: item.total_price, // Ini adalah harga total per item deal
+            };
+        });
           setProducts(standardizedProducts);
           localStorage.setItem("DataProduct", JSON.stringify(standardizedProducts));
 
@@ -639,133 +631,109 @@ const SingleDeals = () => {
     setSelectFile(file);
   };
 
+  // Ganti seluruh fungsi submit Anda dengan ini
   const handleSubmitDeals = async (e) => {
-    e.preventDefault();
+      e.preventDefault();
 
-    const userPosition = localStorage.getItem('position_name');
-    const isSalesManager = userPosition?.toLowerCase() === 'sales manager';
+      // Validasi HPP Modal (logika Anda sudah benar)
+      const userPosition = localStorage.getItem('position_name');
+      const isSalesManager = userPosition?.toLowerCase() === 'sales manager';
+      const currentSelectedStage = pipeline.find(p => p.uid === selectedPipeline);
+      const selectedStageName = currentSelectedStage?.name;
+      if (isSalesManager && selectedStageName === 'Closed Won' && !hppFile) {
+          setShowHppModal(true);
+          setButtonDisabled(false); // Pastikan tombol tidak terkunci
+          return;
+      }
 
-    // Dapatkan stage yang dipilih (asumsi kamu punya state 'selectedPipeline' berisi objek stage)
-    const selectedStageName = selectedPipeline?.name;
-
-    if (isSalesManager && selectedStageName === 'Closed Won' && !hppFile) {
-        setShowHppModal(true); // Tampilkan modal
-        return; // Hentikan eksekusi fungsi untuk sementara
-    }
-
-
-    try {
+      setButtonDisabled(true);
       const formData = new FormData();
+      
+      // --- Logika Universal (Create vs Edit) ---
+      const isEditMode = !!uid;
+      const url = isEditMode
+        ? `${process.env.REACT_APP_BACKEND_URL}/deals/${uid}`
+        : `${process.env.REACT_APP_BACKEND_URL}/deals`;
 
-      // Contact person
-      for (const uidContact of inputContact) {
-        formData.append("contact_person[]", uidContact || "");
+      if (isEditMode) {
+        formData.append("_method", "put");
       }
 
-      // Mention users
-      mentionUsers.forEach((ment, index) => {
-        formData.append(`mention_user[${index}]`, ment);
-      });
+      // Pilih sumber data yang benar (inputDeals untuk Create, valueDeals untuk Edit)
+      const dealData = isEditMode ? valueDeals : inputDeals;
 
-      // Deals data
-      formData.append("deal_name", inputDeals.deal_name);
-      formData.append("deal_size", price || "");
-      formData.append("deal_status", inputDeals.deal_status);
-      formData.append("priority_uid", inputDeals.priority ?? "");
-      formData.append("deal_category", inputDeals.deal_category || "");
-      formData.append("project_category_uid", inputDeals.project_category_uid || "");
+      // --- Mengisi FormData (Sudah Lengkap) ---
+      // Data Deal Utama
+      formData.append("deal_name", dealData.deal_name || "");
+      formData.append("deal_status", dealData.deal_status || "");
+      formData.append("priority_uid", dealData.priority_uid ?? "");
+      formData.append("deal_category", dealData.deal_category || "");
+      formData.append("project_category_uid", dealData.project_category_uid || "");
+      formData.append("company_uid", dealData.company_uid || "");
+      formData.append("owner_user_uid", dealData.owner_user_uid || "");
+      formData.append("notes", dealData.notes || "");
+
+      // Data dari state terpisah
       formData.append("staging_uid", selectedPipeline ?? "");
-      formData.append("owner_user_uid", inputDeals.owner_user_uid);
-      formData.append("company_uid", inputDeals.company_uid || "");
-      formData.append("notes", inputDeals.notes ? inputDeals.notes : "");
+      formData.append("deal_size", totalPrice); // PERBAIKAN: Selalu gunakan totalPrice yang reaktif
       formData.append("file", selectFile || "");
-
-      // Planned implementation date
-      if (inputDeals.planned_implementation_date) {
-        const date = inputDeals.planned_implementation_date;
-        const formattedDate = `${date.getFullYear()}-${String(
-          date.getMonth() + 1
-        ).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-        formData.append("planned_implementation_date", formattedDate);
+      if (hppFile) {
+          formData.append("hpp_file", hppFile);
       }
-
-        if (inputDeals.next_project_date) {
-          const date = inputDeals.next_project_date;
-          const formattedDate = `${date.getFullYear()}-${String(
-              date.getMonth() + 1
-          ).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+      
+      // Data Tanggal
+      if (dealData.planned_implementation_date) {
+          const date = new Date(dealData.planned_implementation_date);
+          const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+          formData.append("planned_implementation_date", formattedDate);
+      }
+      if (dealData.next_project_date) {
+          const date = new Date(dealData.next_project_date);
+          const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
           formData.append("next_project_date", formattedDate);
       }
 
+      // Data Relasi (Kontak & Mention)
+      inputContact.forEach(contactUid => formData.append('contact_person[]', contactUid));
+      mentionUsers.forEach((userUid, index) => formData.append(`mention_user[${index}]`, userUid));
 
-      // Products
+      // Data Produk (dari localStorage)
       const productsToSave = JSON.parse(localStorage.getItem("DataProduct") || "[]");
-
-     // 2. Lampirkan ke formData jika ada isinya
       if (productsToSave.length > 0) {
         productsToSave.forEach((product, index) => {
           formData.append(`products[${index}][product_uid]`, product.product_uid || "");
           formData.append(`products[${index}][product_name]`, product.product_name || "");
+          formData.append(`products[${index}][qty]`, product.qty || "1");
+          formData.append(`products[${index}][discount_type]`, product.discount_type || "none");
+          formData.append(`products[${index}][discount]`, product.discount || 0);
+                formData.append(`products[${index}][price]`, product.price || 0); 
 
-          formData.append(`products[${index}][qty]`, product.qty || "");
-          formData.append(`products[${index}][discount_type]`, product.discount_type || "");
-          formData.append(`products[${index}][discount]`, product.discount || "");
-          formData.append(`products[${index}][total_price]`, product.total_price || "");
+          formData.append(`products[${index}][total_price]`, product.total_price || 0);
         });
       }
 
+      // --- Pengiriman Data & Penanganan Hasil ---
+      try {
+        const res = await axios.post(url, formData, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-      if (hppFile) {
-        formData.append("hpp_file", hppFile);
-      }
-
-      // Debugging kalau mau cek isi formData
-      // for (const pair of formData.entries()) {
-      //   console.log(pair[0] + ": " + pair[1]);
-      // }
-
-      setButtonDisabled(true);
-
-      // 🔥 Axios call pakai async/await
-      const res = await axios.post(
-        `${process.env.REACT_APP_BACKEND_URL}/deals`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      // Success response
-      Swal.fire({
-        title: res.data.message,
-        text: "Successfully created deals",
-        icon: "success",
-      }).then((result) => {
-        if (result.isConfirmed) {
-          localStorage.removeItem("DataProduct");
-          window.location.href = "/deals";
-        }
-      });
-    } catch (err) {
-      // Error response dari backend
-      if (err.response) {
         Swal.fire({
-          text: err.response.data.message || "Validation failed!",
-          icon: "warning",
+          title: res.data.message,
+          text: isEditMode ? "Successfully updated deal" : "Successfully created deal",
+          icon: "success",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            localStorage.removeItem("DataProduct");
+            window.location.href = "/deals"; // Redirect
+          }
         });
-      } else {
-        Swal.fire({
-          text: "Something went wrong!",
-          icon: "error",
-        });
+      } catch (err) {
+        Swal.fire({ text: err.response?.data?.message || "An error occurred!", icon: "warning" });
+      } finally {
+        setButtonDisabled(false); // Selalu aktifkan kembali tombol, baik sukses maupun gagal
       }
-
-      setButtonDisabled(false);
-    }
   };
-
 
   const currentSelectedStage = pipeline.find(p => p.uid === selectedPipeline);
 
@@ -1043,19 +1011,17 @@ const SingleDeals = () => {
                 <Card.Body>
                   <div>
                     <DataTable
-                      data={products}
+                      data={products} // <-- PERBAIKAN: Gunakan state 'products'
                       columns={columns}
                       customStyles={customStyle}
                     />
                   </div>
                   <div className="row">
                     <div className="mt-3 me-3">
-                      <span
-                        className="float-end"
-                        style={{ fontWeight: 400, fontSize: "0.80rem" }}
-                      >
+                      <span className="float-end" style={{ fontWeight: 400, fontSize: "0.80rem" }}>
                         Total Price Product:
                         <span className="ms-3 me-2" style={{ fontWeight: 600 }}>
+                          {/* PERBAIKAN: Gunakan variabel totalPrice yang reaktif */}
                           Rp. {new Intl.NumberFormat().format(totalPrice)}
                         </span>
                       </span>
@@ -1063,15 +1029,9 @@ const SingleDeals = () => {
                   </div>
                   <div>
                     <div className="mt-3 text-center">
-                      <a
-                        onClick={handleShowProduct}
-                        className="fw-semibold fs-6 btn btn-outline-primary"
-                        style={{
-                          cursor: "pointer",
-                        }}
-                      >
+                      <Button variant="outline-primary" onClick={handleShowProduct}>
                         Add Product
-                      </a>
+                      </Button>
                     </div>
                   </div>
                 </Card.Body>
@@ -1079,7 +1039,7 @@ const SingleDeals = () => {
               <AddProductOverlay
                   visible={showAddProduct}
                   onClose={handleCloseProduct}
-                  onProductsUpdated={handleProductsUpdate}
+                  onProductsUpdated={handleProductsUpdate} // <-- PERBAIKAN: Pastikan prop ini ada
               />
 
               <Card className="shadow">

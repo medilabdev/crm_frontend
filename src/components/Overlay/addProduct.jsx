@@ -101,7 +101,12 @@ const AddProductOverlay = ({ visible, onClose, onProductsUpdated }) => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setCurrentItem(prev => ({ ...prev, [name]: value }));
+    let finalValue = value;
+    if (name === 'price' || name === 'qty' || name === 'discount') {
+        finalValue = parseFloat(value) || 0;
+        if (finalValue < 0) finalValue = 0;
+    }
+    setCurrentItem(prev => ({ ...prev, [name]: finalValue }));
   };
   
   const handleCrmSelect = (selectedOption, type) => {
@@ -114,6 +119,10 @@ const AddProductOverlay = ({ visible, onClose, onProductsUpdated }) => {
   };
   
   const handleMasterSelect = (product) => {
+
+    console.log("Master Product Selected:", product);
+    console.log("Price field from API:", product.price);
+
     setCurrentItem({ ...initialItemState, uid: product.uid, name: product.name, price: product.price });
     setMasterSearchResults([]);
     setMasterSearchTerm(product.name);
@@ -121,11 +130,20 @@ const AddProductOverlay = ({ visible, onClose, onProductsUpdated }) => {
 
   const handleSaveProduct = (e) => {
     e.preventDefault();
+        console.log("Saving Item State:", currentItem);
+
     const existingProducts = JSON.parse(localStorage.getItem("DataProduct") || "[]");
+
+    if (currentItem.price <= 0 || currentItem.qty <= 0) {
+        alert("Price and Quantity must be greater than 0.");
+        return;
+    }
+
     const newProduct = {
       id: `${sourceType}-${currentItem.uid}-${Date.now()}`,
       product_uid: currentItem.uid,
       product_name: currentItem.name,
+      price: currentItem.price,
       qty: currentItem.qty,
       discount_type: currentItem.discount_type,
       discount: currentItem.discount,
