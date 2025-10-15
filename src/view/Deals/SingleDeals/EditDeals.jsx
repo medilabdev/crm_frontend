@@ -83,7 +83,7 @@ const EditDeals = () => {
     }
   };
 
-   const totalPrice = products.reduce((sum, item) => sum + (item.total_price || 0), 0);
+  const totalPrice = products.reduce((sum, item) => sum + (item.total_price || 0), 0);
 
 
   const getCompany = async (retryCount = 0) => {
@@ -263,15 +263,34 @@ const EditDeals = () => {
             setHistory(dealData.history);
 
             // --- STANDARISASI DATA PRODUK ---
-            const standardizedProducts = (dealData.detail_product || []).map(item => ({
-                id: item.id || item.uid,
-                product_uid: item.product_uid || item.package_product_uid,
-                product_name: item.product?.name || item.package_product?.name || item.product_name || 'Product Not Found',
-                qty: item.qty,
-                discount_type: item.discount_type,
-                discount: item.discount,
-                total_price: item.total_price,
-            }));
+            const standardizedProducts = (dealData.detail_product || []).map(item => {
+
+              // Cari harga satuan dari relasi product/package
+              let unitPrice = 0;
+              if (item.product) {
+                  // Produk Single/MCU: Ambil harga dari tabel 'products'
+                  unitPrice = item.product.price;
+              } else if (item.package_product) {
+                  // Produk Package: Ambil harga total dari tabel 'package_products'
+                  unitPrice = item.package_product.total_price;
+              }
+
+              return {
+                  id: item.id || item.uid,
+                  product_uid: item.product_uid || item.package_product_uid,
+                  product_name: (item.product && item.product.name) || (item.package_product && item.package_product.name) || item.product_name || 'Product Not Found',
+                  
+                  // >>> PERBAIKAN: Tambahkan unitPrice <<<
+                  price: unitPrice || 0,
+                  // >>> END PERBAIKAN <<<
+                  
+                  qty: item.qty,
+                  discount_type: item.discount_type,
+                  discount: item.discount,
+                  total_price: item.total_price, // Harga total final per item
+              }
+          });
+
 
             setProducts(standardizedProducts);
             localStorage.setItem("DataProduct", JSON.stringify(standardizedProducts));
@@ -317,9 +336,6 @@ const EditDeals = () => {
     setProducts(updatedProducts);
     console.log("PARENT STATE UPDATED:", updatedProducts); // Log untuk verifikasi
   };
-
-
-
 
   const getPipeline = async (retryCount = 0) => {
     try {
@@ -410,7 +426,9 @@ const EditDeals = () => {
     });
     return result;
   };
+
   const [resContact, setResContact] = useState([]);
+
   const handleResContact = (e) => {
     setResContact(e.map((opt) => opt.value));
   };
@@ -479,10 +497,7 @@ const EditDeals = () => {
       }));
   };
 
-
-  
-
-   const handleDeleteProduct = (productId) => {
+  const handleDeleteProduct = (productId) => {
     const updatedProducts = products.filter(p => p.id !== productId);
     setProducts(updatedProducts); // Update state
     localStorage.setItem("DataProduct", JSON.stringify(updatedProducts)); // Sinkronkan localStorage
@@ -763,7 +778,9 @@ const EditDeals = () => {
 
     formData.append("deal_name", valueDeals.deal_name);
     formData.append("deal_size", valueDeals.deal_size || totalPrice);
-    formData.append("priority_uid", valueDeals.priority_uid);
+    if (valueDeals.priority_uid) {
+        formData.append("priority_uid", valueDeals.priority_uid);
+    }
     formData.append("deal_status", valueDeals.deal_status);
     formData.append("deal_category", valueDeals.deal_category);
     formData.append("project_category_uid", valueDeals.project_category_uid || "");
@@ -804,12 +821,14 @@ const EditDeals = () => {
 
    if (productsFromStorage.length > 0) {
      productsFromStorage.forEach((product, index) => {
-       formData.append(`products[${index}][product_uid]`, product.product_uid || "");
-       formData.append(`products[${index}][product_name]`, product.product_name || "");
-       formData.append(`products[${index}][qty]`, product.qty || 1);
-       formData.append(`products[${index}][discount_type]`, product.discount_type || "none");
-       formData.append(`products[${index}][discount]`, product.discount || 0);
-       formData.append(`products[${index}][total_price]`, product.total_price || 0);
+      formData.append(`products[${index}][product_uid]`, product.product_uid || "");
+      formData.append(`products[${index}][product_name]`, product.product_name || "");
+      formData.append(`products[${index}][price]`, product.price || 0);
+
+      formData.append(`products[${index}][qty]`, product.qty || 1);
+      formData.append(`products[${index}][discount_type]`, product.discount_type || "none");
+      formData.append(`products[${index}][discount]`, product.discount || 0);
+      formData.append(`products[${index}][total_price]`, product.total_price || 0);
      });
    }
 
