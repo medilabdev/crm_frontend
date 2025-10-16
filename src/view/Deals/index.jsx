@@ -28,6 +28,7 @@ import { getListContact } from "../../action/FormContact";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import ExportWithModal from "./Modals/ExportWithModal";
+import { de } from "@faker-js/faker";
 
 const Deals = () => {
   const token = localStorage.getItem("token");
@@ -462,6 +463,8 @@ const Deals = () => {
   const handleExportClick = () => {
     setShowExportModal(true);
   };
+
+  console.log(deals);
 
   return (
     <body id="body">

@@ -42,8 +42,10 @@ const EditDeals = () => {
   const [projectCategories, setProjectCategories] = useState([]);
   const [showHppModal, setShowHppModal] = useState(false);
   const [hppFile, setHppFile] = useState(null);
-
-  // mention user
+  const [contactLocalStorage, setContactLocalStorage] = useState([]); 
+  const [selectedCompanyData, setSelectedCompanyData] = useState([]);
+  const [companyStorage, setCompanyStorage] = useState([]); // Ganti variabel global dengan state
+  
   const mantionUsersUid = (e) => {
     setMentionUsers(e.map((opt) => opt.value));
   };
@@ -246,7 +248,6 @@ const EditDeals = () => {
             );
             const dealData = response.data.data;
 
-            // ... (kode Anda untuk setValueDeals, setSelectedPipeline, dll. tetap sama) ...
             setValueDeals({
                 deal_name: dealData.deal_name,
                 priority_uid: dealData.priority_uid,
@@ -262,7 +263,6 @@ const EditDeals = () => {
             setSelectedPipeline(dealData.staging_uid);
             setHistory(dealData.history);
 
-            // --- STANDARISASI DATA PRODUK ---
             const standardizedProducts = (dealData.detail_product || []).map(item => {
 
               // Cari harga satuan dari relasi product/package
@@ -274,6 +274,8 @@ const EditDeals = () => {
                   // Produk Package: Ambil harga total dari tabel 'package_products'
                   unitPrice = item.package_product.total_price;
               }
+
+
 
               return {
                   id: item.id || item.uid,
@@ -289,11 +291,28 @@ const EditDeals = () => {
                   discount: item.discount,
                   total_price: item.total_price, // Harga total final per item
               }
-          });
+            });
+
+            const existingContacts = dealData.contact_person || []; // Sesuaikan nama key relasi dari backend
+            const standardizedContacts = existingContacts.map(item => ({
+                uid: item.uid,
+                contact_uid: item.contact_uid, 
+                contact: item.contact || null 
+            }));
 
 
             setProducts(standardizedProducts);
+            setContactLocalStorage(standardizedContacts);
             localStorage.setItem("DataProduct", JSON.stringify(standardizedProducts));
+            localStorage.setItem("contactPerson", JSON.stringify(standardizedContacts));
+
+            if (dealData.company) {                
+                 const companyDataToStore = [dealData.company]; 
+                 localStorage.setItem("companyStorage", JSON.stringify(companyDataToStore));
+            } else {
+                 localStorage.removeItem("companyStorage");
+                 setDataCompany([]);
+            }
 
         } catch (error) {
             console.error("Failed to fetch deal data:", error);
@@ -313,6 +332,12 @@ const EditDeals = () => {
     getProjectCategories();
     getCompany();
     getContact();
+    const loadInitialCompany = () => {
+        // Muat dari localStorage
+        const company = JSON.parse(localStorage.getItem("companyStorage") || "[]");
+        setCompanyStorage(company);
+    };
+    loadInitialCompany();
 
     // Listener untuk update UI jika localStorage diubah oleh overlay
     const handleStorageChange = () => {
@@ -335,6 +360,10 @@ const EditDeals = () => {
     const updatedProducts = JSON.parse(localStorage.getItem("DataProduct") || "[]");
     setProducts(updatedProducts);
     console.log("PARENT STATE UPDATED:", updatedProducts); // Log untuk verifikasi
+  };
+
+  const handleContactUpdate = () => {
+    setContactLocalStorage(JSON.parse(localStorage.getItem("contactPerson") || "[]"));
   };
 
   const getPipeline = async (retryCount = 0) => {
@@ -442,10 +471,10 @@ const EditDeals = () => {
     }
   }
 
-  let contactLocalStorage = null;
-  if (allContact[0]) {
-    contactLocalStorage = allContact[0]?.map((data) => data);
-  }
+  const loadInitialContacts = () => {
+    const contacts = JSON.parse(localStorage.getItem("contactPerson") || "[]");
+    setContactLocalStorage(contacts);
+  };
 
   const uidRes = contactLocalStorage?.map((data) => data.contact_uid);
   const uniqCont = new Set([...resContact, ...(uidRes || [])]);
@@ -639,15 +668,15 @@ const EditDeals = () => {
     },
   ];
 
-  const companyStorage = [];
+  // const companyStorage = [];
 
-  for (let i = 0; i < localStorage.length; i++) {
-    const keys = localStorage.key(i);
-    if (keys.startsWith("companyStorage")) {
-      const data = JSON.parse(localStorage.getItem(keys));
-      companyStorage.push(data);
-    }
-  }
+  // for (let i = 0; i < localStorage.length; i++) {
+  //   const keys = localStorage.key(i);
+  //   if (keys.startsWith("companyStorage")) {
+  //     const data = JSON.parse(localStorage.getItem(keys));
+  //     companyStorage.push(data);
+  //   }
+  // }
 
   const dataHistory = [
     {
@@ -777,7 +806,7 @@ const EditDeals = () => {
     formData.append("_method", "put");
 
     formData.append("deal_name", valueDeals.deal_name);
-    formData.append("deal_size", valueDeals.deal_size || totalPrice);
+    formData.append("deal_size", valueDeals.deal_size);
     if (valueDeals.priority_uid) {
         formData.append("priority_uid", valueDeals.priority_uid);
     }
@@ -876,6 +905,10 @@ const EditDeals = () => {
 
   const currentSelectedStage = pipeline.find(p => p.uid === selectedPipeline);
   // console.log("Current HPP File:", hppFile);
+  console.log("Company from localStorage:", companyStorage);
+  console.log("Company from state:", company);
+  console.log("Contact from state:", contact);
+  console.log("Contact from localStorage:", contactLocalStorage);
 
   return (
     <body id="body">
@@ -1017,7 +1050,7 @@ const EditDeals = () => {
                     <Form.Control
                       type="number"
                       name="deal_size"
-                      value={valueDeals.deal_size || totalPrice}
+                      value={valueDeals.deal_size}
                       onChange={handlePrice}
                       placeholder="text"
                     />
@@ -1239,6 +1272,8 @@ const EditDeals = () => {
                   </div>
                 </Card.Body>
               </Card>
+
+
               <Card className="shadow">
                 <Card.Header>
                   <h5 className="mt-2">

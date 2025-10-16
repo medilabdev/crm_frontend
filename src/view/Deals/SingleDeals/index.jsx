@@ -65,7 +65,7 @@ const SingleDeals = () => {
   const [inputDeals, setInputDeals] = useState({
     deal_name: "",
     deal_size: "",
-    priority: "",
+    priority_uid: "",
     deal_status: "",
     deal_category: "",
     project_category_uid: "", 
@@ -103,7 +103,7 @@ const SingleDeals = () => {
   const handleInputPriority = (e) => {
     setInputDeals({
       ...inputDeals,
-      priority: e.value,
+      priority_uid: e.value,
     });
   };
 
@@ -675,7 +675,7 @@ const SingleDeals = () => {
 
       // Data dari state terpisah
       formData.append("staging_uid", selectedPipeline ?? "");
-      formData.append("deal_size", totalPrice); // PERBAIKAN: Selalu gunakan totalPrice yang reaktif
+      formData.append("deal_size", dealSize);
       formData.append("file", selectFile || "");
       if (hppFile) {
           formData.append("hpp_file", hppFile);
