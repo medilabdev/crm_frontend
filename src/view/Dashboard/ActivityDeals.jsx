@@ -12,7 +12,7 @@ const ActivityDeals = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [showTaskModal, setShowTaskModal] = useState(false);
     const [selectedTask, setSelectedTask] = useState(null);
-    const [selectedDealUid, setSelectedDealUid] = useState(''); 
+    const [selectedDealName, setSelectedDealName] = useState(''); // Changed from selectedDealUid
     const userRole = localStorage.getItem('role_name');
     const userPosition = localStorage.getItem('position_name');
     const canExport = userRole?.toLowerCase() === 'owner' || userPosition?.toLowerCase() === 'direktur';
@@ -20,14 +20,11 @@ const ActivityDeals = () => {
     useEffect(() => {
         const fetchDealsForFilter = async () => {
             try {
-                const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/deals/form/select`, {
+                const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/deals/form/select-for-report`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
-                const formattedDeals = response.data.data.map(deal => ({
-                    value: deal.uid,
-                    label: deal.deal_name,
-                }));
-                setDealsList(formattedDeals);
+                // No need to map since endpoint already returns {value, label} format
+                setDealsList(response.data.data);
             } catch (error) {
                 console.error("Failed to fetch deals list:", error);
             }
@@ -38,17 +35,17 @@ const ActivityDeals = () => {
     const handleGenerateReport = async (selectedOption) => {
         if (!selectedOption) {
             setReportData(null);
-            setSelectedDealUid('');
+            setSelectedDealName('');
             return;
         }
         
-        const dealUid = selectedOption.value;
-        setSelectedDealUid(dealUid); 
+        const dealName = selectedOption.value; // This is now deal_name
+        setSelectedDealName(dealName); 
         setIsLoading(true);
         setReportData(null);
 
         try {
-            const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/reports/activity?deal_uid=${dealUid}`, {
+            const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/reports/activity-by-deal-name?deal_name=${dealName}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setReportData(response.data.data); 
@@ -61,16 +58,17 @@ const ActivityDeals = () => {
     };
 
     const handleExport = async () => {
-        if (!selectedDealUid) return; // Jaga-jaga
+        if (!selectedDealName) return; // Changed from selectedDealUid
         try {
-            const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/reports/activity/export?deal_uid=${selectedDealUid}`, {
+            // TODO: Need to create export endpoint for deal_name based reports
+            const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/reports/activity-by-deal-name/export?deal_name=${selectedDealName}`, {
                 headers: { Authorization: `Bearer ${token}` },
                 responseType: 'blob',
             });
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
             link.href = url;
-            const fileName = `activity_report_${reportData?.deal_name || selectedDealUid}.xlsx`;
+            const fileName = `activity_report_${reportData?.deal_name || selectedDealName}.xlsx`;
             link.setAttribute('download', fileName);
             document.body.appendChild(link);
             link.click();
@@ -90,7 +88,6 @@ const ActivityDeals = () => {
         setShowTaskModal(false);
         setSelectedTask(null);
     };
-
 
     const columns = [
         { name: 'Date', selector: row => row.date, sortable: true },
@@ -114,20 +111,18 @@ const ActivityDeals = () => {
         },
     ];
 
-
     return (
         <>
         <Card className="shadow">
             <Card.Header className="d-flex justify-content-between align-items-center">
                 <Card.Title className="mb-0">Activity Report by Deal</Card.Title>
                 {canExport && (
-                    <Button variant="success" size="sm" onClick={handleExport} disabled={!selectedDealUid || isLoading}>
+                    <Button variant="success" size="sm" onClick={handleExport} disabled={!selectedDealName || isLoading}>
                         Export to Excel
                     </Button>
                 )}
             </Card.Header>
             <Card.Body>
-                {/* ... (sisa JSX tidak berubah, sudah benar) ... */}
                 <div className="row">
                     <div className="col-md-6 mb-3">
                         <label className="mb-1">Select Deal to Generate Report</label>
@@ -146,6 +141,9 @@ const ActivityDeals = () => {
                         <div className='mt-3'>
                             <h5>Report for: {reportData.deal_name}</h5>
                             <p className='mb-1'><strong>Owner:</strong> {reportData.owner} | <strong>Current Stage:</strong> {reportData.stage}</p>
+                            {reportData.total_deals_with_same_name > 1 && (
+                                <p className='mb-1'><strong>Total deals with this name:</strong> {reportData.total_deals_with_same_name}</p>
+                            )}
                         </div>
                         <hr />
                         <DataTable
