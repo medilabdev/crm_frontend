@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import DataTable from 'react-data-table-component';
-import { Button, Card, Col, Row } from 'react-bootstrap';
+import { Button, Card, Col, Row, Accordion, Table, Badge } from 'react-bootstrap';
 import axios from 'axios';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -18,7 +17,7 @@ const ActivityByDate = () => {
     const userPosition = localStorage.getItem('position_name');
     const canExport = userRole?.toLowerCase() === 'owner' || userPosition?.toLowerCase() === 'direktur';
 
-        const handleGenerateReport = async () => {
+    const handleGenerateReport = async () => {
         if (!selectedDate) {
             alert("Please select a date.");
             return;
@@ -59,7 +58,7 @@ const ActivityByDate = () => {
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
             link.href = url;
-            link.setAttribute('download', `daily_activity_report_${formattedDate}.xlsx`); // Nama file dinamis
+            link.setAttribute('download', `daily_activity_report_${formattedDate}.xlsx`);
             document.body.appendChild(link);
             link.click();
             link.parentNode.removeChild(link);
@@ -78,31 +77,10 @@ const ActivityByDate = () => {
         setShowTaskModal(false);
         setSelectedTask(null);
     };
-    
-    const columns = [
-        { name: 'Deal Name', selector: row => row.deal_name, sortable: true, wrap: true },
-        { name: 'Owner', selector: row => row.owner, sortable: true },
-        { name: 'Stage', selector: row => row.stage, sortable: true },
-        { name: 'Type', selector: row => row.type, sortable: true },
-        { name: 'Time', selector: row => row.date.split(' ')[1], sortable: true },
-        { name: 'Update / Note', selector: row => row.update, wrap: true, grow: 2 },
-        {
-            name: 'File',
-            cell: row => row.file ? (
-                <a href={`${process.env.REACT_APP_BACKEND_IMAGE}/${row.file.path}`} target="_blank" rel="noopener noreferrer">
-                    {row.file.name}
-                </a>
-            ) : '-'
-        },
-        {
-            name: 'Task',
-            cell: row => row.task ? (
-                <Button variant="info" size="sm" onClick={() => handleShowTaskModal(row.task)}>
-                    View Task
-                </Button>
-            ) : '-'
-        },
-    ];
+
+    const getTotalActivities = () => {
+        return reportData.reduce((total, company) => total + company.total_activities, 0);
+    };
 
     return (
         <>
@@ -135,15 +113,87 @@ const ActivityByDate = () => {
 
                 <hr />
 
-                <DataTable
-                    title={reportData.length > 0 ? `Activities on ${selectedDate.toLocaleDateString('id-ID')}` : ""}
-                    columns={columns}
-                    data={reportData}
-                    pagination
-                    highlightOnHover
-                    responsive
-                    noDataComponent={!isLoading && "No activities found for the selected date."}
-                />
+                {reportData.length > 0 && (
+                    <div className="mb-3">
+                        <h5>Activities on {selectedDate.toLocaleDateString('id-ID')}</h5>
+                        <p className="text-muted">
+                            Total: {getTotalActivities()} activities from {reportData.length} companies
+                        </p>
+                    </div>
+                )}
+
+                {!isLoading && reportData.length === 0 && (
+                    <div className="text-center text-muted py-4">
+                        No activities found for the selected date.
+                    </div>
+                )}
+
+                {reportData.length > 0 && (
+                    <Accordion>
+                        {reportData.map((company, index) => (
+                            <Accordion.Item eventKey={index.toString()} key={index}>
+                                <Accordion.Header>
+                                    <div className="d-flex justify-content-between align-items-center w-100 me-3">
+                                        <span className="fw-bold">{company.company_name}</span>
+                                        <Badge bg="primary" pill>
+                                            {company.total_activities} activities
+                                        </Badge>
+                                    </div>
+                                </Accordion.Header>
+                                <Accordion.Body>
+                                    <Table responsive striped hover size="sm">
+                                        <thead className="table-dark">
+                                            <tr>
+                                                <th>Time</th>
+                                                <th>Owner</th>
+                                                <th>Stage</th>
+                                                <th>Update / Note</th>
+                                                <th>File</th>
+                                                <th>Task</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {company.activities.map((activity, actIndex) => (
+                                                <tr key={actIndex}>
+                                                    
+                                                    <td>{activity.date.split(' ')[1]}</td>
+                                                    <td>{activity.owner}</td>
+                                                    <td>{activity.stage}</td>
+                                                    <td style={{maxWidth: '300px', wordWrap: 'break-word'}}>
+                                                        {activity.update}
+                                                    </td>
+                                                    <td>
+                                                        {activity.file ? (
+                                                            <a 
+                                                                href={`${process.env.REACT_APP_BACKEND_IMAGE}/${activity.file.path}`} 
+                                                                target="_blank" 
+                                                                rel="noopener noreferrer"
+                                                                className="text-decoration-none"
+                                                            >
+                                                                📎 {activity.file.name}
+                                                            </a>
+                                                        ) : '-'}
+                                                    </td>
+                                                    <td>
+                                                        {activity.task ? (
+                                                            <Button 
+                                                                variant="outline-info" 
+                                                                size="sm" 
+                                                                onClick={() => handleShowTaskModal(activity.task)}
+                                                            >
+                                                                View Task
+                                                            </Button>
+                                                        ) : '-'}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </Table>
+                                </Accordion.Body>
+                            </Accordion.Item>
+                        ))}
+                    </Accordion>
+                )}
             </Card.Body>
         </Card>
 
