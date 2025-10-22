@@ -2,8 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Select from 'react-select';
-import DataTable from 'react-data-table-component';
-import { Card, Button } from 'react-bootstrap';
+import { Card, Button, Accordion, Table } from 'react-bootstrap';
 import axios from 'axios';
 
 const DealsByStageReport = () => {
@@ -75,7 +74,7 @@ const DealsByStageReport = () => {
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
             link.href = url;
-            link.setAttribute('download', `deals_in_stage_${selectedStageName}.xlsx`); // Nama file dinamis
+            link.setAttribute('download', `deals_in_stage_${selectedStageName}.xlsx`); 
             document.body.appendChild(link);
             link.click();
             link.parentNode.removeChild(link);
@@ -85,23 +84,31 @@ const DealsByStageReport = () => {
         }
     };
 
+    const formatCurrency = (value) => {
+        return `Rp ${Number(value).toLocaleString('id-ID')}`;
+    };
 
-    // Definisi kolom untuk tabel
-    const columns = [
-        { name: 'Sales & Deal Name', selector: row => row.sales_deal_name, sortable: true, grow: 2, wrap: true },
-        { name: 'Products', selector: row => row.products, sortable: true, grow: 2, wrap: true },
-        { 
-            name: 'Project Value', 
-            selector: row => `Rp ${Number(row.project_value).toLocaleString('id-ID')}`,
-            sortable: true,
-            right: true, // Rata kanan untuk angka
-        },
-    ];
+    const renderProductDetails = (products) => {
+        if (!products || products.length === 0) {
+            return <span className="text-muted">No products</span>;
+        }
+
+        return products.map((product, index) => (
+            <div key={index} className="mb-1">
+                <strong>{product.product_name}</strong>
+                <br />
+                <small className="text-muted">
+                    Qty: {product.quantity} | Unit: {formatCurrency(product.unit_price)} | 
+                    Total: {formatCurrency(product.total_price)}
+                </small>
+            </div>
+        ));
+    };
 
     return (
         <Card className="shadow">
-            <Card.Header>
-                <Card.Title>Deals by Stage Report</Card.Title>
+            <Card.Header className="d-flex justify-content-between align-items-center">
+                <Card.Title className="mb-0">Deals by Stage Report</Card.Title>
                 {canExport && (
                     <Button variant="success" size="sm" onClick={handleExport} disabled={!selectedStageUid || isLoading}>
                         Export to Excel
@@ -123,16 +130,53 @@ const DealsByStageReport = () => {
 
                 {isLoading && <p>Loading report...</p>}
 
-                {(reportData.length > 0 || !isLoading && selectedStageName) && (
-                    <DataTable
-                        title={`Deals in Stage: ${selectedStageName}`}
-                        columns={columns}
-                        data={reportData}
-                        pagination
-                        highlightOnHover
-                        responsive
-                        noDataComponent="No deals found in this stage."
-                    />
+                {reportData.length > 0 && (
+                    <div className="mt-3">
+                        <h5 className="mb-3">Deals in Stage: {selectedStageName}</h5>
+                        <Accordion>
+                            {reportData.map((company, companyIndex) => (
+                                <Accordion.Item eventKey={companyIndex.toString()} key={companyIndex}>
+                                    <Accordion.Header>
+                                        <div className="d-flex justify-content-between w-100 me-3">
+                                            <strong>{company.company_name}</strong>
+                                            <span className="badge bg-primary ms-2">
+                                                {company.deals.length} deal{company.deals.length > 1 ? 's' : ''}
+                                            </span>
+                                        </div>
+                                    </Accordion.Header>
+                                    <Accordion.Body>
+                                        <Table striped bordered hover responsive>
+                                            <thead>
+                                                <tr>
+                                                    <th>Sales Name</th>
+                                                    <th>Deal Name</th>
+                                                    <th>Products</th>
+                                                    
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {company.deals.map((deal, dealIndex) => (
+                                                    <tr key={dealIndex}>
+                                                        <td>{deal.sales_name}</td>
+                                                        <td>{deal.deal_name}</td>
+                                                        <td>
+                                                            {renderProductDetails(deal.products)}
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </Table>
+                                    </Accordion.Body>
+                                </Accordion.Item>
+                            ))}
+                        </Accordion>
+                    </div>
+                )}
+
+                {!isLoading && reportData.length === 0 && selectedStageName && (
+                    <div className="text-center text-muted mt-4">
+                        <p>No deals found in this stage.</p>
+                    </div>
                 )}
             </Card.Body>
         </Card>

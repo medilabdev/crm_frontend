@@ -6,7 +6,6 @@ import ShowUser from "../view/User/show";
 import Auth from "../view/Auth";
 import Contact from "../view/Contact";
 import SingleContact from "../view/Contact/SingleContact";
-
 import BulkChange from "../view/Contact/BulkChange";
 import Company from "../view/Company";
 import SingleCompany from "../view/Company/SingleCompany";
@@ -61,7 +60,12 @@ import ActivityTechnician from "../view/ActivityTechnicians";
 import DetailActivity from "../view/ActivityTechnicians/details";
 import CreateTechnicianTicket from "../view/ActivityTechnicians/create";
 import ApprovalCenter from "../view/Contact/ApprovalCenter";
-
+import WeeklyPlanningForm from "../view/TaskNew/WeeklyPlanningForm";
+import WeeklyPlanningPreview from "../view/TaskNew/WeeklyPlanningPreview";
+import WeeklyPlanningReportMockup from "../view/TaskNew/WeeklyPlanningReportMockup";
+import WeeklyPlanningSystem from "../view/TaskNew/WeeklyPlanningSystem";
+import WeeklyPlanningTestPage from "../view/TaskNew/WeeklyPlanningTestPage";
+import WeeklyPlanningSimulation from "../view/TaskNew/WeeklyPlanningSimulation";
 const Login = ({ children }) => {
   const token = localStorage.getItem("token");
   if (!token) {
@@ -484,6 +488,11 @@ function Router() {
             </Login>
           }
         />
+        <Route exact path="/task/weekly-planning-form" element={<Login><WeeklyPlanningForm /></Login>} />
+        <Route exact path="/task/weekly-planning-preview" element={<Login><WeeklyPlanningPreview /></Login>} />
+        <Route exact path="/task/weekly-planning-report" element={<Login><WeeklyPlanningReportMockup /></Login>} />
+        <Route exact path="/task/weekly-planning-system" element={<Login><WeeklyPlanningSystem /></Login>} />
+        <Route exact path="/task/weekly-planning-test" element={<Login><WeeklyPlanningTestPage /></Login>} />
 
         <Route exact path="/properties/deals-version" element={<Login><DealsVersion /></Login>} />
         <Route exact path="/deals-second/:uid/edit" element={<Login><EditDataSecondDeals /></Login>} />
@@ -494,7 +503,7 @@ function Router() {
         <Route exact path="/weekly-task/create" element={<Login><CreateWeeklyTask /></Login>} />
         <Route exact path="/weekly-task/:uid/edit" element={<Login><EditTaskWeekly /></Login>} />
         <Route exact path="/weekly-task/:uid/note" element={<Login><FillTaskWeekly /></Login>} />
-
+        <Route exact path="/task/weekly-planning-simulation" element={<Login><WeeklyPlanningSimulation /></Login>} />
         {/* activity technician */}
         <Route exact path="/activity-technician" element={<Login><ActivityTechnician /></Login>} />
         <Route exact path="/activity-technician/:uid/detail" element={<Login><DetailActivity /></Login>} />
