@@ -1,283 +1,391 @@
-/**
- * Weekly Planning Main Container
- * Entry point component that coordinates all weekly planning functionality
- */
-
-import React, { useState, useEffect } from 'react';
-import { Card, Container, Row, Col, Alert, Spinner } from 'react-bootstrap';
-
-// Layout components (following existing pattern)
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { Card, Container, Row, Col, Alert, Spinner, Button } from 'react-bootstrap';
 import Topbar from '../../../components/Template/Topbar';
 import Sidebar from '../../../components/Template/Sidebar';
 import Main from '../../../components/Template/Main';
-
-// Feature components
 import WeeklyPlanningHeader from './components/WeeklyPlanningHeader';
 import WeeklyPlanningGrid from './components/WeeklyPlanningGrid';
 import CalculationStats from './components/CalculationStats';
-
-// Custom hooks
-import { useWeeklyPlanningAPI } from './hooks/useWeeklyPlanningAPI';
+import { useWeeklyPlanningAPI, useBranches, useWeeklyPlanMasters } from './hooks/useWeeklyPlanningAPI';
 import { useWeeklyPlanningState } from './hooks/useWeeklyPlanningState';
 import { useCalculations } from './hooks/useCalculations';
 
-/**
- * Main Weekly Planning Component
- */
 const WeeklyPlanning = () => {
-  // Local UI state
-  const [selectedMonth, setSelectedMonth] = useState(new Date());
-  const [selectedBranch, setSelectedBranch] = useState(null);
-  const [currentPlanningUid, setCurrentPlanningUid] = useState(null);
+    // Local UI state
+    const [selectedMonth, setSelectedMonth] = useState(new Date());
+    const [selectedBranch, setSelectedBranch] = useState(null);
+    const [currentPlanningUid, setCurrentPlanningUid] = useState(null);
 
-  // API hooks
-  const {
-    branches,
-    weeklyPlanMasters,
-    loading,
-    error,
-    loadBranches,
-    loadWeeklyPlanMasters,
-    createWeeklyPlanning,
-    loadWeeklyPlanning
-  } = useWeeklyPlanningAPI();
+    // Data hooks
+    const { branches, loading: branchesLoading } = useBranches();
+    const { planMasters: weeklyPlanMasters, loading: planMastersLoading, createPlanMaster } = useWeeklyPlanMasters();
 
-  // State management hook
-  const {
-    planningData,
-    setPlanningData,
-    updateWeekData,
-    updateDayData,
-    addPlanningDetail,
-    updatePlanningDetail,
-    deletePlanningDetail,
-    addOutsideDetail,
-    updateOutsideDetail,
-    deleteOutsideDetail
-  } = useWeeklyPlanningState();
+    // API hooks
+    const {
+        loading: apiLoading, // Rename biar gak bentrok dgn branchesLoading
+        error,
+        clearError,
+        plannings,
+        // weeks: apiWeeks, // Tidak dipakai langsung
+        days: apiDays,   // Tidak dipakai langsung
+        details,
+        outsideDetails,
+    } = useWeeklyPlanningAPI();
 
-  // Calculations hook
-  const {
-    getDashboardStats,
-    hasSignificantData
-  } = useCalculations(planningData);
+    // State management hook
+    const {
+        planning,
+        weeks,
+        updatePlanning,
+        updateWeeks,
+        updateDayInWeek,
+        setActiveWeekUid, // Jika dipakai
+        setActiveDayUid,   // Jika dipakai
+    } = useWeeklyPlanningState(null); // Mulai null
 
-  /**
-   * Initialize component - load initial data
-   */
-  useEffect(() => {
-    const initializeData = async () => {
-      try {
-        await Promise.all([
-          loadBranches(),
-          loadWeeklyPlanMasters()
-        ]);
-      } catch (error) {
-        console.error('Failed to initialize weekly planning:', error);
-      }
-    };
+    const combinedPlanningData = useMemo(() => {
+        // Jika 'planning' (metadata) belum ada, kirim null
+        if (!planning) {
+            return null;
+        }
 
-    initializeData();
-  }, [loadBranches, loadWeeklyPlanMasters]);
+        // Jika 'planning' ada, gabungkan dengan 'weeks'
+        return {
+            ...planning, // Sebar semua metadata (uid, status, dll)
+            weeks,       // Tambahkan array 'weeks' dari state 'weeks'
+        };
+        }, [planning, weeks]); // <-- Dibuat ulang hanya jika planning atau weeks berubah
 
-  /**
-   * Load planning data when branch or month changes
-   */
-  useEffect(() => {
-    if (selectedBranch) {
-      handleLoadOrCreatePlanning();
-    }
-  }, [selectedBranch, selectedMonth]);
+        // Calculations hook
+        const {
+        getDashboardStats,
+        hasSignificantData,
+        // ... ambil kalkulasi lain jika perlu
+        } = useCalculations(combinedPlanningData); // ✅ BENAR: Kirim data gabungan
 
-  /**
-   * Handle loading or creating planning for selected month/branch
-   */
-  const handleLoadOrCreatePlanning = async () => {
-    if (!selectedBranch) return;
 
+    // Gabungkan loading state
+    const loading = apiLoading || branchesLoading || planMastersLoading;
+
+    const handleLoadOrCreatePlanning = useCallback(async () => {
+        if (!selectedBranch?.value) {
+            // Jika belum ada cabang yang dipilih, reset state
+            updatePlanning(null);
+            updateWeeks([]);
+            setCurrentPlanningUid(null);
+            return;
+        }
+
+        clearError();
+
+        try {
+            const response = await plannings.getAll({
+            branch_uid: selectedBranch.value,
+            month: selectedMonth.getMonth() + 1,
+            year: selectedMonth.getFullYear(),
+            });
+
+            // ✅ SOLUSI: Pastikan 'response.data.data' dibaca dengan benar
+            if (response && response.status === 'success' && response.data) {
+                const planningsList = response?.data?.data;
+
+                if (planningsList && planningsList.length > 0) {
+                const planningFromApi = planningsList[0]; // Ambil planning pertama
+
+                // Set metadata
+                updatePlanning({
+                    uid: planningFromApi.uid,
+                    branch_uid: planningFromApi.branch_uid,
+                    status: planningFromApi.status,
+                    week_name: planningFromApi.week_name,
+                    week_start_date: planningFromApi.week_start_date,
+                });
+
+                // Set weeks
+                updateWeeks(planningFromApi.weeks || []);
+                setCurrentPlanningUid(planningFromApi.uid);
+
+                console.log('✅ Planning data loaded from BE:', planningFromApi.uid);
+                } else {
+                    // Reset jika tidak ada planning
+                    updatePlanning(null);
+                    updateWeeks([]);
+                    setCurrentPlanningUid(null);
+                    console.log('ℹ️ No existing planning found, ready to create');
+                }
+            } else {
+            // Reset jika response tidak sukses
+            updatePlanning(null);
+            updateWeeks([]);
+            setCurrentPlanningUid(null);
+            }
+        } catch (err) {
+            console.error('❌ Failed to load planning:', err);
+            updatePlanning(null);
+            updateWeeks([]);
+            setCurrentPlanningUid(null);
+        }
+    }, [selectedBranch, selectedMonth, plannings, updatePlanning, updateWeeks, clearError]);
+
+
+    /**
+     * ✅ SOLVED: Fungsi Refetch (wrapper handleLoadOrCreatePlanning)
+     */
+    const refetchPlanningData = useCallback(() => {
+        handleLoadOrCreatePlanning();
+    }, [handleLoadOrCreatePlanning]);
+
+    /**
+     * Trigger load saat branch/month berubah
+     */
+    useEffect(() => {
+        handleLoadOrCreatePlanning(); // Panggil fungsi load/clear
+    // ✅ Dependensi sudah benar (panggil fungsi dari useCallback)
+    }, [handleLoadOrCreatePlanning]);
+
+    useEffect(() => {
+    console.log('📦 Fetching planning for', selectedBranch?.value, selectedMonth);
+    }, [selectedBranch, selectedMonth]);
+
+    const handleCreatePlanning = useCallback(async () => {
+        if (!selectedBranch?.value) return false;
+        clearError();
+
+        try {
+            // 1. Panggil API create — 'response' berisi data baru
+            const response = await plannings.create({
+            branch_uid: selectedBranch.value,
+            month: selectedMonth.getMonth() + 1,
+            year: selectedMonth.getFullYear(),
+            });
+
+            // 2. Pastikan create sukses dan 'data' ada
+            if (response && response.status === 'success' && response.data) {
+            const newPlanningData = response.data; // Ambil data baru
+            console.log('✅ New planning created, updating state locally:', newPlanningData.uid);
+
+            // 3. Update state lokal — tidak perlu refetch
+            updatePlanning(newPlanningData); // Set metadata
+            updateWeeks(newPlanningData.weeks || []); // Set weeks
+            setCurrentPlanningUid(newPlanningData.uid);
+
+            return true; // Sukses
+            }
+
+            console.error('❌ Create succeeded but no data returned from BE:', response);
+            return false; // Gagal create
+        } catch (err) {
+            console.error('❌ Failed to create or initialize planning:', err);
+            return false; // Gagal
+        }
+
+        // ✅ Sesuaikan dependency: hapus 'handleLoadOrCreatePlanning'
+    }, [selectedBranch, selectedMonth, plannings, updatePlanning, updateWeeks, clearError]);
+
+
+
+    // --- Handlers Branch & Month Change (Sudah Benar) ---
+    const handleBranchChange = useCallback((selectedOption) => {
+        setSelectedBranch(selectedOption);
+        // useEffect akan otomatis trigger handleLoadOrCreatePlanning
+    }, []); // Hanya perlu setSelectedBranch
+
+    const handleMonthChange = useCallback((newMonth) => {
+        setSelectedMonth(newMonth);
+         // useEffect akan otomatis trigger handleLoadOrCreatePlanning
+    }, []); 
+
+    const refetchDayData = useCallback(async (weekUid, dayUid) => {
+    if (!currentPlanningUid) return;
     try {
-      // Try to load existing planning first
-      const plannings = await loadWeeklyPlanning({
-        branch_uid: selectedBranch.value,
-        week_start_date: selectedMonth.toISOString().split('T')[0]
-      });
-
-      if (plannings.data && plannings.data.length > 0) {
-        // Load existing planning
-        const planning = plannings.data[0];
-        setPlanningData(planning);
-        setCurrentPlanningUid(planning.uid);
-      } else {
-        // No existing planning, will show create form
-        setPlanningData(null);
-        setCurrentPlanningUid(null);
-      }
-    } catch (error) {
-      console.error('Failed to load planning:', error);
+        // Panggil API untuk get data 1 hari (asumsi ada endpointnya)
+        const dayResponse = await apiDays.getById(currentPlanningUid, weekUid, dayUid); // Butuh getById di service & API hook
+        if (dayResponse.status === 'success') {
+            // Panggil fungsi di useWeeklyPlanningState untuk update HANYA hari itu
+            updateDayInWeek(weekUid, dayUid, dayResponse.data); // Butuh fungsi ini di state hook
+        }
+    } catch (err) {
+        console.error("Failed to refetch day data:", err);
     }
-  };
+    }, [currentPlanningUid, apiDays, updateDayInWeek]); // Tambah dependensi yg relevan
 
-  /**
-   * Handle creating new planning
-   */
-  const handleCreatePlanning = async (planningFormData) => {
-    try {
-      const newPlanning = await createWeeklyPlanning({
-        ...planningFormData,
-        branch_uid: selectedBranch.value
-      });
+    const handleAddPlanningDetail = useCallback(async (weekUid, dayUid, detailData) => {
+        try {
+            const response = await details.create(currentPlanningUid, weekUid, dayUid, detailData);
+            if (response.status === 'success') { refetchDayData(weekUid, dayUid); return true; } return false;
+        } catch(err) { console.error('Failed add detail:', err); return false; }
+    }, [currentPlanningUid, details, refetchDayData]);
 
-      if (newPlanning.status === 'success') {
-        setPlanningData(newPlanning.data);
-        setCurrentPlanningUid(newPlanning.data.uid);
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error('Failed to create planning:', error);
-      return false;
+    const handleUpdatePlanningDetail = useCallback(async (weekUid, dayUid, detailUid, updatedData) => {
+        // ... (try catch call details.update -> refetchPlanningData) ...
+        try {
+            const response = await details.update(currentPlanningUid, weekUid, dayUid, detailUid, updatedData);
+            if (response.status === 'success') { refetchPlanningData(); return true; } return false;
+        } catch(err) { console.error('Failed update detail:', err); return false; }
+    }, [currentPlanningUid, details, refetchPlanningData]);
+
+    const handleDeletePlanningDetail = useCallback(async (weekUid, dayUid, detailUid) => {
+        // ... (try catch call details.delete -> refetchPlanningData) ...
+        try {
+            const response = await details.delete(currentPlanningUid, weekUid, dayUid, detailUid);
+            if (response.status === 'success') { refetchPlanningData(); return true; } return false;
+        } catch(err) { console.error('Failed delete detail:', err); return false; }
+    }, [currentPlanningUid, details, refetchPlanningData]);
+
+    const handleAddOutsideDetail = useCallback(async (weekUid, dayUid, detailData) => {
+         // ... (try catch call outsideDetails.create -> refetchPlanningData) ...
+        try {
+            const response = await outsideDetails.create(currentPlanningUid, weekUid, dayUid, detailData);
+            if (response.status === 'success') { refetchPlanningData(); return true; } return false;
+        } catch(err) { console.error('Failed add outside:', err); return false; }
+    }, [currentPlanningUid, outsideDetails, refetchPlanningData]);
+
+     const handleUpdateOutsideDetail = useCallback(async (weekUid, dayUid, detailUid, updatedData) => {
+        try {
+            const response = await outsideDetails.update(currentPlanningUid, weekUid, dayUid, detailUid, updatedData);
+            if (response.status === 'success') {
+                refetchPlanningData(); // ✅ Trigger refetch
+                return true;
+            }
+            return false;
+        } catch (error) { // ✅ Ganti 'err' jadi 'error' agar konsisten
+            console.error('Failed to update outside detail:', error);
+            return false;
+        }
+    // ✅ Tambahkan dependensi yg benar
+    }, [currentPlanningUid, outsideDetails, refetchPlanningData]);
+
+    // ✅ SOLVED: Handler Delete Outside Detail (Sudah pakai useCallback & dependensi)
+    const handleDeleteOutsideDetail = useCallback(async (weekUid, dayUid, detailUid) => {
+        try {
+            const response = await outsideDetails.delete(currentPlanningUid, weekUid, dayUid, detailUid);
+            if (response.status === 'success') {
+                refetchPlanningData(); // ✅ Trigger refetch
+                return true;
+            }
+            return false;
+        } catch (err) { // ✅ Ganti 'err' jadi 'error' agar konsisten
+            console.error('Failed to delete outside detail:', err);
+            return false;
+        }
+    }, [currentPlanningUid, outsideDetails, refetchPlanningData]); // ✅ Dependensi benar
+
+    /**
+     * ✅ Render error state (Sudah Benar)
+     * Menggunakan 'error' state dari useWeeklyPlanningAPI
+     * Menyediakan tombol Try Again (refetch) dan Dismiss (clearError)
+     */
+    if (error && !loading) { // Tampilkan error hanya jika tidak loading
+        return (
+            <>
+                <Topbar />
+                <div className="d-flex">
+                    <Sidebar />
+                    <Main>
+                        <Container fluid className="p-4"> {/* Tambah padding */}
+                            <Alert variant="danger" className="mt-3">
+                                <Alert.Heading>Error Loading Data</Alert.Heading>
+                                <p>{error}</p> {/* Tampilkan pesan error dari state */}
+                                <Button onClick={() => refetchPlanningData()} variant="outline-danger" size="sm">Try Again</Button>
+                                <Button onClick={clearError} variant="link" size="sm" className="ms-2">Dismiss</Button>
+                            </Alert>
+                        </Container>
+                    </Main>
+                </div>
+            </>
+        );
     }
-  };
 
-  /**
-   * Handle branch selection change
-   */
-  const handleBranchChange = (selectedOption) => {
-    setSelectedBranch(selectedOption);
-    // Reset current planning when branch changes
-    setPlanningData(null);
-    setCurrentPlanningUid(null);
-  };
-
-  /**
-   * Handle month selection change
-   */
-  const handleMonthChange = (newMonth) => {
-    setSelectedMonth(newMonth);
-    // Reset current planning when month changes
-    setPlanningData(null);
-    setCurrentPlanningUid(null);
-  };
-
-  /**
-   * Render error state
-   */
-  if (error) {
     return (
-      <>
-        <Topbar />
-        <div className="d-flex">
-          <Sidebar />
-          <Main>
-            <Container fluid>
-              <Alert variant="danger" className="mt-3">
-                <Alert.Heading>Error Loading Weekly Planning</Alert.Heading>
-                <p>{error}</p>
-              </Alert>
-            </Container>
-          </Main>
-        </div>
-      </>
-    );
-  }
-
-  /**
-   * Main render
-   */
-  return (
     <>
-      <Topbar />
-      <div className="d-flex">
+    <Topbar />
+    <div className="d-flex">
         <Sidebar />
         <Main>
-          <Container fluid className="p-4">
-            {/* Page Header */}
-            <Row className="mb-4">
-              <Col>
-                <h2 className="mb-0">Weekly Planning</h2>
-                <p className="text-muted">Manage your weekly planning and track performance</p>
-              </Col>
-            </Row>
+            <Container fluid className="p-4"> {/* Standard padding */}
+                <Row className="mb-4">
+                    <Col>
+                        <h2 className="mb-0">Weekly Planning</h2>
+                        <p className="text-muted">Manage your weekly planning and track performance</p>
+                    </Col>
+                </Row>
 
-            {/* Header Controls */}
-            <WeeklyPlanningHeader
-              selectedBranch={selectedBranch}
-              selectedMonth={selectedMonth}
-              branches={branches}
-              weeklyPlanMasters={weeklyPlanMasters}
-              onBranchChange={handleBranchChange}
-              onMonthChange={handleMonthChange}
-              onCreatePlanning={handleCreatePlanning}
-              loading={loading}
-              hasExistingPlanning={!!currentPlanningUid}
-            />
+                {/* ✅ Render Header dengan props yg benar (termasuk loading gabungan) */}
+                <WeeklyPlanningHeader
+                    selectedBranch={selectedBranch}
+                    selectedMonth={selectedMonth}
+                    branches={branches}
+                    // weeklyPlanMasters={weeklyPlanMasters} // Prop ini tidak dipakai header lagi
+                    onBranchChange={handleBranchChange}
+                    onMonthChange={handleMonthChange}
+                    onCreatePlanning={handleCreatePlanning} // Handler create yg solved
+                    // onCreatePlanMaster={createPlanMaster} // Prop ini tidak dipakai header lagi
+                    loading={loading} // Prop loading gabungan (sudah benar)
+                    hasExistingPlanning={!!currentPlanningUid} // Flag status (sudah benar)
+                />
+                {currentPlanningUid && hasSignificantData && ( // Tambah cek currentPlanningUid
+                    <Row className="mb-4">
+                        <Col>
+                            <CalculationStats
+                                dashboardStats={getDashboardStats} // Kirim hasil hook kalkulasi
+                                // planning={planning} // Prop ini tidak dipakai CalculationStats lagi
+                            />
+                        </Col>
+                    </Row>
+                )}
+                
+                {/* Tampilkan Loading Stats jika sedang load tapi sudah ada planning */}
+                {currentPlanningUid && loading && !error && (
+                    <div className="text-center my-3"><Spinner size="sm"/> Loading stats...</div>
+                )}
 
-            {/* Statistics Dashboard */}
-            {hasSignificantData && (
-              <Row className="mb-4">
-                <Col>
-                  <CalculationStats 
-                    dashboardStats={getDashboardStats}
-                    planningData={planningData}
-                  />
-                </Col>
-              </Row>
-            )}
 
-            {/* Main Planning Grid */}
-            {currentPlanningUid ? (
-              <Row>
-                <Col>
-                  <Card>
-                    <Card.Body>
-                      <WeeklyPlanningGrid
-                        planningData={planningData}
-                        planningUid={currentPlanningUid}
-                        onUpdateWeek={updateWeekData}
-                        onUpdateDay={updateDayData}
-                        onAddPlanningDetail={addPlanningDetail}
-                        onUpdatePlanningDetail={updatePlanningDetail}
-                        onDeletePlanningDetail={deletePlanningDetail}
-                        onAddOutsideDetail={addOutsideDetail}
-                        onUpdateOutsideDetail={updateOutsideDetail}
-                        onDeleteOutsideDetail={deleteOutsideDetail}
-                        weeklyPlanMasters={weeklyPlanMasters}
-                        loading={loading}
-                      />
-                    </Card.Body>
-                  </Card>
-                </Col>
-              </Row>
-            ) : (
-              /* No Planning Selected State */
-              <Row>
-                <Col>
-                  <Card>
-                    <Card.Body className="text-center py-5">
-                      {loading ? (
-                        <>
-                          <Spinner animation="border" className="mb-3" />
-                          <p className="text-muted">Loading planning data...</p>
-                        </>
-                      ) : (
-                        <>
-                          <h4 className="text-muted mb-3">No Planning Selected</h4>
-                          <p className="text-muted">
-                            {selectedBranch 
-                              ? 'Select a month and create planning to get started'
-                              : 'Select a branch to view or create weekly planning'
-                            }
-                          </p>
-                        </>
-                      )}
-                    </Card.Body>
-                  </Card>
-                </Col>
-              </Row>
-            )}
-          </Container>
+                {/* ✅ Render Grid atau Pesan "No Planning" (kondisional benar) */}
+                {currentPlanningUid && !loading ? ( // Tampilkan grid jika ada UID & tidak loading
+                    <Row>
+                        <Col>
+                            <Card className="shadow-sm"> {/* Styling konsisten */}
+                                <Card.Body>
+                                    {/* ✅ Render Grid dengan props yg benar (tanpa onUpdateWeek/Day) */}
+                                    <WeeklyPlanningGrid
+                                        planningData={combinedPlanningData} // Kirim object planning lengkap
+                                        planningUid={currentPlanningUid}
+                                        // 🗑️ Hapus onUpdateWeek & onUpdateDay
+                                        onAddPlanningDetail={handleAddPlanningDetail}
+                                        onUpdatePlanningDetail={handleUpdatePlanningDetail}
+                                        onDeletePlanningDetail={handleDeletePlanningDetail}
+                                        onAddOutsideDetail={handleAddOutsideDetail}
+                                        onUpdateOutsideDetail={handleUpdateOutsideDetail}
+                                        onDeleteOutsideDetail={handleDeleteOutsideDetail}
+                                        weeklyPlanMasters={weeklyPlanMasters} // Kirim masters untuk modal di grid
+                                        loading={loading} // Kirim loading state (meski mungkin tdk dipakai grid)
+                                    />
+                                </Card.Body>
+                            </Card>
+                        </Col>
+                    </Row>
+                ) : !selectedBranch && !loading ? ( // Pesan jika branch belum dipilih
+                    <Row> <Col> <Card> <Card.Body className="text-center py-5">
+                        <h4 className="text-muted mb-3">Select Branch</h4>
+                        <p className="text-muted">Please select a branch to view or create weekly planning.</p>
+                    </Card.Body> </Card> </Col> </Row>
+                ) : !currentPlanningUid && selectedBranch && !loading ? ( // Pesan jika branch dipilih TAPI belum ada planning (sebelum create)
+                        <Row> <Col> <Card> <Card.Body className="text-center py-5">
+                            <h4 className="text-muted mb-3">No Planning Found</h4>
+                            <p className="text-muted">Click "Create" in the header to start planning for {selectedMonth?.toLocaleString('id-ID', { month: 'long', year: 'numeric' })}.</p>
+                        </Card.Body> </Card> </Col> </Row>
+                    ) : loading ? ( // Tampilkan loading utama jika sedang fetch awal
+                        <div className="text-center my-5">
+                            <Spinner animation="border" role="status">
+                                <span className="visually-hidden">Loading...</span>
+                            </Spinner>
+                            <p className="mt-2">Loading planning data...</p>
+                        </div>
+                    ) : null /* Fallback jika ada kondisi lain */
+                }
+            </Container>
         </Main>
-      </div>
+    </div>
     </>
   );
 };

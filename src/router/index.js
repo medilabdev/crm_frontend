@@ -32,7 +32,7 @@ import DealsCategory from "../view/Properties/DealsStage";
 import NeedsApproval from "../view/Deals/NeedApproval";
 import EditDeals from "../view/Deals/SingleDeals/EditDeals";
 import Accounting from "../view/Deals/Accounting";
-import Task from "../view/Task";
+import Task from "../view/TaskNew/WeeklyPlanning/index";
 import BulkChangeTask from "../view/Task/BulkChange";
 import UploadFileTask from "../view/Task/UploadFile";
 import DetailNeedApproval from "../view/Deals/NeedApproval/Detail";

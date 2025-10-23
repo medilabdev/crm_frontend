@@ -15,327 +15,168 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faChartLine, 
-  faTargetArrow, 
+  faBullseye, 
   faCalendarCheck, 
   faTrophy,
   faChartPie,
   faArrowUp,
   faArrowDown,
   faMinus,
-  faExclamationTriangle
+  faExclamationTriangle,
+  faExternalLinkAlt
 } from '@fortawesome/free-solid-svg-icons';
-
-// Utils
-import { getPerformanceIndicator } from '../utils/calculationUtils';
+import { getPerformanceIndicator, formatPercentage } from '../utils/calculationUtils';
 
 /**
  * Statistics dashboard component
  */
 const CalculationStats = ({
-  dashboardStats = {},
-  planningData = null
+  dashboardStats = {}
 }) => {
-  // Memoized calculations
-  const statsData = useMemo(() => {
-    if (!dashboardStats || Object.keys(dashboardStats).length === 0) {
-      return {
-        totalPlanning: 0,
-        totalAchieved: 0,
-        achievementRate: 0,
-        totalOutside: 0,
-        performanceLevel: 'none',
-        weeklyStats: [],
-        dailyStats: []
-      };
-    }
+    const statsData = useMemo(() => {
+        // Default structure if dashboardStats is empty or invalid
+        const defaultStats = {
+            totals: { planned_activities: 0, completed_reports: 0, outside_activities: 0, total_reported: 0 },
+            performance: { completion_rate: 0, outside_rate: 0, performance_level: 'none' },
+            formatted: { completion_pct: '0%', outside_pct: '0%' },
+            // Add derived performance details
+            performanceDetails: { level: 'none', color: 'secondary', label: 'N/A', icon: faExclamationTriangle }
+        };
 
-    // Get performance indicator with trend
-    const performance = getPerformanceIndicator(dashboardStats.achievementRate || 0);
-    
-    return {
-      ...dashboardStats,
-      performanceLevel: performance.level,
-      performanceColor: performance.color,
-      performanceIcon: performance.icon
-    };
-  }, [dashboardStats]);
+        if (!dashboardStats || !dashboardStats.performance || !dashboardStats.totals) {
+            return defaultStats;
+        }
+
+        // ✅ Get performance indicator using the CORRECT key from dashboardStats
+        const performance = getPerformanceIndicator(dashboardStats.performance.completion_rate || 0);
+
+        // Map icons based on performance level (example)
+        let icon = faMinus;
+        switch (performance.level) {
+             case 'high': icon = faTrophy; break;
+             case 'medium': icon = faArrowUp; break;
+             // case 'low': icon = faMinus; break; // Keep faMinus for low/fair?
+             case 'poor': icon = faArrowDown; break;
+             default: icon = faExclamationTriangle;
+        }
+
+        return {
+            // Spread the received stats
+            totals: dashboardStats.totals,
+            performance: dashboardStats.performance,
+            formatted: dashboardStats.formatted,
+            // Add derived performance details for easier rendering
+            performanceDetails: {
+                level: performance.level,
+                color: performance.color, // Use color from indicator
+                label: performance.label,
+                icon: icon
+            }
+        };
+    }, [dashboardStats]);
 
   /**
    * Render performance indicator card
    */
   const renderPerformanceCard = () => {
-    const { performanceLevel, performanceColor, achievementRate } = statsData;
+    const completionRate = statsData.performance.completion_rate || 0;
+    const { level, color, label, icon } = statsData.performanceDetails;
+    const textColor = ['success', 'primary', 'danger'].includes(color) ? 'white' : 'dark';
     
-    let bgVariant = 'light';
-    let textColor = 'dark';
-    let icon = faMinus;
-    
-    switch (performanceLevel) {
-      case 'excellent':
-        bgVariant = 'success';
-        textColor = 'white';
-        icon = faTrophy;
-        break;
-      case 'good':
-        bgVariant = 'primary';
-        textColor = 'white';
-        icon = faArrowUp;
-        break;
-      case 'average':
-        bgVariant = 'warning';
-        textColor = 'dark';
-        icon = faMinus;
-        break;
-      case 'poor':
-        bgVariant = 'danger';
-        textColor = 'white';
-        icon = faArrowDown;
-        break;
-      default:
-        bgVariant = 'light';
-        icon = faExclamationTriangle;
-    }
-
     return (
-      <Card className={`bg-${bgVariant} text-${textColor} h-100`}>
-        <Card.Body className="text-center">
-          <FontAwesomeIcon icon={icon} size="3x" className="mb-3" />
-          <h4 className="mb-1">{achievementRate}%</h4>
-          <h6 className="mb-0 text-capitalize">{performanceLevel} Performance</h6>
-          <ProgressBar 
-            variant={textColor === 'white' ? 'light' : bgVariant}
-            now={achievementRate} 
-            className="mt-3"
-            style={{ height: '8px' }}
-          />
-        </Card.Body>
-      </Card>
+            // ✅ Use derived color for background
+        <Card className={`bg-${color} text-${textColor} h-100 shadow-sm border-0`}>
+            <Card.Body className="text-center">
+                {/* ✅ Use derived icon */}
+                <FontAwesomeIcon icon={icon} size="3x" className="mb-3 opacity-75" />
+                {/* ✅ Use correct completion rate and format */}
+                <h4 className="mb-1">{formatPercentage(completionRate)}</h4>
+                {/* ✅ Use derived label */}
+                <h6 className="mb-0 text-capitalize">{label}</h6>
+                {/* ✅ Progress bar representing completion rate */}
+                <ProgressBar
+                    // Use 'light' variant for dark backgrounds, map color otherwise
+                    variant={textColor === 'white' ? 'light' : color}
+                    now={completionRate}
+                    className="mt-3"
+                    style={{ height: '8px', backgroundColor: 'rgba(255,255,255,0.3)' }} // Add subtle background
+                />
+            </Card.Body>
+        </Card>
     );
   };
 
   /**
    * Render statistics overview cards
    */
-  const renderOverviewCards = () => {
-    const cards = [
-      {
-        title: 'Total Planning',
-        value: statsData.totalPlanning || 0,
-        icon: faTargetArrow,
-        color: 'primary',
-        description: 'Total planned activities'
-      },
-      {
-        title: 'Achieved',
-        value: statsData.totalAchieved || 0,
-        icon: faCalendarCheck,
-        color: 'success',
-        description: 'Successfully completed'
-      },
-      {
-        title: 'Outside Activities',
-        value: statsData.totalOutside || 0,
-        icon: faChartPie,
-        color: 'warning',
-        description: 'Additional activities'
-      }
-    ];
+    const renderOverviewCards = () => {
+        const cardsData = [
+            {
+                title: 'Planned Activities',
+                value: statsData.totals.planned_activities || 0, // Use planned_activities
+                icon: faBullseye,
+                color: 'primary',
+                description: 'Total activities planned'
+            },
+            {
+                title: 'Completed Reports', // Changed title for clarity
+                value: statsData.totals.completed_reports || 0, // Use completed_reports
+                icon: faCalendarCheck,
+                color: 'success',
+                description: 'Reports matching plan'
+            },
+            {
+                title: 'Outside Activities',
+                value: statsData.totals.outside_activities || 0, // Use outside_activities
+                icon: faExternalLinkAlt, // Changed icon
+                color: 'warning',
+                description: 'Activities done outside plan'
+            }
+        ];
 
-    return cards.map((card, index) => (
-      <Col md={4} key={index}>
-        <Card className="h-100 border-0 shadow-sm">
-          <Card.Body className="text-center">
-            <div className={`text-${card.color} mb-3`}>
-              <FontAwesomeIcon icon={card.icon} size="2x" />
-            </div>
-            <h3 className="mb-1 text-dark">{card.value}</h3>
-            <h6 className="text-muted mb-2">{card.title}</h6>
-            <small className="text-muted">{card.description}</small>
-          </Card.Body>
-        </Card>
-      </Col>
-    ));
-  };
-
-  /**
-   * Render weekly breakdown
-   */
-  const renderWeeklyBreakdown = () => {
-    const weeklyStats = statsData.weeklyStats || [];
-    
-    if (weeklyStats.length === 0) {
-      return (
-        <Alert variant="info" className="text-center">
-          <FontAwesomeIcon icon={faChartLine} className="me-2" />
-          No weekly data available
-        </Alert>
-      );
-    }
-
-    return (
-      <div className="weekly-breakdown">
-        {weeklyStats.map((week, index) => (
-          <Card key={index} className="mb-3">
-            <Card.Body>
-              <Row className="align-items-center">
-                <Col md={3}>
-                  <h6 className="mb-1">{week.weekName}</h6>
-                  <small className="text-muted">{week.dateRange}</small>
-                </Col>
-                <Col md={6}>
-                  <div className="d-flex justify-content-between align-items-center mb-2">
-                    <small>Progress</small>
-                    <small>{week.achievementRate}%</small>
-                  </div>
-                  <ProgressBar 
-                    now={week.achievementRate} 
-                    variant={week.achievementRate >= 80 ? 'success' : 
-                            week.achievementRate >= 60 ? 'primary' : 
-                            week.achievementRate >= 40 ? 'warning' : 'danger'}
-                  />
-                </Col>
-                <Col md={3}>
-                  <Row className="text-center">
-                    <Col>
-                      <small className="text-muted">Planned</small>
-                      <div className="fw-bold">{week.totalPlanning}</div>
-                    </Col>
-                    <Col>
-                      <small className="text-muted">Achieved</small>
-                      <div className="fw-bold text-success">{week.totalAchieved}</div>
-                    </Col>
-                    <Col>
-                      <small className="text-muted">Outside</small>
-                      <div className="fw-bold text-warning">{week.totalOutside}</div>
-                    </Col>
-                  </Row>
-                </Col>
-              </Row>
-            </Card.Body>
-          </Card>
-        ))}
-      </div>
-    );
-  };
-
-  /**
-   * Render daily insights
-   */
-  const renderDailyInsights = () => {
-    const dailyStats = statsData.dailyStats || [];
-    
-    if (dailyStats.length === 0) {
-      return (
-        <Alert variant="info" className="text-center">
-          <FontAwesomeIcon icon={faCalendarCheck} className="me-2" />
-          No daily insights available
-        </Alert>
-      );
-    }
-
-    // Get top performing and underperforming days
-    const sortedDays = [...dailyStats].sort((a, b) => b.achievementRate - a.achievementRate);
-    const topDays = sortedDays.slice(0, 3);
-    const bottomDays = sortedDays.slice(-3).reverse();
-
-    return (
-      <Row>
-        <Col md={6}>
-          <h6 className="text-success mb-3">
-            <FontAwesomeIcon icon={faArrowUp} className="me-2" />
-            Top Performing Days
-          </h6>
-          {topDays.map((day, index) => (
-            <div key={index} className="d-flex justify-content-between align-items-center mb-2 p-2 bg-light rounded">
-              <div>
-                <span className="fw-bold">{day.dayName}</span>
-                <small className="text-muted ms-2">{day.date}</small>
-              </div>
-              <Badge bg="success">{day.achievementRate}%</Badge>
-            </div>
-          ))}
-        </Col>
-        <Col md={6}>
-          <h6 className="text-warning mb-3">
-            <FontAwesomeIcon icon={faArrowDown} className="me-2" />
-            Needs Improvement
-          </h6>
-          {bottomDays.map((day, index) => (
-            <div key={index} className="d-flex justify-content-between align-items-center mb-2 p-2 bg-light rounded">
-              <div>
-                <span className="fw-bold">{day.dayName}</span>
-                <small className="text-muted ms-2">{day.date}</small>
-              </div>
-              <Badge bg={day.achievementRate < 50 ? 'danger' : 'warning'}>
-                {day.achievementRate}%
-              </Badge>
-            </div>
-          ))}
-        </Col>
-      </Row>
-    );
-  };
+        return cardsData.map((card, index) => (
+            <Col md={4} key={index} className="mb-3 mb-md-0"> {/* Add spacing */}
+                <Card className="h-100 border-0 shadow-sm">
+                    <Card.Body className="text-center d-flex flex-column justify-content-center"> {/* Center content */}
+                        <div className={`text-${card.color} mb-2`}> {/* Reduced margin */}
+                            <FontAwesomeIcon icon={card.icon} size="2x" />
+                        </div>
+                        <h3 className="mb-0 text-dark fw-bold">{card.value}</h3> {/* Adjusted styling */}
+                        <p className="text-muted mb-0 small">{card.title}</p> {/* Adjusted styling */}
+                        {/* <small className="text-muted">{card.description}</small> // Description might be redundant */}
+                    </Card.Body>
+                </Card>
+            </Col>
+        ));
+    };
 
   // Show placeholder if no data
-  if (!planningData || Object.keys(statsData).length === 0) {
+    if (!statsData || !dashboardStats?.totals?.planned_activities || dashboardStats.totals.planned_activities === 0) {
+        return (
+            <Alert variant="light" className="text-center border py-4 mb-4">
+                <FontAwesomeIcon icon={faChartLine} size="2x" className="mb-3 text-muted" />
+                <h5>No Statistics Yet</h5>
+                <p className="text-muted mb-0">Statistics will appear once planning activities are added.</p>
+            </Alert>
+        );
+    }
+
     return (
-      <Alert variant="info" className="text-center">
-        <FontAwesomeIcon icon={faChartLine} size="2x" className="mb-3 opacity-50" />
-        <h5>No Statistics Available</h5>
-        <p>Statistics will appear once you have planning data with activities.</p>
-      </Alert>
+        <div className="calculation-stats">
+        {/* Performance Overview */}
+        <Row className="mb-4">
+            <Col md={3}>
+            {renderPerformanceCard()}
+            </Col>
+            <Col md={9}>
+            <Row>
+                {renderOverviewCards()}
+            </Row>
+            </Col>
+        </Row>
+
+        </div>
     );
-  }
-
-  return (
-    <div className="calculation-stats">
-      {/* Performance Overview */}
-      <Row className="mb-4">
-        <Col md={3}>
-          {renderPerformanceCard()}
-        </Col>
-        <Col md={9}>
-          <Row>
-            {renderOverviewCards()}
-          </Row>
-        </Col>
-      </Row>
-
-      {/* Weekly Breakdown */}
-      <Row className="mb-4">
-        <Col>
-          <Card>
-            <Card.Header>
-              <h5 className="mb-0">
-                <FontAwesomeIcon icon={faChartLine} className="me-2" />
-                Weekly Breakdown
-              </h5>
-            </Card.Header>
-            <Card.Body>
-              {renderWeeklyBreakdown()}
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-
-      {/* Daily Insights */}
-      <Row>
-        <Col>
-          <Card>
-            <Card.Header>
-              <h5 className="mb-0">
-                <FontAwesomeIcon icon={faCalendarCheck} className="me-2" />
-                Daily Insights
-              </h5>
-            </Card.Header>
-            <Card.Body>
-              {renderDailyInsights()}
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-    </div>
-  );
 };
 
 export default CalculationStats;

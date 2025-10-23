@@ -3,7 +3,7 @@
  * Custom hook for managing API operations with loading, error states, and caching
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { 
   branchService, 
   weeklyPlanMasterService, 
@@ -15,95 +15,189 @@ import {
   reportSuggestionsService
 } from '../services/weeklyPlanningService';
 
-/**
- * Hook for managing API operations with consistent loading/error states
- */
 export const useWeeklyPlanningAPI = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const cache = useRef({});
 
-  // Clear error state
+  // Clear error state (stabil)
   const clearError = useCallback(() => {
     setError(null);
   }, []);
 
-  // Generic API call wrapper with loading/error handling
+  // Generic API call wrapper (stabil)
   const apiCall = useCallback(async (apiFunction, ...args) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const result = await apiFunction(...args);
-      setLoading(false);
       return result;
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'An error occurred');
+      throw err; // ensure the caller can handle the error
+    } finally {
       setLoading(false);
-      throw err;
     }
   }, []);
 
+  // --- Bungkus semua objek dengan useMemo untuk stabilitas ---
+
   // Branch operations
-  const branches = {
-    getAll: useCallback(() => apiCall(branchService.getAll), [apiCall]),
-    create: useCallback((data) => apiCall(branchService.create, data), [apiCall])
-  };
+  const branches = useMemo(
+    () => ({
+      getAll: () => apiCall(branchService.getAll),
+      create: (data) => apiCall(branchService.create, data),
+    }),
+    [apiCall]
+  );
 
   // Weekly Plan Master operations
-  const planMasters = {
-    getAll: useCallback(() => apiCall(weeklyPlanMasterService.getAll), [apiCall]),
-    create: useCallback((data) => apiCall(weeklyPlanMasterService.create, data), [apiCall]),
-    update: useCallback((uid, data) => apiCall(weeklyPlanMasterService.update, uid, data), [apiCall]),
-    delete: useCallback((uid) => apiCall(weeklyPlanMasterService.delete, uid), [apiCall])
-  };
+  const planMasters = useMemo(
+    () => ({
+      getAll: () => apiCall(weeklyPlanMasterService.getAll),
+      create: (data) => apiCall(weeklyPlanMasterService.create, data),
+      update: (uid, data) => apiCall(weeklyPlanMasterService.update, uid, data),
+      delete: (uid) => apiCall(weeklyPlanMasterService.delete, uid),
+    }),
+    [apiCall]
+  );
 
   // Weekly Planning operations
-  const plannings = {
-    getAll: useCallback((filters) => apiCall(weeklyPlanningService.getAll, filters), [apiCall]),
-    getById: useCallback((uid) => apiCall(weeklyPlanningService.getById, uid), [apiCall]),
-    create: useCallback((data) => apiCall(weeklyPlanningService.create, data), [apiCall]),
-    update: useCallback((uid, data) => apiCall(weeklyPlanningService.update, uid, data), [apiCall]),
-    delete: useCallback((uid) => apiCall(weeklyPlanningService.delete, uid), [apiCall])
-  };
+  const plannings = useMemo(
+    () => ({
+      getAll: async (filters) => {
+        const cacheKey = JSON.stringify(filters);
+        if (cache.current[cacheKey]) return cache.current[cacheKey];
+
+        const result = await apiCall(weeklyPlanningService.getAll, filters);
+        cache.current[cacheKey] = result;
+        return result;
+      },
+      getById: (uid) => apiCall(weeklyPlanningService.getById, uid),
+      create: (data) => apiCall(weeklyPlanningService.create, data),
+      update: (uid, data) =>
+        apiCall(weeklyPlanningService.update, uid, data),
+      delete: (uid) => apiCall(weeklyPlanningService.delete, uid),
+    }),
+    [apiCall]
+  );
 
   // Weekly Planning Week operations
-  const weeks = {
-    getAll: useCallback((planningUid) => apiCall(weeklyPlanningWeekService.getAll, planningUid), [apiCall]),
-    getById: useCallback((planningUid, weekUid) => apiCall(weeklyPlanningWeekService.getById, planningUid, weekUid), [apiCall]),
-    create: useCallback((planningUid, data) => apiCall(weeklyPlanningWeekService.create, planningUid, data), [apiCall]),
-    update: useCallback((planningUid, weekUid, data) => apiCall(weeklyPlanningWeekService.update, planningUid, weekUid, data), [apiCall]),
-    delete: useCallback((planningUid, weekUid) => apiCall(weeklyPlanningWeekService.delete, planningUid, weekUid), [apiCall])
-  };
+  const weeks = useMemo(
+    () => ({
+      getAll: (planningUid) =>
+        apiCall(weeklyPlanningWeekService.getAll, planningUid),
+      getById: (planningUid, weekUid) =>
+        apiCall(weeklyPlanningWeekService.getById, planningUid, weekUid),
+      create: (planningUid, data) =>
+        apiCall(weeklyPlanningWeekService.create, planningUid, data),
+      update: (planningUid, weekUid, data) =>
+        apiCall(weeklyPlanningWeekService.update, planningUid, weekUid, data),
+      delete: (planningUid, weekUid) =>
+        apiCall(weeklyPlanningWeekService.delete, planningUid, weekUid),
+    }),
+    [apiCall]
+  );
 
   // Weekly Planning Day operations
-  const days = {
-    getAll: useCallback((planningUid, weekUid) => apiCall(weeklyPlanningDayService.getAll, planningUid, weekUid), [apiCall]),
-    create: useCallback((planningUid, weekUid, data) => apiCall(weeklyPlanningDayService.create, planningUid, weekUid, data), [apiCall]),
-    bulkCreate: useCallback((planningUid, weekUid, data) => apiCall(weeklyPlanningDayService.bulkCreate, planningUid, weekUid, data), [apiCall]),
-    update: useCallback((planningUid, weekUid, dayUid, data) => apiCall(weeklyPlanningDayService.update, planningUid, weekUid, dayUid, data), [apiCall])
-  };
+  const days = useMemo(
+    () => ({
+      getAll: (planningUid, weekUid) =>
+        apiCall(weeklyPlanningDayService.getAll, planningUid, weekUid),
+      create: (planningUid, weekUid, data) =>
+        apiCall(weeklyPlanningDayService.create, planningUid, weekUid, data),
+      bulkCreate: (planningUid, weekUid, data) =>
+        apiCall(weeklyPlanningDayService.bulkCreate, planningUid, weekUid, data),
+      update: (planningUid, weekUid, dayUid, data) =>
+        apiCall(
+          weeklyPlanningDayService.update,
+          planningUid,
+          weekUid,
+          dayUid,
+          data
+        ),
+    }),
+    [apiCall]
+  );
 
   // Weekly Planning Detail operations
-  const details = {
-    getAll: useCallback((planningUid, weekUid, dayUid) => apiCall(weeklyPlanningDetailService.getAll, planningUid, weekUid, dayUid), [apiCall]),
-    create: useCallback((planningUid, weekUid, dayUid, data) => apiCall(weeklyPlanningDetailService.create, planningUid, weekUid, dayUid, data), [apiCall]),
-    update: useCallback((planningUid, weekUid, dayUid, detailUid, data) => apiCall(weeklyPlanningDetailService.update, planningUid, weekUid, dayUid, detailUid, data), [apiCall]),
-    delete: useCallback((planningUid, weekUid, dayUid, detailUid) => apiCall(weeklyPlanningDetailService.delete, planningUid, weekUid, dayUid, detailUid), [apiCall])
-  };
+  const details = useMemo(
+    () => ({
+      getAll: (planningUid, weekUid, dayUid) =>
+        apiCall(weeklyPlanningDetailService.getAll, planningUid, weekUid, dayUid),
+      create: (planningUid, weekUid, dayUid, data) =>
+        apiCall(
+          weeklyPlanningDetailService.create,
+          planningUid,
+          weekUid,
+          dayUid,
+          data
+        ),
+      update: (planningUid, weekUid, dayUid, detailUid, data) =>
+        apiCall(
+          weeklyPlanningDetailService.update,
+          planningUid,
+          weekUid,
+          dayUid,
+          detailUid,
+          data
+        ),
+      delete: (planningUid, weekUid, dayUid, detailUid) =>
+        apiCall(
+          weeklyPlanningDetailService.delete,
+          planningUid,
+          weekUid,
+          dayUid,
+          detailUid
+        ),
+    }),
+    [apiCall]
+  );
 
   // Outside Planning Detail operations
-  const outsideDetails = {
-    getAll: useCallback((planningUid, weekUid, dayUid) => apiCall(outsidePlanningDetailService.getAll, planningUid, weekUid, dayUid), [apiCall]),
-    create: useCallback((planningUid, weekUid, dayUid, data) => apiCall(outsidePlanningDetailService.create, planningUid, weekUid, dayUid, data), [apiCall]),
-    update: useCallback((planningUid, weekUid, dayUid, detailUid, data) => apiCall(outsidePlanningDetailService.update, planningUid, weekUid, dayUid, detailUid, data), [apiCall]),
-    delete: useCallback((planningUid, weekUid, dayUid, detailUid) => apiCall(outsidePlanningDetailService.delete, planningUid, weekUid, dayUid, detailUid), [apiCall])
-  };
+  const outsideDetails = useMemo(
+    () => ({
+      getAll: (planningUid, weekUid, dayUid) =>
+        apiCall(outsidePlanningDetailService.getAll, planningUid, weekUid, dayUid),
+      create: (planningUid, weekUid, dayUid, data) =>
+        apiCall(
+          outsidePlanningDetailService.create,
+          planningUid,
+          weekUid,
+          dayUid,
+          data
+        ),
+      update: (planningUid, weekUid, dayUid, detailUid, data) =>
+        apiCall(
+          outsidePlanningDetailService.update,
+          planningUid,
+          weekUid,
+          dayUid,
+          detailUid,
+          data
+        ),
+      delete: (planningUid, weekUid, dayUid, detailUid) =>
+        apiCall(
+          outsidePlanningDetailService.delete,
+          planningUid,
+          weekUid,
+          dayUid,
+          detailUid
+        ),
+    }),
+    [apiCall]
+  );
 
   // Report Suggestions operations
-  const reportSuggestions = {
-    get: useCallback(() => apiCall(reportSuggestionsService.getSuggestions), [apiCall]),
-    addUsage: useCallback((reportText) => apiCall(reportSuggestionsService.addUsage, reportText), [apiCall])
-  };
+  const reportSuggestions = useMemo(
+    () => ({
+      get: () => apiCall(reportSuggestionsService.getSuggestions),
+      addUsage: (reportText) =>
+        apiCall(reportSuggestionsService.addUsage, reportText),
+    }),
+    [apiCall]
+  );
 
   return {
     loading,
@@ -116,13 +210,10 @@ export const useWeeklyPlanningAPI = () => {
     days,
     details,
     outsideDetails,
-    reportSuggestions
+    reportSuggestions,
   };
 };
 
-/**
- * Hook for fetching and caching branches data
- */
 export const useBranches = () => {
   const [branches, setBranches] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -154,9 +245,6 @@ export const useBranches = () => {
   };
 };
 
-/**
- * Hook for fetching and caching weekly plan masters
- */
 export const useWeeklyPlanMasters = () => {
   const [planMasters, setPlanMasters] = useState([]);
   const [loading, setLoading] = useState(false);

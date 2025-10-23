@@ -774,6 +774,7 @@ const WeeklyPlanningSimulation = () => {
                         📅 Daily Planning Input - {modalDayData && modalDayData.dayName}, {modalDayData && formatDate(modalDayData.date)}
                     </Modal.Title>
                 </Modal.Header>
+                
                 <Modal.Body style={{ maxHeight: '70vh', overflowY: 'auto' }}>
                     {modalDayData && (
                         <>
@@ -1047,6 +1048,7 @@ const WeeklyPlanningSimulation = () => {
                         </>
                     )}
                 </Modal.Body>
+
                 <Modal.Footer className="bg-light">
                     <div className="w-100 d-flex justify-content-between align-items-center">
                         <div>
