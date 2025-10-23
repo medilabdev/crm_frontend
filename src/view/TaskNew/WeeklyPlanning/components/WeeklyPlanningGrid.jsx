@@ -33,6 +33,10 @@ import {
 import { generateWeeksForMonth, formatDate } from '../utils/dateUtils';
 import { calculateWeekStatistics, calculateDayStatistics } from '../utils/calculationUtils';
 
+// Child components
+import PlanningDetailModal from './PlanningDetailModal';
+import OutsideActivityModal from './OutsideActivityModal';
+
 /**
  * Planning grid with weeks and days layout
  */
@@ -88,6 +92,46 @@ const WeeklyPlanningGrid = ({
       weeks: enrichedWeeks
     };
   }, [planningData]);
+
+  /**
+   * Handle saving planning detail (create or update)
+   */
+  const handleSavePlanningDetail = async (formData, editingDetail) => {
+    try {
+      if (editingDetail) {
+        // Update existing detail
+        const success = await onUpdatePlanningDetail(editingDetail.uid, formData);
+        return success;
+      } else {
+        // Create new detail
+        const success = await onAddPlanningDetail(formData);
+        return success;
+      }
+    } catch (error) {
+      console.error('Failed to save planning detail:', error);
+      return false;
+    }
+  };
+
+  /**
+   * Handle saving outside activity (create or update)
+   */
+  const handleSaveOutsideActivity = async (formData, editingDetail) => {
+    try {
+      if (editingDetail) {
+        // Update existing detail
+        const success = await onUpdateOutsideDetail(editingDetail.uid, formData);
+        return success;
+      } else {
+        // Create new detail
+        const success = await onAddOutsideDetail(formData);
+        return success;
+      }
+    } catch (error) {
+      console.error('Failed to save outside activity:', error);
+      return false;
+    }
+  };
 
   /**
    * Handle opening planning detail modal
@@ -440,47 +484,27 @@ const WeeklyPlanningGrid = ({
         </div>
       ))}
 
-      {/* Planning Detail Modal (placeholder) */}
-      <Modal show={showDetailModal} onHide={handleCloseModals} size="lg">
-        <Modal.Header closeButton>
-          <Modal.Title>
-            {editingDetail ? 'Edit Planning Detail' : 'Add Planning Detail'}
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Alert variant="info">
-            Planning Detail Modal content will be implemented next.
-            <br />
-            Selected Day: {selectedDay?.day_name} ({formatDate(new Date(selectedDay?.day_date || ''))})
-          </Alert>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseModals}>
-            Close
-          </Button>
-        </Modal.Footer>
-      </Modal>
+      {/* Planning Detail Modal */}
+      <PlanningDetailModal
+        show={showDetailModal}
+        onHide={handleCloseModals}
+        onSave={handleSavePlanningDetail}
+        editingDetail={editingDetail}
+        selectedWeek={selectedWeek}
+        selectedDay={selectedDay}
+        weeklyPlanMasters={weeklyPlanMasters}
+        loading={modalLoading}
+      />
 
-      {/* Outside Detail Modal (placeholder) */}
-      <Modal show={showOutsideModal} onHide={handleCloseModals} size="lg">
-        <Modal.Header closeButton>
-          <Modal.Title>
-            {editingDetail ? 'Edit Outside Activity' : 'Add Outside Activity'}
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Alert variant="info">
-            Outside Activity Modal content will be implemented next.
-            <br />
-            Selected Week: {selectedWeek?.week_name}
-          </Alert>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseModals}>
-            Close
-          </Button>
-        </Modal.Footer>
-      </Modal>
+      {/* Outside Activity Modal */}
+      <OutsideActivityModal
+        show={showOutsideModal}
+        onHide={handleCloseModals}
+        onSave={handleSaveOutsideActivity}
+        editingDetail={editingDetail}
+        selectedWeek={selectedWeek}
+        loading={modalLoading}
+      />
     </div>
   );
 };

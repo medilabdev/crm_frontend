@@ -213,41 +213,105 @@ export const usePlanningValidation = () => {
   const validatePlanningDetailForm = useCallback((formData) => {
     const newErrors = {};
     
-    // Weekly plan text validation (required)
-    const planTextError = validateRequired(formData.weekly_plan_text, 'Planning text');
+    // Weekly plan master validation
+    const masterError = validateRequired(formData.weekly_plan_master_uid, 'Plan template');
+    if (masterError) {
+      newErrors.weekly_plan_master_uid = masterError;
+    }
+    
+    // Plan text validation (required)
+    const planTextError = validateRequired(formData.plan_text, 'Plan description');
     if (planTextError) {
-      newErrors.weekly_plan_text = planTextError;
+      newErrors.plan_text = planTextError;
     } else {
       const lengthError = validateTextLength(
-        formData.weekly_plan_text,
-        'Planning text',
+        formData.plan_text,
+        'Plan description',
         VALIDATION_RULES.PLAN_TEXT.MIN_LENGTH,
         VALIDATION_RULES.PLAN_TEXT.MAX_LENGTH
       );
       if (lengthError) {
-        newErrors.weekly_plan_text = lengthError;
+        newErrors.plan_text = lengthError;
+      }
+    }
+    
+    // Target quantity validation (required)
+    const targetError = validateNumber(formData.target_quantity, 'Target quantity', 0.01);
+    if (targetError) {
+      newErrors.target_quantity = targetError;
+    }
+    
+    // Actual quantity validation (optional but must be valid number if provided)
+    if (formData.actual_quantity !== '' && formData.actual_quantity !== null && formData.actual_quantity !== undefined) {
+      const actualError = validateNumber(formData.actual_quantity, 'Actual quantity', 0);
+      if (actualError) {
+        newErrors.actual_quantity = actualError;
       }
     }
     
     // Plan notes validation (optional)
-    if (formData.plan_notes) {
+    if (formData.plan_note) {
       const notesError = validateTextLength(
-        formData.plan_notes,
+        formData.plan_note,
         'Plan notes',
         0,
         VALIDATION_RULES.NOTES.MAX_LENGTH
       );
       if (notesError) {
-        newErrors.plan_notes = notesError;
+        newErrors.plan_note = notesError;
       }
     }
     
-    // Weekly report text validation (optional)
-    if (formData.weekly_report_text) {
-      const reportError = validateTextLength(
-        formData.weekly_report_text,
-        'Weekly report',
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  }, [validateRequired, validateTextLength, validateNumber]);
+
+  /**
+   * Validate outside activity form
+   */
+  const validateOutsideDetailForm = useCallback((formData) => {
+    const newErrors = {};
+    
+    // Outside text validation (required)
+    const outsideTextError = validateRequired(formData.outside_text, 'Activity description');
+    if (outsideTextError) {
+      newErrors.outside_text = outsideTextError;
+    } else {
+      const lengthError = validateTextLength(
+        formData.outside_text,
+        'Activity description',
+        VALIDATION_RULES.PLAN_TEXT.MIN_LENGTH,
+        VALIDATION_RULES.PLAN_TEXT.MAX_LENGTH
+      );
+      if (lengthError) {
+        newErrors.outside_text = lengthError;
+      }
+    }
+    
+    // Outside quantity validation (required)
+    const quantityError = validateNumber(formData.outside_quantity, 'Quantity/Duration', 0.01);
+    if (quantityError) {
+      newErrors.outside_quantity = quantityError;
+    }
+    
+    // Outside notes validation (optional)
+    if (formData.outside_note) {
+      const notesError = validateTextLength(
+        formData.outside_note,
+        'Additional notes',
         0,
+        VALIDATION_RULES.NOTES.MAX_LENGTH
+      );
+      if (notesError) {
+        newErrors.outside_note = notesError;
+      }
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  }, [validateRequired, validateTextLength, validateNumber]);
+
+  /**
         VALIDATION_RULES.PLAN_TEXT.MAX_LENGTH
       );
       if (reportError) {
@@ -376,6 +440,7 @@ export const usePlanningValidation = () => {
     validateWeekForm,
     validateDayForm,
     validatePlanningDetailForm,
+    validateOutsideDetailForm,
     validateOutsidePlanningForm,
     
     // Field validators
