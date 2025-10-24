@@ -48,17 +48,17 @@ const WeeklyPlanningGrid = ({
   onUpdateOutsideDetail,
   onDeleteOutsideDetail,
   weeklyPlanMasters = [],
-  loading = false
+  loading = false,
+  createPlanMaster
 }) => {
-    // Local state
+
     const [selectedWeek, setSelectedWeek] = useState(null);
     const [selectedDay, setSelectedDay] = useState(null);
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [showOutsideModal, setShowOutsideModal] = useState(false);
     const [editingDetail, setEditingDetail] = useState(null);
-    const [modalLoading, setModalLoading] = useState(false); // State untuk loading di modal
-
-    // Fungsi Save Planning Detail (Create/Update)
+    const [modalLoading, setModalLoading] = useState(false);
+    
     const handleSavePlanningDetail = async (formData, editingDetail) => {
         setModalLoading(true); // Mulai loading
         try {
@@ -154,6 +154,7 @@ const WeeklyPlanningGrid = ({
 
     const renderWeekHeader = (week) => {
         // ✅ Gunakan week.statistics yang SUDAH DIHITUNG di useWeeklyPlanningState
+        console.log("Week Statistics: ", week.statistics);
         const stats = week.statistics || { // Sediakan default object kosong jika statistics null/undefined
             total_weekly_plan: 0,
             total_weekly_report: 0,
@@ -232,6 +233,8 @@ const WeeklyPlanningGrid = ({
         const stats = day.calculations || getDefaultCalculations();
         const planningDetails = day.weeklyPlanningDetails || [];
         const outsideDetails = day.outsidePlanningDetails || [];
+
+        console.log(`FINAL CHECK Achievement for ${day.day_name}: ${stats.daily_planning_pct}`);
 
         return (
         <Card className="h-100 border-light">
@@ -460,7 +463,9 @@ const WeeklyPlanningGrid = ({
 
     // ✅ No data state (sudah benar, cek planningData.weeks)
     if (!planningData || !planningData.weeks || planningData.weeks.length === 0) {
+        console.log('WeeklyPlanningGrid: Merender "No Planning Data"');
         return (
+            
         <Alert variant="info" className="text-center">
             <FontAwesomeIcon icon={faCalendarWeek} size="2x" className="mb-3 opacity-50" />
             <h5>No Planning Data</h5>
@@ -498,6 +503,7 @@ const WeeklyPlanningGrid = ({
         selectedDay={selectedDay}
         weeklyPlanMasters={weeklyPlanMasters}
         loading={modalLoading}
+        createPlanMaster={createPlanMaster}
       />
 
       <OutsideActivityModal

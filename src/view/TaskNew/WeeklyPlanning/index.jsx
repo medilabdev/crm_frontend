@@ -11,28 +11,24 @@ import { useWeeklyPlanningState } from './hooks/useWeeklyPlanningState';
 import { useCalculations } from './hooks/useCalculations';
 
 const WeeklyPlanning = () => {
-    // Local UI state
     const [selectedMonth, setSelectedMonth] = useState(new Date());
     const [selectedBranch, setSelectedBranch] = useState(null);
     const [currentPlanningUid, setCurrentPlanningUid] = useState(null);
 
-    // Data hooks
     const { branches, loading: branchesLoading } = useBranches();
     const { planMasters: weeklyPlanMasters, loading: planMastersLoading, createPlanMaster } = useWeeklyPlanMasters();
 
-    // API hooks
     const {
-        loading: apiLoading, // Rename biar gak bentrok dgn branchesLoading
+        loading: apiLoading,
         error,
         clearError,
         plannings,
         // weeks: apiWeeks, // Tidak dipakai langsung
-        days: apiDays,   // Tidak dipakai langsung
+        days: apiDays,  
         details,
         outsideDetails,
     } = useWeeklyPlanningAPI();
 
-    // State management hook
     const {
         planning,
         weeks,
@@ -40,32 +36,28 @@ const WeeklyPlanning = () => {
         updateWeeks,
         updateDayInWeek,
         addPlanningDetailOptimistic,
-        setActiveWeekUid, // Jika dipakai
-        setActiveDayUid,   // Jika dipakai
-    } = useWeeklyPlanningState(null); // Mulai null
+        updateSingleDay,
+        setActiveWeekUid, 
+        setActiveDayUid,
+    } = useWeeklyPlanningState(null); 
 
     const combinedPlanningData = useMemo(() => {
-        // Jika 'planning' (metadata) belum ada, kirim null
         if (!planning) {
             return null;
         }
 
-        // Jika 'planning' ada, gabungkan dengan 'weeks'
         return {
-            ...planning, // Sebar semua metadata (uid, status, dll)
-            weeks,       // Tambahkan array 'weeks' dari state 'weeks'
+            ...planning, 
+            weeks, 
         };
-        }, [planning, weeks]); // <-- Dibuat ulang hanya jika planning atau weeks berubah
+        }, [planning, weeks]);
 
-        // Calculations hook
         const {
         getDashboardStats,
         hasSignificantData,
-        // ... ambil kalkulasi lain jika perlu
-        } = useCalculations(combinedPlanningData); // ✅ BENAR: Kirim data gabungan
+    } = useCalculations(combinedPlanningData); 
 
 
-    // Gabungkan loading state
     const loading = apiLoading || branchesLoading || planMastersLoading;
 
     const handleLoadOrCreatePlanning = useCallback(async () => {
@@ -218,8 +210,7 @@ const WeeklyPlanning = () => {
                 const newDetailData = response.data;
                 console.log('✅ Detail created, updating state locally:', newDetailData);
 
-                addPlanningDetailOptimistic(weekUid, dayUid, newDetailData); 
-
+                updateSingleDay(weekUid, newDetailData);
                 return true; // Sukses
             } else {
                 console.error('❌ Create detail succeeded but no data returned:', response);
@@ -229,69 +220,93 @@ const WeeklyPlanning = () => {
             console.error('❌ Failed add detail:', err);
             return false; // Gagal karena error API
         }
-    // ✅ Hapus 'refetchDayData' dari dependency array
-    }, [currentPlanningUid, details, addPlanningDetailOptimistic]);
+    }, [currentPlanningUid, details, updateSingleDay]);
 
     const handleUpdatePlanningDetail = useCallback(async (weekUid, dayUid, detailUid, updatedData) => {
-        // ... (try catch call details.update -> refetchPlanningData) ...
         try {
             const response = await details.update(currentPlanningUid, weekUid, dayUid, detailUid, updatedData);
             if (response.status === 'success') { refetchPlanningData(); return true; } return false;
         } catch(err) { console.error('Failed update detail:', err); return false; }
     }, [currentPlanningUid, details, refetchPlanningData]);
 
-    const handleDeletePlanningDetail = useCallback(async (weekUid, dayUid, detailUid) => {
-        // ... (try catch call details.delete -> refetchPlanningData) ...
+    const handleDeletePlanningDetail = useCallback(async (weekUid, dayUid, detailUid) => { 
         try {
-            const response = await details.delete(currentPlanningUid, weekUid, dayUid, detailUid);
-            if (response.status === 'success') { refetchPlanningData(); return true; } return false;
-        } catch(err) { console.error('Failed delete detail:', err); return false; }
-    }, [currentPlanningUid, details, refetchPlanningData]);
+            console.log('Memanggil API details.delete...');
+            
+            const response = await details.delete(currentPlanningUid, weekUid, dayUid, detailUid); 
+            
+            if (response && response.status === 'success' && response.data) {
+                const updatedDayData = response.data;
+                
+                console.log('✅ Detail deleted. Updating single day state locally.');
+                
+                updateSingleDay(weekUid, updatedDayData); 
+                
+                return true;
+            } 
+            
+            console.warn('Delete sukses tapi BE tidak mengirim data day baru:', response);
+            return false;
+
+        } catch (err) {
+            console.error('❌ Gagal menghapus detail (error tertangkap):', err);
+            return false;
+        } finally {
+            console.log('--- Akhir handleDeletePlanningDetail ---');
+        }
+    }, [currentPlanningUid, details, updateSingleDay]);
 
     const handleAddOutsideDetail = useCallback(async (weekUid, dayUid, detailData) => {
-         // ... (try catch call outsideDetails.create -> refetchPlanningData) ...
         try {
             const response = await outsideDetails.create(currentPlanningUid, weekUid, dayUid, detailData);
-            if (response.status === 'success') { refetchPlanningData(); return true; } return false;
-        } catch(err) { console.error('Failed add outside:', err); return false; }
-    }, [currentPlanningUid, outsideDetails, refetchPlanningData]);
 
-     const handleUpdateOutsideDetail = useCallback(async (weekUid, dayUid, detailUid, updatedData) => {
-        try {
-            const response = await outsideDetails.update(currentPlanningUid, weekUid, dayUid, detailUid, updatedData);
-            if (response.status === 'success') {
-                refetchPlanningData(); // ✅ Trigger refetch
+            if (response && response.status === 'success' && response.data) {
+                const updatedDayData = response.data; // Objek DAY dari BE
+                updateSingleDay(weekUid, updatedDayData); // ✅ Panggil updater yang benar
                 return true;
             }
             return false;
-        } catch (error) { // ✅ Ganti 'err' jadi 'error' agar konsisten
-            console.error('Failed to update outside detail:', error);
+
+        } catch (err) {
+            console.error('❌ Failed to add outside detail:', err);
+        }
+    }, [currentPlanningUid, outsideDetails, updateSingleDay]);
+
+    const handleUpdateOutsideDetail = useCallback(async (weekUid, dayUid, detailUid, updatedData) => {
+        try {
+            const response = await outsideDetails.update(currentPlanningUid, weekUid, dayUid, detailUid, updatedData);
+            
+            if (response.status === 'success' && response.data) {
+                const updatedDayData = response.data; // Objek DAY dari BE
+                updateSingleDay(weekUid, updatedDayData); // ✅ Panggil updater yang benar
+                return true;
+            }
+            return false;
+        } catch (error) { 
+            console.error('❌ Failed to update outside detail:', error);
             return false;
         }
-    // ✅ Tambahkan dependensi yg benar
-    }, [currentPlanningUid, outsideDetails, refetchPlanningData]);
+    // ✅ Ganti dependency
+    }, [currentPlanningUid, outsideDetails, updateSingleDay]);
 
-    // ✅ SOLVED: Handler Delete Outside Detail (Sudah pakai useCallback & dependensi)
     const handleDeleteOutsideDetail = useCallback(async (weekUid, dayUid, detailUid) => {
         try {
             const response = await outsideDetails.delete(currentPlanningUid, weekUid, dayUid, detailUid);
-            if (response.status === 'success') {
-                refetchPlanningData(); // ✅ Trigger refetch
+            
+            if (response.status === 'success' && response.data) {
+                const updatedDayData = response.data; // Objek DAY dari BE
+                updateSingleDay(weekUid, updatedDayData); // ✅ Panggil updater yang benar
                 return true;
             }
             return false;
-        } catch (err) { // ✅ Ganti 'err' jadi 'error' agar konsisten
-            console.error('Failed to delete outside detail:', err);
+        } catch (err) { 
+            console.error('❌ Failed to delete outside detail:', err);
             return false;
         }
-    }, [currentPlanningUid, outsideDetails, refetchPlanningData]); // ✅ Dependensi benar
+    // ✅ Ganti dependency
+    }, [currentPlanningUid, outsideDetails, updateSingleDay]);
 
-    /**
-     * ✅ Render error state (Sudah Benar)
-     * Menggunakan 'error' state dari useWeeklyPlanningAPI
-     * Menyediakan tombol Try Again (refetch) dan Dismiss (clearError)
-     */
-    if (error && !loading) { // Tampilkan error hanya jika tidak loading
+    if (error && !loading) { 
         return (
             <>
                 <Topbar />
@@ -373,8 +388,9 @@ const WeeklyPlanning = () => {
                                         onAddOutsideDetail={handleAddOutsideDetail}
                                         onUpdateOutsideDetail={handleUpdateOutsideDetail}
                                         onDeleteOutsideDetail={handleDeleteOutsideDetail}
-                                        weeklyPlanMasters={weeklyPlanMasters} // Kirim masters untuk modal di grid
-                                        loading={loading} // Kirim loading state (meski mungkin tdk dipakai grid)
+                                        weeklyPlanMasters={weeklyPlanMasters}
+                                        loading={loading}
+                                        createPlanMaster={createPlanMaster}
                                     />
                                 </Card.Body>
                             </Card>

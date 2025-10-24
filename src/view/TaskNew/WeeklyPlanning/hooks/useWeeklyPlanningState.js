@@ -88,27 +88,51 @@ export const useWeeklyPlanningState = (initialData = null) => {
   }, []);
 
   // Example: Simplified deletePlanningDetail (just updates array, no recalc)
-   const deletePlanningDetailOptimistic = useCallback((weekUid, dayUid, detailUid) => {
-     setWeeks(prev => prev.map(week => {
-       if (week.uid === weekUid) {
-         const updatedDays = week.days?.map(day => {
-           if (day.uid === dayUid) {
-             const updatedDetails = day.weeklyPlanningDetails.filter(detail => detail.uid !== detailUid);
-             // ⛔️ NO RECALCULATION HERE!
-             return { ...day, weeklyPlanningDetails: updatedDetails };
-           }
-           return day;
-         }) || [];
-         // Optionally mark week as stale
-         return { ...week, days: updatedDays /* statistics: undefined */ };
-       }
-       return week;
-     }));
-   }, []);
+  const deletePlanningDetailOptimistic = useCallback((weekUid, dayUid, detailUid) => {
+    setWeeks(prev => prev.map(week => {
+      if (week.uid === weekUid) {
+        const updatedDays = week.days?.map(day => {
+          if (day.uid === dayUid) {
+            const updatedDetails = day.weeklyPlanningDetails.filter(detail => detail.uid !== detailUid);
+            // ⛔️ NO RECALCULATION HERE!
+            return { ...day, weeklyPlanningDetails: updatedDetails };
+          }
+          return day;
+        }) || [];
+        // Optionally mark week as stale
+        return { ...week, days: updatedDays /* statistics: undefined */ };
+      }
+      return week;
+    }));
+  }, []);
 
-   // ... (Similarly simplify other local mutation functions like updateDayInWeek, addOutsideDetail etc.)
-   // REMOVE ALL calls to calculateDayStatistics from these functions.
-   // Remove recalculation of weekStatistics within these functions too.
+  const updateSingleDay = useCallback((weekUid, updatedDayData) => {
+    console.log(`updateSingleDay: Mengupdate hari ${updatedDayData.uid} di minggu ${weekUid}`);
+
+    setWeeks(prevWeeks => prevWeeks.map(week => {
+      if (week.uid === weekUid) {
+        const updatedDays = week.days?.map(day => {
+          if (day.uid === updatedDayData.uid) {
+            return {
+                ...updatedDayData, 
+                weeklyPlanningDetails: updatedDayData.weeklyPlanningDetails || updatedDayData.weekly_planning_details || [],
+                outsidePlanningDetails: updatedDayData.outsidePlanningDetails || updatedDayData.outside_planning_details || []
+            };
+          }
+          return day;
+        });
+
+        const updatedWeekStats = calculateWeekStatistics({
+          ...week,
+          days: updatedDays,
+        });
+        return { ...week, days: updatedDays, statistics: updatedWeekStats };
+      }
+
+      return week;
+    }))
+
+  }, [calculateWeekStatistics]);
 
 
   // --- Selection management (remains the same) ---
@@ -164,7 +188,9 @@ export const useWeeklyPlanningState = (initialData = null) => {
     // updateDayInWeek,
     addPlanningDetailOptimistic, // Renamed for clarity
     // updatePlanningDetail,
-    deletePlanningDetailOptimistic, // Renamed for clarity
+    deletePlanningDetailOptimistic,
+    updateSingleDay,
+    // Renamed for clarity
     // addOutsideDetail,
     // updateOutsideDetail,
     // deleteOutsideDetail,

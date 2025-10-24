@@ -42,7 +42,7 @@ const OutsideActivityModal = ({
   // Validation hook
     const {
         errors,
-        validateOutsideDetailForm,
+        validateOutsidePlanningForm,
         clearErrors
     } = usePlanningValidation();
 
@@ -76,7 +76,7 @@ const OutsideActivityModal = ({
         e.preventDefault();
 
         // ⚠️ Ensure validation hook checks 'activity_text'
-        if (!validateOutsideDetailForm(formData)) {
+        if (!validateOutsidePlanningForm(formData)) {
             return;
         }
 

@@ -1,29 +1,29 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  Modal, 
-  Form, 
-  Button, 
-  Row, 
-  Col, 
-  Alert, 
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import {
+  Modal,
+  Form,
+  Button,
+  Row,
+  Col,
+  Alert,
   Spinner,
-  InputGroup 
+  InputGroup
 } from 'react-bootstrap';
 import Select from 'react-select';
 import CreatableSelect from 'react-select/creatable';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-  faSave, 
-  faTimes, 
+import {
+  faSave,
+  faTimes,
   faChartLine,
   faClipboardList,
   faStickyNote,
   faExternalLinkAlt,
-  faBullseye
+  faBullseye // Ikon yang benar
 } from '@fortawesome/free-solid-svg-icons';
 
 // Custom hooks
-import { usePlanningValidation } from '../hooks/usePlanningValidation';
+import { usePlanningValidation } from '../hooks/usePlanningValidation'; // Asumsi hook ini ada
 
 /**
  * Modal for creating/editing planning details
@@ -31,165 +31,249 @@ import { usePlanningValidation } from '../hooks/usePlanningValidation';
 const PlanningDetailModal = ({
   show,
   onHide,
-  onSave,
+  onSave, // Fungsi dari parent untuk save DETAIL
   editingDetail = null,
   selectedWeek = null,
   selectedDay = null,
-  weeklyPlanMasters = [],
-  loading = false
+  weeklyPlanMasters = [], // List master yang ada {uid, plan_text} atau {value, label}
+  loading = false, // Loading umum dari parent
+  createPlanMaster // Fungsi dari parent untuk CREATE master BARU via API
 }) => {
-  // Local state
-    const [formData, setFormData] = useState({
-        weekly_plan_master_uid: '',
-        weekly_plan_text: '',
-        plan_notes: '',
-        weekly_report_text: '',
-        report_notes: ''
-    });
+
     
-    const [saveLoading, setSaveLoading] = useState(false);
-    const [saveError, setSaveError] = useState(null);
+  // State lokal untuk form detail
+  const [formData, setFormData] = useState({
+    weekly_plan_master_uid: '',
+    weekly_plan_text: '',
+    plan_notes: '',
+    weekly_report_text: '',
+    report_notes: ''
+  });
 
-    // Validation hook
-    const {
-        errors,
-        validatePlanningDetailForm,
-        clearErrors
-    } = usePlanningValidation();
+  // State untuk proses save utama (save detail)
+  const [saveLoading, setSaveLoading] = useState(false);
+  const [saveError, setSaveError] = useState(null);
 
-    useEffect(() => {
-        if (show) {
-            if (editingDetail) {
-                setFormData({
-                    weekly_plan_master_uid: editingDetail.weekly_plan_master_uid || '',
-                    weekly_plan_text: editingDetail.weekly_plan_text || '',
-                    plan_notes: editingDetail.plan_notes || '',
-                    weekly_report_text: editingDetail.weekly_report_text || '',
-                    report_notes: editingDetail.report_notes || ''
-                });
-            } else {
-                setFormData({
-                    weekly_plan_master_uid: '',
-                    weekly_plan_text: '',
-                    plan_notes: '',
-                    weekly_report_text: '',
-                    report_notes: ''
-                });
-            }
-            clearErrors(); // Clear validation errors on open
-            setSaveError(null); // Clear save errors on open
-        }
-    }, [show, editingDetail, clearErrors]);
+  // State KHUSUS untuk proses "create master" via CreatableSelect
+  const [isCreatingMaster, setIsCreatingMaster] = useState(false);
+  const [createMasterError, setCreateMasterError] = useState(null);
 
-    const handleFormChange = (field, value) => {
-        setFormData(prev => ({
-        ...prev,
-        [field]: value
-        }));
-        setSaveError(null);
-    };
 
-    const handlePlanMasterChange = (selectedOption) => {
-        if (selectedOption) {
-            handleFormChange('weekly_plan_master_uid', selectedOption.__isNew__ ? null : selectedOption.value);
-            handleFormChange('weekly_plan_text', selectedOption.label);
-        } else {
-            handleFormChange('weekly_plan_master_uid', '');
-            handleFormChange('weekly_plan_text', '');
-        }
-    };
+  // Hook validasi (asumsi sudah bekerja)
+  const {
+    errors,
+    validatePlanningDetailForm,
+    clearErrors
+  } = usePlanningValidation();
 
-  /**
-   * Handle creating new plan master
-   */
-    const handleCreatePlanMaster = async (inputValue) => {
-        const newOption = {
-            value: `new_${inputValue.replace(/\s+/g, '_').toLowerCase()}`, 
-            label: inputValue,
-            __isNew__: true 
-        };
-        
-        // try {
-        //   const createdMaster = await apiHook.planMasters.create({ plan_text: inputValue });
-        //   return { value: createdMaster.data.value, label: createdMaster.data.label };
-        // } catch (err) { /* handle error */ return null; }
-        return newOption;
-    };
+  // Efek untuk mengisi form saat modal dibuka atau data edit berubah
+  useEffect(() => {
+    if (show) {
+      if (editingDetail) {
+        setFormData({
+          weekly_plan_master_uid: editingDetail.weekly_plan_master_uid || '',
+          weekly_plan_text: editingDetail.weekly_plan_text || '',
+          plan_notes: editingDetail.plan_notes || '',
+          weekly_report_text: editingDetail.weekly_report_text || '',
+          report_notes: editingDetail.report_notes || ''
+        });
+      } else {
+        // Reset form untuk detail baru
+        setFormData({
+          weekly_plan_master_uid: '',
+          weekly_plan_text: '',
+          plan_notes: '',
+          weekly_report_text: '',
+          report_notes: ''
+        });
+      }
+      clearErrors(); // Hapus error validasi lama
+      setSaveError(null); // Hapus error save lama
+      setCreateMasterError(null); // Hapus error create master lama
+    }
+  }, [show, editingDetail, clearErrors]);
 
-  /**
-   * Handle form submission
-   */
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        if (!validatePlanningDetailForm(formData)) {
-            return; // Stop submission if validation fails
-        }
-
-        setSaveLoading(true); 
-        setSaveError(null); 
-
-        try {
-            const submitData = { ...formData };
-
-            const success = await onSave(submitData, editingDetail);
-
-            if (success) {
-                onHide();
-            } else {
-                setSaveError('Failed to save. Please check the data or try again.');
-            }
-        } catch (error) {
-            console.error('Save planning detail error caught in modal:', error);
-            setSaveError('An unexpected error occurred while saving.');
-        } finally {
-            setSaveLoading(false); // Stop loading indicator
-        }
-    };
-
-    const handleClose = () => {
-        if (!saveLoading) { // Prevent closing if save is in progress
-            onHide();
-        }
-    };
-
-  /**
-   * Format plan master options for select
-   */
-    const planMasterOptions = weeklyPlanMasters.map(master => ({
-        value: master.value, // Assuming useWeeklyPlanMasters returns { value, label }
-        label: master.label
+  // Handler umum untuk update state formData (dibungkus useCallback)
+  const handleFormChange = useCallback((field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
     }));
+    // Hapus error saat user mulai mengetik lagi
+    setSaveError(null);
+    setCreateMasterError(null);
+  }, []); // Dependensi kosong karena hanya memanggil setter state
 
-    
+   /**
+   * Handler saat OPSI DIPILIH (atau dihapus) di CreatableSelect.
+   * Mengupdate state formData. Dibuat useCallback agar stabil.
+   */
+   const handlePlanMasterChange = useCallback((selectedOption) => {
+    console.log('--- handlePlanMasterChange ---');
+    console.log('Opsi Dipilih:', selectedOption);
+
+    if (selectedOption) {
+      // Jika opsi dipilih (baik yg lama atau yg baru dari API)
+      const newUid = selectedOption.value; // Ini akan jadi UID asli (atau value temp jika error API)
+      const newText = selectedOption.label;
+      console.log(`Update formData: UID=${newUid}, Text=${newText}`);
+      // Update UID dan Text di formData
+      handleFormChange('weekly_plan_master_uid', newUid);
+      handleFormChange('weekly_plan_text', newText);
+    } else {
+      // Jika pilihan dihapus (clear)
+      console.log('Hapus pilihan plan master...');
+      handleFormChange('weekly_plan_master_uid', '');
+      handleFormChange('weekly_plan_text', '');
+    }
+    console.log('--- Akhir handlePlanMasterChange ---');
+  }, [handleFormChange]); // Tambahkan dependensi handleFormChange
+
+  /**
+   * Handler saat OPSI BARU dibuat di CreatableSelect.
+   * Memanggil API untuk menyimpan master baru.
+   */
+  const handleCreatePlanMaster = useCallback(async (inputValue) => {
+    // Validasi dasar & cek apakah fungsi prop ada
+    if (!inputValue || !createPlanMaster) {
+        console.warn('Batal create master: Input kosong atau fungsi createPlanMaster tidak ada.');
+        return;
+    }
+
+    setIsCreatingMaster(true);
+    setCreateMasterError(null);
+    console.log(`--- handleCreatePlanMaster --- Panggil API untuk: "${inputValue}"`);
+
+    try {
+      // 1. Panggil fungsi API createPlanMaster dari prop
+      const newMasterData = await createPlanMaster(inputValue);
+
+      // 2. Cek apakah API sukses & mengembalikan data yg diharapkan
+      if (newMasterData && newMasterData.uid && newMasterData.plan_text) {
+        console.log('API Create Master Sukses:', newMasterData);
+
+        // 3. Format hasil API ke struktur {value, label}
+        const newOption = {
+          value: newMasterData.uid, // Pakai UID asli
+          label: newMasterData.plan_text // Pakai teks asli
+        };
+        console.log('Format Opsi Baru dari API:', newOption);
+
+        // 4. Panggil handlePlanMasterChange secara MANUAL
+        handlePlanMasterChange(newOption);
+
+      } else {
+        console.error('API Create Master tidak mengembalikan data yg diharapkan (uid, plan_text):', newMasterData);
+        setCreateMasterError(`Berhasil menyimpan "${inputValue}" tapi gagal memuat data terbaru.`);
+        // Tetap set teksnya di form agar user tidak kehilangan input
+        handlePlanMasterChange({ value: null, label: inputValue });
+      }
+
+    } catch (err) {
+      console.error('API Create Master Gagal:', err);
+      const apiErrorMessage = err.response?.data?.message || err.message || `Gagal membuat template "${inputValue}".`;
+      setCreateMasterError(apiErrorMessage);
+      // JANGAN panggil handlePlanMasterChange, biarkan input seperti yg diketik user
+    } finally {
+      setIsCreatingMaster(false);
+    }
+  }, [createPlanMaster, handlePlanMasterChange]); // Tambahkan dependensi
+
+
+  // Log perubahan formData untuk debug
+  useEffect(() => {
+    console.log('Current formData state:', formData);
+  }, [formData]);
+
+  /**
+   * Handler untuk submit form DETAIL planning (tombol Save utama)
+   */
+  const handleSubmit = async (e) => {
+    e.preventDefault(); // Cegah submit HTML biasa
+
+    // Validasi form
+    if (!validatePlanningDetailForm(formData)) {
+      console.warn('Validasi form gagal.');
+      return; // Stop jika tidak valid
+    }
+
+    setSaveLoading(true);
+    setSaveError(null);
+
+    try {
+      const submitData = { ...formData };
+      console.log('Submit data detail:', submitData);
+
+      // Panggil fungsi onSave dari parent (index.jsx)
+      const success = await onSave(submitData, editingDetail);
+
+      if (success) {
+        console.log('Save detail sukses, tutup modal.');
+        onHide(); // Tutup modal jika sukses
+      } else {
+        console.error('Fungsi onSave melaporkan kegagalan.');
+        setSaveError('Gagal menyimpan detail. Coba lagi.');
+      }
+    } catch (error) {
+      console.error('Error saat save detail tertangkap di modal:', error);
+      setSaveError(error.response?.data?.message || 'Terjadi error tak terduga saat menyimpan detail.');
+    } finally {
+      setSaveLoading(false); // Pastikan loading berhenti
+    }
+  };
+
+  // Handler tutup modal (cek loading state)
+  const handleClose = () => {
+    if (!saveLoading && !isCreatingMaster) { // Cek kedua loading
+      onHide();
+    }
+  };
+
+  /**
+   * Format options untuk react-select dari prop weeklyPlanMasters.
+   * Dibungkus useMemo agar tidak kalkulasi ulang terus-menerus.
+   */
+  const planMasterOptions = useMemo(() => {
+      console.log("Format planMasterOptions dari prop:", weeklyPlanMasters);
+      if (!Array.isArray(weeklyPlanMasters)) {
+          console.warn("weeklyPlanMasters prop is not an array:", weeklyPlanMasters);
+          return [];
+      }
+      return weeklyPlanMasters.map(master => ({
+        value: master.uid || master.value,
+        label: master.plan_text || master.label
+      }));
+  }, [weeklyPlanMasters]);
+
+
+  // Dummy suggestions, ganti atau hapus jika tidak relevan
   const activitySuggestions = [
     'Meeting with Client',
     'Training Session',
-    // ... sisanya
-    ];
+  ];
 
-
+  // ========================================================
+  // === BAGIAN JSX MULAI DARI SINI =======================
+  // ========================================================
   return (
-    <>
-    return (
     <Modal
         show={show}
         onHide={handleClose}
         size="lg"
         backdrop="static"
+        // Keyboard={!saveLoading && !isCreatingMaster} // Bisa juga disable keyboard saat create master
         keyboard={!saveLoading}
     >
-        <Modal.Header closeButton={!saveLoading}>
+        <Modal.Header closeButton={!saveLoading && !isCreatingMaster}> {/* Disable close saat loading */}
             <Modal.Title>
-                {/* ✅ Ganti Ikon dan Judul */}
-                <FontAwesomeIcon icon={faClipboardList} className="me-2" /> 
+                <FontAwesomeIcon icon={faClipboardList} className="me-2" />
                 {editingDetail ? 'Edit Planning Detail' : 'Add Planning Detail'}
             </Modal.Title>
         </Modal.Header>
 
         <Form onSubmit={handleSubmit}>
             <Modal.Body>
-                {/* Context Info (Ini sudah benar) */}
+                {/* Context Info */}
                 <Alert variant="info" className="mb-3">
                     <Row>
                         <Col md={6}><strong>Week:</strong> {selectedWeek?.week_name || `Week ${selectedWeek?.week_number}` || 'N/A'}</Col>
@@ -197,8 +281,12 @@ const PlanningDetailModal = ({
                     </Row>
                 </Alert>
 
-                {/* Error Alert (Ini sudah benar) */}
+                 {/* ✅ Error Create Master */}
+                {createMasterError && ( <Alert variant="danger" className="mb-3">{createMasterError}</Alert> )}
+
+                {/* Error Save Detail */}
                 {saveError && ( <Alert variant="danger" className="mb-3">{saveError}</Alert> )}
+
 
                 {/* --- Planning Section --- */}
                 <h5 className="mb-3"><FontAwesomeIcon icon={faBullseye} className="me-2 text-primary"/> Planning</h5>
@@ -207,18 +295,23 @@ const PlanningDetailModal = ({
                     <Col md={12} className="mb-3">
                         <Form.Group>
                             <Form.Label>Plan Template (Optional)</Form.Label>
-                             {/* ✅ Gunakan CreatableSelect */}
                             <CreatableSelect
                                 isClearable
-                                options={planMasterOptions}
-                                value={planMasterOptions.find(opt => opt.value === formData.weekly_plan_master_uid)}
+                                options={planMasterOptions} // Gunakan options dari prop yg diformat
+                                // Logika Value: Cari by UID, JIKA GAGAL & ada teks, buat opsi sementara
+                                value={planMasterOptions.find(opt => opt.value === formData.weekly_plan_master_uid) ||
+                                       (formData.weekly_plan_text && formData.weekly_plan_master_uid === null ? // Khusus untuk yg baru dibuat tapi belum di-refetch
+                                            { value: null, label: formData.weekly_plan_text } : null)
+                                      }
                                 onChange={handlePlanMasterChange}
-                                onCreateOption={handleCreatePlanMaster} // Jika kamu ingin bisa buat baru
-                                placeholder="Select or type to create a new plan template..."
-                                isDisabled={saveLoading}
+                                onCreateOption={handleCreatePlanMaster}
+                                placeholder="Select or type to create new..."
+                                // ✅ Loading & Disable States
+                                isLoading={isCreatingMaster}
+                                isDisabled={saveLoading || loading || isCreatingMaster}
                                 styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                                 menuPortalTarget={document.body}
-                                // formatCreateLabel={(inputValue) => `Create new: "${inputValue}"`} // Opsional
+                                formatCreateLabel={(inputValue) => `Create new template: "${inputValue}"`}
                             />
                             <Form.Text>Select an existing plan or type to create a reusable template.</Form.Text>
                         </Form.Group>
@@ -228,7 +321,6 @@ const PlanningDetailModal = ({
                     <Col md={12} className="mb-3">
                         <Form.Group>
                             <Form.Label>Plan Description *</Form.Label>
-                            {/* ✅ Hubungkan ke formData.weekly_plan_text */}
                             <Form.Control
                                 as="textarea"
                                 rows={3}
@@ -236,27 +328,26 @@ const PlanningDetailModal = ({
                                 onChange={(e) => handleFormChange('weekly_plan_text', e.target.value)}
                                 placeholder="Describe the planned activity..."
                                 isInvalid={!!errors?.weekly_plan_text}
-                                disabled={saveLoading}
+                                disabled={saveLoading || isCreatingMaster} // Disable juga saat create master
                             />
                             <Form.Control.Feedback type="invalid">
                                 {errors?.weekly_plan_text}
                             </Form.Control.Feedback>
                         </Form.Group>
                     </Col>
-                    
+
                     {/* Plan Notes */}
                     <Col md={12} className="mb-3">
                         <Form.Group>
                             <Form.Label>Plan Notes (Optional)</Form.Label>
-                             {/* ✅ Hubungkan ke formData.plan_notes */}
                             <Form.Control
                                 as="textarea"
                                 rows={2}
                                 value={formData.plan_notes}
                                 onChange={(e) => handleFormChange('plan_notes', e.target.value)}
-                                placeholder="Add any notes related to the plan (e.g., preparation, specific goals)..."
+                                placeholder="Add any notes related to the plan..."
                                 isInvalid={!!errors?.plan_notes}
-                                disabled={saveLoading}
+                                disabled={saveLoading || isCreatingMaster}
                             />
                              <Form.Control.Feedback type="invalid">
                                 {errors?.plan_notes}
@@ -273,7 +364,6 @@ const PlanningDetailModal = ({
                     <Col md={12} className="mb-3">
                         <Form.Group>
                             <Form.Label>Report / Actual Activity *</Form.Label>
-                             {/* ✅ Hubungkan ke formData.weekly_report_text */}
                             <Form.Control
                                 as="textarea"
                                 rows={3}
@@ -281,27 +371,26 @@ const PlanningDetailModal = ({
                                 onChange={(e) => handleFormChange('weekly_report_text', e.target.value)}
                                 placeholder="Describe the actual activity performed..."
                                 isInvalid={!!errors?.weekly_report_text}
-                                disabled={saveLoading}
+                                disabled={saveLoading || isCreatingMaster}
                             />
                             <Form.Control.Feedback type="invalid">
                                 {errors?.weekly_report_text}
                             </Form.Control.Feedback>
-                            <Form.Text>Click suggestions below to quickly fill.</Form.Text> 
+                            <Form.Text>Click suggestions below to quickly fill.</Form.Text>
                         </Form.Group>
                     </Col>
 
-                     {/* Report Suggestions (Opsional, sesuaikan jika perlu) */}
+                     {/* Report Suggestions */}
                      <Col md={12} className="mb-3">
                          <Form.Label className="small text-muted">Quick Report Suggestions:</Form.Label>
                          <div className="d-flex flex-wrap gap-1">
-                             {activitySuggestions.map((suggestion, index) => ( // Ganti 'activitySuggestions' jika perlu
+                             {activitySuggestions.map((suggestion, index) => (
                                  <Button
                                     key={index} variant="outline-secondary" size="sm"
-                                    // ✅ Isi 'weekly_report_text'
-                                    onClick={() => handleFormChange('weekly_report_text', suggestion)} 
-                                    disabled={saveLoading} className="mb-1"
+                                    onClick={() => handleFormChange('weekly_report_text', suggestion)}
+                                    disabled={saveLoading || isCreatingMaster} className="mb-1"
                                  >
-                                     {suggestion} 
+                                     {suggestion}
                                  </Button>
                              ))}
                          </div>
@@ -311,15 +400,14 @@ const PlanningDetailModal = ({
                     <Col md={12}>
                         <Form.Group>
                             <Form.Label>Report Notes (Optional)</Form.Label>
-                            {/* ✅ Hubungkan ke formData.report_notes */}
                             <Form.Control
                                 as="textarea"
                                 rows={2}
                                 value={formData.report_notes}
                                 onChange={(e) => handleFormChange('report_notes', e.target.value)}
-                                placeholder="Add any notes about the outcome, follow-up actions, etc..."
+                                placeholder="Add any notes about the outcome..."
                                 isInvalid={!!errors?.report_notes}
-                                disabled={saveLoading}
+                                disabled={saveLoading || isCreatingMaster}
                             />
                              <Form.Control.Feedback type="invalid">
                                 {errors?.report_notes}
@@ -328,29 +416,24 @@ const PlanningDetailModal = ({
                     </Col>
                 </Row>
 
-                 {/* 🗑️ HAPUS Help Text tentang Outside Activity */}
-
             </Modal.Body>
 
             <Modal.Footer>
-                {/* Tombol Cancel (Sudah benar) */}
-                <Button variant="secondary" onClick={handleClose} disabled={saveLoading}>
+                {/* Tombol Cancel */}
+                <Button variant="secondary" onClick={handleClose} disabled={saveLoading || isCreatingMaster}>
                     <FontAwesomeIcon icon={faTimes} className="me-2" /> Cancel
                 </Button>
                 {/* Tombol Save/Update */}
-                <Button type="submit" variant="primary" disabled={saveLoading}> {/* Ganti warna jika perlu */}
+                <Button type="submit" variant="primary" disabled={saveLoading || isCreatingMaster}>
                     {saveLoading ? (
                         <><Spinner size="sm" className="me-2" /> Saving...</>
                     ) : (
-                        // ✅ Ganti teks tombol
-                        <><FontAwesomeIcon icon={faSave} className="me-2" /> {editingDetail ? 'Update Detail' : 'Save Detail'}</> 
+                        <><FontAwesomeIcon icon={faSave} className="me-2" /> {editingDetail ? 'Update Detail' : 'Save Detail'}</>
                     )}
                 </Button>
             </Modal.Footer>
         </Form>
     </Modal>
-    
-    </>
   );
 };
 
