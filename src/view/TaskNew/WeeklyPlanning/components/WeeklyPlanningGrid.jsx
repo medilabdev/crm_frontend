@@ -230,12 +230,9 @@ const WeeklyPlanningGrid = ({
 
     const renderDayColumn = (week, day) => {
         const stats = day.calculations || getDefaultCalculations();
-
-        // ✅ Akses details langsung dari day object
         const planningDetails = day.weeklyPlanningDetails || [];
         const outsideDetails = day.outsidePlanningDetails || [];
 
-        
         return (
         <Card className="h-100 border-light">
             <Card.Header className="bg-light py-2">
@@ -388,7 +385,7 @@ const WeeklyPlanningGrid = ({
                 <Col>
                 <small className="text-muted">Achievement:</small>
                 <div className="fw-bold text-primary">
-                    {stats.achievementRate ? `${stats.achievementRate}%` : '0%'}
+                    {stats.daily_planning_pct ? `${stats.daily_planning_pct}%` : '0%'}
                 </div>
                 </Col>
             </Row>
@@ -475,7 +472,8 @@ const WeeklyPlanningGrid = ({
 
     console.log("Planning Data: ", planningData);
 
-  return (
+    return (
+    <>
     <div className="weekly-planning-grid">
       {planningData.weeks?.map((week, weekIndex) => (
         <div key={week.uid || weekIndex} className="week-section mb-4">
@@ -512,7 +510,8 @@ const WeeklyPlanningGrid = ({
         loading={modalLoading}
       />
     </div>
-  );
+    </>
+    );
 };
 
 export default WeeklyPlanningGrid;

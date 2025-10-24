@@ -109,11 +109,14 @@ const WeeklyPlanningForm = () => {
     };
 
     const handleSaveActivity = () => {
+        console.log('handleSaveActivity called'); // <-- Log #1
+    console.log('Current newActivity state:', newActivity);
         if (!newActivity.activity_type || !newActivity.customer_name) {
+            console.log('Validation failed!'); // <-- Log #3
             alert('Mohon isi semua field yang wajib');
             return;
         }
-
+console.log('Validation passed, updating state...'); // <-- Log #4
         const updatedWeeks = [...formData.weeks];
         updatedWeeks[currentWeek].days[currentDay].activities.push({
             ...newActivity,

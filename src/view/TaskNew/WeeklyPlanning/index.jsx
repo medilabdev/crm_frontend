@@ -39,6 +39,7 @@ const WeeklyPlanning = () => {
         updatePlanning,
         updateWeeks,
         updateDayInWeek,
+        addPlanningDetailOptimistic,
         setActiveWeekUid, // Jika dipakai
         setActiveDayUid,   // Jika dipakai
     } = useWeeklyPlanningState(null); // Mulai null
@@ -212,9 +213,24 @@ const WeeklyPlanning = () => {
     const handleAddPlanningDetail = useCallback(async (weekUid, dayUid, detailData) => {
         try {
             const response = await details.create(currentPlanningUid, weekUid, dayUid, detailData);
-            if (response.status === 'success') { refetchDayData(weekUid, dayUid); return true; } return false;
-        } catch(err) { console.error('Failed add detail:', err); return false; }
-    }, [currentPlanningUid, details, refetchDayData]);
+
+            if (response && response.status === 'success' && response.data) {
+                const newDetailData = response.data;
+                console.log('✅ Detail created, updating state locally:', newDetailData);
+
+                addPlanningDetailOptimistic(weekUid, dayUid, newDetailData); 
+
+                return true; // Sukses
+            } else {
+                console.error('❌ Create detail succeeded but no data returned:', response);
+                return false; // Gagal (meski aneh jika status success tapi data kosong)
+            }
+        } catch(err) {
+            console.error('❌ Failed add detail:', err);
+            return false; // Gagal karena error API
+        }
+    // ✅ Hapus 'refetchDayData' dari dependency array
+    }, [currentPlanningUid, details, addPlanningDetailOptimistic]);
 
     const handleUpdatePlanningDetail = useCallback(async (weekUid, dayUid, detailUid, updatedData) => {
         // ... (try catch call details.update -> refetchPlanningData) ...

@@ -15,11 +15,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faSave, 
   faTimes, 
-  faTargetArrow, 
   faChartLine,
   faClipboardList,
   faStickyNote,
-  faExternalLinkAlt
+  faExternalLinkAlt,
+  faBullseye
 } from '@fortawesome/free-solid-svg-icons';
 
 // Custom hooks
@@ -170,6 +170,8 @@ const PlanningDetailModal = ({
 
 
   return (
+    <>
+    return (
     <Modal
         show={show}
         onHide={handleClose}
@@ -179,14 +181,15 @@ const PlanningDetailModal = ({
     >
         <Modal.Header closeButton={!saveLoading}>
             <Modal.Title>
-                <FontAwesomeIcon icon={faExternalLinkAlt} className="me-2" />
-                {editingDetail ? 'Edit Outside Activity' : 'Add Outside Activity'}
+                {/* ✅ Ganti Ikon dan Judul */}
+                <FontAwesomeIcon icon={faClipboardList} className="me-2" /> 
+                {editingDetail ? 'Edit Planning Detail' : 'Add Planning Detail'}
             </Modal.Title>
         </Modal.Header>
 
         <Form onSubmit={handleSubmit}>
             <Modal.Body>
-                {/* Context Info */}
+                {/* Context Info (Ini sudah benar) */}
                 <Alert variant="info" className="mb-3">
                     <Row>
                         <Col md={6}><strong>Week:</strong> {selectedWeek?.week_name || `Week ${selectedWeek?.week_number}` || 'N/A'}</Col>
@@ -194,105 +197,160 @@ const PlanningDetailModal = ({
                     </Row>
                 </Alert>
 
-                {/* Error Alert */}
+                {/* Error Alert (Ini sudah benar) */}
                 {saveError && ( <Alert variant="danger" className="mb-3">{saveError}</Alert> )}
 
+                {/* --- Planning Section --- */}
+                <h5 className="mb-3"><FontAwesomeIcon icon={faBullseye} className="me-2 text-primary"/> Planning</h5>
                 <Row>
-                    {/* Activity Description */}
+                    {/* Plan Master Selection */}
                     <Col md={12} className="mb-3">
                         <Form.Group>
-                            <Form.Label>
-                                <FontAwesomeIcon icon={faExternalLinkAlt} className="me-2" />
-                                Activity Description *
-                            </Form.Label>
-                            <Form.Control
-                                as="textarea"
-                                rows={3}
-                                value={formData.activity_text} // ✅ Bind ke activity_text
-                                onChange={(e) => handleFormChange('activity_text', e.target.value)}
-                                placeholder="Describe the outside activity..."
-                                isInvalid={!!errors?.activity_text} // ✅ Validasi activity_text
-                                disabled={saveLoading}
+                            <Form.Label>Plan Template (Optional)</Form.Label>
+                             {/* ✅ Gunakan CreatableSelect */}
+                            <CreatableSelect
+                                isClearable
+                                options={planMasterOptions}
+                                value={planMasterOptions.find(opt => opt.value === formData.weekly_plan_master_uid)}
+                                onChange={handlePlanMasterChange}
+                                onCreateOption={handleCreatePlanMaster} // Jika kamu ingin bisa buat baru
+                                placeholder="Select or type to create a new plan template..."
+                                isDisabled={saveLoading}
+                                styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                menuPortalTarget={document.body}
+                                // formatCreateLabel={(inputValue) => `Create new: "${inputValue}"`} // Opsional
                             />
-                            <Form.Control.Feedback type="invalid">
-                                {errors?.activity_text}
-                            </Form.Control.Feedback>
-                            <Form.Text className="text-muted">
-                                Describe what activity was performed outside of regular planning.
-                            </Form.Text>
+                            <Form.Text>Select an existing plan or type to create a reusable template.</Form.Text>
                         </Form.Group>
                     </Col>
 
-                    {/* Activity Suggestions */}
+                    {/* Weekly Plan Text */}
                     <Col md={12} className="mb-3">
-                        <Form.Label className="small text-muted">Quick Suggestions:</Form.Label>
-                        <div className="d-flex flex-wrap gap-1">
-                            {planMasterOptions.map((suggestion, index) => (
-                                <Button
-                                    key={index} variant="outline-secondary" size="sm"
-                                    onClick={() => handleFormChange('activity_text', suggestion)} // ✅ Update activity_text
-                                    disabled={saveLoading} className="mb-1"
-                                >
-                                    {suggestion.label}
-                                </Button>
-                            ))}
-                        </div>
-                    </Col>
-
-                    {/* 🗑️ BAGIAN QUANTITY & IMPACT SUDAH DIHAPUS */}
-
-                    {/* Notes */}
-                    <Col md={12}> {/* ✅ Full width */}
                         <Form.Group>
-                            <Form.Label>
-                                <FontAwesomeIcon icon={faStickyNote} className="me-2" />
-                                Additional Notes (Optional)
-                            </Form.Label>
+                            <Form.Label>Plan Description *</Form.Label>
+                            {/* ✅ Hubungkan ke formData.weekly_plan_text */}
                             <Form.Control
                                 as="textarea"
-                                rows={2}
-                                value={formData.notes} // ✅ Bind ke notes
-                                onChange={(e) => handleFormChange('notes', e.target.value)}
-                                placeholder="Add any additional notes, reasons, or context..."
-                                isInvalid={!!errors?.notes} // ✅ Validasi notes (jika ada)
+                                rows={3}
+                                value={formData.weekly_plan_text}
+                                onChange={(e) => handleFormChange('weekly_plan_text', e.target.value)}
+                                placeholder="Describe the planned activity..."
+                                isInvalid={!!errors?.weekly_plan_text}
                                 disabled={saveLoading}
                             />
                             <Form.Control.Feedback type="invalid">
-                                {errors?.notes}
+                                {errors?.weekly_plan_text}
                             </Form.Control.Feedback>
-                            <Form.Text className="text-muted">
-                                Optional: Explain why this activity was necessary or any relevant context.
-                            </Form.Text>
+                        </Form.Group>
+                    </Col>
+                    
+                    {/* Plan Notes */}
+                    <Col md={12} className="mb-3">
+                        <Form.Group>
+                            <Form.Label>Plan Notes (Optional)</Form.Label>
+                             {/* ✅ Hubungkan ke formData.plan_notes */}
+                            <Form.Control
+                                as="textarea"
+                                rows={2}
+                                value={formData.plan_notes}
+                                onChange={(e) => handleFormChange('plan_notes', e.target.value)}
+                                placeholder="Add any notes related to the plan (e.g., preparation, specific goals)..."
+                                isInvalid={!!errors?.plan_notes}
+                                disabled={saveLoading}
+                            />
+                             <Form.Control.Feedback type="invalid">
+                                {errors?.plan_notes}
+                            </Form.Control.Feedback>
                         </Form.Group>
                     </Col>
                 </Row>
 
-                {/* Help Text */}
-                <Alert variant="light" className="mt-3 mb-0 border">
-                    <small>
-                         <FontAwesomeIcon icon={faChartLine} className="me-2 text-info" /> {/* Ganti ikon jika perlu */}
-                        <strong>About Outside Activities:</strong> These are activities performed outside of your regular weekly planning.
-                        They help track additional work that wasn't originally planned but needed to be done.
-                    </small>
-                </Alert>
+                 {/* --- Reporting Section --- */}
+                 <hr className="my-4"/>
+                 <h5 className="mb-3"><FontAwesomeIcon icon={faChartLine} className="me-2 text-success"/> Reporting</h5>
+                 <Row>
+                    {/* Weekly Report Text */}
+                    <Col md={12} className="mb-3">
+                        <Form.Group>
+                            <Form.Label>Report / Actual Activity *</Form.Label>
+                             {/* ✅ Hubungkan ke formData.weekly_report_text */}
+                            <Form.Control
+                                as="textarea"
+                                rows={3}
+                                value={formData.weekly_report_text}
+                                onChange={(e) => handleFormChange('weekly_report_text', e.target.value)}
+                                placeholder="Describe the actual activity performed..."
+                                isInvalid={!!errors?.weekly_report_text}
+                                disabled={saveLoading}
+                            />
+                            <Form.Control.Feedback type="invalid">
+                                {errors?.weekly_report_text}
+                            </Form.Control.Feedback>
+                            <Form.Text>Click suggestions below to quickly fill.</Form.Text> 
+                        </Form.Group>
+                    </Col>
+
+                     {/* Report Suggestions (Opsional, sesuaikan jika perlu) */}
+                     <Col md={12} className="mb-3">
+                         <Form.Label className="small text-muted">Quick Report Suggestions:</Form.Label>
+                         <div className="d-flex flex-wrap gap-1">
+                             {activitySuggestions.map((suggestion, index) => ( // Ganti 'activitySuggestions' jika perlu
+                                 <Button
+                                    key={index} variant="outline-secondary" size="sm"
+                                    // ✅ Isi 'weekly_report_text'
+                                    onClick={() => handleFormChange('weekly_report_text', suggestion)} 
+                                    disabled={saveLoading} className="mb-1"
+                                 >
+                                     {suggestion} 
+                                 </Button>
+                             ))}
+                         </div>
+                     </Col>
+
+                    {/* Report Notes */}
+                    <Col md={12}>
+                        <Form.Group>
+                            <Form.Label>Report Notes (Optional)</Form.Label>
+                            {/* ✅ Hubungkan ke formData.report_notes */}
+                            <Form.Control
+                                as="textarea"
+                                rows={2}
+                                value={formData.report_notes}
+                                onChange={(e) => handleFormChange('report_notes', e.target.value)}
+                                placeholder="Add any notes about the outcome, follow-up actions, etc..."
+                                isInvalid={!!errors?.report_notes}
+                                disabled={saveLoading}
+                            />
+                             <Form.Control.Feedback type="invalid">
+                                {errors?.report_notes}
+                            </Form.Control.Feedback>
+                        </Form.Group>
+                    </Col>
+                </Row>
+
+                 {/* 🗑️ HAPUS Help Text tentang Outside Activity */}
+
             </Modal.Body>
 
             <Modal.Footer>
-                {/* Tombol Cancel */}
+                {/* Tombol Cancel (Sudah benar) */}
                 <Button variant="secondary" onClick={handleClose} disabled={saveLoading}>
                     <FontAwesomeIcon icon={faTimes} className="me-2" /> Cancel
                 </Button>
                 {/* Tombol Save/Update */}
-                <Button type="submit" variant="warning" disabled={saveLoading}>
+                <Button type="submit" variant="primary" disabled={saveLoading}> {/* Ganti warna jika perlu */}
                     {saveLoading ? (
                         <><Spinner size="sm" className="me-2" /> Saving...</>
                     ) : (
-                        <><FontAwesomeIcon icon={faSave} className="me-2" /> {editingDetail ? 'Update' : 'Save'} Activity</>
+                        // ✅ Ganti teks tombol
+                        <><FontAwesomeIcon icon={faSave} className="me-2" /> {editingDetail ? 'Update Detail' : 'Save Detail'}</> 
                     )}
                 </Button>
             </Modal.Footer>
         </Form>
     </Modal>
+    
+    </>
   );
 };
 

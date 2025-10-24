@@ -50,7 +50,7 @@ export const useWeeklyPlanningState = (initialData = null) => {
             day.outsidePlanningDetails ||
             day.outside_planning_details ||
             [],
-        })) || [];
+      })) || [];
 
       const weekStats = calculateWeekStatistics({
         ...week,
