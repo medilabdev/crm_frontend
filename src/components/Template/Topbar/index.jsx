@@ -74,7 +74,7 @@ function Topbar() {
           href="\"
           className="logo d-flex align-items-center text-decoration-none"
         >
-          <img src={resultImage} style={{ width: "25px", marginLeft: "0.3rem" }} />
+          <img src={Image} style={{ width: "25px", marginLeft: "0.3rem" }} />
           <span
             className="title"
             style={{

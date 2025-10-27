@@ -225,33 +225,55 @@ const Deals = () => {
           params: params,
         }
       );
-
-      setDataDeals(response.data?.data);
-      setTotalRows(response.data?.pagination?.totalData);
+      setDataDeals(response.data?.data || []); // Default ke array kosong jika 'data' null/undefined
+      setTotalRows(response.data?.pagination?.totalData || 0); // Default ke 0
       setPending(false);
+
     } catch (error) {
+      
+      // --- PERBAIKAN BLOCK 'CATCH' ---
+
       if (
+        error.response && 
         error.response.status === 401 &&
         error.response.data.message === "Unauthenticated."
       ) {
         localStorage.clear();
         window.location.href = "/login";
+
       } else if (error.response && error.response.status === 429) {
+        // Handle 429 Too Many Requests
         const maxRetries = 3;
         if (retryCount < maxRetries) {
           setTimeout(() => {
-            getDeals(retryCount + 1);
-          }, 2000);
+            // FIX 2: Masukkan SEMUA argumen saat retry
+            getDeals(
+              token,
+              term,
+              ownerDeals,
+              formSearch,
+              pagination,
+              retryCount + 1 // Kirim retryCount yang sudah ditambah
+            );
+          }, 2000); // Tunggu 2 detik sebelum retry
         } else {
           console.error(
             "Max retry attempts reached. Unable to complete the request."
           );
+          setPending(false); // Matikan loading jika gagal retry
         }
+
       } else if (error.response && error.response.status === 404) {
+        // Handle 404 Not Found (ini sudah benar)
         setDataDeals([]);
         setTotalRows(0);
+        setPending(false); // Pastikan matikan loading
+
       } else {
-        console.error("error", error);
+        console.error("Error fetching deals:", error.message || error);
+        setDataDeals([]); // Set ke array kosong agar UI tidak crash
+        setTotalRows(0);  // Set ke 0
+        setPending(false); // Matikan loading
       }
     }
   };
