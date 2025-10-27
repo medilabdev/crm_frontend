@@ -21,7 +21,8 @@ export const API_ENDPOINTS = {
     OUTSIDE_DETAILS: (planningUid, weekUid, dayUid) => `/weekly-planning/plannings/${planningUid}/weeks/${weekUid}/days/${dayUid}/outside-details`,
     OUTSIDE_DETAIL_ITEM: (planningUid, weekUid, dayUid, outsideDetailUid) => `/weekly-planning/plannings/${planningUid}/weeks/${weekUid}/days/${dayUid}/outside-details/${outsideDetailUid}`,
     REPORT_SUGGESTIONS: '/weekly-planning/report-suggestions',
-    REPORT_USAGE: '/weekly-planning/report-suggestions/usage'
+    REPORT_USAGE: '/weekly-planning/report-suggestions/usage',
+    DAY_TOGGLE_WORKING: (planningUid, weekUid, dayUid) => `/weekly-planning/plannings/${planningUid}/weeks/${weekUid}/days/${dayUid}/toggle-working`,
   }
 };
 
@@ -37,8 +38,6 @@ export const DAY_NAMES = [
   'Rabu',
   'Kamis',
   'Jumat',
-  'Sabtu',
-  'Minggu'
 ];
 
 // Form Validation Rules

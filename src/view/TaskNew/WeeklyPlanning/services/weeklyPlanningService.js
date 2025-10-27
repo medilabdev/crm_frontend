@@ -10,6 +10,7 @@ const apiClient = axios.create({
 let lastGetAllTime = 0;
 let lastGetAllCache = null;
 const MIN_INTERVAL_MS = 1000; // 1 second
+
 const rateLimitedGetAll = async (filters = {}) => {
   const now = Date.now();
   const isRecent = now - lastGetAllTime < MIN_INTERVAL_MS;
@@ -295,6 +296,21 @@ export const weeklyPlanningDayService = {
       console.error('Error updating day:', error);
       throw error;
     }
+  },
+
+  // Di weeklyPlanningDayService
+  async toggleWorking(planningUid, weekUid, dayUid) {
+      try {
+          // Asumsi API_ENDPOINTS.WEEKLY_PLANNING.DAY_TOGGLE_WORKING(...) sudah dibuat
+          const apiUrl = API_ENDPOINTS.WEEKLY_PLANNING.DAY_TOGGLE_WORKING(planningUid, weekUid, dayUid);
+          const response = await apiClient.put(apiUrl, {}, { // Kirim body kosong jika tidak perlu data
+              headers: getAuthHeaders() 
+          });
+          return response.data; // Harusnya berisi objek Day yang diupdate
+      } catch (error) {
+          console.error('Error toggling day working status:', error);
+          throw error;
+      }
   }
 };
 
@@ -434,3 +450,5 @@ export const reportSuggestionsService = {
     }
   }
 };
+
+

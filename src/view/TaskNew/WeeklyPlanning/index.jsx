@@ -9,6 +9,7 @@ import CalculationStats from './components/CalculationStats';
 import { useWeeklyPlanningAPI, useBranches, useWeeklyPlanMasters } from './hooks/useWeeklyPlanningAPI';
 import { useWeeklyPlanningState } from './hooks/useWeeklyPlanningState';
 import { useCalculations } from './hooks/useCalculations';
+import Swal from 'sweetalert2';
 
 const WeeklyPlanning = () => {
     const [selectedMonth, setSelectedMonth] = useState(new Date());
@@ -181,6 +182,30 @@ const WeeklyPlanning = () => {
     }
     }, [currentPlanningUid, apiDays, updateDayInWeek]);
 
+    const handleToggleWorkingDay = useCallback(async (weekUid, dayUid) => {
+        try {
+            console.log(`Toggling working status for day: ${dayUid}`);
+            // Panggil API hook
+            const response = await apiDays.toggleWorking(currentPlanningUid, weekUid, dayUid);
+
+            if (response && response.status === 'success' && response.data) {
+                const updatedDayData = response.data; // Respons berisi objek Day baru
+                console.log('✅ Day status toggled. Updating state:', updatedDayData.uid);
+                // Panggil state updater
+                updateSingleDay(weekUid, updatedDayData); 
+                // Opsional: Tampilkan notifikasi sukses (misal pakai SweetAlert)
+                Swal.fire('Sukses!', `Status hari ${updatedDayData.day_name} diubah.`, 'success');
+                return true;
+            }
+            return false;
+        } catch (err) {
+            console.error('❌ Failed to toggle day status:', err);
+            // Opsional: Tampilkan notifikasi error
+            Swal.fire('Error!', `Gagal mengubah status hari.`, 'error');
+            return false;
+        }
+    }, [currentPlanningUid, apiDays, updateSingleDay]); 
+
     const handleAddPlanningDetail = useCallback(async (weekUid, dayUid, detailData) => {
         try {
             const response = await details.create(currentPlanningUid, weekUid, dayUid, detailData);
@@ -282,7 +307,7 @@ const WeeklyPlanning = () => {
             Week UID: ${weekUid}
             Day UID: ${dayUid}
             Outside Detail UID: ${detailUid}`);
-            
+
             const response = await outsideDetails.delete(currentPlanningUid, weekUid, dayUid, detailUid);
             
             if (response.status === 'success' && response.data) {
@@ -378,6 +403,7 @@ const WeeklyPlanning = () => {
                                         weeklyPlanMasters={weeklyPlanMasters}
                                         loading={loading}
                                         createPlanMaster={createPlanMaster}
+                                        handleToggleWorkingDay={handleToggleWorkingDay}
                                     />
                                 </Card.Body>
                             </Card>

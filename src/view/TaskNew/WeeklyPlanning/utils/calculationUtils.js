@@ -25,7 +25,7 @@ export const calculateWeekStatistics = (week = {}) => {
     weekTotals.total_report += dayStats.total_report; // SUM the combined report
 
     // ✅ Adjusted working_days logic: Count if there was any plan OR any outside activity reported
-    if (dayStats.total_weekly_plan > 0 || dayStats.total_outside > 0) {
+    if (day.is_working_day !== false) {
       weekTotals.working_days += 1;
     }
   });

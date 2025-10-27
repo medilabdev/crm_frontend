@@ -117,6 +117,7 @@ export const useWeeklyPlanningAPI = () => {
           dayUid,
           data
         ),
+      toggleWorking: (pUid, wUid, dUid) => apiCall(weeklyPlanningDayService.toggleWorking, pUid, wUid, dUid),
     }),
     [apiCall]
   );

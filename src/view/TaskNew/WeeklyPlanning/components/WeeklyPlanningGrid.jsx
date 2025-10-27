@@ -28,9 +28,10 @@ import {
   faEye,
   faExternalLinkAlt,
   faClipboardList,
-  
+  faCalendarCheck,
+  faCalendarTimes
 } from '@fortawesome/free-solid-svg-icons';
-
+import Swal from 'sweetalert2';
 // Utils
 import { formatDate } from '../utils/dateUtils';
 import { calculateWeekStatistics, calculatePlanningStatistics, getPerformanceIndicator, formatPercentage } from '../utils/calculationUtils';
@@ -56,7 +57,8 @@ const WeeklyPlanningGrid = ({
   onDeleteOutsideDetail,
   weeklyPlanMasters = [],
   loading = false,
-  createPlanMaster
+  createPlanMaster,
+  handleToggleWorkingDay
 }) => {
 
     const [selectedWeek, setSelectedWeek] = useState(null);
@@ -239,7 +241,16 @@ const WeeklyPlanningGrid = ({
                 {/* 1. Header Ringkas (Sama seperti Konsep 1) */}
                 <Card.Header className="d-flex justify-content-between align-items-center py-2 bg-light">
                     <div>
-                        <h6 className="mb-0">{day.day_name}</h6>
+                        <h6 className="mb-0">
+                            {day.day_name}
+                            {!day.is_working_day && ( 
+                            <Badge bg="secondary" pill className="ms-2" title="Hari Libur">
+                                Libur 
+                                {/* Atau pakai ikon: <FontAwesomeIcon icon={faMugHot} /> */}
+                            </Badge>
+                        )}
+                        
+                        </h6>
                         <small className="text-muted">
                             {formatDate(new Date(day.day_date))}
                         </small>
@@ -255,6 +266,18 @@ const WeeklyPlanningGrid = ({
                                 <FontAwesomeIcon icon={faExternalLinkAlt} /> 
                             </Button>
                         </OverlayTrigger>
+                        
+                        <OverlayTrigger overlay={<Tooltip>{day.is_working_day ? 'Tandai sebagai Libur' : 'Tandai sebagai Hari Kerja'}</Tooltip>}>
+                            <Button 
+                                variant={day.is_working_day ? "outline-secondary" : "outline-success"} // Beda warna
+                                size="sm" 
+                                onClick={() => handleToggleWorkingDay(week.uid, day.uid)} 
+                                className="ms-1" // Beri jarak jika perlu
+                            >
+                                <FontAwesomeIcon icon={day.is_working_day ? faCalendarTimes : faCalendarCheck} /> 
+                            </Button>
+                        </OverlayTrigger>
+
                     </div>
                 </Card.Header>
 
@@ -345,7 +368,8 @@ const WeeklyPlanningGrid = ({
                                                     </Button>
                                                 </OverlayTrigger>
                                                 <OverlayTrigger overlay={<Tooltip>Delete</Tooltip>}>
-                                                    <Button variant="outline-danger" size="sm" onClick={() => onDeleteOutsideDetail(week.uid, day.uid, outside.uid)}>
+                                                    <Button variant="outline-danger" size="sm" onClick={() => confirmDeleteOutsideDetail(week.uid, day.uid, outside.uid, outside.activity_text)}
+                                                    title="Delete Outside Activity">
                                                         <FontAwesomeIcon icon={faTrash} />
                                                     </Button>
                                                 </OverlayTrigger>
@@ -392,32 +416,79 @@ const WeeklyPlanningGrid = ({
         );
     };
 
-    /**
-     * Handle delete planning detail (Wrapper for prop function)
-     */
     const handleDeleteDetail = async (week, day, detail) => {
-        // ✅ Konfirmasi sebelum delete
-        if (window.confirm('Are you sure you want to delete this planning detail?')) {
-        try {
-            // ✅ Panggil prop dari index.jsx (yang sudah handle refetch)
-            await onDeletePlanningDetail(week.uid, day.uid, detail.uid);
-        } catch (error) {
-            console.error('Failed to delete planning detail:', error);
-            // Error handling bisa ditambahkan di sini atau di index.jsx
-        }
-        }
+        Swal.fire({
+            title: 'Hapus Detail Planning?',
+            text: `Anda yakin ingin menghapus plan "${detail.weekly_plan_text || 'ini'}"?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33', 
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal'
+        }).then(async (result) => { 
+            if (result.isConfirmed) {
+                try {
+                    console.log(`Mencoba hapus Planning Detail UID: ${detail.uid}`);
+                    await onDeletePlanningDetail(week.uid, day.uid, detail.uid);
+                    Swal.fire(
+                        'Dihapus!',
+                        'Detail planning berhasil dihapus.',
+                        'success'
+                    );
+                } catch (error) {
+                    console.error('Gagal menghapus planning detail:', error);
+                    Swal.fire(
+                        'Error!',
+                        'Gagal menghapus detail planning. Coba lagi.',
+                        'error'
+                    );
+                }
+            }
+        });
     };
+
+    const confirmDeleteOutsideDetail = (weekUid, dayUid, outsideUid, outsideText) => {
+        Swal.fire({
+            title: 'Hapus Outside Activity?',
+            text: `Anda yakin ingin menghapus aktivitas "${outsideText || 'ini'}"?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    console.log(`Mencoba hapus Outside Activity UID: ${outsideUid}`);
+
+                    if (typeof onDeleteOutsideDetail === 'function') {
+                        await onDeleteOutsideDetail(weekUid, dayUid, outsideUid);
+                        Swal.fire('Dihapus!', 'Outside activity berhasil dihapus.', 'success');
+                    } else {
+                        console.error("Prop onDeleteOutsideDetail is not a function!");
+                        throw new Error("Delete handler not available."); // Lempar error agar ditangkap catch
+
+                    }
+                } catch (error) {
+                    console.error('Gagal menghapus outside activity:', error);
+                    Swal.fire('Error!', 'Gagal menghapus outside activity. Coba lagi.', 'error');
+                }
+            }
+        });
+    }
     
     const handleDeleteOutsideDetail = async (week, day, detail) => {
         // ✅ Konfirmasi sebelum delete
         if (window.confirm('Are you sure you want to delete this outside activity?')) {
-        try {
-            // ✅ Panggil prop dari index.jsx (yang sudah handle refetch)
-            await onDeleteOutsideDetail(week.uid, day.uid, detail.uid);
-        } catch (error) {
-            console.error('Failed to delete outside detail:', error);
-            // Error handling bisa ditambahkan di sini atau di index.jsx
-        }
+            try {
+                // ✅ Panggil prop dari index.jsx (yang sudah handle refetch)
+                await onDeleteOutsideDetail(week.uid, day.uid, detail.uid);
+            } catch (error) {
+                console.error('Failed to delete outside detail:', error);
+                // Error handling bisa ditambahkan di sini atau di index.jsx
+            }
         }
     };
 
@@ -458,25 +529,16 @@ const WeeklyPlanningGrid = ({
 
             return (
                 <div key={week.uid || weekIndex} className="week-section mb-4">
-                {/* Header Minggu */}
                 {renderWeekHeader(week)}
-                {/* Summary Minggu */}
                 {renderWeekSummary(week)}
 
-                {/* ✅ Gunakan row-cols untuk mengatur jumlah kolom per baris */}
-                {/* xs=1 (1 kolom di HP), sm=2 (2 kolom di tablet kecil), md=3 (3 kolom di tablet besar dst) */}
-                {/* g-3 menambahkan gutter (jarak) antar kolom */}
                 <Row xs={1} sm={2} md={3} className="g-3"> 
                     {daysInWeek.map((day, dayIndex) => (
-                        // ✅ Col tidak perlu ukuran spesifik lagi, Row yang mengatur
                         <Col key={day.uid || dayIndex}> 
                             {renderDayColumn(week, day)}
                         </Col>
                     ))}
                 </Row>
-
-                {/* 🗑️ HAPUS logic pembagian daysRow1 & daysRow2, serta Row kedua */}
-                
             </div>
             );
         })}
