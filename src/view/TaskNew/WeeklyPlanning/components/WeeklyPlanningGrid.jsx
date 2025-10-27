@@ -11,7 +11,11 @@ import {
   Badge,
   Spinner,
   OverlayTrigger,
-  Tooltip
+  Tooltip,
+  Tabs, 
+  Tab,
+    ListGroup
+
 } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
@@ -21,7 +25,10 @@ import {
   faCalendarWeek,
   faCalendarDay,
   faChartLine,
-  faEye
+  faEye,
+  faExternalLinkAlt,
+  faClipboardList,
+  
 } from '@fortawesome/free-solid-svg-icons';
 
 // Utils
@@ -60,11 +67,10 @@ const WeeklyPlanningGrid = ({
     const [modalLoading, setModalLoading] = useState(false);
     
     const handleSavePlanningDetail = async (formData, editingDetail) => {
-        setModalLoading(true); // Mulai loading
+        setModalLoading(true);
         try {
             let success = false;
             if (editingDetail) {
-                // Panggil handler dari index.jsx untuk Update
                 success = await onUpdatePlanningDetail(
                     selectedWeek?.uid,
                     selectedDay?.uid,
@@ -72,34 +78,29 @@ const WeeklyPlanningGrid = ({
                     formData
                 );
             } else {
-                // Panggil handler dari index.jsx untuk Create
                 success = await onAddPlanningDetail(
                     selectedWeek?.uid,
                     selectedDay?.uid,
                     formData
                 );
             }
-            setModalLoading(false); // Selesai loading
+            setModalLoading(false);
             if (success) {
-                handleCloseModals(); // Tutup modal jika sukses
+                handleCloseModals();
             }
-            // Jika !success, error handling mungkin sudah di index.jsx atau biarkan modal terbuka
-            return success; // Kembalikan status sukses
+            return success; 
         } catch (error) {
             console.error('Failed to save planning detail:', error);
-            setModalLoading(false); // Selesai loading meskipun error
-            // Mungkin tampilkan notifikasi error di sini
+            setModalLoading(false);
             return false;
         }
     };
 
-    // Fungsi Save Outside Activity (Create/Update)
     const handleSaveOutsideActivity = async (formData, editingDetail) => {
         setModalLoading(true);
         try {
             let success = false;
             if (editingDetail) {
-                // Panggil handler dari index.jsx untuk Update
                 success = await onUpdateOutsideDetail(
                     selectedWeek?.uid,
                     selectedDay?.uid,
@@ -107,7 +108,6 @@ const WeeklyPlanningGrid = ({
                     formData
                 );
             } else {
-                // Panggil handler dari index.jsx untuk Create
                 success = await onAddOutsideDetail(
                     selectedWeek?.uid,
                     selectedDay?.uid,
@@ -126,47 +126,41 @@ const WeeklyPlanningGrid = ({
         }
     };
 
-    // Fungsi Buka Modal Planning Detail
     const handleOpenDetailModal = (week, day, detail = null) => {
         setSelectedWeek(week);
         setSelectedDay(day);
-        setEditingDetail(detail); // null jika create, object detail jika edit
+        setEditingDetail(detail);
         setShowDetailModal(true);
     };
 
-    // Fungsi Buka Modal Outside Activity
     const handleOpenOutsideModal = (week, day, detail = null) => {
         setSelectedWeek(week);
         setSelectedDay(day);
-        setEditingDetail(detail); // null jika create, object detail jika edit
+        setEditingDetail(detail); 
         setShowOutsideModal(true);
     };
 
-    // Fungsi Tutup Semua Modal
     const handleCloseModals = () => {
         setShowDetailModal(false);
         setShowOutsideModal(false);
         setSelectedWeek(null);
         setSelectedDay(null);
         setEditingDetail(null);
-        // setModalLoading(false); // Reset loading state saat modal ditutup
+        // setModalLoading(false);
     };
 
     const renderWeekHeader = (week) => {
-        // ✅ Gunakan week.statistics yang SUDAH DIHITUNG di useWeeklyPlanningState
         console.log("Week Statistics: ", week.statistics);
-        const stats = week.statistics || { // Sediakan default object kosong jika statistics null/undefined
+        const stats = week.statistics || { 
             total_weekly_plan: 0,
             total_weekly_report: 0,
             total_outside: 0,
             week_planning_pct: 0,
             week_outside_pct: 0,
-            // Tambahkan default lain jika perlu
         };
-        // ✅ Hitung performance indicator dari week_planning_pct
         const performance = stats.week_planning_pct !== undefined
             ? getPerformanceIndicator(stats.week_planning_pct)
-            : { color: 'secondary', label: 'N/A' }; // Default jika pct tidak ada
+            : { color: 'secondary', label: 'N/A' };
 
         return (
         <Card className="mb-3 border-primary">
@@ -229,182 +223,161 @@ const WeeklyPlanningGrid = ({
         );
     };
 
+
     const renderDayColumn = (week, day) => {
+        // --- Data Preparation (Tetap Sama) ---
         const stats = day.calculations || getDefaultCalculations();
         const planningDetails = day.weeklyPlanningDetails || [];
         const outsideDetails = day.outsidePlanningDetails || [];
 
-        console.log(`FINAL CHECK Achievement for ${day.day_name}: ${stats.daily_planning_pct}`);
+        // Tentukan key default untuk Tab (pilih "Planning" jika ada, jika tidak, "Outside")
+        const defaultTabKey = planningDetails.length > 0 ? "planning" : "outside";
 
+        // --- JSX Rombakan ---
         return (
-        <Card className="h-100 border-light">
-            <Card.Header className="bg-light py-2">
-            <div className="d-flex justify-content-between align-items-center">
-                <div>
-                <h6 className="mb-0">{day.day_name}</h6>
-                <small className="text-muted">
-                    {formatDate(new Date(day.day_date))}
-                </small>
-                </div>
-                <div className="text-end">
-                    <small className="text-muted d-block">
-                        Plan: {planningDetails.length} | Outside: {outsideDetails.length}
-                    </small>
-                    <div className="btn-group" role="group">
-                        <Button variant="primary" size="sm" onClick={() => handleOpenDetailModal(week, day)}> <FontAwesomeIcon icon={faPlus} /> </Button>
-                        <Button variant="warning" size="sm" onClick={() => handleOpenOutsideModal(week, day)} title="Add Outside Activity"> <FontAwesomeIcon icon={faChartLine} /> </Button>
-                    </div>
-                </div>
-            </div>
-            </Card.Header>
-            
-            <Card.Body className="p-2" style={{ minHeight: '200px', maxHeight: '300px', overflowY: 'auto' }}>
-            {planningDetails.length === 0 ? (
-                <div className="text-center text-muted py-3">
-                <FontAwesomeIcon icon={faCalendarDay} size="2x" className="mb-2 opacity-50" />
-                <p className="mb-0">No planning yet</p>
-                <Button
-                    variant="outline-primary"
-                    size="sm"
-                    onClick={() => handleOpenDetailModal(week, day)}
-                    className="mt-2"
-                >
-                    Add Planning
-                </Button>
-                </div>
-            ) : (
-                <div className="planning-details">
-                {planningDetails.map((detail, index) => (
-                    <div
-                    key={detail.uid || index}
-                    className="planning-item mb-2 p-2 border rounded bg-white"
-                    >
-                    <div className="d-flex justify-content-between align-items-start">
-                        <div className="flex-grow-1">
-                        <h6 className="mb-1 text-primary">
-                            {detail.weekly_plan_text || 'No plan text'}
-                        </h6>
-                        {detail.plan_notes && (
-                            <small className="text-muted d-block">
-                            <strong>Plan Note:</strong> {detail.plan_notes}
-                            </small>
-                        )}
-                        {detail.weekly_report_text && (
-                            <small className="text-success d-block">
-                            <strong>Report:</strong> {detail.weekly_report_text}
-                            </small>
-                        )}
-                        {detail.report_notes && (
-                            <small className="text-muted d-block">
-                            <strong>Report Note:</strong> {detail.report_notes}
-                            </small>
-                        )}
-                        <div className="mt-1">
-                            <Badge 
-                            bg={detail.weekly_report_text ? 'success' : 'warning'}
-                            className="me-1"
-                            >
-                            {detail.weekly_report_text ? 'Reported' : 'Planned Only'}
-                            </Badge>
-                        </div>
-                        </div>
-                        <div className="d-flex flex-column">
-                        <OverlayTrigger
-                            placement="top"
-                            overlay={<Tooltip>Edit Planning</Tooltip>}
-                        >
-                            <Button
-                            variant="outline-primary"
-                            size="sm"
-                            onClick={() => handleOpenDetailModal(week, day, detail)}
-                            className="mb-1"
-                            >
-                            <FontAwesomeIcon icon={faEdit} />
-                            </Button>
-                        </OverlayTrigger>
-                        <OverlayTrigger
-                            placement="top"
-                            overlay={<Tooltip>Delete Planning</Tooltip>}
-                        >
-                            <Button
-                            variant="outline-danger"
-                            size="sm"
-                            onClick={() => handleDeleteDetail(week, day, detail)}
-                            >
-                            <FontAwesomeIcon icon={faTrash} />
-                            </Button>
-                        </OverlayTrigger>
-                        </div>
-                    </div>
-                    </div>
-                ))}
-                </div>
-            )}
-
-            {/* Outside Activities for this day */}
-            {(day.outside_details || []).length > 0 && (
-                <div className="outside-activities mt-2 pt-2 border-top">
-                <small className="text-warning fw-bold d-block mb-1">Outside Activities:</small>
-                {day.outside_details.map((outside, index) => (
-                    <div
-                    key={outside.uid || index}
-                    className="outside-item mb-1 p-1 border rounded bg-warning bg-opacity-10"
-                    >
-                    <div className="d-flex justify-content-between align-items-start">
-                        <div className="flex-grow-1">
-                        <small className="fw-bold text-warning d-block">
-                            {outside.outside_text}
-                        </small>
+            <Card className="h-100 shadow-sm day-card"> {/* Tambah class & shadow */}
+                {/* 1. Header Ringkas (Sama seperti Konsep 1) */}
+                <Card.Header className="d-flex justify-content-between align-items-center py-2 bg-light">
+                    <div>
+                        <h6 className="mb-0">{day.day_name}</h6>
                         <small className="text-muted">
-                            Qty: {outside.outside_quantity || 0}
+                            {formatDate(new Date(day.day_date))}
                         </small>
-                        </div>
-                        <div className="d-flex">
-                        <Button
-                            variant="outline-warning"
-                            size="sm"
-                            onClick={() => handleOpenOutsideModal(week, day, outside)}
-                            className="me-1"
-                        >
-                            <FontAwesomeIcon icon={faEdit} />
-                        </Button>
-                        <Button
-                            variant="outline-danger"
-                            size="sm"
-                            onClick={() => handleDeleteOutsideDetail(week, day, outside)}
-                        >
-                            <FontAwesomeIcon icon={faTrash} />
-                        </Button>
-                        </div>
                     </div>
+                    <div className="btn-group" role="group">
+                        <OverlayTrigger overlay={<Tooltip>Add Planning Detail</Tooltip>}>
+                            <Button variant="outline-primary" size="sm" onClick={() => handleOpenDetailModal(week, day)}>
+                                <FontAwesomeIcon icon={faPlus} />
+                            </Button>
+                        </OverlayTrigger>
+                        <OverlayTrigger overlay={<Tooltip>Add Outside Activity</Tooltip>}>
+                            <Button variant="outline-warning" size="sm" onClick={() => handleOpenOutsideModal(week, day)}>
+                                <FontAwesomeIcon icon={faExternalLinkAlt} /> 
+                            </Button>
+                        </OverlayTrigger>
                     </div>
-                ))}
-                </div>
-            )}
-            </Card.Body>
+                </Card.Header>
 
-            <Card.Footer className="py-1 bg-light">
-            <Row className="text-center">
-                <Col>
-                <small className="text-muted">Achievement:</small>
-                <div className="fw-bold text-primary">
-                    {stats.daily_planning_pct ? `${stats.daily_planning_pct}%` : '0%'}
-                </div>
-                </Col>
-            </Row>
-            </Card.Footer>
-        </Card>
+                {/* 2. Body Kartu (TANPA Ringkasan Cepat, langsung Tabs) */}
+                <Card.Body className="p-0 d-flex flex-column"> {/* Padding 0, Tabs akan handle padding internal */}
+                
+                    {/* 3. Area Konten Utama (Tabbed) */}
+                    {/* Gunakan unmountOnExit agar konten tab tidak dirender jika tidak aktif */}
+                    <Tabs defaultActiveKey={defaultTabKey} id={`day-tabs-${day.uid}`} className="day-card-tabs px-3 pt-2" fill unmountOnExit> 
+                        
+                        {/* Tab Planning Details */}
+                        <Tab 
+                            eventKey="planning" 
+                            // Judul Tab dengan jumlah item
+                            title={
+                                <span>
+                                    <FontAwesomeIcon icon={faClipboardList} className="me-1"/> Plan 
+                                    <Badge pill bg="primary" className="ms-1">{planningDetails.length}</Badge> 
+                                </span>
+                            }
+                            disabled={planningDetails.length === 0} // Disable jika kosong
+                            className="p-3 details-area" // Padding di dalam tab, kelas untuk styling scroll
+                            style={{ overflowY: 'auto', maxHeight: '250px', flexGrow: 1 }} // Style scroll & tinggi
+                        >
+                            {planningDetails.length === 0 ? (
+                                <p className="text-muted text-center small mt-3">No planned activities.</p>
+                            ) : (
+                                // Render list planning details (mirip Konsep 1, pakai ListGroup)
+                                <ListGroup variant="flush">
+                                    {planningDetails.map((detail) => (
+                                        <ListGroup.Item key={detail.uid} className="d-flex justify-content-between align-items-start px-0 py-1">
+                                            <div className="flex-grow-1 me-2">
+                                                <span className="d-block">{detail.weekly_plan_text || 'No plan'}</span>
+                                                {detail.weekly_report_text && (
+                                                    <small className="text-success d-block">
+                                                        <Badge bg="success" className="me-1">R</Badge> {detail.weekly_report_text}
+                                                    </small>
+                                                )}
+                                                {detail.plan_notes && <small className="text-muted d-block fst-italic">P-Note: {detail.plan_notes}</small>}
+                                                {detail.report_notes && <small className="text-muted d-block fst-italic">R-Note: {detail.report_notes}</small>}
+                                            </div>
+                                            <div className="btn-group">
+                                                <OverlayTrigger overlay={<Tooltip>Edit</Tooltip>}>
+                                                    <Button variant="outline-secondary" size="sm" onClick={() => handleOpenDetailModal(week, day, detail)}>
+                                                        <FontAwesomeIcon icon={faEdit} />
+                                                    </Button>
+                                                </OverlayTrigger>
+                                                <OverlayTrigger overlay={<Tooltip>Delete</Tooltip>}>
+                                                    <Button variant="outline-danger" size="sm" onClick={() => handleDeleteDetail(week.uid, day.uid, detail.uid)}>
+                                                        <FontAwesomeIcon icon={faTrash} />
+                                                    </Button>
+                                                </OverlayTrigger>
+                                            </div>
+                                        </ListGroup.Item>
+                                    ))}
+                                </ListGroup>
+                            )}
+                        </Tab>
+
+                        {/* Tab Outside Activities */}
+                        <Tab 
+                            eventKey="outside" 
+                            title={
+                                <span>
+                                    <FontAwesomeIcon icon={faExternalLinkAlt} className="me-1"/> Outside 
+                                    <Badge pill bg="warning" text="dark" className="ms-1">{outsideDetails.length}</Badge> 
+                                </span>
+                            }
+                            disabled={outsideDetails.length === 0}
+                            className="p-3 details-area"
+                            style={{ overflowY: 'auto', maxHeight: '250px', flexGrow: 1 }}
+                        >
+                            {outsideDetails.length === 0 ? (
+                                <p className="text-muted text-center small mt-3">No outside activities.</p>
+                            ) : (
+                                // Render list outside activities (mirip Konsep 1, pakai ListGroup)
+                                <ListGroup variant="flush">
+                                    {outsideDetails.map((outside) => (
+                                        <ListGroup.Item key={outside.uid} className="d-flex justify-content-between align-items-start px-0 py-1">
+                                            <div className="flex-grow-1 me-2">
+                                                <span className="d-block">{outside.activity_text || 'No description'}</span>
+                                                {outside.notes && <small className="text-muted d-block fst-italic">Note: {outside.notes}</small>}
+                                            </div>
+                                            <div className="btn-group">
+                                                <OverlayTrigger overlay={<Tooltip>Edit</Tooltip>}>
+                                                    <Button variant="outline-secondary" size="sm" onClick={() => handleOpenOutsideModal(week, day, outside)}>
+                                                        <FontAwesomeIcon icon={faEdit} />
+                                                    </Button>
+                                                </OverlayTrigger>
+                                                <OverlayTrigger overlay={<Tooltip>Delete</Tooltip>}>
+                                                    <Button variant="outline-danger" size="sm" onClick={() => onDeleteOutsideDetail(week.uid, day.uid, outside.uid)}>
+                                                        <FontAwesomeIcon icon={faTrash} />
+                                                    </Button>
+                                                </OverlayTrigger>
+                                            </div>
+                                        </ListGroup.Item>
+                                    ))}
+                                </ListGroup>
+                            )}
+                        </Tab>
+                    </Tabs>
+
+                    {/* 4. Footer (Hanya Achievement) */}
+                    <Card.Footer className="py-1 bg-light mt-auto"> {/* mt-auto dorong ke bawah */}
+                        <Row className="text-center">
+                            <Col>
+                                <small className="text-muted">Achievement:</small>
+                                <div className={`fw-bold text-${stats.daily_planning_pct >= 80 ? 'success' : stats.daily_planning_pct >= 60 ? 'warning' : 'danger'}`}>
+                                    {`${stats.daily_planning_pct || 0}%`}
+                                </div>
+                            </Col>
+                        </Row>
+                    </Card.Footer>
+                </Card.Body>
+            </Card>
         );
     };
 
     const renderWeekSummary = (week) => {
-        // ✅ Gunakan week.statistics yg sudah dihitung dari state hook
         const totalOutsideActivities = week.statistics?.total_outside || 0;
 
-        // ✅ Return null jika tidak ada outside activity
         if (totalOutsideActivities === 0) return null;
 
-        // ✅ JSX untuk menampilkan summary (sudah benar)
         return (
         <Alert variant="warning" className="mb-3">
             <Row className="align-items-center">
@@ -434,10 +407,7 @@ const WeeklyPlanningGrid = ({
         }
         }
     };
-
-    /**
-     * Handle delete outside detail (Wrapper for prop function)
-     */
+    
     const handleDeleteOutsideDetail = async (week, day, detail) => {
         // ✅ Konfirmasi sebelum delete
         if (window.confirm('Are you sure you want to delete this outside activity?')) {
@@ -480,41 +450,58 @@ const WeeklyPlanningGrid = ({
     return (
     <>
     <div className="weekly-planning-grid">
-      {planningData.weeks?.map((week, weekIndex) => (
-        <div key={week.uid || weekIndex} className="week-section mb-4">
-          {renderWeekHeader(week)}
-          {renderWeekSummary(week)}
-          <Row>
-            {week.days?.map((day, dayIndex) => (
-              <Col md={2} key={day.uid || dayIndex} className="mb-3">
-                {renderDayColumn(week, day)}
-              </Col>
-            ))}
-          </Row>
-        </div>
-      ))}
+        {planningData.weeks?.map((week, weekIndex) => {
+            // ✅ Bagian 1: Bagi array 'days' menjadi dua (maks 3 per baris)
+            const daysInWeek = week.days || [];
+            const daysRow1 = daysInWeek.slice(0, 3); // Ambil 3 hari pertama (Senin, Selasa, Rabu)
+            const daysRow2 = daysInWeek.slice(3);   // Ambil sisanya (Kamis, Jumat, Sabtu)
 
-      <PlanningDetailModal
-        show={showDetailModal}
-        onHide={handleCloseModals}
-        onSave={handleSavePlanningDetail}
-        editingDetail={editingDetail}
-        selectedWeek={selectedWeek}
-        selectedDay={selectedDay}
-        weeklyPlanMasters={weeklyPlanMasters}
-        loading={modalLoading}
-        createPlanMaster={createPlanMaster}
-      />
+            return (
+                <div key={week.uid || weekIndex} className="week-section mb-4">
+                {/* Header Minggu */}
+                {renderWeekHeader(week)}
+                {/* Summary Minggu */}
+                {renderWeekSummary(week)}
 
-      <OutsideActivityModal
-        show={showOutsideModal}
-        onHide={handleCloseModals}
-        onSave={handleSaveOutsideActivity}
-        editingDetail={editingDetail}
-        selectedWeek={selectedWeek}
-        selectedDay={selectedDay}
-        loading={modalLoading}
-      />
+                {/* ✅ Gunakan row-cols untuk mengatur jumlah kolom per baris */}
+                {/* xs=1 (1 kolom di HP), sm=2 (2 kolom di tablet kecil), md=3 (3 kolom di tablet besar dst) */}
+                {/* g-3 menambahkan gutter (jarak) antar kolom */}
+                <Row xs={1} sm={2} md={3} className="g-3"> 
+                    {daysInWeek.map((day, dayIndex) => (
+                        // ✅ Col tidak perlu ukuran spesifik lagi, Row yang mengatur
+                        <Col key={day.uid || dayIndex}> 
+                            {renderDayColumn(week, day)}
+                        </Col>
+                    ))}
+                </Row>
+
+                {/* 🗑️ HAPUS logic pembagian daysRow1 & daysRow2, serta Row kedua */}
+                
+            </div>
+            );
+        })}
+
+        <PlanningDetailModal
+            show={showDetailModal}
+            onHide={handleCloseModals}
+            onSave={handleSavePlanningDetail}
+            editingDetail={editingDetail}
+            selectedWeek={selectedWeek}
+            selectedDay={selectedDay}
+            weeklyPlanMasters={weeklyPlanMasters}
+            loading={modalLoading}
+            createPlanMaster={createPlanMaster}
+        />
+
+        <OutsideActivityModal
+            show={showOutsideModal}
+            onHide={handleCloseModals}
+            onSave={handleSaveOutsideActivity}
+            editingDetail={editingDetail}
+            selectedWeek={selectedWeek}
+            selectedDay={selectedDay}
+            loading={modalLoading}
+        />
     </div>
     </>
     );

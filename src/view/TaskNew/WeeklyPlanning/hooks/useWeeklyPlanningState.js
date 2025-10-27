@@ -163,24 +163,17 @@ export const useWeeklyPlanningState = (initialData = null) => {
   const clearFilters = useCallback(/* ... */);
 
   return {
-    // Data state
     planning,
     weeks, // This now contains days with BE calculations and calculated week stats
     activeWeekUid,
     activeDayUid,
     activeWeek,
     activeDay,
-
-    // UI state
     selectedItems,
     viewMode,
     filters,
     hasUnsavedChanges,
-
-    // ✅ Central data update function (expects BE data)
     updateWeeks,
-
-    // Data mutations (Metadata only, or simplified optimistic updates)
     updatePlanning,
     // addWeek, // Need to be adjusted if used optimistically
     // updateWeek,
@@ -194,8 +187,6 @@ export const useWeeklyPlanningState = (initialData = null) => {
     // addOutsideDetail,
     // updateOutsideDetail,
     // deleteOutsideDetail,
-
-    // UI actions
     setActiveWeekUid,
     setActiveDayUid,
     setViewMode,

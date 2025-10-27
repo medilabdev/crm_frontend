@@ -67,6 +67,7 @@ const PlanningDetailModal = ({
   } = usePlanningValidation();
 
   // Efek untuk mengisi form saat modal dibuka atau data edit berubah
+  console.log('Editing Detail di Modal:', editingDetail);
   useEffect(() => {
     if (show) {
       if (editingDetail) {
@@ -102,18 +103,10 @@ const PlanningDetailModal = ({
     // Hapus error saat user mulai mengetik lagi
     setSaveError(null);
     setCreateMasterError(null);
-  }, []); // Dependensi kosong karena hanya memanggil setter state
+  }, []);
 
-   /**
-   * Handler saat OPSI DIPILIH (atau dihapus) di CreatableSelect.
-   * Mengupdate state formData. Dibuat useCallback agar stabil.
-   */
-   const handlePlanMasterChange = useCallback((selectedOption) => {
-    console.log('--- handlePlanMasterChange ---');
-    console.log('Opsi Dipilih:', selectedOption);
-
+  const handlePlanMasterChange = useCallback((selectedOption) => {
     if (selectedOption) {
-      // Jika opsi dipilih (baik yg lama atau yg baru dari API)
       const newUid = selectedOption.value; // Ini akan jadi UID asli (atau value temp jika error API)
       const newText = selectedOption.label;
       console.log(`Update formData: UID=${newUid}, Text=${newText}`);
@@ -127,67 +120,19 @@ const PlanningDetailModal = ({
       handleFormChange('weekly_plan_text', '');
     }
     console.log('--- Akhir handlePlanMasterChange ---');
-  }, [handleFormChange]); // Tambahkan dependensi handleFormChange
+  }, [handleFormChange]); 
 
-  /**
-   * Handler saat OPSI BARU dibuat di CreatableSelect.
-   * Memanggil API untuk menyimpan master baru.
-   */
-  const handleCreatePlanMaster = useCallback(async (inputValue) => {
-    // Validasi dasar & cek apakah fungsi prop ada
-    if (!inputValue || !createPlanMaster) {
-        console.warn('Batal create master: Input kosong atau fungsi createPlanMaster tidak ada.');
-        return;
-    }
+  const handleCreatePlanMaster = useCallback((inputValue) => {     
+    const newOption = {
+        value: null, 
+        label: inputValue,
+        __isNew__: true 
+    };
 
-    setIsCreatingMaster(true);
-    setCreateMasterError(null);
-    console.log(`--- handleCreatePlanMaster --- Panggil API untuk: "${inputValue}"`);
+    handlePlanMasterChange(newOption); 
+    return Promise.resolve(newOption);
+  }, [handlePlanMasterChange]);
 
-    try {
-      // 1. Panggil fungsi API createPlanMaster dari prop
-      const newMasterData = await createPlanMaster(inputValue);
-
-      // 2. Cek apakah API sukses & mengembalikan data yg diharapkan
-      if (newMasterData && newMasterData.uid && newMasterData.plan_text) {
-        console.log('API Create Master Sukses:', newMasterData);
-
-        // 3. Format hasil API ke struktur {value, label}
-        const newOption = {
-          value: newMasterData.uid, // Pakai UID asli
-          label: newMasterData.plan_text // Pakai teks asli
-        };
-        console.log('Format Opsi Baru dari API:', newOption);
-
-        // 4. Panggil handlePlanMasterChange secara MANUAL
-        handlePlanMasterChange(newOption);
-
-      } else {
-        console.error('API Create Master tidak mengembalikan data yg diharapkan (uid, plan_text):', newMasterData);
-        setCreateMasterError(`Berhasil menyimpan "${inputValue}" tapi gagal memuat data terbaru.`);
-        // Tetap set teksnya di form agar user tidak kehilangan input
-        handlePlanMasterChange({ value: null, label: inputValue });
-      }
-
-    } catch (err) {
-      console.error('API Create Master Gagal:', err);
-      const apiErrorMessage = err.response?.data?.message || err.message || `Gagal membuat template "${inputValue}".`;
-      setCreateMasterError(apiErrorMessage);
-      // JANGAN panggil handlePlanMasterChange, biarkan input seperti yg diketik user
-    } finally {
-      setIsCreatingMaster(false);
-    }
-  }, [createPlanMaster, handlePlanMasterChange]); // Tambahkan dependensi
-
-
-  // Log perubahan formData untuk debug
-  useEffect(() => {
-    console.log('Current formData state:', formData);
-  }, [formData]);
-
-  /**
-   * Handler untuk submit form DETAIL planning (tombol Save utama)
-   */
   const handleSubmit = async (e) => {
     e.preventDefault(); // Cegah submit HTML biasa
 

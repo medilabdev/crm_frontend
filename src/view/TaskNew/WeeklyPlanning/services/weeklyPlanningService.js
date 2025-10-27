@@ -391,9 +391,10 @@ export const outsidePlanningDetailService = {
  
   async delete(planningUid, weekUid, dayUid, detailUid) {
     try {
-      const response = await apiClient.delete(API_ENDPOINTS.WEEKLY_PLANNING.OUTSIDE_DETAIL_ITEM(planningUid, weekUid, dayUid, detailUid), {
-        headers: getAuthHeaders(),
-      });
+      const apiUrl = API_ENDPOINTS.WEEKLY_PLANNING.OUTSIDE_DETAIL_ITEM(planningUid, weekUid, dayUid, detailUid);
+      console.log(`Sending DELETE request to: ${apiClient.defaults.baseURL}${apiUrl}`); // Pastikan baseURL ada
+
+      const response = await apiClient.delete(apiUrl, { headers: getAuthHeaders() });
       return response.data;
     } catch (error) {
       console.error('Error deleting outside planning detail:', error);
