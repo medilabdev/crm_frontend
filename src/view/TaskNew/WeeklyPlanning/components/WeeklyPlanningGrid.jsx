@@ -1,19 +1,19 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { 
-  Card, 
-  Row, 
-  Col, 
-  Table, 
-  Button, 
-  Form, 
-  Modal, 
-  Alert,
-  Badge,
-  Spinner,
-  OverlayTrigger,
-  Tooltip,
-  Tabs, 
-  Tab,
+    Card, 
+    Row, 
+    Col, 
+    Table, 
+    Button, 
+    Form, 
+    Modal, 
+    Alert,
+    Badge,
+    Spinner,
+    OverlayTrigger,
+    Tooltip,
+    Tabs, 
+    Tab,
     ListGroup
 
 } from 'react-bootstrap';
@@ -29,7 +29,7 @@ import {
   faExternalLinkAlt,
   faClipboardList,
   faCalendarCheck,
-  faCalendarTimes
+  faCalendarTimes,
 } from '@fortawesome/free-solid-svg-icons';
 import Swal from 'sweetalert2';
 // Utils
@@ -60,6 +60,7 @@ const WeeklyPlanningGrid = ({
   createPlanMaster,
   handleToggleWorkingDay
 }) => {
+    
 
     const [selectedWeek, setSelectedWeek] = useState(null);
     const [selectedDay, setSelectedDay] = useState(null);
@@ -227,99 +228,88 @@ const WeeklyPlanningGrid = ({
 
 
     const renderDayColumn = (week, day) => {
-        // --- Data Preparation (Tetap Sama) ---
         const stats = day.calculations || getDefaultCalculations();
         const planningDetails = day.weeklyPlanningDetails || [];
         const outsideDetails = day.outsidePlanningDetails || [];
 
-        // Tentukan key default untuk Tab (pilih "Planning" jika ada, jika tidak, "Outside")
-        const defaultTabKey = planningDetails.length > 0 ? "planning" : "outside";
-
-        // --- JSX Rombakan ---
+        const defaultTabKey = planningDetails.length > 0 ? "planning" : (outsideDetails.length > 0 ? "outside" : "planning");
         return (
-            <Card className="h-100 shadow-sm day-card"> {/* Tambah class & shadow */}
-                {/* 1. Header Ringkas (Sama seperti Konsep 1) */}
+            <Card className="h-100 shadow-sm day-card"> 
                 <Card.Header className="d-flex justify-content-between align-items-center py-2 bg-light">
                     <div>
-                        <h6 className="mb-0">
+                        <h6 className="mb-0 d-inline-block">
                             {day.day_name}
                             {!day.is_working_day && ( 
-                            <Badge bg="secondary" pill className="ms-2" title="Hari Libur">
-                                Libur 
-                                {/* Atau pakai ikon: <FontAwesomeIcon icon={faMugHot} /> */}
-                            </Badge>
-                        )}
-                        
+                                <Badge bg="secondary" pill className="ms-2" title="Hari Libur">
+                                    Libur 
+                                </Badge>
+                            )}
                         </h6>
-                        <small className="text-muted">
+                        <small className="text-muted d-block">
                             {formatDate(new Date(day.day_date))}
                         </small>
                     </div>
                     <div className="btn-group" role="group">
                         <OverlayTrigger overlay={<Tooltip>Add Planning Detail</Tooltip>}>
-                            <Button variant="outline-primary" size="sm" onClick={() => handleOpenDetailModal(week, day)}>
+                            <Button variant="outline-primary" size="sm" onClick={() => handleOpenDetailModal(week, day)} disabled={!day.is_working_day}> 
                                 <FontAwesomeIcon icon={faPlus} />
                             </Button>
                         </OverlayTrigger>
                         <OverlayTrigger overlay={<Tooltip>Add Outside Activity</Tooltip>}>
-                            <Button variant="outline-warning" size="sm" onClick={() => handleOpenOutsideModal(week, day)}>
+                            <Button variant="outline-warning" size="sm" onClick={() => handleOpenOutsideModal(week, day)} disabled={!day.is_working_day}>
                                 <FontAwesomeIcon icon={faExternalLinkAlt} /> 
                             </Button>
                         </OverlayTrigger>
-                        
-                        <OverlayTrigger overlay={<Tooltip>{day.is_working_day ? 'Tandai sebagai Libur' : 'Tandai sebagai Hari Kerja'}</Tooltip>}>
+                        <OverlayTrigger overlay={<Tooltip>{day.is_working_day ? 'Tandai Libur' : 'Tandai Hari Kerja'}</Tooltip>}>
                             <Button 
-                                variant={day.is_working_day ? "outline-secondary" : "outline-success"} // Beda warna
+                                variant={day.is_working_day ? "outline-secondary" : "outline-success"} 
                                 size="sm" 
                                 onClick={() => handleToggleWorkingDay(week.uid, day.uid)} 
-                                className="ms-1" // Beri jarak jika perlu
                             >
                                 <FontAwesomeIcon icon={day.is_working_day ? faCalendarTimes : faCalendarCheck} /> 
                             </Button>
                         </OverlayTrigger>
-
                     </div>
                 </Card.Header>
 
-                {/* 2. Body Kartu (TANPA Ringkasan Cepat, langsung Tabs) */}
-                <Card.Body className="p-0 d-flex flex-column"> {/* Padding 0, Tabs akan handle padding internal */}
-                
-                    {/* 3. Area Konten Utama (Tabbed) */}
-                    {/* Gunakan unmountOnExit agar konten tab tidak dirender jika tidak aktif */}
-                    <Tabs defaultActiveKey={defaultTabKey} id={`day-tabs-${day.uid}`} className="day-card-tabs px-3 pt-2" fill unmountOnExit> 
-                        
-                        {/* Tab Planning Details */}
+                <Card.Body className="p-0 d-flex flex-column">
+                    <Tabs 
+                        defaultActiveKey={defaultTabKey} 
+                        id={`day-tabs-${day.uid}`} 
+                        className="day-card-tabs px-3 pt-2 flex-shrink-0"
+                        justify 
+                        unmountOnExit
+                    > 
                         <Tab 
                             eventKey="planning" 
-                            // Judul Tab dengan jumlah item
                             title={
-                                <span>
-                                    <FontAwesomeIcon icon={faClipboardList} className="me-1"/> Plan 
+                                <span title="Planning Details"> 
+                                    <FontAwesomeIcon icon={faClipboardList} className="me-1"/> 
+                                    <span className="d-none d-lg-inline">Plan</span>
                                     <Badge pill bg="primary" className="ms-1">{planningDetails.length}</Badge> 
                                 </span>
                             }
-                            disabled={planningDetails.length === 0} // Disable jika kosong
-                            className="p-3 details-area" // Padding di dalam tab, kelas untuk styling scroll
-                            style={{ overflowY: 'auto', maxHeight: '250px', flexGrow: 1 }} // Style scroll & tinggi
+                            // disabled={planningDetails.length === 0} 
+                            className="p-3 details-area" 
+                            style={{ overflowY: 'auto', flexGrow: 1 }}
                         >
                             {planningDetails.length === 0 ? (
-                                <p className="text-muted text-center small mt-3">No planned activities.</p>
+                                <p className="text-muted text-center small mt-3 mb-0">No planned activities.</p>
                             ) : (
-                                // Render list planning details (mirip Konsep 1, pakai ListGroup)
                                 <ListGroup variant="flush">
                                     {planningDetails.map((detail) => (
-                                        <ListGroup.Item key={detail.uid} className="d-flex justify-content-between align-items-start px-0 py-1">
-                                            <div className="flex-grow-1 me-2">
+                                        <ListGroup.Item key={detail.uid} className="d-flex justify-content-between align-items-center px-0 py-1">
+                                            <div className="flex-grow-1 me-2" style={{wordBreak: 'break-word'}}> 
                                                 <span className="d-block">{detail.weekly_plan_text || 'No plan'}</span>
                                                 {detail.weekly_report_text && (
                                                     <small className="text-success d-block">
-                                                        <Badge bg="success" className="me-1">R</Badge> {detail.weekly_report_text}
+                                                        <Badge bg="success" className="me-1" pill>R</Badge> {detail.weekly_report_text}
                                                     </small>
                                                 )}
-                                                {detail.plan_notes && <small className="text-muted d-block fst-italic">P-Note: {detail.plan_notes}</small>}
-                                                {detail.report_notes && <small className="text-muted d-block fst-italic">R-Note: {detail.report_notes}</small>}
+                                                {detail.plan_notes && <small className="text-muted d-block fst-italic ms-1" title={detail.plan_notes}>P-Note: {(detail.plan_notes || '').substring(0, 30)}...</small>}
+                                                {detail.report_notes && <small className="text-muted d-block fst-italic ms-1" title={detail.report_notes}>R-Note: {(detail.report_notes || '').substring(0, 30)}...</small>}
                                             </div>
-                                            <div className="btn-group">
+                                            <div className="btn-group flex-shrink-0">
                                                 <OverlayTrigger overlay={<Tooltip>Edit</Tooltip>}>
                                                     <Button variant="outline-secondary" size="sm" onClick={() => handleOpenDetailModal(week, day, detail)}>
                                                         <FontAwesomeIcon icon={faEdit} />
@@ -337,39 +327,37 @@ const WeeklyPlanningGrid = ({
                             )}
                         </Tab>
 
-                        {/* Tab Outside Activities */}
                         <Tab 
                             eventKey="outside" 
                             title={
-                                <span>
-                                    <FontAwesomeIcon icon={faExternalLinkAlt} className="me-1"/> Outside 
+                                <span title="Outside Activities">
+                                    <FontAwesomeIcon icon={faExternalLinkAlt} className="me-1"/> 
+                                    <span className="d-none d-lg-inline">Outside</span>
                                     <Badge pill bg="warning" text="dark" className="ms-1">{outsideDetails.length}</Badge> 
                                 </span>
                             }
-                            disabled={outsideDetails.length === 0}
+                            // disabled={outsideDetails.length === 0}
                             className="p-3 details-area"
-                            style={{ overflowY: 'auto', maxHeight: '250px', flexGrow: 1 }}
+                            style={{ overflowY: 'auto', flexGrow: 1 }}
                         >
                             {outsideDetails.length === 0 ? (
-                                <p className="text-muted text-center small mt-3">No outside activities.</p>
+                                <p className="text-muted text-center small mt-3 mb-0">No outside activities.</p>
                             ) : (
-                                // Render list outside activities (mirip Konsep 1, pakai ListGroup)
                                 <ListGroup variant="flush">
                                     {outsideDetails.map((outside) => (
-                                        <ListGroup.Item key={outside.uid} className="d-flex justify-content-between align-items-start px-0 py-1">
-                                            <div className="flex-grow-1 me-2">
+                                        <ListGroup.Item key={outside.uid} className="d-flex justify-content-between align-items-center px-0 py-1">
+                                            <div className="flex-grow-1 me-2" style={{wordBreak: 'break-word'}}>
                                                 <span className="d-block">{outside.activity_text || 'No description'}</span>
-                                                {outside.notes && <small className="text-muted d-block fst-italic">Note: {outside.notes}</small>}
+                                                {outside.notes && <small className="text-muted d-block fst-italic ms-1" title={outside.notes}>Note: {(outside.notes || '').substring(0, 30)}...</small>}
                                             </div>
-                                            <div className="btn-group">
+                                            <div className="btn-group flex-shrink-0">
                                                 <OverlayTrigger overlay={<Tooltip>Edit</Tooltip>}>
                                                     <Button variant="outline-secondary" size="sm" onClick={() => handleOpenOutsideModal(week, day, outside)}>
                                                         <FontAwesomeIcon icon={faEdit} />
                                                     </Button>
                                                 </OverlayTrigger>
                                                 <OverlayTrigger overlay={<Tooltip>Delete</Tooltip>}>
-                                                    <Button variant="outline-danger" size="sm" onClick={() => confirmDeleteOutsideDetail(week.uid, day.uid, outside.uid, outside.activity_text)}
-                                                    title="Delete Outside Activity">
+                                                    <Button variant="outline-danger" size="sm" onClick={() => confirmDeleteOutsideDetail(week.uid, day.uid, outside.uid, outside.activity_text)}>
                                                         <FontAwesomeIcon icon={faTrash} />
                                                     </Button>
                                                 </OverlayTrigger>
@@ -381,8 +369,7 @@ const WeeklyPlanningGrid = ({
                         </Tab>
                     </Tabs>
 
-                    {/* 4. Footer (Hanya Achievement) */}
-                    <Card.Footer className="py-1 bg-light mt-auto"> {/* mt-auto dorong ke bawah */}
+                    <Card.Footer className="py-1 bg-light mt-auto">
                         <Row className="text-center">
                             <Col>
                                 <small className="text-muted">Achievement:</small>

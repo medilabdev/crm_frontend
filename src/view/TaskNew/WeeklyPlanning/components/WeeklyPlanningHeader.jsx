@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react'; // Added useCallback
 import {
-    Row, Col, Card, Button, Form, Modal, Alert, Spinner
+    Row, Col, Card, Button, Form, Modal, Alert, Spinner, InputGroup
 } from 'react-bootstrap';
 import Select from 'react-select';
 import CreatableSelect from 'react-select/creatable';
@@ -10,7 +10,7 @@ import {
     faPlus, faCalendarAlt, faBuilding, faRefresh
 } from '@fortawesome/free-solid-svg-icons';
 import { usePlanningValidation } from '../hooks/usePlanningValidation';
-
+import CreateBranchModal from './CreateBranchModal';
 // Utils
 import { formatDate, getWeekStartDate, formatDateForAPI } from '../utils/dateUtils';
 
@@ -25,13 +25,16 @@ const WeeklyPlanningHeader = ({
     onMonthChange,
     onCreatePlanning, 
     loading = false, 
-    hasExistingPlanning = false 
+    hasExistingPlanning = false,
+    onRefetchBranches
 }) => {
   // Local state for create modal
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [createLoading, setCreateLoading] = useState(false);
     const [createError, setCreateError] = useState(null);
-    
+    const [showCreateBranchModal, setShowCreateBranchModal] = useState(false);
+
+
     const handleOpenCreateModal = () => {
         setCreateError(null); // Clear previous errors
         setShowCreateModal(true);
@@ -40,6 +43,20 @@ const WeeklyPlanningHeader = ({
     const handleCloseCreateModal = () => {
         if (createLoading) return; 
         setShowCreateModal(false);
+    };
+
+    const handleShowCreateBranchModal = () => setShowCreateBranchModal(true);
+    const handleHideCreateBranchModal = () => setShowCreateBranchModal(false);
+
+    const handleBranchCreated = (newBranchData) => {
+        console.log('Branch baru dibuat:', newBranchData, 'Memicu refetch...');
+        // Panggil fungsi refetch dari parent (index.jsx)
+        if (onRefetchBranches) {
+            onRefetchBranches();
+        }
+        // Opsional: Langsung pilih branch baru?
+        const newOption = { value: newBranchData.uid, label: newBranchData.name };
+        onBranchChange(newOption); 
     };
 
     const handleSubmitCreate = async (e) => {
@@ -72,25 +89,35 @@ const WeeklyPlanningHeader = ({
             <Card.Body>
                 <Row className="align-items-center">
                     {/* Branch Selection */}
-                    <Col md={4} className="mb-3 mb-md-0"> {/* Responsiveness */}
+                    <Col md={4} className="mb-3 mb-md-0">
                         <Form.Group>
                             <Form.Label className="fw-bold">
-                                <FontAwesomeIcon icon={faBuilding} className="me-2" />
-                                Branch *
+                                <FontAwesomeIcon icon={faBuilding} className="me-2" /> Branch *
                             </Form.Label>
-                            {/* ✅ Select Branch sudah benar */}
-                            <Select
-                                value={selectedBranch}
-                                onChange={onBranchChange} // Panggil prop dari index.jsx
-                                options={branchOptions} // Dari prop (hasil useBranches)
-                                placeholder="Select branch..."
-                                isSearchable
-                                isClearable
-                                isLoading={loading} // Gabungkan loading state
-                                isDisabled={loading}
-                                styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }} // Fix z-index jika perlu
-                                menuPortalTarget={document.body}
-                            />
+                            {/* ✅ 5. Tambahkan InputGroup & Tombol "+" */}
+                            <InputGroup>
+                                <Select
+                                    className="flex-grow-1" // Agar select mengisi sisa ruang
+                                    value={selectedBranch}
+                                    onChange={onBranchChange}
+                                    options={branchOptions}
+                                    placeholder="Select branch..."
+                                    isSearchable
+                                    isClearable
+                                    isLoading={loading}
+                                    isDisabled={loading}
+                                    styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                    menuPortalTarget={document.body}
+                                />
+                                <Button 
+                                    variant="outline-secondary" 
+                                    onClick={handleShowCreateBranchModal}
+                                    disabled={loading}
+                                    title="Create New Branch"
+                                >
+                                    <FontAwesomeIcon icon={faPlus} />
+                                </Button>
+                            </InputGroup>
                         </Form.Group>
                     </Col>
 
@@ -204,6 +231,12 @@ const WeeklyPlanningHeader = ({
                 </Button>
             </Modal.Footer>
         </Modal>
+
+        <CreateBranchModal 
+            show={showCreateBranchModal}
+            onHide={handleHideCreateBranchModal}
+            onBranchCreated={handleBranchCreated} // Kirim callback
+        />
 
         </>
     );

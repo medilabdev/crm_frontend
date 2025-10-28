@@ -40,7 +40,7 @@ const PlanningDetailModal = ({
   createPlanMaster // Fungsi dari parent untuk CREATE master BARU via API
 }) => {
 
-    
+  // console.log('[MODAL] Prop weeklyPlanMasters Diterima:', weeklyPlanMasters);
   // State lokal untuk form detail
   const [formData, setFormData] = useState({
     weekly_plan_master_uid: '',

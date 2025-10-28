@@ -1,13 +1,7 @@
-/**
- * useWeeklyPlanningState.js - SOLVED VERSION
- * Hook for managing weekly planning state, relying on BE for day calculations.
- */
+
 import { useState, useCallback, useMemo } from 'react';
-// ⛔️ No longer importing calculateDayStatistics
-// ✅ Import SOLVED versions from utils
 import { calculateWeekStatistics, calculatePlanningStatistics } from '../utils/calculationUtils';
 
-// Helper to provide default calculations if BE returns null/undefined
 const getDefaultCalculations = () => ({
   total_weekly_plan: 0,
   total_weekly_report: 0,
@@ -75,7 +69,6 @@ export const useWeeklyPlanningState = (initialData = null) => {
         const updatedDays = week.days?.map(day => {
           if (day.uid === dayUid) {
             const updatedDetails = [...day.weeklyPlanningDetails, detailData];
-            // ⛔️ NO RECALCULATION HERE! Trust the refetch to bring correct calculations.
             return { ...day, weeklyPlanningDetails: updatedDetails };
           }
           return day;
@@ -107,32 +100,65 @@ export const useWeeklyPlanningState = (initialData = null) => {
   }, []);
 
   const updateSingleDay = useCallback((weekUid, updatedDayData) => {
-    console.log(`updateSingleDay: Mengupdate hari ${updatedDayData.uid} di minggu ${weekUid}`);
+    console.log(`[STATE UPDATE] updateSingleDay: Mengupdate hari ${updatedDayData.uid} di minggu ${weekUid}`);
+    // Log #1: Data day baru yang diterima dari handler (index.jsx)
+    console.log(`[STATE UPDATE] 1. Data Day Baru Diterima:`, JSON.stringify(updatedDayData, null, 2));
 
-    setWeeks(prevWeeks => prevWeeks.map(week => {
-      if (week.uid === weekUid) {
-        const updatedDays = week.days?.map(day => {
-          if (day.uid === updatedDayData.uid) {
-            return {
-                ...updatedDayData, 
-                weeklyPlanningDetails: updatedDayData.weeklyPlanningDetails || updatedDayData.weekly_planning_details || [],
-                outsidePlanningDetails: updatedDayData.outsidePlanningDetails || updatedDayData.outside_planning_details || []
-            };
-          }
-          return day;
+    setWeeks(prevWeeks => {
+        const newWeeks = prevWeeks.map(week => {
+            if (week.uid === weekUid) {
+                console.log(`[STATE UPDATE] -> Mencocokkan Week UID: ${weekUid}`);
+                const updatedDays = week.days?.map(day => {
+                    if (day.uid === updatedDayData.uid) {
+                        console.log(`   --> Mencocokkan Day UID: ${updatedDayData.uid}`);
+                        // Log #2: Nilai is_working_day DARI updatedDayData (API)
+                        console.log(`       2. is_working_day DARI API:`, updatedDayData?.is_working_day);
+
+                        const finalUpdatedDay = { // Buat objek final
+                            ...updatedDayData,
+                            weeklyPlanningDetails: updatedDayData.weeklyPlanningDetails || updatedDayData.weekly_planning_details || [],
+                            outsidePlanningDetails: updatedDayData.outsidePlanningDetails || updatedDayData.outside_planning_details || []
+                        };
+
+                        // Log #3: Nilai is_working_day DI OBJEK FINAL hari ini
+                        console.log(`       3. is_working_day DI OBJEK FINAL:`, finalUpdatedDay?.is_working_day);
+                        return finalUpdatedDay; // Kembalikan objek yang sudah digabung
+                    }
+                    return day; // Kembalikan hari lain apa adanya
+                });
+
+                // Log #4: Cek is_working_day di array updatedDays (setelah map selesai)
+                const checkDayInUpdated = updatedDays?.find(d => d.uid === updatedDayData.uid);
+                console.log(`   <-- 4. is_working_day DI updatedDays (setelah map):`, checkDayInUpdated?.is_working_day);
+
+
+                // Hitung ulang statistik mingguan
+                const updatedWeekStats = calculateWeekStatistics({
+                    ...week, // Gunakan metadata week lama
+                    days: updatedDays, // Gunakan array days baru
+                });
+                console.log(`   <-- Statistik Minggu Dihitung Ulang:`, updatedWeekStats);
+
+                // Kembalikan objek week baru
+                const finalUpdatedWeek = { ...week, days: updatedDays, statistics: updatedWeekStats };
+
+                 // Log #5: Cek is_working_day di objek week final (sebelum return)
+                 const checkDayInFinalWeek = finalUpdatedWeek.days?.find(d => d.uid === updatedDayData.uid);
+                 console.log(` <- 5. is_working_day DI OBJEK WEEK FINAL:`, checkDayInFinalWeek?.is_working_day);
+
+                return finalUpdatedWeek;
+            }
+            // Jika bukan minggu yang dicari, kembalikan apa adanya
+            return week;
         });
 
-        const updatedWeekStats = calculateWeekStatistics({
-          ...week,
-          days: updatedDays,
-        });
-        return { ...week, days: updatedDays, statistics: updatedWeekStats };
-      }
+        // Log #6: Seluruh state weeks baru SEBELUM di-set
+        console.log('[STATE UPDATE] 6. State weeks BARU (akan di-set):', JSON.stringify(newWeeks, null, 2));
 
-      return week;
-    }))
+        return newWeeks; // Kembalikan state baru ke setWeeks
+    });
 
-  }, [calculateWeekStatistics]);
+  }, [calculateWeekStatistics]); // Pastikan dependensi benar
 
 
   // --- Selection management (remains the same) ---

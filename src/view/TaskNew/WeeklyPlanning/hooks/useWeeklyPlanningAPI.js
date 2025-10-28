@@ -257,6 +257,7 @@ export const useWeeklyPlanMasters = () => {
     
     try {
       const response = await weeklyPlanMasterService.getAll();
+      // console.log('[HOOK] Data Master Mentah dari API:', response?.data);
       setPlanMasters(response.data || []);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to fetch plan masters');

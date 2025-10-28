@@ -16,7 +16,8 @@ const WeeklyPlanning = () => {
     const [selectedBranch, setSelectedBranch] = useState(null);
     const [currentPlanningUid, setCurrentPlanningUid] = useState(null);
 
-    const { branches, loading: branchesLoading } = useBranches();
+    const { branches, loading: branchesLoading, refetch: refetchBranches } = useBranches(); // Ambil fungsi refetch
+
     const { planMasters: weeklyPlanMasters, loading: planMastersLoading, createPlanMaster } = useWeeklyPlanMasters();
 
     const {
@@ -43,6 +44,7 @@ const WeeklyPlanning = () => {
     } = useWeeklyPlanningState(null); 
 
     const combinedPlanningData = useMemo(() => {
+        console.log('[useMemo] Recalculating combinedPlanningData...'); // <-- Log ini
         if (!planning) {
             return null;
         }
@@ -191,6 +193,7 @@ const WeeklyPlanning = () => {
             if (response && response.status === 'success' && response.data) {
                 const updatedDayData = response.data; // Respons berisi objek Day baru
                 console.log('✅ Day status toggled. Updating state:', updatedDayData.uid);
+                console.log('[HANDLER] Data Day dari API:', JSON.stringify(updatedDayData, null, 2));
                 // Panggil state updater
                 updateSingleDay(weekUid, updatedDayData); 
                 // Opsional: Tampilkan notifikasi sukses (misal pakai SweetAlert)
@@ -361,6 +364,7 @@ const WeeklyPlanning = () => {
                     selectedBranch={selectedBranch}
                     selectedMonth={selectedMonth}
                     branches={branches}
+                    onRefetchBranches={refetchBranches}
                     // weeklyPlanMasters={weeklyPlanMasters} // Prop ini tidak dipakai header lagi
                     onBranchChange={handleBranchChange}
                     onMonthChange={handleMonthChange}
