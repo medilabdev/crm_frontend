@@ -180,14 +180,23 @@ const Deals = () => {
   };
 
   const getDeals = async (
-    token,
-    term,
-    ownerDeals,
-    formSearch,
-    pagination,
-    retryCount = 0
+  token,
+  term,
+  ownerDeals,
+  formSearch,
+  pagination,
+  retryCount = 0
   ) => {
     try {
+      // --- FUNGSI HELPER BARU ---
+      // Fungsi kecil untuk format tanggal ke YYYY-MM-DD
+      const formatDate = (date) => {
+        if (!date) return null; // Jika null, kembalikan null
+        // 'sv' (Swedish locale) kebetulan pakai format YYYY-MM-DD
+        return date.toLocaleDateString('sv'); 
+      };
+      // -------------------------
+
       const params = {};
       if (term) {
         params.search = term;
@@ -208,14 +217,19 @@ const Deals = () => {
       }
       params.page = pagination.page;
       params.limit = pagination.limit;
+      
+      // --- PERUBAHAN DI SINI ---
+      // Gunakan fungsi 'formatDate' saat mengirim ke params
       params.created_at = {
-        start: startCreated,
-        end: endCreated,
+        start: formatDate(startCreated),
+        end: formatDate(endCreated),
       };
       params.updated_at = {
-        start: startUpdated,
-        end: endUpdated,
+        start: formatDate(startUpdated),
+        end: formatDate(endUpdated),
       };
+      // -------------------------
+
       const response = await axios.get(
         `${process.env.REACT_APP_BACKEND_URL}/deals`,
         {
@@ -225,14 +239,13 @@ const Deals = () => {
           params: params,
         }
       );
-      setDataDeals(response.data?.data || []); // Default ke array kosong jika 'data' null/undefined
-      setTotalRows(response.data?.pagination?.totalData || 0); // Default ke 0
+      setDataDeals(response.data?.data || []);
+      setTotalRows(response.data?.pagination?.totalData || 0);
       setPending(false);
 
     } catch (error) {
       
-      // --- PERBAIKAN BLOCK 'CATCH' ---
-
+      // --- Block 'catch' lo yang sudah benar ---
       if (
         error.response && 
         error.response.status === 401 &&
@@ -240,40 +253,34 @@ const Deals = () => {
       ) {
         localStorage.clear();
         window.location.href = "/login";
-
       } else if (error.response && error.response.status === 429) {
-        // Handle 429 Too Many Requests
         const maxRetries = 3;
         if (retryCount < maxRetries) {
           setTimeout(() => {
-            // FIX 2: Masukkan SEMUA argumen saat retry
             getDeals(
               token,
               term,
               ownerDeals,
               formSearch,
               pagination,
-              retryCount + 1 // Kirim retryCount yang sudah ditambah
+              retryCount + 1
             );
-          }, 2000); // Tunggu 2 detik sebelum retry
+          }, 2000);
         } else {
           console.error(
             "Max retry attempts reached. Unable to complete the request."
           );
-          setPending(false); // Matikan loading jika gagal retry
+          setPending(false);
         }
-
       } else if (error.response && error.response.status === 404) {
-        // Handle 404 Not Found (ini sudah benar)
         setDataDeals([]);
         setTotalRows(0);
-        setPending(false); // Pastikan matikan loading
-
+        setPending(false);
       } else {
         console.error("Error fetching deals:", error.message || error);
-        setDataDeals([]); // Set ke array kosong agar UI tidak crash
-        setTotalRows(0);  // Set ke 0
-        setPending(false); // Matikan loading
+        setDataDeals([]);
+        setTotalRows(0);
+        setPending(false);
       }
     }
   };
@@ -467,19 +474,15 @@ const Deals = () => {
 
   const handleCreatedChange = (dates) => {
     const [start, end] = dates;
-    const startDateOnly = start ? start.toLocaleDateString() : null
-    const endDateOnly = end ? end.toLocaleDateString() : null
-    setStartCreated(startDateOnly);
-    setEndCreated(endDateOnly);
+    setStartCreated(start);
+    setEndCreated(end);
   };
 
   const handleUpdatedChange = (dates) => {
     const [start, end] = dates;
-    const startDateOnly = start ? start.toLocaleDateString() : null
-    const endDateOnly = end ? end.toLocaleDateString() : null
-    setStartUpdated(startDateOnly);
-    setEndUpdated(endDateOnly);
-  };
+    setStartUpdated(start); // Simpan Date object-nya
+    setEndUpdated(end);
+  }
 
   const handleExportClick = () => {
     setShowExportModal(true);
@@ -628,8 +631,9 @@ const Deals = () => {
                       <label htmlFor="date">Created</label>  <br />
                       <DatePicker
                         selectsRange
-                        startDate={startCreated ? new Date(startCreated) : null}
-                        endDate={endCreated ? new Date(endCreated) : null}
+                        startDate={startCreated}
+                        endDate={endCreated}
+                        placeholder="Select Date"
                         onChange={handleCreatedChange}
                         isClearable
                         className="form-control"
@@ -639,8 +643,9 @@ const Deals = () => {
                     <div className="mb-1">
                       <label htmlFor="date">Updated</label> <br />
                       <DatePicker
-                        selectsRange startDate={startUpdated ? new Date(startUpdated) : null}
-                        endDate={endUpdated ? new Date(endUpdated) : null}
+                        selectsRange
+                        startDate={startUpdated}
+                        endDate={endUpdated}
                         onChange={handleUpdatedChange}
                         isClearable
                         className="form-control"

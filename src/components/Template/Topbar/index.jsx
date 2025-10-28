@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
 import Image from "../../../../src/assets/img/LOGO_MEDIALYS_ICON.png";
-import ImageIss from "../../../../src/assets/img/iss.png";
-import Medika from "../../../../src/assets/img/medika.png";
 import IconImage from "../../../../src/assets/img/man.png";
 import "./style.css";
 import axios from "axios";
@@ -61,7 +59,8 @@ function Topbar() {
       })
       .catch((error) => console.error(error));
   };
-  const resultImage = process.env.REACT_APP_BACKEND_URL === "https://api-crm.medilabjakarta.id/api" ? Image : process.env.REACT_APP_BACKEND_URL === "https://api-crm-medika.medilabjakarta.id/api" ? Medika : ImageIss;
+
+
   // console.log(isSidebarToggled);
   return (
     <header id="header" className="header fixed-top d-flex align-items-center">
