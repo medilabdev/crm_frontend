@@ -18,6 +18,37 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSackDollar } from "@fortawesome/free-solid-svg-icons";
 
 
+const HppUploadModal = ({ show, onClose, onFileSelect, onSubmit }) => {
+  return (
+      <Modal show={show} onHide={onClose} centered>
+          <Modal.Header closeButton>
+              <Modal.Title>Upload HPP File</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+              <p>To move this deal to "Closed Won", you must upload the HPP file.</p>
+              <Form.Group controlId="hppFile">
+                  <Form.Label><span className="text-danger">*</span> HPP File (PDF, XLSX, DOC)</Form.Label>
+                  <Form.Control 
+                      type="file" 
+                      accept=".pdf,.xlsx,.xls,.doc,.docx"
+                      onChange={(e) => onFileSelect(e.target.files[0])}
+                      required
+                  />
+              </Form.Group>
+          </Modal.Body>
+          <Modal.Footer>
+              <Button variant="secondary" onClick={onClose}>
+                  Cancel
+              </Button>
+              <Button variant="primary" onClick={onSubmit}>
+                  Confirm & Save Deal
+              </Button>
+          </Modal.Footer>
+      </Modal>
+  );
+};
+
+
 const EditDeals = () => {
   const token = localStorage.getItem("token");
   const { uid } = useParams();
@@ -755,160 +786,136 @@ const EditDeals = () => {
       setSelectedPipeline(stageObject.uid);
   };
 
-  const HppUploadModal = ({ show, onClose, onFileSelect, onSubmit }) => {
-    return (
-        <Modal show={show} onHide={onClose} centered>
-            <Modal.Header closeButton>
-                <Modal.Title>Upload HPP File</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                <p>To move this deal to "Closed Won", you must upload the HPP file.</p>
-                <Form.Group controlId="hppFile">
-                    <Form.Label><span className="text-danger">*</span> HPP File (PDF, XLSX, DOC)</Form.Label>
-                    <Form.Control 
-                        type="file" 
-                        accept=".pdf,.xlsx,.xls,.doc,.docx"
-                        onChange={(e) => onFileSelect(e.target.files[0])}
-                        required
-                    />
-                </Form.Group>
-            </Modal.Body>
-            <Modal.Footer>
-                <Button variant="secondary" onClick={onClose}>
-                    Cancel
-                </Button>
-                <Button variant="primary" onClick={onSubmit}>
-                    Confirm & Save Deal
-                </Button>
-            </Modal.Footer>
-        </Modal>
-    );
-  };
 
-  console.log("LIVE STATE of products:", products);
+  
+  const performSubmit = () => {
+      // Logika diambil dari handleSubmit
+      const formData = new FormData();
+      formData.append("_method", "put");
 
-  const handleSubmit = (e) => {
-        console.log("STALE STATE in handleSubmit:", products);
+      formData.append("deal_name", valueDeals.deal_name);
+      formData.append("deal_size", valueDeals.deal_size);
+      if (valueDeals.priority_uid) {
+          formData.append("priority_uid", valueDeals.priority_uid);
+      }
+      formData.append("deal_status", valueDeals.deal_status);
+      formData.append("deal_category", valueDeals.deal_category);
+      formData.append("project_category_uid", valueDeals.project_category_uid || "");
 
-    e.preventDefault();
-    const userPosition = localStorage.getItem('position_name');
-    const isSalesManager = userPosition?.toLowerCase() === 'sales manager';
+      formData.append("staging_uid", selectedPipeline ?? "");
+      formData.append("company_uid", valueDeals.company_uid || "");
+      formData.append("owner_user_uid", valueDeals.owner_user_uid);
+      formData.append("file", selectFile || ""); // <-- Pastikan 'selectFile' ada di state
 
-    const currentSelectedStage = pipeline.find(p => p.uid === selectedPipeline);
-    const selectedStageName = currentSelectedStage?.name;
-
-    if (isSalesManager && selectedStageName === 'Closed Won' && !hppFile) {
-        setShowHppModal(true); 
-        return;
-    }
-
-    const formData = new FormData();
-    formData.append("_method", "put");
-
-    formData.append("deal_name", valueDeals.deal_name);
-    formData.append("deal_size", valueDeals.deal_size);
-    if (valueDeals.priority_uid) {
-        formData.append("priority_uid", valueDeals.priority_uid);
-    }
-    formData.append("deal_status", valueDeals.deal_status);
-    formData.append("deal_category", valueDeals.deal_category);
-    formData.append("project_category_uid", valueDeals.project_category_uid || "");
-
-    formData.append("staging_uid", selectedPipeline ?? "");
-    formData.append("company_uid", valueDeals.company_uid || "");
-    formData.append("owner_user_uid", valueDeals.owner_user_uid);
-    formData.append("file", selectFile || "");
-
-    if (hppFile) {
-        formData.append("hpp_file", hppFile);
-    }
+      if (hppFile) {
+          formData.append("hpp_file", hppFile); // <-- Ini akan keisi
+      }
 
 
-    if (valueDeals.planned_implementation_date) {
-        const date = new Date(valueDeals.planned_implementation_date);
-        const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-        formData.append("planned_implementation_date", formattedDate);
-    }
+      if (valueDeals.planned_implementation_date) {
+          const date = new Date(valueDeals.planned_implementation_date);
+          const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+          formData.append("planned_implementation_date", formattedDate);
+      }
 
-    if (valueDeals.next_project_date) {
-        const date = new Date(valueDeals.next_project_date);
-        const formattedDate = `${date.getFullYear()}-${String(
-            date.getMonth() + 1
-        ).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-        formData.append("next_project_date", formattedDate);
-    }
+      if (valueDeals.next_project_date) {
+          const date = new Date(valueDeals.next_project_date);
+          const formattedDate = `${date.getFullYear()}-${String(
+              date.getMonth() + 1
+          ).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+          formData.append("next_project_date", formattedDate);
+      }
 
-    mentionUsers.forEach((ment, index) => {
-      formData.append(`mention_user[${index}]`, ment);
-    });
-    combineCont.forEach((com, index) => {
-      formData.append(`contact_person[${index}]`, com);
-    });
+      mentionUsers.forEach((ment, index) => {
+        formData.append(`mention_user[${index}]`, ment);
+      });
+      
+      // Pastikan 'combineCont' ada di scope ini
+      combineCont.forEach((com, index) => { 
+        formData.append(`contact_person[${index}]`, com);
+      });
 
-   const productsFromStorage = JSON.parse(localStorage.getItem("DataProduct") || "[]");
+      const productsFromStorage = JSON.parse(localStorage.getItem("DataProduct") || "[]");
 
+      if (productsFromStorage.length > 0) {
+        productsFromStorage.forEach((product, index) => {
+          formData.append(`products[${index}][product_uid]`, product.product_uid || "");
+          formData.append(`products[${index}][product_name]`, product.product_name || "");
+          formData.append(`products[${index}][price]`, product.price || 0);
 
-   if (productsFromStorage.length > 0) {
-     productsFromStorage.forEach((product, index) => {
-      formData.append(`products[${index}][product_uid]`, product.product_uid || "");
-      formData.append(`products[${index}][product_name]`, product.product_name || "");
-      formData.append(`products[${index}][price]`, product.price || 0);
+          formData.append(`products[${index}][qty]`, product.qty || 1);
+          formData.append(`products[${index}][discount_type]`, product.discount_type || "none");
+          formData.append(`products[${index}][discount]`, product.discount || 0);
+          formData.append(`products[${index}][total_price]`, product.total_price || 0);
+        });
+      }
 
-      formData.append(`products[${index}][qty]`, product.qty || 1);
-      formData.append(`products[${index}][discount_type]`, product.discount_type || "none");
-      formData.append(`products[${index}][discount]`, product.discount || 0);
-      formData.append(`products[${index}][total_price]`, product.total_price || 0);
-     });
-   }
-
-
-
-    formData.append("notes", valueDeals.notes ? valueDeals.notes : "");
+      formData.append("notes", valueDeals.notes ? valueDeals.notes : "");
 
       console.log("--- FORM DATA SENT TO BACKEND ---");
       for (const pair of formData.entries()) {
         console.log(pair[0] + ": " + pair[1]);
       }
 
-    // for (const pair of formData.entries()) {
-    //   console.log(pair[0] + ": " + pair[1]);
-    // }
-    setButtonDisabled(true);
-    axios
-      .post(`${process.env.REACT_APP_BACKEND_URL}/deals/${uid} `, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => {
-        Swal.fire({
-          title: res.data.message,
-          text: "Successfully updated deals",
-          icon: "success",
-        }).then((res) => {
-          if (res.isConfirmed) {
-            localStorage.removeItem("DataProduct");
-            window.location.reload();
-          }
-        });
-      })
-      .catch((err) => {
-        // console.log(err);
-        if (err.response) {
+      setButtonDisabled(true);
+      axios
+        .post(`${process.env.REACT_APP_BACKEND_URL}/deals/${uid} `, formData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((res) => {
           Swal.fire({
-            text: err.response.data.message,
-            icon: "warning",
+            title: res.data.message,
+            text: "Successfully updated deals",
+            icon: "success",
+          }).then((res) => {
+            if (res.isConfirmed) {
+              localStorage.removeItem("DataProduct");
+              window.location.reload();
+            }
           });
-        }
-      });
+        })
+        .catch((err) => {
+          if (err.response) {
+            Swal.fire({
+              text: err.response.data.message,
+              icon: "warning",
+            });
+          }
+          setButtonDisabled(false); // <-- Jangan lupa balikin kalo error
+        });
   };
+
+  const handleSubmit = (e) => {
+      // Hapus console.log stale state, udah nggak relevan
+      // console.log("STALE STATE in handleSubmit:", products);
+
+      e.preventDefault();
+      const userPosition = localStorage.getItem('position_name');
+      const isSalesManager = userPosition?.toLowerCase() === 'sales manager';
+
+      const currentSelectedStage = pipeline.find(p => p.uid === selectedPipeline);
+      const selectedStageName = currentSelectedStage?.name;
+
+      // Ini adalah 'Si Penjaga Gerbang'
+      if (isSalesManager && selectedStageName === 'Closed Won' && !hppFile) {
+          setShowHppModal(true); // Buka modal
+          return; // Berhenti. Jangan lakukan apa-apa lagi.
+      }
+
+      // Kalo lolos dari gerbang (misal: bukan 'Closed Won' ATAU HPP sudah ada),
+      // langsung panggil 'Si Mesin Submit'
+      performSubmit();
+  };
+
 
   const currentSelectedStage = pipeline.find(p => p.uid === selectedPipeline);
   // console.log("Current HPP File:", hppFile);
-  console.log("Company from localStorage:", companyStorage);
-  console.log("Company from state:", company);
-  console.log("Contact from state:", contact);
-  console.log("Contact from localStorage:", contactLocalStorage);
+  // console.log("Company from localStorage:", companyStorage);
+  // console.log("Company from state:", company);
+  // console.log("Contact from state:", contact);
+  // console.log("Contact from localStorage:", contactLocalStorage);
 
   return (
     <body id="body">
@@ -1485,13 +1492,30 @@ const EditDeals = () => {
           </form>
         </div>
 
-      <HppUploadModal
+        <HppUploadModal
           show={showHppModal}
-          onClose={() => setShowHppModal(false)}
-          onFileSelect={(file) => setHppFile(file)}
-          onSubmit={() => {
+          onClose={() => {
+              console.log("MODAL DITUTUP");
               setShowHppModal(false);
-              handleSubmit(new Event('submit'));
+              setHppFile(null); 
+          }}
+          onFileSelect={(file) => {
+              console.log("1. FILE DIPILIH:", file); // Cek ini muncul di console
+              setHppFile(file);
+          }}
+          onSubmit={() => {
+              console.log("2. TOMBOL SUBMIT DIKLIK");
+              console.log("3. HPP STATE SAAT SUBMIT:", hppFile); // Cek ini null atau enggak
+
+              if (!hppFile) {
+                  alert('Please select an HPP file first.');
+                  console.log("4. SUBMIT GAGAL, FILE KOSONG");
+                  return; 
+              }
+              
+              console.log("5. SUBMIT BERHASIL, MENJALANKAN performSubmit");
+              setShowHppModal(false);
+              performSubmit();
           }}
       />
 

@@ -51,7 +51,7 @@ const SingleDeals = () => {
   const handleShowProduct = () => setShowAddProduct(true);
   const [allProductData, setAllProductData] = useState([]);
   const [mentionUsers, setMentionUsers] = useState([]);
-  const [dealSize, setDealSize] = useState([]);
+  const [dealSize, setDealSize] = useState(null);
   const [showHppModal, setShowHppModal] = useState(false);
   const [hppFile, setHppFile] = useState(null);
   const [price, setPrice] = useState(0); // Tidak diperlukan lagi
@@ -737,6 +737,7 @@ const SingleDeals = () => {
 
   const currentSelectedStage = pipeline.find(p => p.uid === selectedPipeline);
 
+  console.log('deal size state:', dealSize);
 
   return (
     <body id="body">
@@ -833,15 +834,16 @@ const SingleDeals = () => {
                   </FloatingLabel>
 
                   <FloatingLabel
-                    label={<span>Deal Size</span>}
-                    className="mb-3"
+                      label={<span>Deal Size</span>}
+                      className="mb-3"
                   >
-                    <Form.Control
-                      type="number"
-                      placeholder="text"
-                      value={price}
-                      onChange={handlePrice}
-                    />
+                      <Form.Control
+                          type="number"
+                          placeholder="text"
+                          value={dealSize || ''} // <-- GANTI dari price
+                          onChange={(e) => setDealSize(e.target.value)} // <-- GANTI dari handlePrice
+                          name="deal_size"
+                      />
                   </FloatingLabel>
                   <FloatingLabel label="Deal Status" className="mb-3">
                     <Form.Control
