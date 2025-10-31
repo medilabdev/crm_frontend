@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'; // Added useCallback
+import React, { useState, useEffect, useCallback, useMemo } from 'react'; // <-- Pastikan 'useMemo' ada
 import {
     Modal,
     Form,
@@ -9,6 +9,8 @@ import {
     Spinner,
     // InputGroup // Unused import?
 } from 'react-bootstrap';
+import Select from 'react-select'; 
+import CreatableSelect from 'react-select/creatable';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     faSave,
@@ -19,11 +21,12 @@ import {
     faExternalLinkAlt // Icon for 'Outside Activity'
 } from '@fortawesome/free-solid-svg-icons';
 
+import { useCategories, useWeeklyPlanMasters } from '../hooks/useWeeklyPlanningAPI';
 // Custom hooks
 import { usePlanningValidation } from '../hooks/usePlanningValidation'; // Assuming path is correct
 
 const OutsideActivityModal = ({
-  show,
+    show,
     onHide,
     onSave,
     editingDetail = null,
@@ -32,12 +35,18 @@ const OutsideActivityModal = ({
 }) => {
     const [formData, setFormData] = useState({
         activity_text: '',
-        notes: '' 
+        notes: '',
+        weekly_plan_master_uid: '',
     });
 
     const [saveLoading, setSaveLoading] = useState(false);
     const [saveError, setSaveError] = useState(null);
 
+    
+    const [isCreatingMaster, setIsCreatingMaster] = useState(false); // <-- [PENAMBAHAN]
+    const { categories, loading: categoriesLoading } = useCategories(); 
+    const { planMasters, loading: planMastersLoading } = useWeeklyPlanMasters();
+    const [selectedCategory, setSelectedCategory] = useState(null);
 
   // Validation hook
     const {
@@ -49,31 +58,90 @@ const OutsideActivityModal = ({
   
     useEffect(() => {
         if (show) {
-        if (editingDetail) {
-            // Edit mode - populate with existing data
-            setFormData({
-                activity_text: editingDetail.activity_text || '',
-                notes: editingDetail.notes || ''
-            });
-        } else {
-            // Create mode - reset form
-            setFormData({
-            activity_text: '',
-            notes: ''
-            });
+            if (editingDetail) {
+                // Edit mode - populate with existing data
+                setFormData({
+                    activity_text: editingDetail.activity_text || '',
+                    notes: editingDetail.notes || '',
+                    weekly_plan_master_uid: editingDetail.weekly_plan_master_uid || '',
+                });
+
+                if (planMasters.length > 0 && categories.length > 0) {
+                    const master = planMasters.find(m => m.uid === editingDetail.weekly_plan_master_uid);
+                    if (master) {
+                        const category = categories.find(c => c.uid === master.weekly_category_uid);
+                        setSelectedCategory(category ? { value: category.uid, label: category.category_name } : null);
+                    } else {
+                        setSelectedCategory(null);
+                    }
+                }
+            } else {
+                // Create mode - reset form
+                setFormData({
+                    activity_text: '',
+                    notes: '',
+                    weekly_plan_master_uid: ''
+                });
+
+                setSelectedCategory(null);
+            }
+            clearErrors();
+            setSaveError(null);
         }
-        clearErrors();
-        setSaveError(null);
-        }
-    }, [show, editingDetail, clearErrors]);
+    }, [show, editingDetail, categories, planMasters, clearErrors]);
 
     const handleFormChange = (field, value) => {
         setFormData(prev => ({ ...prev, [field]: value }));
         setSaveError(null);
     };
 
+    const filteredMasterOptions = useMemo(() => {
+        if (!selectedCategory) return [];
+
+        return planMasters.filter(master => master && master.weekly_category_uid === selectedCategory.value).map(master => ({
+            value: master.uid,
+            label: master.plan_text,
+        }));
+    }, [selectedCategory, planMasters]);
+
+
+    const stableHandleFormChange = useCallback(handleFormChange, []);
+
+    const handlePlanMasterChange = useCallback((selectedOption) => {
+        if (selectedOption) {
+            stableHandleFormChange('weekly_plan_master_uid', selectedOption.value);
+            stableHandleFormChange('activity_text', selectedOption.label);
+        } else {
+            stableHandleFormChange('weekly_plan_master_uid', '');
+            stableHandleFormChange('activity_text', '');
+        }
+    }, [stableHandleFormChange]);
+
+    const handleCreatePlanMaster = useCallback(
+        inputValue => {
+            const newOption = {
+            value: null,
+            label: inputValue,
+            __isNew__: true,
+            };
+            handlePlanMasterChange(newOption);
+            return Promise.resolve(newOption);
+        },
+        [handlePlanMasterChange]
+    );
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (!selectedCategory) {
+            setSaveError("Please select a category.");
+            return;
+        }
+
+        if (!formData.weekly_plan_master_uid && !formData.activity_text) { 
+            setSaveError("Client or Activity Text is required.");
+            return;
+        }
 
         // ⚠️ Ensure validation hook checks 'activity_text'
         if (!validateOutsidePlanningForm(formData)) {
@@ -87,11 +155,11 @@ const OutsideActivityModal = ({
             // ✅ Prepare submission data with keys matching BE model
             const submitData = {
                 activity_text: formData.activity_text,
-                notes: formData.notes
-                // 🗑️ Removed quantity, week/day UIDs (handled by parent/API path)
+                notes: formData.notes,
+                weekly_plan_master_uid: formData.weekly_plan_master_uid,
+                weekly_category_uid: selectedCategory.value,
             };
 
-            // ✅ Call parent save handler (index.jsx -> API -> Refetch)
             const success = await onSave(submitData, editingDetail);
 
             if (success) {
@@ -151,30 +219,98 @@ const OutsideActivityModal = ({
                 {saveError && ( <Alert variant="danger" className="mb-3">{saveError}</Alert> )}
 
                 <Row>
+
+                    {/* Dropdown 1: Kategori */}
+                    <Col md={12} className="mb-3">
+                        <Form.Group>
+                        <Form.Label>Category *</Form.Label>
+
+                        <Select
+                        // Filter 'Internal/Office' karena ini modal 'Outside'
+                        // options={categories.filter(c => c.label !== 'Internal/Office')}
+                        options={categories}
+                        value={selectedCategory}
+                        onChange={option => {
+                        setSelectedCategory(option);
+                        handleFormChange('weekly_plan_master_uid', '');
+                        handleFormChange('activity_text', '');
+                        }}
+                        placeholder="Select Category..."
+                        isLoading={categoriesLoading}
+                        isDisabled={saveLoading || isCreatingMaster}
+                        styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                        menuPortalTarget={document.body}
+                        />
+
+                        {saveError && !selectedCategory && (
+                            <Form.Text className="text-danger">{saveError}</Form.Text>
+                        )}
+                        </Form.Group>
+                    </Col>
+
+                    <Col md={12} className="mb-3">
+                        <Form.Group>
+                            <Form.Label>Klien / Master *</Form.Label>
+
+                            <CreatableSelect
+                            isClearable
+                            options={filteredMasterOptions}
+                            value={
+                                filteredMasterOptions.find(
+                                opt => opt.value === formData.weekly_plan_master_uid
+                                ) ||
+                                (formData.activity_text && !formData.weekly_plan_master_uid
+                                ? { value: null, label: formData.activity_text }
+                                : null)
+                            }
+                            onChange={handlePlanMasterChange}
+                            onCreateOption={handleCreatePlanMaster}
+                            placeholder={
+                                selectedCategory
+                                ? 'Select or create a Client...'
+                                : 'Select a Category first'
+                            }
+                            isLoading={isCreatingMaster || planMastersLoading}
+                            isDisabled={!selectedCategory || saveLoading || isCreatingMaster}
+                            styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                            menuPortalTarget={document.body}
+                            formatCreateLabel={inputValue => `New Client: "${inputValue}"`}
+                            />
+                        </Form.Group>
+                        </Col>
+
                     {/* Activity Description */}
                     <Col md={12} className="mb-3">
                         <Form.Group>
                             <Form.Label>
-                                <FontAwesomeIcon icon={faExternalLinkAlt} className="me-2" />
-                                Activity Description *
+                            <FontAwesomeIcon icon={faExternalLinkAlt} className="me-2" />
+                            Activity Description *
                             </Form.Label>
+
                             <Form.Control
-                                as="textarea"
-                                rows={3}
-                                value={formData.activity_text} // ✅ Bind ke activity_text
-                                onChange={(e) => handleFormChange('activity_text', e.target.value)}
-                                placeholder="Describe the outside activity..."
-                                isInvalid={!!errors?.activity_text} // ✅ Validasi activity_text
-                                disabled={saveLoading}
+                            as="textarea"
+                            rows={3}
+                            value={formData.activity_text}
+                            onChange={e => handleFormChange('activity_text', e.target.value)}
+                            placeholder="Choose Client/Master to fill..."
+                            isInvalid={!!errors?.activity_text}
+                            readOnly={!!formData.weekly_plan_master_uid} // Read-only jika master dipilih
+                            disabled={saveLoading || isCreatingMaster}
                             />
+
                             <Form.Control.Feedback type="invalid">
-                                {errors?.activity_text}
+                            {errors?.activity_text}
                             </Form.Control.Feedback>
+
                             <Form.Text className="text-muted">
-                                Describe what activity was performed outside of regular planning.
+                            {formData.weekly_plan_master_uid
+                                ? 'Activity description is auto-filled from selected Client/Master.'
+                                : 'Select Client/Master or remove selection to type manual description.'}
                             </Form.Text>
                         </Form.Group>
-                    </Col>
+                        </Col>
+
+
 
                     {/* Activity Suggestions */}
                     <Col md={12} className="mb-3">
@@ -191,8 +327,6 @@ const OutsideActivityModal = ({
                             ))}
                         </div>
                     </Col>
-
-                    {/* 🗑️ BAGIAN QUANTITY & IMPACT SUDAH DIHAPUS */}
 
                     {/* Notes */}
                     <Col md={12}> {/* ✅ Full width */}

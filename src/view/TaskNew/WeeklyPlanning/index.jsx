@@ -5,6 +5,7 @@ import Sidebar from '../../../components/Template/Sidebar';
 import Main from '../../../components/Template/Main';
 import WeeklyPlanningHeader from './components/WeeklyPlanningHeader';
 import WeeklyPlanningGrid from './components/WeeklyPlanningGrid';
+import ImportMastersModal from './components/ImportMastersModal';
 import CalculationStats from './components/CalculationStats';
 import { useWeeklyPlanningAPI, useBranches, useWeeklyPlanMasters } from './hooks/useWeeklyPlanningAPI';
 import { useWeeklyPlanningState } from './hooks/useWeeklyPlanningState';
@@ -15,10 +16,14 @@ const WeeklyPlanning = () => {
     const [selectedMonth, setSelectedMonth] = useState(new Date());
     const [selectedBranch, setSelectedBranch] = useState(null);
     const [currentPlanningUid, setCurrentPlanningUid] = useState(null);
+    const [showImportModal, setShowImportModal] = useState(false);
+    const [recapData, setRecapData] = useState(null);
+    const [recapLoading, setRecapLoading] = useState(false);
+    const [recapError, setRecapError] = useState(null);
 
     const { branches, loading: branchesLoading, refetch: refetchBranches } = useBranches(); // Ambil fungsi refetch
 
-    const { planMasters: weeklyPlanMasters, loading: planMastersLoading, createPlanMaster } = useWeeklyPlanMasters();
+    const { planMasters: weeklyPlanMasters, loading: planMastersLoading, createPlanMaster, refetch: refetchPlanMasters } = useWeeklyPlanMasters();
 
     const {
         loading: apiLoading,
@@ -29,6 +34,7 @@ const WeeklyPlanning = () => {
         days: apiDays,  
         details,
         outsideDetails,
+        planningRecap,
     } = useWeeklyPlanningAPI();
 
     const {
@@ -130,6 +136,34 @@ const WeeklyPlanning = () => {
     useEffect(() => {
     console.log('📦 Fetching planning for', selectedBranch?.value, selectedMonth);
     }, [selectedBranch, selectedMonth]);
+
+    useEffect(() => {
+        // Jalankan hanya jika ada planning aktif
+        if (currentPlanningUid) {
+            setRecapLoading(true);
+            setRecapError(null);
+
+            // Format tanggal ke YYYY-MM-DD
+            const monthString = selectedMonth.toISOString().split('T')[0];
+
+            planningRecap
+            .getRecap(monthString)
+            .then(response => {
+                // Simpan objek recap dari response
+                setRecapData(response.data);
+            })
+            .catch(err => {
+                setRecapError(err.message || 'Failed to fetch recap');
+            })
+            .finally(() => {
+                setRecapLoading(false);
+            });
+        } else {
+            // Jika tidak ada planning, reset data recap
+            setRecapData(null);
+        }
+        }, [currentPlanningUid, selectedMonth, planningRecap, weeks]);
+
 
     const handleCreatePlanning = useCallback(async () => {
         if (!selectedBranch?.value) return false;
@@ -325,6 +359,12 @@ const WeeklyPlanning = () => {
         }
     }, [currentPlanningUid, outsideDetails, updateSingleDay]);
 
+    const handleImportSuccess = () => {
+        console.log("Impor sukses! Me-refetch data master...");
+        refetchPlanMasters(); 
+        setShowImportModal(false); 
+    };
+
     if (error && !loading) { 
         return (
             <>
@@ -374,17 +414,20 @@ const WeeklyPlanning = () => {
                     // onCreatePlanMaster={createPlanMaster} // Prop ini tidak dipakai header lagi
                     loading={loading} 
                     hasExistingPlanning={!!currentPlanningUid} 
+                    onShowImportModal={() => setShowImportModal(true)}
                 />
-                {currentPlanningUid && hasSignificantData && ( // Tambah cek currentPlanningUid
-                    <Row className="mb-4">
-                        <Col>
-                            <CalculationStats
-                                dashboardStats={getDashboardStats} // Kirim hasil hook kalkulasi
-                                // planning={planning} // Prop ini tidak dipakai CalculationStats lagi
-                            />
-                        </Col>
-                    </Row>
+                {currentPlanningUid && (
+                <Row className="mb-4">
+                    <Col>
+                    <CalculationStats
+                        recapData={recapData}
+                        isLoading={recapLoading}
+                        error={recapError}
+                    />
+                    </Col>
+                </Row>
                 )}
+
                 
                 {/* Tampilkan Loading Stats jika sedang load tapi sudah ada planning */}
                 {currentPlanningUid && loading && !error && (
@@ -410,6 +453,12 @@ const WeeklyPlanning = () => {
                                         loading={loading}
                                         createPlanMaster={createPlanMaster}
                                         handleToggleWorkingDay={handleToggleWorkingDay}
+                                    />
+
+                                    <ImportMastersModal 
+                                        show={showImportModal}
+                                        onHide={() => setShowImportModal(false)}
+                                        onImportSuccess={handleImportSuccess}
                                     />
                                 </Card.Body>
                             </Card>

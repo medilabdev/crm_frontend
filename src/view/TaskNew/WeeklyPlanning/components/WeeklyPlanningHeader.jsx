@@ -7,7 +7,7 @@ import CreatableSelect from 'react-select/creatable';
 import DatePicker from 'react-datepicker';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-    faPlus, faCalendarAlt, faBuilding, faRefresh
+    faPlus, faCalendarAlt, faBuilding, faRefresh, faFileExcel
 } from '@fortawesome/free-solid-svg-icons';
 import { usePlanningValidation } from '../hooks/usePlanningValidation';
 import CreateBranchModal from './CreateBranchModal';
@@ -26,7 +26,8 @@ const WeeklyPlanningHeader = ({
     onCreatePlanning, 
     loading = false, 
     hasExistingPlanning = false,
-    onRefetchBranches
+    onRefetchBranches,
+    onShowImportModal
 }) => {
   // Local state for create modal
     const [showCreateModal, setShowCreateModal] = useState(false);
@@ -88,6 +89,14 @@ const WeeklyPlanningHeader = ({
         <Card className="mb-4 shadow-sm"> {/* Tambah shadow untuk konsistensi */}
             <Card.Body>
                 <Row className="align-items-center">
+
+                    <Button 
+                        variant="outline-success" 
+                        onClick={onShowImportModal} // <-- Panggil handler dari parent
+                        title="Import Masters from Excel"
+                    >
+                        <FontAwesomeIcon icon={faFileExcel} /> Import
+                    </Button>
                     {/* Branch Selection */}
                     <Col md={4} className="mb-3 mb-md-0">
                         <Form.Group>

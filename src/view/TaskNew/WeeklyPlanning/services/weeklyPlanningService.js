@@ -486,7 +486,7 @@ export const masterImportService = {
 export const planningRecapService = {
   async getRecap(month) {
     try {
-      const response = await apiClient.get(API_ENDPOINTS.WEEKLY_PLANNING.PLANNING_RECAP, {
+      const response = await apiClient.get(API_ENDPOINTS.WEEKLY_PLANNING.RECAP, {
         headers: getAuthHeaders(),
         params: { month: month }, // Kirim sebagai query param
       });
