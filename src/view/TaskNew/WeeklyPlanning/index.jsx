@@ -346,6 +346,8 @@ const WeeklyPlanning = () => {
         );
     }
 
+    console.log('Weekly planning master', weeklyPlanMasters);
+
     return (
     <>
     <Topbar />

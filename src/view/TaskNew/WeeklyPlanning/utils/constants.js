@@ -8,9 +8,12 @@ export const API_ENDPOINTS = {
   WEEKLY_PLANNING: {
     BASE: '/weekly-planning',
     BRANCHES: '/weekly-planning/branches',
+    CATEGORIES: '/weekly-planning/categories',
+    IMPORT_EXCEL: '/weekly-planning/weekly-plan-masters/import-excel/plan/masters',
     PLAN_MASTERS: '/weekly-planning/weekly-plan-masters',
     PLANNINGS: '/weekly-planning/plannings',
     PLANNING_DETAIL: (uid) => `/weekly-planning/plannings/${uid}`,
+    RECAP: '/weekly-planning/recap',
     WEEKS: (planningUid) => `/weekly-planning/plannings/${planningUid}/weeks`,
     WEEK_DETAIL: (planningUid, weekUid) => `/weekly-planning/plannings/${planningUid}/weeks/${weekUid}`,
     DAYS: (planningUid, weekUid) => `/weekly-planning/plannings/${planningUid}/weeks/${weekUid}/days`,

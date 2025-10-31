@@ -1,8 +1,3 @@
-/**
- * Weekly Planning API Hook
- * Custom hook for managing API operations with loading, error states, and caching
- */
-
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { 
   branchService, 
@@ -12,7 +7,10 @@ import {
   weeklyPlanningDayService,
   weeklyPlanningDetailService,
   outsidePlanningDetailService,
-  reportSuggestionsService
+  reportSuggestionsService,
+  weeklyCategoryService, 
+  masterImportService,
+  planningRecapService
 } from '../services/weeklyPlanningService';
 
 export const useWeeklyPlanningAPI = () => {
@@ -52,6 +50,13 @@ export const useWeeklyPlanningAPI = () => {
     [apiCall]
   );
 
+  const categories = useMemo(
+    () => ({
+      getAll: () => apiCall(weeklyCategoryService.getAll),
+    }),
+    [apiCall]
+  );
+
   // Weekly Plan Master operations
   const planMasters = useMemo(
     () => ({
@@ -59,6 +64,13 @@ export const useWeeklyPlanningAPI = () => {
       create: (data) => apiCall(weeklyPlanMasterService.create, data),
       update: (uid, data) => apiCall(weeklyPlanMasterService.update, uid, data),
       delete: (uid) => apiCall(weeklyPlanMasterService.delete, uid),
+    }),
+    [apiCall]
+  );
+
+  const masterImport = useMemo(
+    () => ({
+      importExcel: (fileData) => apiCall(masterImportService.importExcel, fileData),
     }),
     [apiCall]
   );
@@ -79,6 +91,14 @@ export const useWeeklyPlanningAPI = () => {
       update: (uid, data) =>
         apiCall(weeklyPlanningService.update, uid, data),
       delete: (uid) => apiCall(weeklyPlanningService.delete, uid),
+    }),
+    [apiCall]
+  );
+
+  const planningRecap = useMemo(
+    () => ({
+      // 'month' adalah string 'Y-m-d'
+      getRecap: (month) => apiCall(planningRecapService.getRecap, month), 
     }),
     [apiCall]
   );
@@ -212,6 +232,9 @@ export const useWeeklyPlanningAPI = () => {
     details,
     outsideDetails,
     reportSuggestions,
+    categories,
+    masterImport,
+    planningRecap
   };
 };
 
@@ -243,6 +266,37 @@ export const useBranches = () => {
     loading,
     error,
     refetch: fetchBranches
+  };
+};
+
+export const useCategories = () => {
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const fetchCategories = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await weeklyCategoryService.getAll();
+      setCategories(response.data || []);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to fetch categories');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
+
+  return {
+    categories,
+    loading,
+    error,
+    refetch: fetchCategories
   };
 };
 

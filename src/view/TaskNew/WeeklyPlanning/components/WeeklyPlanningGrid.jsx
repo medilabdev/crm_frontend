@@ -164,6 +164,9 @@ const WeeklyPlanningGrid = ({
         const performance = stats.week_planning_pct !== undefined
             ? getPerformanceIndicator(stats.week_planning_pct)
             : { color: 'secondary', label: 'N/A' };
+        
+        const totalVisitPct = (stats.week_planning_pct || 0) + (stats.week_outside_pct || 0);
+
 
         return (
         <Card className="mb-3 border-primary">
@@ -172,53 +175,52 @@ const WeeklyPlanningGrid = ({
                 <Col md={4}> {/* Info Week */}
                 <h6 className="mb-0">
                     <FontAwesomeIcon icon={faCalendarWeek} className="me-2" />
-                    {/* ✅ Akses nama & nomor minggu dari data week */}
                     {week.week_name || `Week ${week.week_number}`}
                 </h6>
                 <small>
-                    {/* ✅ Akses tanggal & format (asumsi formatDate ada) */}
                     {formatDate(new Date(week.start_date || week.week_start_date))} - {formatDate(new Date(week.end_date || week.week_end_date))}
                 </small>
                 </Col>
-                <Col md={6}> {/* Statistik Week */}
-                <Row className="text-center">
-                    <Col>
-                    <small>Plan</small>
-                    {/* ✅ Gunakan key yg benar: total_weekly_plan */}
-                    <div className="fw-bold">{stats.total_weekly_plan || 0}</div>
-                    </Col>
-                    <Col>
-                    <small>Report</small>
-                    {/* ✅ Gunakan key yg benar: total_weekly_report */}
-                    <div className="fw-bold">{stats.total_weekly_report || 0}</div>
-                    </Col>
-                    <Col>
-                    <small>Outside</small>
-                    {/* ✅ Gunakan key yg benar: total_outside */}
-                    <div className="fw-bold">{stats.total_outside || 0}</div>
-                    </Col>
-                    <Col>
-                    <small>% Plan</small>
-                    {/* ✅ Gunakan key yg benar & format (asumsi formatPercentage ada) */}
-                    <div className="fw-bold">{formatPercentage(stats.week_planning_pct)}</div>
-                    </Col>
-                    <Col>
-                    <small>% Outside</small>
-                    {/* ✅ Gunakan key yg benar & format */}
-                    <div className="fw-bold">{formatPercentage(stats.week_outside_pct)}</div>
-                    </Col>
-                    <Col>
-                    <small>Perf.</small>
-                    {/* ✅ Gunakan hasil getPerformanceIndicator */}
-                    <div><Badge bg={performance.color}>{performance.label}</Badge></div>
-                    </Col>
-                </Row>
+                <Col md={6}>
+                    {/* Ubah Row agar punya 7 kolom */}
+                    <Row className="text-center" xs={7}> 
+                        <Col>
+                            <small>Plan</small>
+                            <div className="fw-bold">{stats.total_weekly_plan || 0}</div>
+                        </Col>
+                        <Col>
+                            <small>Report</small>
+                            <div className="fw-bold">{stats.total_weekly_report || 0}</div>
+                        </Col>
+                        <Col>
+                            <small>Outside</small>
+                            <div className="fw-bold">{stats.total_outside || 0}</div>
+                        </Col>
+                        <Col>
+                            <small>% Plan</small>
+                            <div className="fw-bold">{formatPercentage(stats.week_planning_pct)}</div>
+                        </Col>
+                        {/* ✅ Kolom % Outside sudah ada, pastikan datanya benar */}
+                        <Col>
+                            <small>% Outside</small>
+                            <div className="fw-bold">{formatPercentage(stats.week_outside_pct)}</div>
+                        </Col>
+                        <Col>
+                            <small>Perf.</small>
+                            <div><Badge bg={performance.color}>{performance.label}</Badge></div>
+                        </Col>
+                        {/* ✅ Kolom BARU: Total Kunjungan (Total Report) */}
+                        <Col>
+                            <small>Total Persentase Kunjungan</small>
+                            <div className="fw-bold">{formatPercentage(totalVisitPct)} </div>
+                        </Col>
+                    </Row>
                 </Col>
                 <Col md={2} className="text-end">
-                <small className="text-muted">
-                    {/* ✅ Akses jumlah hari */}
-                    Days: {week.days?.length || 0}
-                </small>
+                    <small className="text-muted">
+                        {/* ✅ Akses jumlah hari */}
+                        Days: {week.days?.length || 0}
+                    </small>
                 </Col>
             </Row>
             </Card.Header>
@@ -316,7 +318,13 @@ const WeeklyPlanningGrid = ({
                                                     </Button>
                                                 </OverlayTrigger>
                                                 <OverlayTrigger overlay={<Tooltip>Delete</Tooltip>}>
-                                                    <Button variant="outline-danger" size="sm" onClick={() => handleDeleteDetail(week.uid, day.uid, detail.uid)}>
+                                                    <Button
+                                                        variant="outline-danger"
+                                                        size="sm"
+                                                        // ✅ Panggil handler bersih
+                                                        onClick={() => handleDeleteDetail(week, day, detail)}
+                                                        title='Delete Planning Detail'
+                                                    >
                                                         <FontAwesomeIcon icon={faTrash} />
                                                     </Button>
                                                 </OverlayTrigger>
@@ -357,7 +365,13 @@ const WeeklyPlanningGrid = ({
                                                     </Button>
                                                 </OverlayTrigger>
                                                 <OverlayTrigger overlay={<Tooltip>Delete</Tooltip>}>
-                                                    <Button variant="outline-danger" size="sm" onClick={() => confirmDeleteOutsideDetail(week.uid, day.uid, outside.uid, outside.activity_text)}>
+                                                    <Button
+                                                        variant="outline-danger"
+                                                        size="sm"
+                                                        // ✅ Panggil handler bersih
+                                                        onClick={() => confirmDeleteOutsideDetail(week, day, outside)}
+                                                        title="Delete Outside Activity"
+                                                    >
                                                         <FontAwesomeIcon icon={faTrash} />
                                                     </Button>
                                                 </OverlayTrigger>
@@ -369,16 +383,32 @@ const WeeklyPlanningGrid = ({
                         </Tab>
                     </Tabs>
 
-                    <Card.Footer className="py-1 bg-light mt-auto">
+                    <Card.Footer className="py-2 bg-light mt-auto"> {/* Beri padding py-2 */}
                         <Row className="text-center">
-                            <Col>
-                                <small className="text-muted">Achievement:</small>
-                                <div className={`fw-bold text-${stats.daily_planning_pct >= 80 ? 'success' : stats.daily_planning_pct >= 60 ? 'warning' : 'danger'}`}>
+                            {/* Kolom Plan Achievement */}
+                            <Col xs={6} className="border-end"> {/* xs={6} = 50% width, border-end = garis pemisah */}
+                                <small className="text-muted" title="Plan vs Report">Plan Achv.</small>
+                                <div 
+                                    className={`fw-bold text-${stats.daily_planning_pct >= 80 ? 'success' : stats.daily_planning_pct >= 60 ? 'warning' : 'danger'}`}
+                                    title={`Plan: ${stats.total_weekly_plan} | Report: ${stats.total_weekly_report}`}
+                                >
                                     {`${stats.daily_planning_pct || 0}%`}
+                                </div>
+                            </Col>
+                            {/* Kolom Outside Percentage */}
+                            <Col xs={6}>
+                                <small className="text-muted" title="Outside vs Plan">Outside %</small>
+                                <div 
+                                    className={`fw-bold text-warning`} // Beri warna warning
+                                    title={`Outside: ${stats.total_outside} | Plan: ${stats.total_weekly_plan}`}
+                                >
+                                    {/* ✅ Tampilkan daily_outside_pct */}
+                                    {`${stats.daily_outside_pct || 0}%`}
                                 </div>
                             </Col>
                         </Row>
                     </Card.Footer>
+
                 </Card.Body>
             </Card>
         );
@@ -403,42 +433,37 @@ const WeeklyPlanningGrid = ({
         );
     };
 
-    const handleDeleteDetail = async (week, day, detail) => {
+    const handleDeleteDetail = (week, day, detail) => {
+        // 'week', 'day', 'detail' adalah argumen dari tombol
         Swal.fire({
             title: 'Hapus Detail Planning?',
             text: `Anda yakin ingin menghapus plan "${detail.weekly_plan_text || 'ini'}"?`,
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#d33', 
+            confirmButtonColor: '#d33',
             cancelButtonColor: '#3085d6',
             confirmButtonText: 'Ya, Hapus!',
             cancelButtonText: 'Batal'
         }).then(async (result) => { 
             if (result.isConfirmed) {
                 try {
-                    console.log(`Mencoba hapus Planning Detail UID: ${detail.uid}`);
-                    await onDeletePlanningDetail(week.uid, day.uid, detail.uid);
-                    Swal.fire(
-                        'Dihapus!',
-                        'Detail planning berhasil dihapus.',
-                        'success'
-                    );
+                    console.log(`[Grid Handler] Mengirim UID: w:${week.uid}, d:${day.uid}, dt:${detail.uid}`);
+                    // Panggil prop dari index.jsx
+                    await onDeletePlanningDetail(week.uid, day.uid, detail.uid); 
+                    
+                    Swal.fire('Dihapus!', 'Detail planning berhasil dihapus.', 'success');
                 } catch (error) {
                     console.error('Gagal menghapus planning detail:', error);
-                    Swal.fire(
-                        'Error!',
-                        'Gagal menghapus detail planning. Coba lagi.',
-                        'error'
-                    );
+                    Swal.fire('Error!', 'Gagal menghapus detail planning. Coba lagi.', 'error');
                 }
             }
         });
     };
 
-    const confirmDeleteOutsideDetail = (weekUid, dayUid, outsideUid, outsideText) => {
+    const confirmDeleteOutsideDetail = (week, day, outside) => {
         Swal.fire({
             title: 'Hapus Outside Activity?',
-            text: `Anda yakin ingin menghapus aktivitas "${outsideText || 'ini'}"?`,
+            text: `Anda yakin ingin menghapus aktivitas "${outside.activity_text || 'ini'}"?`,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
@@ -448,23 +473,17 @@ const WeeklyPlanningGrid = ({
         }).then(async (result) => {
             if (result.isConfirmed) {
                 try {
-                    console.log(`Mencoba hapus Outside Activity UID: ${outsideUid}`);
-
-                    if (typeof onDeleteOutsideDetail === 'function') {
-                        await onDeleteOutsideDetail(weekUid, dayUid, outsideUid);
-                        Swal.fire('Dihapus!', 'Outside activity berhasil dihapus.', 'success');
-                    } else {
-                        console.error("Prop onDeleteOutsideDetail is not a function!");
-                        throw new Error("Delete handler not available."); // Lempar error agar ditangkap catch
-
-                    }
+                    console.log(`[Grid Handler] Mengirim UID: w:${week.uid}, d:${day.uid}, dt:${outside.uid}`);
+                    // Panggil prop dari index.jsx
+                    await onDeleteOutsideDetail(week.uid, day.uid, outside.uid);
+                    Swal.fire('Dihapus!', 'Outside activity berhasil dihapus.', 'success');
                 } catch (error) {
-                    console.error('Gagal menghapus outside activity:', error);
+                    console.error('Gagal menghapus outside detail:', error);
                     Swal.fire('Error!', 'Gagal menghapus outside activity. Coba lagi.', 'error');
                 }
             }
         });
-    }
+    };
     
     const handleDeleteOutsideDetail = async (week, day, detail) => {
         // ✅ Konfirmasi sebelum delete

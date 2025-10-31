@@ -451,4 +451,51 @@ export const reportSuggestionsService = {
   }
 };
 
+export const weeklyCategoryService = {
+  async getAll() {
+    try {
+      const response = await apiClient.get(API_ENDPOINTS.WEEKLY_PLANNING.CATEGORIES, {
+        headers: getAuthHeaders(),
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching weekly categories:', error);
+      throw error;
+    }
+  }
+}
+
+export const masterImportService = {
+  async importExcel(fileData) {
+    try {
+      const headers = getAuthHeaders();
+      const response = await apiClient.post(API_ENDPOINTS.WEEKLY_PLANNING.MASTER_IMPORT, fileData, {
+        headers: {
+          ...headers,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error importing Excel file:', error);
+      throw error;
+    }
+  },
+};
+
+export const planningRecapService = {
+  async getRecap(month) {
+    try {
+      const response = await apiClient.get(API_ENDPOINTS.WEEKLY_PLANNING.PLANNING_RECAP, {
+        headers: getAuthHeaders(),
+        params: { month: month }, // Kirim sebagai query param
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching planning recap:', error);
+      throw error;
+    }
+  }
+}
+
 
