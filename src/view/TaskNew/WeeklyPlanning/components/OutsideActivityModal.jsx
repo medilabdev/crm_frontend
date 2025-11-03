@@ -32,6 +32,7 @@ const OutsideActivityModal = ({
     editingDetail = null,
     selectedWeek = null, 
     selectedDay = null, 
+    createPlanMaster
 }) => {
     const [formData, setFormData] = useState({
         activity_text: '',
@@ -59,7 +60,6 @@ const OutsideActivityModal = ({
     useEffect(() => {
         if (show) {
             if (editingDetail) {
-                // Edit mode - populate with existing data
                 setFormData({
                     activity_text: editingDetail.activity_text || '',
                     notes: editingDetail.notes || '',
@@ -69,14 +69,13 @@ const OutsideActivityModal = ({
                 if (planMasters.length > 0 && categories.length > 0) {
                     const master = planMasters.find(m => m.uid === editingDetail.weekly_plan_master_uid);
                     if (master) {
-                        const category = categories.find(c => c.uid === master.weekly_category_uid);
-                        setSelectedCategory(category ? { value: category.uid, label: category.category_name } : null);
+                        const category = categories.find(c => c.value === master.weekly_category_uid);
+                        setSelectedCategory(category || null);
                     } else {
                         setSelectedCategory(null);
                     }
                 }
             } else {
-                // Create mode - reset form
                 setFormData({
                     activity_text: '',
                     notes: '',
@@ -110,85 +109,130 @@ const OutsideActivityModal = ({
     const handlePlanMasterChange = useCallback((selectedOption) => {
         if (selectedOption) {
             stableHandleFormChange('weekly_plan_master_uid', selectedOption.value);
-            stableHandleFormChange('activity_text', selectedOption.label);
         } else {
             stableHandleFormChange('weekly_plan_master_uid', '');
-            stableHandleFormChange('activity_text', '');
         }
     }, [stableHandleFormChange]);
 
     const handleCreatePlanMaster = useCallback(
-        inputValue => {
+        (inputValue) => {
             const newOption = {
-            value: null,
-            label: inputValue,
-            __isNew__: true,
+                value: null,
+                label: inputValue,
+                __isNew__: true,
             };
             handlePlanMasterChange(newOption);
+
+            stableHandleFormChange('activity_text', inputValue);
+
             return Promise.resolve(newOption);
         },
-        [handlePlanMasterChange]
+        [handlePlanMasterChange, stableHandleFormChange]
     );
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        if (!selectedCategory) {
-            setSaveError("Please select a category.");
-            return;
-        }
-
-        if (!formData.weekly_plan_master_uid && !formData.activity_text) { 
-            setSaveError("Client or Activity Text is required.");
-            return;
-        }
-
-        // ⚠️ Ensure validation hook checks 'activity_text'
-        if (!validateOutsidePlanningForm(formData)) {
-            return;
-        }
-
-        setSaveLoading(true);
-        setSaveError(null);
-
-        try {
-            // ✅ Prepare submission data with keys matching BE model
-            const submitData = {
-                activity_text: formData.activity_text,
-                notes: formData.notes,
-                weekly_plan_master_uid: formData.weekly_plan_master_uid,
-                weekly_category_uid: selectedCategory.value,
-            };
-
-            const success = await onSave(submitData, editingDetail);
-
-            if (success) {
-                onHide(); // Close modal on success
-            } else {
-                setSaveError('Failed to save outside activity. Please try again.');
-            }
-        } catch (error) {
-            console.error('Save outside activity error:', error);
-            setSaveError('An error occurred while saving.');
-        } finally {
-            setSaveLoading(false);
+    const handleClose = () => {
+        if (!saveLoading) {
+        onHide();
         }
     };
 
-  /**
-   * Handle modal close
-   */
-  const handleClose = () => {
-    if (!saveLoading) {
-      onHide();
-    }
-  };
+    const handleSubmit = async (e) => {
+  e.preventDefault();
 
-  const activitySuggestions = [
-   'Meeting with Client',
-   'Training Session',
-   // ... sisanya
- ];
+  // --- [VALIDASI] ---
+  if (!selectedCategory) {
+    setSaveError("Please select a category.");
+    return;
+  }
+
+  if (!formData.activity_text) {
+    setSaveError("Activity Text is required.");
+    return;
+  }
+
+  if (!validateOutsidePlanningForm(formData)) {
+    return;
+  }
+  // --- [AKHIR VALIDASI] ---
+
+  setSaveLoading(true);
+  setSaveError(null);
+
+  try {
+    // Ambil UID master yang ada, atau siapkan jika baru
+    let finalMasterUid = formData.weekly_plan_master_uid;
+    const isNewMaster = !formData.weekly_plan_master_uid && !!formData.activity_text;
+
+    // --- [LOGIKA CREATE MASTER BARU] ---
+    if (isNewMaster) {
+      if (typeof createPlanMaster !== "function") {
+        setSaveError("createPlanMaster is not available.");
+        setSaveLoading(false);
+        return;
+      }
+
+      setIsCreatingMaster(true);
+      try {
+        // Backend hanya butuh field plan_text (string)
+        const newMasterData = {
+          plan_text: String(formData.activity_text).trim(),
+          // Catatan: weekly_category_uid hanya digunakan sementara di sini
+          weekly_category_uid: selectedCategory?.value,
+        };
+
+        const createdMaster = await createPlanMaster(newMasterData);
+        finalMasterUid = createdMaster?.uid || createdMaster?.id;
+
+        if (!finalMasterUid) {
+          throw new Error("createPlanMaster did not return a valid UID.");
+        }
+      } catch (err) {
+        console.error("Gagal create master:", err);
+        setSaveError(
+          err?.response?.data?.message ||
+          err?.message ||
+          "Gagal membuat master baru."
+        );
+        setSaveLoading(false);
+        return;
+      } finally {
+        setIsCreatingMaster(false);
+      }
+    }
+    // --- [AKHIR LOGIKA CREATE MASTER BARU] ---
+
+    // --- [DATA UNTUK OUTSIDE_PLANNING_DETAILS] ---
+    const submitData = {
+      activity_text: formData.activity_text,
+      notes: formData.notes,
+      weekly_plan_master_uid: finalMasterUid, // hanya kirim UID master
+    };
+    // --------------------------------------------
+
+    const success = await onSave(submitData, editingDetail);
+
+    if (success) {
+      onHide();
+    } else {
+      setSaveError("Failed to save outside activity. Please try again.");
+    }
+  } catch (error) {
+    console.error("Save outside activity error:", error);
+    setSaveError("An error occurred while saving.");
+  } finally {
+    setSaveLoading(false);
+  }
+};
+
+
+
+
+    const activitySuggestions = [
+    'Meeting with Client',
+    'Training Session',
+    ];
+
+    console.log(typeof formData.activity_text);
 
   return (
     <Modal
@@ -226,8 +270,6 @@ const OutsideActivityModal = ({
                         <Form.Label>Category *</Form.Label>
 
                         <Select
-                        // Filter 'Internal/Office' karena ini modal 'Outside'
-                        // options={categories.filter(c => c.label !== 'Internal/Office')}
                         options={categories}
                         value={selectedCategory}
                         onChange={option => {
@@ -287,14 +329,14 @@ const OutsideActivityModal = ({
                             Activity Description *
                             </Form.Label>
 
+                            {/* [FIX BUG 2] Hapus 'readOnly' */}
                             <Form.Control
                             as="textarea"
                             rows={3}
                             value={formData.activity_text}
-                            onChange={e => handleFormChange('activity_text', e.target.value)}
-                            placeholder="Choose Client/Master to fill..."
+                            onChange={(e) => handleFormChange('activity_text', e.target.value)}
+                            placeholder="Write activity description here..."
                             isInvalid={!!errors?.activity_text}
-                            readOnly={!!formData.weekly_plan_master_uid} // Read-only jika master dipilih
                             disabled={saveLoading || isCreatingMaster}
                             />
 
@@ -303,12 +345,12 @@ const OutsideActivityModal = ({
                             </Form.Control.Feedback>
 
                             <Form.Text className="text-muted">
-                            {formData.weekly_plan_master_uid
-                                ? 'Activity description is auto-filled from selected Client/Master.'
-                                : 'Select Client/Master or remove selection to type manual description.'}
+                            {/* [FIX BUG 2] Teks helper baru */}
+                            Anda bisa memilih Klien (untuk mengisi teks) ATAU mengetik manual.
                             </Form.Text>
                         </Form.Group>
                         </Col>
+
 
 
 

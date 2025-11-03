@@ -569,6 +569,7 @@ const WeeklyPlanningGrid = ({
             selectedWeek={selectedWeek}
             selectedDay={selectedDay}
             loading={modalLoading}
+            createPlanMaster={createPlanMaster}
         />
     </div>
     </>

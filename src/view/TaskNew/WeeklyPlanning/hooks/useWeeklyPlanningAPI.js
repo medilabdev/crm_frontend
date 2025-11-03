@@ -320,17 +320,28 @@ export const useWeeklyPlanMasters = () => {
     }
   }, []);
 
-  const createPlanMaster = useCallback(async (planText) => {
+  const createPlanMaster = useCallback(async (payload) => {
     try {
-      const response = await weeklyPlanMasterService.create({ plan_text: planText });
-      // Add to local state for immediate UI update
-      setPlanMasters(prev => [...prev, response.data]);
-      return response.data;
+      const response = await weeklyPlanMasterService.create(payload);
+      const data = response?.data || {};
+
+      // normalisasi agar sama kayak hasil getAll
+      const newMaster = {
+        uid: data.uid ?? data.value ?? null,
+        plan_text: data.plan_text ?? data.label ?? payload.plan_text ?? '',
+        weekly_category_uid: data.weekly_category_uid ?? payload.weekly_category_uid ?? null
+      };
+
+      // update state dengan copy
+      setPlanMasters(prev => [...prev.map(m => ({ ...m })), newMaster]);
+
+      return newMaster;
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to create plan master');
       throw err;
     }
   }, []);
+
 
   useEffect(() => {
     fetchPlanMasters();

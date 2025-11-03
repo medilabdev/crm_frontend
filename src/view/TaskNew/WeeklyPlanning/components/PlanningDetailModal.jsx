@@ -40,6 +40,7 @@ const PlanningDetailModal = ({
   loading = false, // Loading umum dari parent
   createPlanMaster, 
 }) => {
+  const [createdLabel, setCreatedLabel] = useState(null);
 
   const [formData, setFormData] = useState({
     weekly_plan_master_uid: '',
@@ -72,40 +73,66 @@ const PlanningDetailModal = ({
   console.log('Editing Detail di Modal:', editingDetail);
   
   useEffect(() => {
-    if (show) {
-      if (editingDetail) {
-        setFormData({
-          weekly_plan_master_uid: editingDetail.weekly_plan_master_uid || '',
-          weekly_plan_text: editingDetail.weekly_plan_text || '',
-          plan_notes: editingDetail.plan_notes || '',
-          weekly_report_text: editingDetail.weekly_report_text || '',
-          report_notes: editingDetail.report_notes || ''
-        });
+    if (!show) return;
 
-        const master = weeklyPlanMasters.find(m => m.uid === editingDetail.weekly_plan_master_uid);
-        if (master) {
-          const category = categories.find(cat => cat.value === master.weekly_category_uid);
-          setSelectedCategory(category || null);
-        } else {
-          setSelectedCategory(null);
-        }
+    if (editingDetail) {
+      setFormData({
+        weekly_plan_master_uid: editingDetail.weekly_plan_master_uid || '',
+        weekly_plan_text: editingDetail.weekly_plan_text || '',
+        plan_notes: editingDetail.plan_notes || '',
+        weekly_report_text: editingDetail.weekly_report_text || '',
+        report_notes: editingDetail.report_notes || ''
+      });
+
+      const master = weeklyPlanMasters.find(m => m.uid === editingDetail.weekly_plan_master_uid);
+      if (master) {
+        const category = categories.find(cat => cat.value === master.weekly_category_uid);
+        setSelectedCategory(category || null);
       } else {
-        // Reset form untuk detail baru
-        setFormData({
-          weekly_plan_master_uid: '',
-          weekly_plan_text: '',
-          plan_notes: '',
-          weekly_report_text: '',
-          report_notes: ''
-        });
-
         setSelectedCategory(null);
       }
-      clearErrors(); // Hapus error validasi lama
-      setSaveError(null); // Hapus error save lama
-      setCreateMasterError(null); // Hapus error create master lama
+
+      setCreatedLabel(null);
+    } else {
+      // === MODE CREATE ===
+      setFormData({
+        weekly_plan_master_uid: '',
+        weekly_plan_text: '',
+        plan_notes: '',
+        weekly_report_text: '',
+        report_notes: ''
+      });
+
+      // 🚫 jangan reset category di sini
+      // setSelectedCategory(null);
+
+      setCreatedLabel(null);
     }
-  }, [show, editingDetail, clearErrors, categories, weeklyPlanMasters]);
+
+    clearErrors();
+    setSaveError(null);
+    setCreateMasterError(null);
+  }, [show, editingDetail, clearErrors]);
+
+
+  useEffect(() => {
+    if (
+      editingDetail &&
+      !selectedCategory && // belum ke-set
+      categories.length > 0 &&
+      weeklyPlanMasters.length > 0
+    ) {
+      const master = weeklyPlanMasters.find(m => m.uid === editingDetail.weekly_plan_master_uid);
+      if (master) {
+        const category = categories.find(cat => cat.value === master.weekly_category_uid);
+        if (category) {
+          setSelectedCategory(category);
+        }
+      }
+    }
+  }, [editingDetail, selectedCategory, categories, weeklyPlanMasters]);
+
+
 
   const handleFormChange = useCallback((field, value) => {
     setFormData(prev => ({
@@ -131,70 +158,83 @@ const PlanningDetailModal = ({
 
   const handlePlanMasterChange = useCallback((selectedOption) => {
     if (selectedOption) {
-      const newUid = selectedOption.value; // Ini akan jadi UID asli (atau value temp jika error API)
-      const newText = selectedOption.label;
-      console.log(`Update formData: UID=${newUid}, Text=${newText}`);
-      // Update UID dan Text di formData
+      const newUid = selectedOption.value;
       handleFormChange('weekly_plan_master_uid', newUid);
-      handleFormChange('weekly_plan_text', newText);
+      setCreatedLabel(null);
     } else {
-      // Jika pilihan dihapus (clear)
-      console.log('Hapus pilihan plan master...');
       handleFormChange('weekly_plan_master_uid', '');
-      handleFormChange('weekly_plan_text', '');
+      setCreatedLabel(null);
     }
-    console.log('--- Akhir handlePlanMasterChange ---');
-  }, [handleFormChange]); 
+  }, [handleFormChange]);
 
-  const handleCreatePlanMaster = useCallback((inputValue) => {     
-    const newOption = {
-        value: null, 
-        label: inputValue,
-        __isNew__: true 
-    };
+  const handleCreatePlanMaster = useCallback((inputValue) => {
+    setCreatedLabel(inputValue); // simpan label baru biar gak ke-clear
+    setFormData(prev => ({
+      ...prev,
+      weekly_plan_master_uid: null, // kosongin UID master
+      // 🚫 jangan ubah weekly_plan_text di sini
+    }));
+    return { value: null, label: inputValue, __isNew__: true };
+  }, []);
 
-    handlePlanMasterChange(newOption); 
-    return Promise.resolve(newOption);
-  }, [handlePlanMasterChange]);
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Cegah submit HTML biasa
+    e.preventDefault();
 
     if (!selectedCategory) {
-      setSaveError('Kategori wajib dipilih.');
+      setSaveError("Kategori wajib dipilih.");
       return;
     }
 
-    // Validasi form
     if (!validatePlanningDetailForm(formData)) {
-      console.warn('Validasi form gagal.');
-      return; // Stop jika tidak valid
+      console.warn("Validasi form gagal.");
+      return;
     }
 
     setSaveLoading(true);
     setSaveError(null);
 
     try {
-      const submitData = { ...formData, weekly_category_uid: selectedCategory.value };
-      console.log('Submit data detail:', submitData);
+      let finalUid = formData.weekly_plan_master_uid;
 
-      // Panggil fungsi onSave dari parent (index.jsx)
+      // ✅ Buat master baru kalau belum ada UID, pakai createdLabel
+      if (!finalUid && createdLabel) {
+        const newMaster = await createPlanMaster({
+          plan_text: createdLabel, // <--- gunakan label dari select, bukan deskripsi
+          weekly_category_uid: selectedCategory.value,
+        });
+        finalUid = newMaster.uid;
+      }
+
+      const submitData = {
+        ...formData,
+        weekly_plan_master_uid: finalUid,
+        weekly_category_uid: selectedCategory.value,
+      };
+
+      console.log("Submit data detail:", submitData);
+
       const success = await onSave(submitData, editingDetail);
 
       if (success) {
-        console.log('Save detail sukses, tutup modal.');
-        onHide(); // Tutup modal jika sukses
+        console.log("Save detail sukses, tutup modal.");
+        setCreatedLabel(null);
+        onHide();
       } else {
-        console.error('Fungsi onSave melaporkan kegagalan.');
-        setSaveError('Gagal menyimpan detail. Coba lagi.');
+        console.error("Fungsi onSave melaporkan kegagalan.");
+        setSaveError("Gagal menyimpan detail. Coba lagi.");
       }
     } catch (error) {
-      console.error('Error saat save detail tertangkap di modal:', error);
-      setSaveError(error.response?.data?.message || 'Terjadi error tak terduga saat menyimpan detail.');
+      console.error("Error saat save detail tertangkap di modal:", error);
+      setSaveError(
+        error.response?.data?.message ||
+          "Terjadi error tak terduga saat menyimpan detail."
+      );
     } finally {
-      setSaveLoading(false); // Pastikan loading berhenti
+      setSaveLoading(false);
     }
   };
+
 
   // Handler tutup modal (cek loading state)
   const handleClose = () => {
@@ -250,19 +290,29 @@ const PlanningDetailModal = ({
                         <Form.Group>
                             <Form.Label>Category *</Form.Label>
                             <Select
-                                options={categories} 
-                                value={selectedCategory}
-                                onChange={(option) => {
-                                    setSelectedCategory(option);
-                                    handleFormChange('weekly_plan_master_uid', '');
-                                    handleFormChange('weekly_plan_text', '');
-                                }}
-                                placeholder="Select Category..."
-                                isLoading={categoriesLoading}
-                                isDisabled={saveLoading || isCreatingMaster || loading}
-                                styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                                menuPortalTarget={typeof document !== 'undefined' ? document.body : undefined}
+                              options={categories}
+                              value={selectedCategory}
+                              onChange={(option) => {
+                                setSelectedCategory(option);
+                                setCreatedLabel(null);
+
+                                // 🧠 FIX: hanya reset jika bukan edit mode
+                                if (!editingDetail) {
+                                  handleFormChange('weekly_plan_master_uid', '');
+                                  handleFormChange('weekly_plan_text', '');
+                                } else {
+                                  // kalau edit, cukup reset UID master aja (biar gak terikat),
+                                  // tapi biarkan deskripsi tetap.
+                                  handleFormChange('weekly_plan_master_uid', '');
+                                }
+                              }}
+                              placeholder="Select Category..."
+                              isLoading={categoriesLoading}
+                              isDisabled={saveLoading || isCreatingMaster || loading}
+                              styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                              menuPortalTarget={typeof document !== 'undefined' ? document.body : undefined}
                             />
+
                             {saveError && !selectedCategory && (
                                 <Form.Text className="text-danger">
                                     {saveError}
@@ -281,10 +331,9 @@ const PlanningDetailModal = ({
                           options={filteredMasterOptions}
                           value={
                             filteredMasterOptions.find(opt => opt.value === formData.weekly_plan_master_uid)
-                            || (formData.weekly_plan_text && !formData.weekly_plan_master_uid
-                              ? { value: null, label: formData.weekly_plan_text }
-                              : null)
+                            || (createdLabel ? { value: null, label: createdLabel } : null)
                           }
+
                           onChange={handlePlanMasterChange}
                           onCreateOption={handleCreatePlanMaster}
                           placeholder={
@@ -318,36 +367,32 @@ const PlanningDetailModal = ({
                       </Form.Group>
                     </Col>
 
-
                     {/* Weekly Plan Text */}
                     <Col md={12} className="mb-3">
                       <Form.Group>
                         <Form.Label>Plan Description *</Form.Label>
-
                         <Form.Control
                           as="textarea"
                           rows={3}
                           value={formData.weekly_plan_text}
-                          onChange={e => handleFormChange('weekly_plan_text', e.target.value)}
+                          onChange={(e) => handleFormChange('weekly_plan_text', e.target.value)}
                           placeholder="Describe the planned activity..."
                           isInvalid={!!errors?.weekly_plan_text}
-                          readOnly={!!formData.weekly_plan_master_uid}
                           disabled={saveLoading || isCreatingMaster}
                         />
 
                         {formData.weekly_plan_master_uid && (
                           <Form.Text>
-                            Plan text is linked to the selected Client and cannot be edited directly.
+                            {/* [FIX] Teks helper baru */}
+                            Teks deskripsi sudah diisi otomatis. Anda BISA mengubahnya.
                           </Form.Text>
                         )}
 
-                        {/* Pesan error validasi */}
                         <Form.Control.Feedback type="invalid">
                           {errors?.weekly_plan_text}
                         </Form.Control.Feedback>
                       </Form.Group>
                     </Col>
-
 
                     {/* Plan Notes */}
                     <Col md={12} className="mb-3">
