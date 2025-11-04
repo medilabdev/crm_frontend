@@ -484,11 +484,15 @@ export const masterImportService = {
 };
 
 export const planningRecapService = {
-  async getRecap(month) {
+
+  async getRecap(month, branchUid) {
     try {
       const response = await apiClient.get(API_ENDPOINTS.WEEKLY_PLANNING.RECAP, {
         headers: getAuthHeaders(),
-        params: { month: month }, // Kirim sebagai query param
+        params: { 
+          month: month,
+          branch_uid: branchUid
+         },
       });
       return response.data;
     } catch (error) {

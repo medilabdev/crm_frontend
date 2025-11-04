@@ -98,7 +98,7 @@ export const useWeeklyPlanningAPI = () => {
   const planningRecap = useMemo(
     () => ({
       // 'month' adalah string 'Y-m-d'
-      getRecap: (month) => apiCall(planningRecapService.getRecap, month), 
+      getRecap: (month, branchUid) => apiCall(planningRecapService.getRecap, month, branchUid), 
     }),
     [apiCall]
   );

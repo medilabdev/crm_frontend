@@ -1,51 +1,21 @@
-import React from 'react';
+import React from "react";
+import { Card, Row, Col, Alert, Spinner, Badge } from "react-bootstrap";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  Card,
-  Row,
-  Col,
-  Badge,
-  Alert,
-  Spinner,
-  ListGroup,
-} from 'react-bootstrap';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faChartLine,
-  faBullseye,
+  faClipboardList,
+  faCheckCircle,
+  faExternalLinkAlt,
   faCalendarCheck,
-  faUsers,
   faSyncAlt,
+  faBuilding,
+  faUniversity,
+  faUserShield,
+  faEllipsisH,
   faExclamationTriangle,
-  faChartPie,
-} from '@fortawesome/free-solid-svg-icons';
+  faChartLine,
+} from "@fortawesome/free-solid-svg-icons";
 
-/**
- * Helper untuk menentukan warna badge status analisis.
- */
-const getStatusBadgeVariant = analysisText => {
-  switch (analysisText) {
-    case 'Buruk':
-      return 'danger';
-    case 'Ditingkatkan':
-    case 'Kurang':
-      return 'warning';
-    case 'Memadai':
-      return 'success';
-    default:
-      return 'secondary';
-  }
-};
-
-/**
- * Komponen Statistik Rekap Bulanan (CalculationStats)
- * “Dumb component” — hanya menerima data & menampilkan UI.
- */
-const CalculationStats = ({
-  recapData = null,
-  isLoading = false,
-  error = null,
-}) => {
-  /** ---------------- Loading State ---------------- */
+const CalculationStats = ({ recapData = null, isLoading = false, error = null }) => {
   if (isLoading) {
     return (
       <Alert variant="light" className="text-center border py-4 mb-4">
@@ -55,166 +25,147 @@ const CalculationStats = ({
     );
   }
 
-  /** ---------------- Error State ---------------- */
   if (error) {
     return (
       <Alert variant="danger" className="text-center border py-4 mb-4">
-        <FontAwesomeIcon
-          icon={faExclamationTriangle}
-          size="2x"
-          className="mb-3"
-        />
+        <FontAwesomeIcon icon={faExclamationTriangle} size="2x" className="mb-3" />
         <h5>Error Loading Recap</h5>
         <p className="text-muted mb-0">{error}</p>
       </Alert>
     );
   }
 
-  /** ---------------- No Data State ---------------- */
-  if (!recapData || recapData.total_visit === 0) {
+  if (!recapData) {
     return (
       <Alert variant="light" className="text-center border py-4 mb-4">
-        <FontAwesomeIcon
-          icon={faChartLine}
-          size="2x"
-          className="mb-3 text-muted"
-        />
+        <FontAwesomeIcon icon={faChartLine} size="2x" className="mb-3 text-muted" />
         <h5>No Recap Data</h5>
-        <p className="text-muted mb-0">
-          No activities were reported for this month.
-        </p>
+        <p className="text-muted mb-0">No activities were reported for this month.</p>
       </Alert>
     );
   }
 
-  /** ---------------- Data Valid ---------------- */
   const {
-    status,
+    planning,
+    on_planning,
+    off_planning,
     total_visit,
-    total_cust_visit,
     repetition_pct,
-    categories,
+    categories = [],
+    analysis_summary = [],
   } = recapData;
 
-  /** ---------- Performance Card ---------- */
-  const renderPerformanceCard = () => {
-    const analysis = status.analysis;
-    const variant = getStatusBadgeVariant(analysis.plan_achievement);
+  /** ---------- 1️⃣ METRIK UTAMA ---------- */
+  const metricCards = [
+    { title: "Planning", value: planning, icon: faClipboardList, color: "primary" },
+    { title: "On Planning", value: on_planning, icon: faCheckCircle, color: "success" },
+    { title: "Off Planning", value: off_planning, icon: faExternalLinkAlt, color: "warning" },
+    { title: "Total Visit", value: total_visit, icon: faCalendarCheck, color: "info" },
+    { title: "Repetition (Clients >1x)", value: repetition_pct, icon: faSyncAlt, color: "secondary" },
+  ];
 
-    return (
-      <Card className={`bg-${variant} text-white h-100 shadow-sm border-0`}>
-        <Card.Body className="text-center">
-          <h6 className="mb-1 text-uppercase small">Plan Achievement</h6>
-          <h4 className="mb-1">{analysis.plan_achievement}</h4>
-          <h6 className="mb-0 text-capitalize">
-            ({status.achievement_pct}%)
-          </h6>
-        </Card.Body>
-      </Card>
-    );
+  const CATEGORY_ICON_MAP = {
+    "Internal/Office": { icon: faUserShield, color: "secondary" },
+    "Pemerintah": { icon: faUniversity, color: "primary" },
+    "Pendidikan": { icon: faClipboardList, color: "info" },
+    "Perusahaan": { icon: faBuilding, color: "success" },
+    "Asuransi": { icon: faCheckCircle, color: "warning" },
+    "Others": { icon: faEllipsisH, color: "dark" },
   };
 
-  /** ---------- Overview Cards ---------- */
-  const renderOverviewCards = () => {
-    const cardsData = [
-      {
-        title: 'Total Visits',
-        value: total_visit,
-        icon: faCalendarCheck,
-        color: 'success',
-      },
-      {
-        title: 'Unique Clients',
-        value: total_cust_visit,
-        icon: faUsers,
-        color: 'primary',
-      },
-      {
-        title: 'Visit Repetition',
-        value: `${repetition_pct}x`,
-        icon: faSyncAlt,
-        color: 'info',
-      },
-    ];
 
-    return cardsData.map((card, index) => (
-      <Col md={4} key={index} className="mb-3 mb-md-0">
-        <Card className="h-100 border-0 shadow-sm">
-          <Card.Body className="text-center d-flex flex-column justify-content-center">
-            <div className={`text-${card.color} mb-2`}>
-              <FontAwesomeIcon icon={card.icon} size="2x" />
-            </div>
-            <h3 className="mb-0 text-dark fw-bold">{card.value}</h3>
-            <p className="text-muted mb-0 small">{card.title}</p>
-          </Card.Body>
-        </Card>
-      </Col>
-    ));
+  /** ---------- 3️⃣ ANALISA BULANAN ---------- */
+  const getBadgeVariant = (value) => {
+    if (value === "Buruk" || value === "Kurang") return "danger";
+    if (value === "Perlu Ditingkatkan" || value === "Ditingkatkan") return "warning";
+    return "success";
   };
 
-  /** ---------- Category List ---------- */
-  const renderCategoryList = () => (
-    <Card className="h-100 border-0 shadow-sm">
-      <Card.Header>
-        <FontAwesomeIcon icon={faChartPie} className="me-2 text-muted" />
-        <strong>Visit by Category</strong>
-      </Card.Header>
-      <ListGroup
-        variant="flush"
-        style={{ maxHeight: '200px', overflowY: 'auto' }}
-      >
-        {categories
-          .filter(cat => cat.total > 0)
-          .sort((a, b) => b.total - a.total)
-          .map(cat => (
-            <ListGroup.Item
-              key={cat.name}
-              className="d-flex justify-content-between align-items-center"
-            >
-              {cat.name}
-              <Badge bg="primary" pill>
-                {cat.total}
-              </Badge>
-            </ListGroup.Item>
-          ))}
-      </ListGroup>
-    </Card>
-  );
-
-  /** ---------- Render Layout ---------- */
   return (
     <div className="calculation-stats">
-      <Row className="mb-4">
-        <Col md={3} className="mb-3 mb-md-0">
-          {renderPerformanceCard()}
-        </Col>
-        <Col md={9}>
-          <Row>{renderOverviewCards()}</Row>
-        </Col>
+      {/* --- Metrik utama --- */}
+      <h5 className="fw-bold mb-3 text-primary">
+        <FontAwesomeIcon icon={faChartLine} className="me-2" />
+        Ringkasan Kunjungan
+      </h5>
+      <Row className="g-3 mb-4">
+        {metricCards.map((card, idx) => (
+          <Col md={4} lg={3} key={idx}>
+            <Card className="h-100 border-0 shadow-sm">
+              <Card.Body className="text-center">
+                <div className={`text-${card.color} mb-2`}>
+                  <FontAwesomeIcon icon={card.icon} size="2x" />
+                </div>
+                <h3 className="mb-0 fw-bold text-dark">{card.value ?? 0}</h3>
+                <p className="text-muted mb-0 small">{card.title}</p>
+              </Card.Body>
+            </Card>
+          </Col>
+        ))}
       </Row>
 
-      <Row>
-        <Col md={9} className="mb-3 mb-md-0">
-          {renderCategoryList()}
-        </Col>
-        <Col md={3}>
-          <Card className="h-100 border-0 shadow-sm">
-            <Card.Body className="text-center">
-              <h6 className="mb-1 text-uppercase small">Visit Target</h6>
-              <h4
-                className={`mb-1 text-${getStatusBadgeVariant(
-                  status.analysis.visit_target
-                )}`}
-              >
-                {status.analysis.visit_target}
-              </h4>
-              <h6 className="mb-0 text-muted">
-                ({status.target_pct}%)
-              </h6>
-            </Card.Body>
-          </Card>
-        </Col>
+      {/* --- Kategori Visit --- */}
+      <h5 className="fw-bold mb-3 text-primary">
+        <FontAwesomeIcon icon={faBuilding} className="me-2" />
+        Kunjungan Berdasarkan Kategori
+      </h5>
+      <Row className="row-cols-2 row-cols-md-3 row-cols-lg-6 g-3 mb-4">
+        {recapData.categories?.map((cat, idx) => {
+          const { icon, color } = CATEGORY_ICON_MAP[cat.name] || CATEGORY_ICON_MAP["Others"];
+          return (
+            <Col key={idx}>
+              <Card className="h-100 border-0 shadow-sm text-center">
+                <Card.Body className="p-3">
+                  <div className={`text-${color} mb-1`}>
+                    <FontAwesomeIcon icon={icon} size="lg" />
+                  </div>
+                  <h3 className="fw-bold text-dark mb-0">{cat.total ?? 0}</h3>
+                  <p className="text-muted mb-0 small text-truncate">{cat.name}</p>
+                </Card.Body>
+              </Card>
+            </Col>
+          );
+        })}
+
       </Row>
+
+
+      {/* --- Analisa Bulanan --- */}
+      <h5 className="fw-bold mb-3 text-primary">
+        <FontAwesomeIcon icon={faClipboardList} className="me-2" />
+        Analisa Kunjungan Bulanan
+      </h5>
+      <Card className="border-0 shadow-sm">
+        <Card.Body>
+          {analysis_summary.map((item, idx) => (
+            <div
+              key={idx}
+              className="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2"
+            >
+              <div className="flex-grow-1">
+                <strong>{item.title}</strong>
+                <p className="mb-0 text-muted small">{item.basis}</p>
+              </div>
+              <div className="text-end">
+                <h6 className="mb-1 fw-bold text-dark">
+                  {item.percent !== undefined
+                    ? `${item.percent}${idx === 2 ? "x" : "%"}`
+                    : "-"}
+                </h6>
+                <Badge
+                  bg={getBadgeVariant(item.value)}
+                  className="px-3 py-2 fs-6 text-uppercase"
+                >
+                  {item.value}
+                </Badge>
+              </div>
+            </div>
+          ))}
+        </Card.Body>
+      </Card>
+
+
+
     </div>
   );
 };

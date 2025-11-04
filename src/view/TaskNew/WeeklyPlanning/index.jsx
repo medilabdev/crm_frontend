@@ -139,17 +139,19 @@ const WeeklyPlanning = () => {
 
     useEffect(() => {
         // Jalankan hanya jika ada planning aktif
-        if (currentPlanningUid) {
+        if (currentPlanningUid && selectedBranch?.value) {
             setRecapLoading(true);
             setRecapError(null);
 
             // Format tanggal ke YYYY-MM-DD
             const monthString = selectedMonth.toISOString().split('T')[0];
+            const branchUid = selectedBranch.value;
 
             planningRecap
-            .getRecap(monthString)
+            .getRecap(monthString, branchUid)
             .then(response => {
                 // Simpan objek recap dari response
+                console.log('📊 Recap data fetched:', response);
                 setRecapData(response.data);
             })
             .catch(err => {
@@ -162,7 +164,7 @@ const WeeklyPlanning = () => {
             // Jika tidak ada planning, reset data recap
             setRecapData(null);
         }
-        }, [currentPlanningUid, selectedMonth, planningRecap, weeks]);
+    }, [currentPlanningUid, selectedMonth, selectedBranch, planningRecap, weeks]);
 
 
     const handleCreatePlanning = useCallback(async () => {
