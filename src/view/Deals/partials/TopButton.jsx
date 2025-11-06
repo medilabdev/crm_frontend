@@ -3,6 +3,7 @@ import {
   faFileExcel,
   faHandshake,
   faTrash,
+  faChartLine, // ⬅️ Tambahkan icon baru
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
@@ -13,6 +14,7 @@ const TopButton = ({ handleDeleteSelect, onExportClick }) => {
     <div className="row mb-2">
       <div className="col ms-3 mb-2 ms-4">
         <div className="d-flex float-end">
+          {/* Dropdown Add Deals */}
           <div className="dropdown float-end">
             <button
               className="btn btn-primary dropdown-toggle"
@@ -40,6 +42,7 @@ const TopButton = ({ handleDeleteSelect, onExportClick }) => {
             </ul>
           </div>
 
+          {/* Need Approval */}
           <Link
             to="/deals/need-approval"
             className="btn btn-primary ms-2"
@@ -49,6 +52,17 @@ const TopButton = ({ handleDeleteSelect, onExportClick }) => {
             Need Approval
           </Link>
 
+          {/* 🔍 Follow-Up Report */}
+          <Link
+            to="/deals/follow-up-report"
+            className="btn btn-outline-info ms-2 text-decoration-none"
+            style={{ fontSize: "0.85rem", fontWeight: "600" }}
+          >
+            <FontAwesomeIcon icon={faChartLine} className="me-2" />
+            Follow-Up Report
+          </Link>
+
+          {/* Bulk Change */}
           <Link
             to="/deals/bulk-change"
             className="btn btn-outline-primary ms-2 text-decoration-none"
@@ -58,16 +72,18 @@ const TopButton = ({ handleDeleteSelect, onExportClick }) => {
             Bulk Change
           </Link>
 
+          {/* Delete */}
           <button
             onClick={handleDeleteSelect}
             className="btn btn-danger ms-2 me-2"
             style={{ fontSize: "0.85rem", fontWeight: "600" }}
           >
-            <FontAwesomeIcon icon={faTrash} className="me-2" />Delete
+            <FontAwesomeIcon icon={faTrash} className="me-2" /> Delete
           </button>
 
+          {/* Export */}
           <button
-            onClick={onExportClick} // <-- props dari parent
+            onClick={onExportClick}
             className="btn btn-success"
             style={{ fontSize: "0.85rem", fontWeight: "600" }}
           >

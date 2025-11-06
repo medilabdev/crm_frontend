@@ -20,6 +20,7 @@ import ShowCompany from "../view/Company/ShowCompany";
 import Templates from "../view/Documents/Templates";
 import ShortCode from "../view/Documents/ShortCode";
 import Deals from "../view/Deals";
+import FollowUpReport from "../view/Deals/FollowUpReport";
 import SingleDeals from "../view/Deals/SingleDeals";
 import BulkChangeDeals from "../view/Deals/BulkChange";
 import EditPackageProduct from "../view/Products/EditPackageProduct";
@@ -218,6 +219,8 @@ function Router() {
             </Login>
           }
         />
+        <Route path="/deals/follow-up-report" element={<FollowUpReport />} />
+
         <Route
           exact
           path="/products"

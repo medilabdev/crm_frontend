@@ -17,9 +17,9 @@ import {
   faPhone,
   faPhoneVolume,
   faTrash,
+  faComments
 } from "@fortawesome/free-solid-svg-icons";
 import { useMediaQuery } from "react-responsive";
-
 
 
 const ExpandedProductComponent = ({ data }) => {
@@ -42,8 +42,7 @@ const ExpandedProductComponent = ({ data }) => {
     );
 };
 
- 
-const ExpandedComponent = ({ data }) => {
+const ExpandedComponent = ({ data, openFollowUpModal }) => {
   const token = localStorage.getItem("token");
   const uid = localStorage.getItem("uid");
   const role = localStorage.getItem("role");
@@ -241,27 +240,37 @@ const ExpandedComponent = ({ data }) => {
               >
                 Delete
               </button>
+
+              <button
+                  className="btn btn-outline-info ms-2"
+                  title="Follow-Up"
+                  onClick={() => openFollowUpModal(data)}
+                >
+                  <i className="fa-solid fa-comments"></i> Follow-Up
+              </button>
+
+
+
             </>
           ) : null}
+
+          </div>
         </div>
-        </div>
-        
       </div>
     </>
   );
 };
 
-
-const ConditionalExpandedComponent = ({ data, isMobile }) => {
+const ConditionalExpandedComponent = ({ data, isMobile, openFollowUpModal }) => {
    
     if (isMobile) {
-        return <ExpandedComponent data={data} />;
+        return <ExpandedComponent data={data} openFollowUpModal={openFollowUpModal} />;
     } else {
-        return <ExpandedProductComponent data={data} />;
+        return <ExpandedProductComponent data={data} openFollowUpModal={openFollowUpModal} />;
     }
 };
 
-const DataTableComponet = ({
+const DataTableComponent = ({
   data,
   selectUidDataTable,
   pending,
@@ -269,6 +278,7 @@ const DataTableComponet = ({
   paginationTotalRows,
   handleChangePage,
   handlePagePerChange,
+  openFollowUpModal
 }) => {
   const token = localStorage.getItem("token");
   const uid = localStorage.getItem("uid");
@@ -466,79 +476,93 @@ const DataTableComponet = ({
     {
       name: "Action",
       selector: (row) => (
-        <div className="action-icon">
+        <div className="d-flex align-items-center">
           {row?.owner_user_uid === uid || role === "hG5sy_dytt95" ? (
             <>
-              <a
-                href={`/deals/${row.uid}/edit`}
-                className="me-3 icon-button text-dark"
-                title="edit"
-                target="_blank"
-              >
-                <FontAwesomeIcon icon={faPenToSquare} />
-              </a>
+              {/* ✏️ Tombol Edit */}
+              <OverlayTrigger placement="top" overlay={<Tooltip>Edit Deal</Tooltip>}>
+                <a
+                  href={`/deals/${row.uid}/edit`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-dark me-3"
+                  style={{ fontSize: "1rem" }}
+                >
+                  <FontAwesomeIcon icon={faPenToSquare} />
+                </a>
+              </OverlayTrigger>
 
-              <button
-                className="icon-button"
-                title="delete"
-                onClick={() => {
-                  Swal.fire({
-                    title: "Konfirmasi",
-                    text: "Apakah kamu yakin ingin menghapus ini deals ini?",
-                    icon: "warning",
-                    showCancelButton: true,
-                    confirmButtonColor: "#3085d6",
-                    cancelButtonColor: "#d33",
-                    confirmButtonText: "Ya, Hapus!",
-                    cancelButtonText: "Batal",
-                  }).then((res) => {
-                    if (res.isConfirmed) {
-                      const formData = new FormData();
-                      formData.append("deals_uid[]", row.uid);
-                      // console.log("FormData:", Object.fromEntries(formData.entries()));
-                      axios
-                        .post(
-                          `${process.env.REACT_APP_BACKEND_URL}/deals/item/delete`,
-                          formData,
-                          {
-                            headers: {
-                              Authorization: `Bearer ${token}`,
-                            },
-                          }
-                        )
-                        .then((res) => {
-                          Swal.fire({
-                            title: res.data.message,
-                            text: "Successfully delete deals",
-                            icon: "success",
-                          }).then((res) => {
-                            if (res.isConfirmed) {
-                              window.location.reload();
+              {/* 🗑️ Tombol Delete */}
+              <OverlayTrigger placement="top" overlay={<Tooltip>Delete Deal</Tooltip>}>
+                <button
+                  className="btn btn-link text-danger p-0 me-3"
+                  title="Delete"
+                  style={{ fontSize: "1rem" }}
+                  onClick={() => {
+                    Swal.fire({
+                      title: "Konfirmasi",
+                      text: "Apakah kamu yakin ingin menghapus deal ini?",
+                      icon: "warning",
+                      showCancelButton: true,
+                      confirmButtonColor: "#3085d6",
+                      cancelButtonColor: "#d33",
+                      confirmButtonText: "Ya, Hapus!",
+                      cancelButtonText: "Batal",
+                    }).then((res) => {
+                      if (res.isConfirmed) {
+                        const formData = new FormData();
+                        formData.append("deals_uid[]", row.uid);
+                        axios
+                          .post(
+                            `${process.env.REACT_APP_BACKEND_URL}/deals/item/delete`,
+                            formData,
+                            {
+                              headers: { Authorization: `Bearer ${token}` },
+                            }
+                          )
+                          .then((res) => {
+                            Swal.fire({
+                              title: res.data.message,
+                              text: "Successfully delete deals",
+                              icon: "success",
+                            }).then(() => window.location.reload());
+                          })
+                          .catch((err) => {
+                            if (err.response?.data?.message === "Delete failed!") {
+                              Swal.fire({
+                                title: "Delete Failed",
+                                text: "Tidak dapat menghapus, data master ini terkait dengan data lainnya",
+                                icon: "warning",
+                              });
                             }
                           });
-                        })
-                        .catch((err) => {
-                          if (err.response.data.message === "Delete failed!") {
-                            Swal.fire({
-                              title: "Delete Failed",
-                              text: "Tidak dapat menghapus, data master ini terkait dengan data lainnya",
-                              icon: "warning",
-                            });
-                          }
-                        });
-                    }
-                  });
-                }}
-              >
-                <FontAwesomeIcon icon={faTrash} />
-              </button>
+                      }
+                    });
+                  }}
+                >
+                  <FontAwesomeIcon icon={faTrash} />
+                </button>
+              </OverlayTrigger>
+
+              {/* 💬 Tombol Follow-Up */}
+              <OverlayTrigger placement="top" overlay={<Tooltip>Follow-Up</Tooltip>}>
+                <button
+                  className="btn btn-link text-info p-0"
+                  title="Follow-Up"
+                  style={{ fontSize: "1rem" }}
+                  onClick={() => openFollowUpModal(row)}
+                >
+                  <FontAwesomeIcon icon={faComments} />
+                </button>
+              </OverlayTrigger>
             </>
           ) : null}
         </div>
       ),
-      width: "120px",
-      hide:'sm'
+      width: "140px",
+      hide: "sm",
     },
+
   ];
   
   return (
@@ -564,7 +588,7 @@ const DataTableComponet = ({
           
           expandableRows={true}
           expandableRowsComponent={ConditionalExpandedComponent}
-          expandableRowsComponentProps={{ isMobile: isMobile }}
+          expandableRowsComponentProps={{ isMobile: isMobile, openFollowUpModal: openFollowUpModal }}
           expandableRowDisabled={row => !isMobile && (!row.detail_product || row.detail_product.length === 0)}
 
           expandableIcon={
@@ -580,4 +604,4 @@ const DataTableComponet = ({
   );
 };
 
-export default DataTableComponet;
+export default DataTableComponent;

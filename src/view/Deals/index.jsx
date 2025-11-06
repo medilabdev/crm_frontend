@@ -6,7 +6,8 @@ import { Link } from "react-router-dom";
 import Card from "../../components/Card";
 import { useState } from "react";
 import Dummy from "./Dummy";
-import DataTableComponet from "./Datatable";
+import DataTableComponent from "./Datatable";
+import FollowUpModal from "./Modals/FollowUpModal";
 import axios from "axios";
 import Select from "react-select";
 import Swal from "sweetalert2";
@@ -59,6 +60,15 @@ const Deals = () => {
   const [endUpdated, setEndUpdated] = useState(null)
 
   const [showExportModal, setShowExportModal] = useState(false);
+  const [showFollowUp, setShowFollowUp] = useState(false);
+  const [selectedDeal, setSelectedDeal] = useState(null);
+
+
+  const openFollowUpModal = (deal) => {
+    setSelectedDeal(deal);
+    setShowFollowUp(true);
+  };
+  
 
   const fetchData = async () => {
     try {
@@ -702,7 +712,7 @@ const Deals = () => {
                 </div>
                 <div className="row">
                   <div className="col mt-3">
-                    <DataTableComponet
+                    <DataTableComponent
                       data={deals}
                       selectUidDataTable={selectUidDataTable}
                       pending={pending}
@@ -710,6 +720,7 @@ const Deals = () => {
                       paginationTotalRows={totalRows}
                       handleChangePage={handleChangePage}
                       handlePagePerChange={handlePagePerChange}
+                      openFollowUpModal={openFollowUpModal}
                     />
                   </div>
                 </div>
@@ -718,6 +729,12 @@ const Deals = () => {
           </Card>
         </div>
       </Main>
+      <FollowUpModal
+        show={showFollowUp}
+        onHide={() => setShowFollowUp(false)}
+        deal={selectedDeal}
+      />
+
     </body>
   );
 };
