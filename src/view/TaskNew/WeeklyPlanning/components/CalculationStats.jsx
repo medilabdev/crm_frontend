@@ -54,7 +54,7 @@ const CalculationStats = ({ recapData = null, isLoading = false, error = null })
     categories = [],
     analysis_summary = [],
   } = recapData;
-
+  console.log('recapData', recapData);
   /** ---------- 1️⃣ METRIK UTAMA ---------- */
   const metricCards = [
     { title: "Planning", value: planning, icon: faClipboardList, color: "primary" },
@@ -62,6 +62,9 @@ const CalculationStats = ({ recapData = null, isLoading = false, error = null })
     { title: "Off Planning", value: off_planning, icon: faExternalLinkAlt, color: "warning" },
     { title: "Total Visit", value: total_visit, icon: faCalendarCheck, color: "info" },
     { title: "Repetition (Clients >1x)", value: repetition_pct, icon: faSyncAlt, color: "secondary" },
+    { title: "Total Cust Visit", value: recapData.total_cust_visit, icon: faBuilding, color: "dark" },
+    { title: "Repetition (Visit - Cust)", value: recapData.repetition_count, icon: faSyncAlt, color: "secondary" },
+
   ];
 
   const CATEGORY_ICON_MAP = {
@@ -103,6 +106,36 @@ const CalculationStats = ({ recapData = null, isLoading = false, error = null })
           </Col>
         ))}
       </Row>
+      <Row className="g-3 mb-4">
+        <Col md={4}>
+          <Card className="border-0 shadow-sm text-center">
+            <Card.Body>
+              <FontAwesomeIcon icon={faClipboardList} className="text-primary mb-2" />
+              <h5>{recapData.total_cust_visit_plan ?? 0}</h5>
+              <p className="text-muted small mb-0">Report Plan</p>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col md={4}>
+          <Card className="border-0 shadow-sm text-center">
+            <Card.Body>
+              <FontAwesomeIcon icon={faExternalLinkAlt} className="text-warning mb-2" />
+              <h5>{recapData.total_cust_visit_outside ?? 0}</h5>
+              <p className="text-muted small mb-0">Report Outside</p>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col md={4}>
+          <Card className="border-0 shadow-sm text-center">
+            <Card.Body>
+              <FontAwesomeIcon icon={faBuilding} className="text-dark mb-2" />
+              <h5>{recapData.total_cust_visit ?? 0}</h5>
+              <p className="text-muted small mb-0">Report Total (Combined)</p>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+
 
       {/* --- Kategori Visit --- */}
       <h5 className="fw-bold mb-3 text-primary">

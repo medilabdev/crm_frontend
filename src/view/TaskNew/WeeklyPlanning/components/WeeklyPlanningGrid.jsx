@@ -236,7 +236,8 @@ const WeeklyPlanningGrid = ({
 
         const defaultTabKey = planningDetails.length > 0 ? "planning" : (outsideDetails.length > 0 ? "outside" : "planning");
         return (
-            <Card className="h-100 shadow-sm day-card"> 
+            <Card className={`h-100 shadow-sm day-card ${!day.is_working_day ? 'bg-light-subtle' : ''}`}>
+ 
                 <Card.Header className="d-flex justify-content-between align-items-center py-2 bg-light">
                     <div>
                         <h6 className="mb-0 d-inline-block">
