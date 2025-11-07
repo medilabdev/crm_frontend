@@ -352,7 +352,7 @@ const DataTableComponent = ({
       hide: "sm",
     },
     {
-      name: "Jumlah",
+      name: "Estimasi Jumlah Pendapatan",
       selector: (row) => `Rp. ${new Intl.NumberFormat().format(row.deal_size)}`,
       sortable: true,
       width: "150px",

@@ -9,147 +9,146 @@ import Swal from "sweetalert2";
 import { Link, useNavigate } from "react-router-dom";
 import { Dropdown, Button  } from 'react-bootstrap'; 
 function Topbar() {
-  const token = localStorage.getItem("token");
-  const [isSidebarToggled, setSidebarToggled] = useState(false);
-  const navigate = useNavigate();
-  const [name, setName] = useState(localStorage.getItem("name"));
-  const [image, setImage] = useState(localStorage.getItem("image"));
-  const [notifications, setNotifications] = useState([]);
-  const [unreadCount, setUnreadCount] = useState(0);
+    const token = localStorage.getItem("token");
+    const [isSidebarToggled, setSidebarToggled] = useState(false);
+    const navigate = useNavigate();
+    const [name, setName] = useState(localStorage.getItem("name"));
+    const [image, setImage] = useState(localStorage.getItem("image"));
+    const [notifications, setNotifications] = useState([]);
+    const [unreadCount, setUnreadCount] = useState(0);
+    
+    const fetchNotifications = async () => {
+        if (!token) return;
 
-  const fetchNotifications = async () => {
-      if (!token) return;
-
-      try {
-          const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/notifications`, {
-              headers: { Authorization: `Bearer ${token}` },
-              params: { limit: 5 }
-          });
-
-          console.log("Fetched notifications:", response.data);
-          setNotifications(response.data.data);
-          setUnreadCount(response.data.unread_count);
-      } catch (error) {
-          console.error("Failed to fetch notifications:", error);
-      }
-  };
-
-
-  useEffect(() => {
-      fetchNotifications();
-      const intervalId = setInterval(fetchNotifications, 30000); 
-
-      return () => clearInterval(intervalId);
-  }, [token]);
-
-  const handleDismiss = async (notificationId) => {
-    try {
-      await axios.post(`${process.env.REACT_APP_BACKEND_URL}/notifications/${notificationId}/mark-as-read`, {}, {
-                headers: { Authorization: `Bearer ${token}` }
+        try {
+            const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/notifications`, {
+                headers: { Authorization: `Bearer ${token}` },
+                params: { limit: 5 }
             });
-            // Update UI secara optimis
-            setNotifications(prev => prev.filter(n => n.id !== notificationId));
-            setUnreadCount(prev => (prev > 0 ? prev - 1 : 0));
 
-    } catch (error) {
-        console.error("Failed to dismiss notification", error);
-
-    }
-  }
-
-    const handleSnooze = async (reminderUid, notificationId) => {
-        const { value: snoozeDate } = await Swal.fire({
-            title: 'Snooze Reminder',
-            input: 'date',
-            inputLabel: 'Remind me again on',
-            // Default 7 hari dari sekarang
-            inputValue: new Date(new Date().setDate(new Date().getDate() + 7)).toISOString().split('T')[0], 
-            showCancelButton: true,
-            // Validasi sederhana agar tidak bisa memilih tanggal di masa lalu
-            inputValidator: (value) => {
-                if (!value) {
-                    return 'You need to choose a date!'
-                }
-                if (new Date(value) <= new Date()) {
-                    return 'Please select a future date.'
-                }
-            }
-        });
-
-        if (snoozeDate) {
-            try {
-                await axios.post(`${process.env.REACT_APP_BACKEND_URL}/reminders/${reminderUid}/snooze`, {
-                    snoozed_until: snoozeDate
-                }, { headers: { Authorization: `Bearer ${token}` } });
-                
-                Swal.fire('Snoozed!', 'Reminder has been rescheduled.', 'success');
-                
-                // --- INI PERBAIKANNYA ---
-                // Update UI secara optimis agar notifikasi langsung hilang
-                setNotifications(prev => prev.filter(n => n.id !== notificationId));
-                setUnreadCount(prev => (prev > 0 ? prev - 1 : 0));
-                // -------------------------
-
-            } catch (error) {
-                console.error("Failed to snooze reminder", error);
-                Swal.fire('Error!', 'Failed to snooze reminder.', 'error');
-            }
+            console.log("Fetched notifications:", response.data);
+            setNotifications(response.data.data);
+            setUnreadCount(response.data.unread_count);
+        } catch (error) {
+            console.error("Failed to fetch notifications:", error);
         }
     };
 
 
+    useEffect(() => {
+        fetchNotifications();
+        const intervalId = setInterval(fetchNotifications, 30000);
 
-  useEffect(() => {
-    // Sidebar toggle
-    const toggleSidebarBtn = document.querySelector(".toggle-sidebar-btn");
-    const body = document.getElementById("body");
+        return () => clearInterval(intervalId);
+    }, [token]);
 
-    const toggleSidebar = () => {
-      if (!isSidebarToggled) {
-        body.classList.add("toggle-sidebar");
-        setSidebarToggled(true);
-      } else {
-        body.classList.remove("toggle-sidebar");
-        setSidebarToggled(false);
-      }
-    };
+    const handleDismiss = async (notificationId) => {
+        try {
+        await axios.post(`${process.env.REACT_APP_BACKEND_URL}/notifications/${notificationId}/mark-as-read`, {}, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                // Update UI secara optimis
+                setNotifications(prev => prev.filter(n => n.id !== notificationId));
+                setUnreadCount(prev => (prev > 0 ? prev - 1 : 0));
 
-    if (toggleSidebarBtn) {
-      toggleSidebarBtn.addEventListener("click", toggleSidebar);
+        } catch (error) {
+            console.error("Failed to dismiss notification", error);
+
+        }
     }
 
-    // Membuang event listener saat komponen dibongkar
-    return () => {
-      if (toggleSidebarBtn) {
-        toggleSidebarBtn.removeEventListener("click", toggleSidebar);
-      }
+    const handleSnooze = async (reminderUid, notificationId) => {
+            const { value: snoozeDate } = await Swal.fire({
+                title: 'Snooze Reminder',
+                input: 'date',
+                inputLabel: 'Remind me again on',
+                // Default 7 hari dari sekarang
+                inputValue: new Date(new Date().setDate(new Date().getDate() + 7)).toISOString().split('T')[0], 
+                showCancelButton: true,
+                // Validasi sederhana agar tidak bisa memilih tanggal di masa lalu
+                inputValidator: (value) => {
+                    if (!value) {
+                        return 'You need to choose a date!'
+                    }
+                    if (new Date(value) <= new Date()) {
+                        return 'Please select a future date.'
+                    }
+                }
+            });
+
+            if (snoozeDate) {
+                try {
+                    await axios.post(`${process.env.REACT_APP_BACKEND_URL}/reminders/${reminderUid}/snooze`, {
+                        snoozed_until: snoozeDate
+                    }, { headers: { Authorization: `Bearer ${token}` } });
+                    
+                    Swal.fire('Snoozed!', 'Reminder has been rescheduled.', 'success');
+                    
+                    // --- INI PERBAIKANNYA ---
+                    // Update UI secara optimis agar notifikasi langsung hilang
+                    setNotifications(prev => prev.filter(n => n.id !== notificationId));
+                    setUnreadCount(prev => (prev > 0 ? prev - 1 : 0));
+                    // -------------------------
+
+                } catch (error) {
+                    console.error("Failed to snooze reminder", error);
+                    Swal.fire('Error!', 'Failed to snooze reminder.', 'error');
+                }
+            }
     };
-  }, [isSidebarToggled]);
 
-  const Logout = () => {
-    axios
-      .post(`${process.env.REACT_APP_BACKEND_URL}/users/logout`, null, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((response) => {
-        localStorage.clear();
-        sessionStorage.clear();
 
-        Swal.fire({
-          title: "Logout Berhasil",
-          text: response.data.message,
-          icon: "success",
-        });
-        navigate("/login");
-      })
-      .catch((error) => console.error(error));
-  };
-  const resultImage = process.env.REACT_APP_BACKEND_URL === "https://api-crm.medilabjakarta.id/api" ? Image : process.env.REACT_APP_BACKEND_URL === "https://api-crm-medika.medilabjakarta.id/api" ? Medika : ImageIss;
-  // console.log(isSidebarToggled);
 
-  console.log(notifications);
+    useEffect(() => {
+        // Sidebar toggle
+        const toggleSidebarBtn = document.querySelector(".toggle-sidebar-btn");
+        const body = document.getElementById("body");
+
+        const toggleSidebar = () => {
+        if (!isSidebarToggled) {
+            body.classList.add("toggle-sidebar");
+            setSidebarToggled(true);
+        } else {
+            body.classList.remove("toggle-sidebar");
+            setSidebarToggled(false);
+        }
+        };
+
+        if (toggleSidebarBtn) {
+        toggleSidebarBtn.addEventListener("click", toggleSidebar);
+        }
+
+        // Membuang event listener saat komponen dibongkar
+        return () => {
+        if (toggleSidebarBtn) {
+            toggleSidebarBtn.removeEventListener("click", toggleSidebar);
+        }
+        };
+    }, [isSidebarToggled]);
+
+    const Logout = () => {
+        axios
+        .post(`${process.env.REACT_APP_BACKEND_URL}/users/logout`, null, {
+            headers: {
+            Authorization: `Bearer ${token}`,
+            },
+        })
+        .then((response) => {
+            localStorage.clear();
+            sessionStorage.clear();
+
+            Swal.fire({
+            title: "Logout Berhasil",
+            text: response.data.message,
+            icon: "success",
+            });
+            navigate("/login");
+        })
+        .catch((error) => console.error(error));
+    };
+    const resultImage = process.env.REACT_APP_BACKEND_URL === "https://api-crm.medilabjakarta.id/api" ? Image : process.env.REACT_APP_BACKEND_URL === "https://api-crm-medika.medilabjakarta.id/api" ? Medika : ImageIss;
+    // console.log(isSidebarToggled);
+//   console.log(notifications);
   return (
     <>
     <header id="header" className="header fixed-top d-flex align-items-center">
@@ -263,6 +262,8 @@ function Topbar() {
             </ul>
         </nav>
     </header>
+    
+    
 
     
     </>

@@ -29,6 +29,7 @@ import {
   faSackDollar,
   faTrash,
   faX,
+  faCircleXmark
 } from "@fortawesome/free-solid-svg-icons";
 import Breadcrumb from "./Partials/Breadcrumb";
 import TopButton from "./Partials/TopButton";
@@ -365,7 +366,9 @@ const Contact = () => {
     ownerContact,
     formSearch,
     pagination.page,
-    pagination.limit,])
+    pagination.limit,
+  ]);
+
 
   const handleChangePage = (page) => {
     setPagination((e) => ({ ...e, page }));
@@ -487,38 +490,116 @@ const Contact = () => {
   
   const columns = [
     {
-      name: "Name",
-      selector: (row) => {
-        const createdDate = new Date(row?.created_at);
-        const updatedDate = new Date(row?.updated_at);
-        const now = new Date();
-        const twoDaysAgo = new Date(now.setDate(now.getDate() - 2));
-  
-        const isNew = createdDate > twoDaysAgo;
-        const isUpdate = updatedDate > twoDaysAgo && updatedDate > createdDate;
-  
-        return (
-          <a href={`/contact/${row.uid}/edit`} target="_blank" className="text-decoration-none text-dark">
-            <div>
-              <span style={{ fontWeight: "500", fontSize: "0.9rem" }}>{row.name}</span>
-              {row.pending_deletion_request && (
-                  <Badge bg="warning" text="dark" className="ms-2" style={{ fontSize: "0.6rem" }}>Pending</Badge>
-              )}
-              {isNew && (
-                <span className="badge rounded-pill bg-primary ms-2" style={{ fontSize: "0.6rem" }}>New</span>
-              )}
-              {!isNew && isUpdate && (
-                <span className="badge rounded-pill bg-success ms-2" style={{ fontSize: "0.6rem" }}>Updated</span>
-              )}
-              <div style={{ fontSize: "0.75rem", color: "#666" }}>{row.position || "-"}</div>
+    name: "Name",
+    selector: (row) => {
+      const createdDate = new Date(row?.created_at);
+      const updatedDate = new Date(row?.updated_at);
+      const now = new Date();
+      const twoDaysAgo = new Date(now.setDate(now.getDate() - 2));
+
+      const isNew = createdDate > twoDaysAgo;
+      const isUpdate = updatedDate > twoDaysAgo && updatedDate > createdDate;
+
+      return (
+        <a
+          href={`/contact/${row.uid}/edit`}
+          target="_blank"
+          className="text-decoration-none text-dark"
+        >
+          <div>
+            <span style={{ fontWeight: "500", fontSize: "0.9rem" }}>
+              {row.name}
+            </span>
+
+            {/* 🔸 Pending Deletion */}
+            {row.pending_deletion_request && (
+              <Badge
+                bg="warning"
+                text="dark"
+                className="ms-2"
+                style={{ fontSize: "0.6rem" }}
+              >
+                Pending
+              </Badge>
+            )}
+
+            {/* 🔴 Rejected Deletion */}
+            {
+              (() => {
+                const rejection = row.latest_deletion_request;
+                if (!rejection || rejection.status !== 'rejected') return null;
+                if (!rejection.approved_or_rejected_at) return null;
+
+                const rejectedAt = new Date(rejection.approved_or_rejected_at);
+                const now = new Date();
+                const hoursSinceReject = (now - rejectedAt) / (1000 * 60 * 60);
+
+                if (hoursSinceReject > 1) return null;
+
+                
+                return (
+                  <OverlayTrigger
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-reject-${row.uid}`}>
+                      <div>
+                        <strong>Rejected by:</strong>{" "}
+                        {rejection?.approver?.name || "-"}
+                        <br />
+                        <strong>Date:</strong>{" "}
+                        {new Date(rejection.approved_or_rejected_at).toLocaleDateString("id-ID")}
+                        <br />
+                        <strong>Reason:</strong>{" "}
+                        {rejection?.reason_for_rejection}
+                      </div>
+                    </Tooltip>
+                  }
+                >
+                  <Badge
+                    bg="danger"
+                    className="ms-2 d-inline-flex align-items-center"
+                    style={{ fontSize: "0.6rem", cursor: "help" }}
+                  >
+                    <FontAwesomeIcon icon={faCircleXmark} className="me-1" />
+                    Rejected
+                  </Badge>
+                </OverlayTrigger>
+                )
+              })
+            }
+
+
+            {/* 🟦 New / 🟩 Updated */}
+            {isNew && (
+              <span
+                className="badge rounded-pill bg-primary ms-2"
+                style={{ fontSize: "0.6rem" }}
+              >
+                New
+              </span>
+            )}
+            {!isNew && isUpdate && (
+              <span
+                className="badge rounded-pill bg-success ms-2"
+                style={{ fontSize: "0.6rem" }}
+              >
+                Updated
+              </span>
+            )}
+
+            {/* 🔹 Position text */}
+            <div style={{ fontSize: "0.75rem", color: "#666" }}>
+              {row.position || "-"}
             </div>
-          </a>
-        );
-      },
-      left: true,
-      wrap: true,
-      width: "180px",
+          </div>
+        </a>
+      );
     },
+    left: true,
+    wrap: true,
+    width: "200px",
+    },
+
     {
       name: "Contact Info",
       selector: (row) => (
