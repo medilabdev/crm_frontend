@@ -1,96 +1,93 @@
 /**
- * useCalculations.js - SOLVED VERSION
- * Custom hook for managing calculations using pre-calculated BE data for days.
+ * useCalculations.js — FINAL PATCHED VERSION
+ * 
+ * ✅ Sinkron penuh dengan BE (planning, on_planning, off_planning, total_visit, planning_pct, outside_pct)
+ * ✅ Backward compatible dengan struktur lama (total_weekly_plan, dll)
+ * ✅ Fix persentase Plan & Outside (tidak 0%)
+ * ✅ Aman untuk Daily, Weekly, dan Monthly Recap
  */
 
 import { useMemo, useCallback } from 'react';
 import {
-  // ⛔️ No longer importing calculateDayStatistics
-  calculateWeekStatistics,      // ✅ Using the SOLVED version
-  calculatePlanningStatistics, // ✅ Using the SOLVED version
+  calculateWeekStatistics,
+  calculatePlanningStatistics,
   getPerformanceIndicator,
   formatPercentage,
   calculateTrend,
-} from '../utils/calculationUtils'; // Assuming utils is now SOLVED
+} from '../utils/calculationUtils';
 
-/**
- * Hook for handling calculation logic using BE data.
- * @param {Object} planningData - Complete planning data structure from BE,
- * where each day object includes a 'calculations' property.
- * @returns {Object} Calculated statistics and helper functions
- */
+// ------------------------------------------------------------
+// 🔧 Normalizer (mapping otomatis schema baru ↔ lama)
+// ------------------------------------------------------------
+const normalizeDayStats = (raw = {}) => ({
+  total_weekly_plan: raw.total_weekly_plan ?? raw.planning ?? 0,
+  total_weekly_report: raw.total_weekly_report ?? raw.on_planning ?? 0,
+  total_outside: raw.total_outside ?? raw.off_planning ?? 0,
+  total_report: raw.total_report ?? raw.total_visit ?? 0,
+  daily_planning_pct: raw.daily_planning_pct ?? raw.planning_pct ?? 0,
+  daily_outside_pct: raw.daily_outside_pct ?? raw.outside_pct ?? 0,
+});
+
+// ------------------------------------------------------------
+// 🧠 Custom Hook
+// ------------------------------------------------------------
 export const useCalculations = (planningData) => {
   const safePlanningData = planningData || {};
   const { weeks = [] } = safePlanningData;
-  
+
+  // === Weekly Statistics ===
   const weekStatistics = useMemo(() => {
-    return weeks.map(week => { // <-- Ini sudah aman, 'weeks' adalah []
+    return weeks.map((week) => {
       const weekStats = calculateWeekStatistics(week);
       return {
         ...week,
         statistics: weekStats,
       };
     });
-  }, [weeks]); // Dependency remains 'weeks' from planningData
+  }, [weeks]);
 
+  // === Monthly / Planning Level Statistics ===
   const planningStatistics = useMemo(() => {
     return calculatePlanningStatistics({ ...safePlanningData, weeks: weekStatistics });
   }, [safePlanningData, weekStatistics]);
-  
-  /**
-   * Get performance indicator (no change needed).
-   */
+
+  // ------------------------------------------------------------
+  // ⚙️ Helper functions
+  // ------------------------------------------------------------
   const getPerformanceLevel = useCallback((percentage) => {
     return getPerformanceIndicator(percentage);
   }, []);
 
-  /**
-   * Format percentage (no change needed).
-   */
   const formatPercent = useCallback((percentage) => {
     return formatPercentage(percentage);
   }, []);
 
-  /**
-   * Calculate trend (no change needed).
-   */
   const analyzeTrend = useCallback((historicalData) => {
     return calculateTrend(historicalData);
   }, []);
 
-  /**
-   * Get day-level performance summary using BE calculations.
-   */
+  // ------------------------------------------------------------
+  // 📅 DAY LEVEL PERFORMANCE
+  // ------------------------------------------------------------
   const getDayPerformanceSummary = useCallback((dayData = {}) => {
-    // ✅ Directly use the 'calculations' object from the dayData (provided by BE).
-    // Use default 0s if calculations is null/undefined.
-    const stats = dayData.calculations || {
-      total_weekly_plan: 0,
-      total_weekly_report: 0,
-      daily_planning_pct: 0,
-      total_outside: 0,
-      daily_outside_pct: 0,
-      total_report: 0,
-    };
+    const stats = normalizeDayStats(dayData.calculations);
 
     const performance = getPerformanceIndicator(stats.daily_planning_pct);
 
     return {
-      ...stats, // Spread the actual calculations from BE
+      ...stats,
       performance,
       formatted: {
         planning_pct: formatPercentage(stats.daily_planning_pct),
-        // ✅ Use the outside percentage calculated by BE (vs total plan)
         outside_pct: formatPercentage(stats.daily_outside_pct),
       },
     };
-  }, []); // No dependencies needed as it operates purely on input
+  }, []);
 
-  /**
-   * Get week-level performance summary using calculated week stats.
-   */
+  // ------------------------------------------------------------
+  // 🗓️ WEEK LEVEL PERFORMANCE
+  // ------------------------------------------------------------
   const getWeekPerformanceSummary = useCallback((weekData = {}) => {
-    // ✅ Pass the weekData directly to the SOLVED calculateWeekStatistics
     const stats = calculateWeekStatistics(weekData);
     const performance = getPerformanceIndicator(stats.week_planning_pct);
 
@@ -99,17 +96,15 @@ export const useCalculations = (planningData) => {
       performance,
       formatted: {
         planning_pct: formatPercentage(stats.week_planning_pct),
-        // ✅ Use the outside percentage calculated by the SOLVED util (vs total plan)
         outside_pct: formatPercentage(stats.week_outside_pct),
       },
     };
-  }, []); // No dependencies needed
+  }, []);
 
-  /**
-   * Get overall planning performance summary (adjusted for solved stats).
-   */
+  // ------------------------------------------------------------
+  // 📆 MONTH / PLANNING LEVEL PERFORMANCE
+  // ------------------------------------------------------------
   const getPlanningPerformanceSummary = useMemo(() => {
-    // ✅ planningStatistics already uses the SOLVED utils
     const stats = planningStatistics;
     const performance = getPerformanceIndicator(stats.planning_completion_pct);
 
@@ -118,64 +113,64 @@ export const useCalculations = (planningData) => {
       performance,
       formatted: {
         completion_pct: formatPercentage(stats.planning_completion_pct),
-        // ✅ Use the outside percentage calculated by the SOLVED util (vs total plan)
         outside_pct: formatPercentage(stats.planning_outside_pct),
       },
     };
   }, [planningStatistics]);
 
-  /**
-   * Get consolidated statistics for dashboard display (adjusted).
-   */
+  // ------------------------------------------------------------
+  // 🧾 DASHBOARD SUMMARY
+  // ------------------------------------------------------------
   const getDashboardStats = useMemo(() => {
     const planning = getPlanningPerformanceSummary;
 
     return {
       totals: {
         planned_activities: planning.total_weekly_plan,
-        completed_reports: planning.total_weekly_report, // Reports matching plan
-        outside_activities: planning.total_outside,    // Reports outside plan
-        total_reported: planning.total_report,         // Combined reports
-        // 🗑️ Removed total_activities
+        completed_reports: planning.total_weekly_report,
+        outside_activities: planning.total_outside,
+        total_reported: planning.total_report,
         active_weeks: planning.active_weeks,
         total_weeks: planning.total_weeks,
       },
       performance: {
-        completion_rate: planning.planning_completion_pct, // Based on plan
-        outside_rate: planning.planning_outside_pct,    // Based on plan
+        completion_rate: planning.planning_completion_pct,
+        outside_rate: planning.planning_outside_pct,
         performance_level: planning.performance,
       },
       formatted: planning.formatted,
     };
   }, [getPlanningPerformanceSummary]);
 
-  /**
-   * Check if planning data has sufficient content (adjusted).
-   */
+  // ------------------------------------------------------------
+  // 🧩 UTILITY CHECK
+  // ------------------------------------------------------------
   const hasSignificantData = useMemo(() => {
-    // ✅ Check based on total_report (any reported activity)
     return planningStatistics.total_report > 0;
   }, [planningStatistics]);
 
+  // ------------------------------------------------------------
+  // 🧠 Return Hook Object
+  // ------------------------------------------------------------
   return {
-    // ⛔️ Removed calculateDayStats
+    // Utility functions
     getPerformanceLevel,
     formatPercent,
     analyzeTrend,
 
-    // ✅ Computed statistics using SOLVED utils and BE data
+    // Computed statistics
     weekStatistics,
     planningStatistics,
 
-    // ✅ Performance summaries using SOLVED utils and BE data
+    // Summaries
     getDayPerformanceSummary,
     getWeekPerformanceSummary,
     getPlanningPerformanceSummary,
 
-    // ✅ Dashboard data reflecting SOLVED structure
+    // Dashboard
     getDashboardStats,
 
-    // ✅ Utility check adjusted
+    // Utility flag
     hasSignificantData,
   };
 };

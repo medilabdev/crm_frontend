@@ -1,60 +1,80 @@
-export const calculateWeekStatistics = (week = {}) => {
-  const days = week.days || [];
+// ------------------------------------------------------------
+// ✅ calculationUtils.js — Final Unified Version (Daily / Weekly / Monthly)
+// ------------------------------------------------------------
 
-  let weekTotals = {
-    total_weekly_plan: 0,
-    total_weekly_report: 0,
-    total_outside: 0,
-    total_report: 0, // total_weekly_report + total_outside
-    working_days: 0,
-  };
-
-  days.forEach(day => {
-    // ✅ Use pre-calculated stats from BE, provide default 0s if null/missing
-    const dayStats = day.calculations || {
-      total_weekly_plan: 0,
-      total_weekly_report: 0,
-      total_outside: 0,
-      total_report: 0,
-      // daily_planning_pct, daily_outside_pct might not be needed for SUM
-    };
-
-    weekTotals.total_weekly_plan += dayStats.total_weekly_plan;
-    weekTotals.total_weekly_report += dayStats.total_weekly_report;
-    weekTotals.total_outside += dayStats.total_outside;
-    weekTotals.total_report += dayStats.total_report; // SUM the combined report
-
-    // ✅ Adjusted working_days logic: Count if there was any plan OR any outside activity reported
-    if (day.is_working_day !== false) {
-      weekTotals.working_days += 1;
-    }
-  });
-
-  // ✅ Use BE/Static logic for week-level percentages
-  const weekPlanningPct = weekTotals.total_weekly_plan > 0
-    ? Math.round((weekTotals.total_weekly_report / weekTotals.total_weekly_plan) * 100)
-    : 0;
-
-  // ✅ Use BE/Static logic: Outside percentage AGAINST total plan
-  const weekOutsidePct = weekTotals.total_weekly_plan > 0
-    ? Math.round((weekTotals.total_outside / weekTotals.total_weekly_plan) * 100)
-    : 0;
-
+// --- 🔧 Helper Normalizer ---
+// Memastikan kompatibilitas antara schema lama (total_weekly_*) dan baru (planning/on_planning/off_planning/total_visit)
+const normalizeDayStats = (raw = {}) => {
   return {
-    ...weekTotals,
-    // 🗑️ No need for total_activities
-    week_planning_pct: weekPlanningPct,
-    week_outside_pct: weekOutsidePct,
+    total_weekly_plan: raw.total_weekly_plan ?? raw.planning ?? 0,
+    total_weekly_report: raw.total_weekly_report ?? raw.on_planning ?? 0,
+    total_outside: raw.total_outside ?? raw.off_planning ?? 0,
+    total_report: raw.total_report ?? raw.total_visit ?? 0,
   };
 };
 
-/**
- * Calculates overall planning statistics SUMMING UP week statistics.
- * Assumes planningData.weeks contains weeks with a 'statistics' property
- * which is the result of the SOLVED calculateWeekStatistics.
- */
+export const calculateWeekStatistics = (weekData = {}) => {
+    console.log("[DEBUG] WeekData masuk:", weekData);
+
+  const { days = [] } = weekData;
+  
+
+  let totalWeeklyPlan = 0;
+  let totalWeeklyReport = 0;
+  let totalOutside = 0;
+  let totalReport = 0;
+
+  // hitung semua hari
+  days.forEach((day) => {
+    const calc = day?.calculations || {};
+    const normalized = {
+      plan: calc.total_weekly_plan ?? calc.planning ?? 0,
+      report: calc.total_weekly_report ?? calc.on_planning ?? 0,
+      outside: calc.total_outside ?? calc.off_planning ?? 0,
+      total: calc.total_report ?? calc.total_visit ?? 0,
+    };
+
+    totalWeeklyPlan += normalized.plan;
+    totalWeeklyReport += normalized.report;
+    totalOutside += normalized.outside;
+    totalReport += normalized.total;
+  });
+
+  const workingDays = days.filter((d) => d.is_working_day).length || 1;
+
+  const weekPlanningPct =
+    totalWeeklyPlan > 0
+      ? Math.round((totalWeeklyReport / totalWeeklyPlan) * 100)
+      : 0;
+
+  const weekOutsidePct =
+    totalWeeklyPlan > 0
+      ? Math.round((totalOutside / totalWeeklyPlan) * 100)
+      : 0;
+
+  const weekTotalVisitPct =
+    totalWeeklyPlan > 0
+      ? Math.round((totalReport / totalWeeklyPlan) * 100)
+      : 0;
+
+  return {
+    total_weekly_plan: totalWeeklyPlan,
+    total_weekly_report: totalWeeklyReport,
+    total_outside: totalOutside,
+    total_report: totalReport,
+    working_days: workingDays,
+    week_planning_pct: weekPlanningPct,
+    week_outside_pct: weekOutsidePct,
+    week_total_visit_pct: weekTotalVisitPct,
+  };
+};
+
+
+// ------------------------------------------------------------
+// 📅 Bulanan / Recap (Level: Planning)
+// ------------------------------------------------------------
 export const calculatePlanningStatistics = (planningData = {}) => {
-  const weeks = planningData.weeks || []; // Expect weeks processed by useCalculations
+  const weeks = planningData.weeks || [];
 
   let planningTotals = {
     total_weekly_plan: 0,
@@ -65,111 +85,117 @@ export const calculatePlanningStatistics = (planningData = {}) => {
     active_weeks: 0,
   };
 
-  weeks.forEach(week => {
-    // ✅ Use pre-calculated week stats from useCalculations
-    const weekStats = week.statistics || { // Use the 'statistics' key added by useCalculations
-      total_weekly_plan: 0,
-      total_weekly_report: 0,
-      total_outside: 0,
-      total_report: 0,
-      // week_planning_pct, week_outside_pct might not be needed for SUM
-    };
+  weeks.forEach((week) => {
+    // ✅ Normalisasi data week statistics
+    const weekStats = normalizeDayStats(week.statistics);
 
     planningTotals.total_weekly_plan += weekStats.total_weekly_plan;
     planningTotals.total_weekly_report += weekStats.total_weekly_report;
     planningTotals.total_outside += weekStats.total_outside;
     planningTotals.total_report += weekStats.total_report;
 
-    // ✅ Adjusted active_weeks logic: Count if there was any report during the week
     if (weekStats.total_report > 0) {
       planningTotals.active_weeks += 1;
     }
   });
 
-  // ✅ Use BE/Static logic for planning-level percentages
-  const planningCompletionPct = planningTotals.total_weekly_plan > 0
-    ? Math.round((planningTotals.total_weekly_report / planningTotals.total_weekly_plan) * 100)
-    : 0;
+  const planningCompletionPct =
+    planningTotals.total_weekly_plan > 0
+      ? Math.round(
+          (planningTotals.total_weekly_report /
+            planningTotals.total_weekly_plan) *
+            100
+        )
+      : 0;
 
-  // ✅ Use BE/Static logic: Outside percentage AGAINST total plan
-  const planningOutsidePct = planningTotals.total_weekly_plan > 0
-    ? Math.round((planningTotals.total_outside / planningTotals.total_weekly_plan) * 100)
-    : 0;
+  const planningOutsidePct =
+    planningTotals.total_weekly_plan > 0
+      ? Math.round(
+          (planningTotals.total_outside /
+            planningTotals.total_weekly_plan) *
+            100
+        )
+      : 0;
 
   return {
     ...planningTotals,
-    // 🗑️ No need for total_activities
-    planning_completion_pct: planningCompletionPct,
-    planning_outside_pct: planningOutsidePct,
+    planning_completion_pct: Number.isFinite(planningCompletionPct)
+      ? planningCompletionPct
+      : 0,
+    planning_outside_pct: Number.isFinite(planningOutsidePct)
+      ? planningOutsidePct
+      : 0,
   };
 };
 
-// --- Helper functions remain the same ---
-
+// ------------------------------------------------------------
+// 📊 UI Helpers (unchanged)
+// ------------------------------------------------------------
 export const getPerformanceIndicator = (percentage) => {
-  // ... (no changes needed) ...
-   if (percentage >= 80) {
-     return {
-       level: 'high',
-       label: 'Excellent',
-       color: 'success',
-       bgColor: '#d4edda',
-       textColor: '#155724'
-     };
-   } else if (percentage >= 60) {
-     return {
-       level: 'medium',
-       label: 'Good',
-       color: 'warning',
-       bgColor: '#fff3cd',
-       textColor: '#856404'
-     };
-   } else if (percentage >= 40) {
-     return {
-       level: 'low',
-       label: 'Fair',
-       color: 'info',
-       bgColor: '#d1ecf1',
-       textColor: '#0c5460'
-     };
-   } else {
-     return {
-       level: 'poor',
-       label: 'Needs Improvement',
-       color: 'danger',
-       bgColor: '#f8d7da',
-       textColor: '#721c24'
-     };
-   }
+  if (percentage >= 80) {
+    return {
+      level: "high",
+      label: "Excellent",
+      color: "success",
+      bgColor: "#d4edda",
+      textColor: "#155724",
+    };
+  } else if (percentage >= 60) {
+    return {
+      level: "medium",
+      label: "Good",
+      color: "warning",
+      bgColor: "#fff3cd",
+      textColor: "#856404",
+    };
+  } else if (percentage >= 40) {
+    return {
+      level: "low",
+      label: "Fair",
+      color: "info",
+      bgColor: "#d1ecf1",
+      textColor: "#0c5460",
+    };
+  } else {
+    return {
+      level: "poor",
+      label: "Needs Improvement",
+      color: "danger",
+      bgColor: "#f8d7da",
+      textColor: "#721c24",
+    };
+  }
 };
 
 export const formatPercentage = (percentage) => {
   return `${Math.round(percentage || 0)}%`;
 };
 
+// ------------------------------------------------------------
+// 📈 Trend Analyzer (unchanged)
+// ------------------------------------------------------------
 export const calculateTrend = (historicalData = []) => {
-  // ... (no changes needed) ...
-   if (historicalData.length < 2) {
-     return { trend: 'stable', change: 0, direction: 'none' };
-   }
-   
-   const current = historicalData[historicalData.length - 1];
-   const previous = historicalData[historicalData.length - 2];
-   const change = current - previous;
-   
-   let trend = 'stable';
-   let direction = 'none';
-   
-   if (Math.abs(change) > 5) { // 5% threshold for significant change
-     trend = change > 0 ? 'improving' : 'declining';
-     direction = change > 0 ? 'up' : 'down';
-   }
-   
-   return {
-     trend,
-     change: Math.round(change),
-     direction,
-     current: Math.round(current),
-     previous: Math.round(previous)
-   };
+  if (historicalData.length < 2) {
+    return { trend: "stable", change: 0, direction: "none" };
+  }
+
+  const current = historicalData[historicalData.length - 1];
+  const previous = historicalData[historicalData.length - 2];
+  const change = current - previous;
+
+  let trend = "stable";
+  let direction = "none";
+
+  if (Math.abs(change) > 5) {
+    trend = change > 0 ? "improving" : "declining";
+    direction = change > 0 ? "up" : "down";
+  }
+
+  return {
+    trend,
+    change: Math.round(change),
+    direction,
+    current: Math.round(current),
+    previous: Math.round(previous),
+  };
 };

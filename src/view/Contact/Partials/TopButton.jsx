@@ -62,13 +62,13 @@ const TopButton = ({ handleDeleteSelected }) => {
             <FontAwesomeIcon icon={faArrowsTurnToDots} className="me-2" />
             Bulk Change
           </Link>
-          <button
+          {/* <button
             class="btn btn-danger ms-2 delete"
             onClick={handleDeleteSelected}
             style={{ fontSize: "0.85rem", fontWeight: "600" }}
           >
             Delete
-          </button>
+          </button> */}
         </div>
       </div>
     </div>
