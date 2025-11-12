@@ -74,7 +74,7 @@ const CalculationStats = ({ recapData = null, isLoading = false, error = null })
     { title: "On Planning", value: on_planning, icon: faCheckCircle, color: "success" },
     { title: "Off Planning", value: off_planning, icon: faExternalLinkAlt, color: "warning" },
     { title: "Total Visit", value: total_visit, icon: faCalendarCheck, color: "info" },
-    { title: "Repetition (Clients >1x)", value: repetition_pct, icon: faSyncAlt, color: "secondary" },
+    { title: "Repetition PCT ", value: repetition_pct, icon: faSyncAlt, color: "secondary" },
     { title: "Total Cust Planned", value: total_cust_planned, icon: faClipboardList, color: "dark" },
     { title: "Total Cust Visit", value: total_cust_visit, icon: faBuilding, color: "secondary" },
     { title: "Achievement %", value: achievement_pct, icon: faChartLine, color: "success" },
