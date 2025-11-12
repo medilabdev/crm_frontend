@@ -6,10 +6,13 @@
 // API Endpoints - Updated to match backend routes exactly
 export const API_ENDPOINTS = {
   WEEKLY_PLANNING: {
+    SETTINGS: {
+      APP_CONFIG: '/settings/app-config'
+    },
     BASE: '/weekly-planning',
     BRANCHES: '/weekly-planning/branches',
     CATEGORIES: '/weekly-planning/categories',
-    IMPORT_EXCEL: '/weekly-planning/weekly-plan-masters/import-excel/plan/masters',
+    IMPORT_EXCEL: '/weekly-planning/import-excel/plan/masters',
     PLAN_MASTERS: '/weekly-planning/weekly-plan-masters',
     PLANNINGS: '/weekly-planning/plannings',
     PLANNING_DETAIL: (uid) => `/weekly-planning/plannings/${uid}`,

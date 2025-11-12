@@ -1,9 +1,3 @@
-// ------------------------------------------------------------
-// ✅ calculationUtils.js — Final Unified Version (Daily / Weekly / Monthly)
-// ------------------------------------------------------------
-
-// --- 🔧 Helper Normalizer ---
-// Memastikan kompatibilitas antara schema lama (total_weekly_*) dan baru (planning/on_planning/off_planning/total_visit)
 const normalizeDayStats = (raw = {}) => {
   return {
     total_weekly_plan: raw.total_weekly_plan ?? raw.planning ?? 0,
@@ -14,50 +8,55 @@ const normalizeDayStats = (raw = {}) => {
 };
 
 export const calculateWeekStatistics = (weekData = {}) => {
-    console.log("[DEBUG] WeekData masuk:", weekData);
-
   const { days = [] } = weekData;
-  
 
+  // --- Inisialisasi SEMUA key (Lama & Baru) ---
   let totalWeeklyPlan = 0;
   let totalWeeklyReport = 0;
   let totalOutside = 0;
   let totalReport = 0;
 
-  // hitung semua hari
-  days.forEach((day) => {
-    const calc = day?.calculations || {};
-    const normalized = {
-      plan: calc.total_weekly_plan ?? calc.planning ?? 0,
-      report: calc.total_weekly_report ?? calc.on_planning ?? 0,
-      outside: calc.total_outside ?? calc.off_planning ?? 0,
-      total: calc.total_report ?? calc.total_visit ?? 0,
-    };
+  let planning = 0;
+  let onPlanning = 0;
+  let offPlanning = 0;
+  let totalVisit = 0;
 
-    totalWeeklyPlan += normalized.plan;
-    totalWeeklyReport += normalized.report;
-    totalOutside += normalized.outside;
-    totalReport += normalized.total;
+  days.forEach((day) => {
+    // Ambil data kalkulasi yang sudah sinkron dari BE
+    const calc = day?.calculations || {};
+
+    // --- Jumlahkan Key LAMA ---
+    totalWeeklyPlan += calc.total_weekly_plan || 0;
+    totalWeeklyReport += calc.total_weekly_report || 0;
+    totalOutside += calc.total_outside || 0;
+    totalReport += calc.total_report || 0;
+    
+    // --- Jumlahkan Key BARU ---
+    planning += calc.planning || 0;
+    onPlanning += calc.on_planning || 0;
+    offPlanning += calc.off_planning || 0;
+    totalVisit += calc.total_visit || 0;
   });
 
   const workingDays = days.filter((d) => d.is_working_day).length || 1;
 
+  // (Kalkulasi persentase LAMA tidak berubah)
   const weekPlanningPct =
     totalWeeklyPlan > 0
       ? Math.round((totalWeeklyReport / totalWeeklyPlan) * 100)
       : 0;
-
   const weekOutsidePct =
     totalWeeklyPlan > 0
       ? Math.round((totalOutside / totalWeeklyPlan) * 100)
       : 0;
-
   const weekTotalVisitPct =
     totalWeeklyPlan > 0
       ? Math.round((totalReport / totalWeeklyPlan) * 100)
       : 0;
 
+  // --- RETURN KEDUA SET KEY ---
   return {
+    // Key LAMA (untuk Analisa Kunjungan Bulanan)
     total_weekly_plan: totalWeeklyPlan,
     total_weekly_report: totalWeeklyReport,
     total_outside: totalOutside,
@@ -66,13 +65,16 @@ export const calculateWeekStatistics = (weekData = {}) => {
     week_planning_pct: weekPlanningPct,
     week_outside_pct: weekOutsidePct,
     week_total_visit_pct: weekTotalVisitPct,
+
+    // Key BARU (untuk Ringkasan Kunjungan)
+    planning: planning,
+    on_planning: onPlanning,
+    off_planning: offPlanning,
+    total_visit: totalVisit,
   };
 };
 
 
-// ------------------------------------------------------------
-// 📅 Bulanan / Recap (Level: Planning)
-// ------------------------------------------------------------
 export const calculatePlanningStatistics = (planningData = {}) => {
   const weeks = planningData.weeks || [];
 
@@ -81,18 +83,27 @@ export const calculatePlanningStatistics = (planningData = {}) => {
     total_weekly_report: 0,
     total_outside: 0,
     total_report: 0,
+    planning: 0,
+    on_planning: 0,
+    off_planning: 0,
+    total_visit: 0,
     total_weeks: weeks.length,
     active_weeks: 0,
   };
 
   weeks.forEach((week) => {
-    // ✅ Normalisasi data week statistics
-    const weekStats = normalizeDayStats(week.statistics);
+    const weekStats = week.statistics || {};
 
-    planningTotals.total_weekly_plan += weekStats.total_weekly_plan;
-    planningTotals.total_weekly_report += weekStats.total_weekly_report;
-    planningTotals.total_outside += weekStats.total_outside;
-    planningTotals.total_report += weekStats.total_report;
+    planningTotals.total_weekly_plan += weekStats.total_weekly_plan || 0;
+    planningTotals.total_weekly_report += weekStats.total_weekly_report || 0;
+    planningTotals.total_outside += weekStats.total_outside || 0;
+    planningTotals.total_report += weekStats.total_report || 0;
+
+    planningTotals.planning += weekStats.planning || 0;
+    planningTotals.on_planning += weekStats.on_planning || 0;
+    planningTotals.off_planning += weekStats.off_planning || 0;
+    planningTotals.total_visit += weekStats.total_visit || 0;
+
 
     if (weekStats.total_report > 0) {
       planningTotals.active_weeks += 1;
@@ -118,7 +129,7 @@ export const calculatePlanningStatistics = (planningData = {}) => {
       : 0;
 
   return {
-    ...planningTotals,
+    ...planningTotals, 
     planning_completion_pct: Number.isFinite(planningCompletionPct)
       ? planningCompletionPct
       : 0,
@@ -128,9 +139,6 @@ export const calculatePlanningStatistics = (planningData = {}) => {
   };
 };
 
-// ------------------------------------------------------------
-// 📊 UI Helpers (unchanged)
-// ------------------------------------------------------------
 export const getPerformanceIndicator = (percentage) => {
   if (percentage >= 80) {
     return {
@@ -171,9 +179,7 @@ export const formatPercentage = (percentage) => {
   return `${Math.round(percentage || 0)}%`;
 };
 
-// ------------------------------------------------------------
-// 📈 Trend Analyzer (unchanged)
-// ------------------------------------------------------------
+
 export const calculateTrend = (historicalData = []) => {
   if (historicalData.length < 2) {
     return { trend: "stable", change: 0, direction: "none" };

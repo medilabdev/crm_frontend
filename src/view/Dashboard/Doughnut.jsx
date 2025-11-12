@@ -4,27 +4,18 @@ import { Doughnut } from 'react-chartjs-2';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-export const data = {
-  labels: ['Red', 'Blue', 'Yellow'],
-  datasets: [
-    {
-      label: 'Hariisa Chart',
-      data: [12, 19, 3],
-      backgroundColor: [
-        'rgba(255, 99, 132, 0.2)',
-        'rgba(54, 162, 235, 0.2)',
-        'rgba(255, 206, 86, 0.2)',
-      ],
-      borderColor: [
-        'rgba(255, 99, 132, 1)',
-        'rgba(54, 162, 235, 1)',
-        'rgba(255, 206, 86, 1)',
-      ],
-      borderWidth: 1,
-    },
-  ],
-};
+// 1. HAPUS 'export const data = ...' YANG STATIS
 
-export function DoughnutChart() {
-  return <Doughnut data={data} style={{ height: "210px"}} />;
+// 2. Buat komponen menerima 'data' sebagai prop
+export function DoughnutChart({ data }) {
+  
+  // 3. Tambahkan penjaga jika data belum ada
+  if (!data) {
+    return <p className="text-center text-muted">Memuat data chart...</p>;
+  }
+
+  return <Doughnut data={data} style={{ height: "210px" }} />;
 }
+
+// 4. (Opsional) Export default agar lebih mudah di-import
+export default DoughnutChart;

@@ -84,168 +84,180 @@ const WeeklyPlanningHeader = ({
 
     return (
         <>
-        {/* Header Controls */}
+        {/* ===================== HEADER CONTROLS ===================== */}
+        <Card className="mb-4 border-0 shadow-sm">
+        <Card.Body>
+            <Row className="align-items-end g-3">
 
-        <Card className="mb-4 shadow-sm"> {/* Tambah shadow untuk konsistensi */}
-            <Card.Body>
-                <Row className="align-items-center">
-
-                    <Button 
-                        variant="outline-success" 
-                        onClick={onShowImportModal} // <-- Panggil handler dari parent
-                        title="Import Masters from Excel"
-                    >
-                        <FontAwesomeIcon icon={faFileExcel} /> Import
-                    </Button>
-                    {/* Branch Selection */}
-                    <Col md={4} className="mb-3 mb-md-0">
-                        <Form.Group>
-                            <Form.Label className="fw-bold">
-                                <FontAwesomeIcon icon={faBuilding} className="me-2" /> Branch *
-                            </Form.Label>
-                            {/* ✅ 5. Tambahkan InputGroup & Tombol "+" */}
-                            <InputGroup>
-                                <Select
-                                    className="flex-grow-1" // Agar select mengisi sisa ruang
-                                    value={selectedBranch}
-                                    onChange={onBranchChange}
-                                    options={branchOptions}
-                                    placeholder="Select branch..."
-                                    isSearchable
-                                    isClearable
-                                    isLoading={loading}
-                                    isDisabled={loading}
-                                    styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                                    menuPortalTarget={document.body}
-                                />
-                                <Button 
-                                    variant="outline-secondary" 
-                                    onClick={handleShowCreateBranchModal}
-                                    disabled={loading}
-                                    title="Create New Branch"
-                                >
-                                    <FontAwesomeIcon icon={faPlus} />
-                                </Button>
-                            </InputGroup>
-                        </Form.Group>
-                    </Col>
-
-                    {/* Month Selection */}
-                    <Col md={3} className="mb-3 mb-md-0">
-                        <Form.Group>
-                            <Form.Label className="fw-bold">
-                                <FontAwesomeIcon icon={faCalendarAlt} className="me-2" />
-                                Month *
-                            </Form.Label>
-                            {/* ✅ DatePicker Month sudah benar */}
-                            <DatePicker
-                                selected={selectedMonth}
-                                onChange={onMonthChange} // Panggil prop dari index.jsx
-                                dateFormat="MMMM yyyy"
-                                showMonthYearPicker
-                                className="form-control" // Bootstrap styling
-                                disabled={loading}
-                                wrapperClassName="d-block" // Ensure full width
-                            />
-                        </Form.Group>
-                    </Col>
-
-                    {/* Status Info */}
-                    <Col md={3} className="mb-3 mb-md-0">
-                        <Form.Group>
-                            <Form.Label className="fw-bold">Status</Form.Label>
-                            {/* ✅ Tampilkan status planning */}
-                            <div style={{ paddingTop: '8px' }}> {/* Align vertical with inputs */}
-                                {loading ? (
-                                    <Spinner animation="border" size="sm" variant="secondary"/>
-                                ) : hasExistingPlanning ? (
-                                    <span className="badge bg-success fs-6">Planning Loaded</span>
-                                ) : (
-                                    <span className="badge bg-secondary fs-6">No Planning</span>
-                                )}
-                            </div>
-                        </Form.Group>
-                    </Col>
-
-                    {/* Action Buttons */}
-                    <Col md={2} className="text-end align-self-end"> {/* Align button ke bawah */}
-                        {/* ✅ Tombol Create Planning */}
-                        {selectedBranch?.label && !hasExistingPlanning && (
-                            <Button
-                                variant="primary"
-                                onClick={handleOpenCreateModal} // Buka modal konfirmasi
-                                disabled={loading}
-                            >
-                                <FontAwesomeIcon icon={faPlus} className="me-2" />
-                                Create
-                            </Button>
-                        )}
-                        {/* ✅ Tombol Refresh (opsional, reload simpel) */}
-                        {hasExistingPlanning && (
-                            <Button
-                                variant="outline-secondary"
-                                // Pertimbangkan ganti window.location.reload() dengan prop onRefresh dari index.jsx
-                                // onClick={onRefresh} // Jika ada prop onRefresh yg panggil refetchPlanningData()
-                                onClick={() => window.location.reload()} // Reload simpel
-                                disabled={loading}
-                                size="sm"
-                                title="Refresh Data"
-                            >
-                                <FontAwesomeIcon icon={faRefresh} />
-                            </Button>
-                        )}
-                    </Col>
-                </Row>
-            </Card.Body>
-        </Card>
-
-        {/* Create Planning Confirmation Modal - ✅ SOLVED: Disederhanakan */}
-        <Modal show={showCreateModal} onHide={handleCloseCreateModal} centered>
-            <Modal.Header closeButton={!createLoading}>
-                <Modal.Title>Confirm Create Planning</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                {createError && (
-                    <Alert variant="danger">{createError}</Alert>
-                )}
-                <p>
-                    Are you sure you want to create a new weekly planning for{' '}
-                    <strong>{selectedBranch?.label}</strong> in{' '}
-                    <strong>{selectedMonth?.toLocaleString('id-ID', { month: 'long', year: 'numeric' })}</strong>?
-                </p>
-                <p className="text-muted small">
-                    The system will generate the default weeks and working days for this period.
-                </p>
-                {/* 🗑️ HAPUS SEMUA FORM FIELDS DARI MODAL INI */}
-            </Modal.Body>
-            <Modal.Footer>
+            {/* 1️⃣ Import Button */}
+            <Col md="auto">
                 <Button
-                    variant="secondary"
-                    onClick={handleCloseCreateModal}
-                    disabled={createLoading}
+                variant="outline-success"
+                onClick={onShowImportModal}
+                disabled={loading}
+                title="Import Weekly Plan Masters from Excel"
+                className="d-flex align-items-center px-3"
                 >
-                    Cancel
+                <FontAwesomeIcon icon={faFileExcel} className="me-2" />
+                Import Excel
                 </Button>
-                {/* ✅ Tombol Create panggil handleSubmitCreate (yg call onCreatePlanning) */}
+            </Col>
+
+            {/* 2️⃣ Branch Selection */}
+            <Col md={4}>
+                <Form.Group controlId="branchSelect">
+                <Form.Label className="fw-bold mb-1">
+                    <FontAwesomeIcon icon={faBuilding} className="me-2" />
+                    Branch <span className="text-danger">*</span>
+                </Form.Label>
+                <InputGroup>
+                    <Select
+                    className="flex-grow-1"
+                    value={selectedBranch}
+                    onChange={onBranchChange}
+                    options={branchOptions}
+                    placeholder="Select branch..."
+                    isSearchable
+                    isClearable
+                    isLoading={loading}
+                    isDisabled={loading}
+                    styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                    menuPortalTarget={document.body}
+                    />
+                    <Button
+                    variant="outline-secondary"
+                    onClick={handleShowCreateBranchModal}
+                    disabled={loading}
+                    title="Create New Branch"
+                    >
+                    <FontAwesomeIcon icon={faPlus} />
+                    </Button>
+                </InputGroup>
+                </Form.Group>
+            </Col>
+
+            {/* 3️⃣ Month Picker */}
+            <Col md={3}>
+                <Form.Group controlId="monthPicker">
+                <Form.Label className="fw-bold mb-1">
+                    <FontAwesomeIcon icon={faCalendarAlt} className="me-2" />
+                    Month <span className="text-danger">*</span>
+                </Form.Label>
+                <DatePicker
+                    selected={selectedMonth}
+                    onChange={onMonthChange}
+                    dateFormat="MMMM yyyy"
+                    showMonthYearPicker
+                    className="form-control"
+                    disabled={loading}
+                    wrapperClassName="d-block"
+                />
+                </Form.Group>
+            </Col>
+
+            {/* 4️⃣ Status Info */}
+            <Col md={2}>
+                <Form.Group controlId="statusInfo">
+                <Form.Label className="fw-bold mb-1">Status</Form.Label>
+                <div className="pt-1">
+                    {loading ? (
+                    <Spinner animation="border" size="sm" variant="secondary" />
+                    ) : hasExistingPlanning ? (
+                    <span className="badge bg-success fs-6">Planning Loaded</span>
+                    ) : (
+                    <span className="badge bg-secondary fs-6">No Planning</span>
+                    )}
+                </div>
+                </Form.Group>
+            </Col>
+
+            {/* 5️⃣ Action Buttons */}
+            <Col md={2} className="text-end">
+                {selectedBranch?.label && !hasExistingPlanning && (
                 <Button
                     variant="primary"
-                    onClick={handleSubmitCreate} // Trigger create process
-                    disabled={createLoading}
+                    onClick={handleOpenCreateModal}
+                    disabled={loading}
+                    className="px-3"
                 >
-                    {createLoading ? (
-                        <><Spinner size="sm" className="me-2" /> Creating...</>
-                    ) : (
-                        <><FontAwesomeIcon icon={faPlus} className="me-2" /> Create Planning</>
-                    )}
+                    <FontAwesomeIcon icon={faPlus} className="me-2" />
+                    Create
                 </Button>
-            </Modal.Footer>
+                )}
+
+                {hasExistingPlanning && (
+                <Button
+                    variant="outline-secondary"
+                    onClick={() => window.location.reload()}
+                    disabled={loading}
+                    title="Refresh Data"
+                    className="px-3 ms-2"
+                >
+                    <FontAwesomeIcon icon={faRefresh} />
+                </Button>
+                )}
+            </Col>
+            </Row>
+        </Card.Body>
+        </Card>
+
+        {/* ===================== CREATE PLANNING MODAL ===================== */}
+        <Modal show={showCreateModal} onHide={handleCloseCreateModal} centered>
+        <Modal.Header closeButton={!createLoading}>
+            <Modal.Title>Create Weekly Planning</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+            {createError && <Alert variant="danger">{createError}</Alert>}
+
+            <p className="mb-1">
+            Are you sure you want to create a new weekly planning for{" "}
+            <strong>{selectedBranch?.label}</strong> in{" "}
+            <strong>
+                {selectedMonth?.toLocaleString("id-ID", {
+                month: "long",
+                year: "numeric",
+                })}
+            </strong>
+            ?
+            </p>
+            <p className="text-muted small mb-0">
+            The system will generate default weeks and working days for this period.
+            </p>
+        </Modal.Body>
+        <Modal.Footer>
+            <Button
+            variant="secondary"
+            onClick={handleCloseCreateModal}
+            disabled={createLoading}
+            >
+            Cancel
+            </Button>
+            <Button
+            variant="primary"
+            onClick={handleSubmitCreate}
+            disabled={createLoading}
+            className="px-3"
+            >
+            {createLoading ? (
+                <>
+                <Spinner size="sm" className="me-2" /> Creating...
+                </>
+            ) : (
+                <>
+                <FontAwesomeIcon icon={faPlus} className="me-2" /> Create Planning
+                </>
+            )}
+            </Button>
+        </Modal.Footer>
         </Modal>
 
-        <CreateBranchModal 
-            show={showCreateBranchModal}
-            onHide={handleHideCreateBranchModal}
-            onBranchCreated={handleBranchCreated} // Kirim callback
+        {/* ===================== CREATE BRANCH MODAL ===================== */}
+        <CreateBranchModal
+        show={showCreateBranchModal}
+        onHide={handleHideCreateBranchModal}
+        onBranchCreated={handleBranchCreated}
         />
+
 
         </>
     );

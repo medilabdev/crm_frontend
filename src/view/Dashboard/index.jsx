@@ -22,7 +22,7 @@ import ActivityDeals from "./ActivityDeals";
 import ActivityByDate from "./ActivityByDate";
 import SalesPerformanceReport from "./SalesPerformanceReport";
 import DealsByStageReport from "./DealsByStageReport";
-
+import ReportWeeklyPlanning from "./ReportWeeklyPlanning";
 
 function Dashboard() {
   return (
@@ -37,12 +37,6 @@ function Dashboard() {
                 <h1>Dashboard</h1>
               </div>
             </div>
-          </div>
-          <div className="row mt-3">
-            <TopSales />
-            <ContactRecap />
-            <CompanyRecap />
-            <DealsRecap />
           </div>
 
            <div className="row mt-3">
@@ -59,6 +53,9 @@ function Dashboard() {
                 </Tab>
                   <Tab eventKey="deals-by-stage" title="Deals by Stage">
                       <DealsByStageReport />
+                  </Tab>
+                  <Tab eventKey="weekly-planning" title="Report Task (Weekly Plan)">
+                      <ReportWeeklyPlanning />
                   </Tab>
               </Tabs>
             </div>

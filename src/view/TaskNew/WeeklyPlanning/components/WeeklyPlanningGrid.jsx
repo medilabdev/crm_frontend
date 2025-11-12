@@ -38,6 +38,7 @@ import { calculateWeekStatistics, calculatePlanningStatistics, getPerformanceInd
 // Child components
 import PlanningDetailModal from './PlanningDetailModal';
 import OutsideActivityModal from './OutsideActivityModal';
+import { useAppConfig } from '../../../../context/AppConfigContext';
 
 const getDefaultCalculations = () => ({
   total_weekly_plan: 0, total_weekly_report: 0, daily_planning_pct: 0,
@@ -61,7 +62,7 @@ const WeeklyPlanningGrid = ({
   handleToggleWorkingDay
 }) => {
     
-
+    const { min_daily_plan_target } = useAppConfig();
     const [selectedWeek, setSelectedWeek] = useState(null);
     const [selectedDay, setSelectedDay] = useState(null);
     const [showDetailModal, setShowDetailModal] = useState(false);
@@ -234,6 +235,9 @@ const WeeklyPlanningGrid = ({
         const planningDetails = day.weeklyPlanningDetails || [];
         const outsideDetails = day.outsidePlanningDetails || [];
 
+        const currentPlanCount = stats.total_weekly_plan;
+        const isTargetMet = currentPlanCount >= min_daily_plan_target;
+
         const defaultTabKey = planningDetails.length > 0 ? "planning" : (outsideDetails.length > 0 ? "outside" : "planning");
         return (
             <Card className={`h-100 shadow-sm day-card ${!day.is_working_day ? 'bg-light-subtle' : ''}`}>
@@ -251,6 +255,17 @@ const WeeklyPlanningGrid = ({
                         <small className="text-muted d-block">
                             {formatDate(new Date(day.day_date))}
                         </small>
+
+                        {day.is_working_day && (
+                            <div className="mt-2" style={{ fontSize: '0.8rem' }}>
+                                <span 
+                                    className={isTargetMet ? 'text-success' : 'text-warning fw-bold'}
+                                    title={isTargetMet ? `Target ${min_daily_plan_target} plan tercapai` : `Target minimal ${min_daily_plan_target} plan`}
+                                >
+                                    {currentPlanCount} / {min_daily_plan_target} Plan
+                                </span>
+                            </div>
+                        )}
                     </div>
                     <div className="btn-group" role="group">
                         <OverlayTrigger overlay={<Tooltip>Add Planning Detail</Tooltip>}>

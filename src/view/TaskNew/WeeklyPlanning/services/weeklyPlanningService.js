@@ -42,6 +42,20 @@ const getAuthHeaders = () => {
   };
 };
 
+export const appConfigService = {
+  async getAppConfig() {
+    try {
+      const response = await apiClient.get(API_ENDPOINTS.WEEKLY_PLANNING.SETTINGS.APP_CONFIG, {
+        headers: getAuthHeaders(),
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching app config:', error);
+      throw error;
+    }
+  }
+}
+
 export const branchService = {
   
   async getAll() {
@@ -469,7 +483,7 @@ export const masterImportService = {
   async importExcel(fileData) {
     try {
       const headers = getAuthHeaders();
-      const response = await apiClient.post(API_ENDPOINTS.WEEKLY_PLANNING.MASTER_IMPORT, fileData, {
+      const response = await apiClient.post(API_ENDPOINTS.WEEKLY_PLANNING.IMPORT_EXCEL, fileData, {
         headers: {
           ...headers,
           'Content-Type': 'multipart/form-data',
