@@ -4,7 +4,7 @@ import Sidebar from "../../../components/Template/Sidebar";
 import Main from "../../../components/Template/Main";
 import Footer from "../../../components/Template/Footer";
 import UploadContactModal from "../Modals/UploadContactModal"; 
-import { Card, Row, Col, Button } from "react-bootstrap";
+import { Card, Row, Col, Button, Form } from "react-bootstrap";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import DataTable from "react-data-table-component";
@@ -15,6 +15,8 @@ const ShowCompany = () => {
   const [detailCompany, setCompanyDetail] = useState([]);
   const [dealsHistory, setDealsHistory] = useState([]);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [selectedYear, setSelectedYear] = useState(''); 
+
 
   const handleDownloadTemplate = async () => {
       try {
@@ -60,23 +62,20 @@ const ShowCompany = () => {
       });
   };
 
-  const getDealsHistory = () => {
-    axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/companies/${uid}/deals`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => setDealsHistory(res.data.data))
-      .catch((err) => {
-        console.error("Failed to fetch deals history:", err);
+  const getDealsHistory = (year = null) => {
+    let url = `${process.env.REACT_APP_BACKEND_URL}/companies/${uid}/deals`;
+    if (year) url += `?year=${year}`;
 
-        if (err.response.data.message === "Unauthenticated.") {
-          localStorage.clear();
-          window.location.href = "/login";
+    axios.get(url, { headers: { Authorization: `Bearer ${token}` }})
+      .then(res => setDealsHistory(res.data.data))
+      .catch(err => {
+        console.error("Failed to fetch deals history:", err);
+        if (err.response?.data?.message === "Unauthenticated.") {
+          localStorage.clear(); window.location.href = "/login";
         }
       });
   };
+
 
   useEffect(() => {
     getDetailCompany();
@@ -147,8 +146,6 @@ const ShowCompany = () => {
                 </div>
               </Card.Title>
               
-
-
               <Card.Body>
                 <Row className="ms-2">
                   <Col lg={3} md={4} className="label">
@@ -184,6 +181,50 @@ const ShowCompany = () => {
                 <h5 className="fw-semibold">Deals History</h5>
               </Card.Title>
               <Card.Body>
+
+                <Row className="mb-3">
+                  <Col md={3}>
+                    <Form.Group>
+                      <Form.Label>Year Filter (optional)</Form.Label>
+                      <div className="d-flex gap-2">
+                        <Form.Control
+                          type="number"
+                          inputMode="numeric"
+                          placeholder="e.g. 2017"
+                          value={selectedYear}
+                          onChange={(e) => setSelectedYear(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              const yr = e.currentTarget.value.trim();
+                              getDealsHistory(yr || null);
+                            }
+                          }}
+                        />
+                        <Button
+                          variant="primary"
+                          onClick={() => getDealsHistory(selectedYear.trim() || null)}
+                        >
+                          Apply
+                        </Button>
+                        <Button
+                          variant="outline-secondary"
+                          onClick={() => {
+                            setSelectedYear('');
+                            getDealsHistory(null); // show all years
+                          }}
+                        >
+                          Reset
+                        </Button>
+                      </div>
+                      <small className="text-muted">
+                        Leave empty to display all years.
+                      </small>
+                    </Form.Group>
+                  </Col>
+                </Row>
+
+
+
                 <DataTable
                   columns={columns}
                   data={dealsHistory}
