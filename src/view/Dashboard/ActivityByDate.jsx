@@ -56,14 +56,14 @@ const ActivityByDate = () => {
       setReportData(response.data.data || []);
     } catch (error) {
 
-      if (error.response) {
-        console.log("Response status:", error.response.status);
-        console.log("Response data:", error.response.data);
-    } else {
-        console.log("Error message:", error.message);
-    }
+        if (error.response) {
+            console.log("Response status:", error.response.status);
+            console.log("Response data:", error.response.data);
+        } else {
+            console.log("Error message:", error.message);
+        }
 
-    Swal.fire("Error", "Gagal memuat laporan aktivitas.", "error");
+        Swal.fire("Error", "Gagal memuat laporan aktivitas.", "error");
     } finally {
       setIsLoading(false);
     }
