@@ -52,8 +52,7 @@ const SingleDeals = () => {
   const [allProductData, setAllProductData] = useState([]);
   const [mentionUsers, setMentionUsers] = useState([]);
   const [dealSize, setDealSize] = useState(null);
-  const [showHppModal, setShowHppModal] = useState(false);
-  const [hppFile, setHppFile] = useState(null);
+
   const [price, setPrice] = useState(0); // Tidak diperlukan lagi
   const handlePrice = (e) => { // Tidak diperlukan lagi
       const value = e.target.value;
@@ -508,36 +507,6 @@ const SingleDeals = () => {
       }));
   };
 
-  const HppUploadModal = ({ show, onClose, onFileSelect, onSubmit }) => {
-    return (
-        <Modal show={show} onHide={onClose} centered>
-            <Modal.Header closeButton>
-                <Modal.Title>Upload HPP File</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                <p>To move this deal to "Closed Won", you must upload the HPP file.</p>
-                <Form.Group controlId="hppFile">
-                    <Form.Label><span className="text-danger">*</span> HPP File (PDF, XLSX, DOC)</Form.Label>
-                    <Form.Control 
-                        type="file" 
-                        accept=".pdf,.xlsx,.xls,.doc,.docx"
-                        onChange={(e) => onFileSelect(e.target.files[0])}
-                        required
-                    />
-                </Form.Group>
-            </Modal.Body>
-            <Modal.Footer>
-                <Button variant="secondary" onClick={onClose}>
-                    Cancel
-                </Button>
-                <Button variant="primary" onClick={onSubmit}>
-                    Confirm & Save Deal
-                </Button>
-            </Modal.Footer>
-        </Modal>
-    );
-  };
-
   // Fungsi ini akan dipanggil oleh overlay setelah produk disimpan
   const handleProductsUpdate = () => {
     const updatedProducts = JSON.parse(localStorage.getItem("DataProduct") || "[]");
@@ -575,6 +544,7 @@ const SingleDeals = () => {
                 project_category_uid: dealData.project_category_uid,
                 planned_implementation_date: dealData.planned_implementation_date ? new Date(dealData.planned_implementation_date) : null,
                 next_project_date: dealData.next_project_date ? new Date(dealData.next_project_date) : null,
+
             });
             setSelectedPipeline(dealData.staging_uid);
 
@@ -635,16 +605,8 @@ const SingleDeals = () => {
   const handleSubmitDeals = async (e) => {
       e.preventDefault();
 
-      // Validasi HPP Modal (logika Anda sudah benar)
-      const userPosition = localStorage.getItem('position_name');
-      const isSalesManager = userPosition?.toLowerCase() === 'sales manager';
-      const currentSelectedStage = pipeline.find(p => p.uid === selectedPipeline);
-      const selectedStageName = currentSelectedStage?.name;
-      if (isSalesManager && selectedStageName === 'Closed Won' && !hppFile) {
-          setShowHppModal(true);
-          setButtonDisabled(false); // Pastikan tombol tidak terkunci
-          return;
-      }
+      
+
 
       setButtonDisabled(true);
       const formData = new FormData();
@@ -677,9 +639,6 @@ const SingleDeals = () => {
       formData.append("staging_uid", selectedPipeline ?? "");
       formData.append("deal_size", dealSize);
       formData.append("file", selectFile || "");
-      if (hppFile) {
-          formData.append("hpp_file", hppFile);
-      }
       
       // Data Tanggal
       if (dealData.planned_implementation_date) {
@@ -929,6 +888,7 @@ const SingleDeals = () => {
 
                 </Card.Body>
               </Card>
+
               <Card className="shadow">
                 <Card.Header>
                   <h5 className="mt-2">
@@ -999,9 +959,7 @@ const SingleDeals = () => {
                 visible={showAddContact}
               />
             </div>
-            
-            
-
+          
             <div className="col-md-8">
               <Card className="shadow">
                 <Card.Header>
@@ -1090,18 +1048,8 @@ const SingleDeals = () => {
             
 
           </form>
-        </div>
+          </div>
 
-          <HppUploadModal
-            show={showHppModal}
-            onClose={() => setShowHppModal(false)}
-            onFileSelect={(file) => setHppFile(file)}
-            // Saat tombol "Confirm" di modal di-klik, panggil handleSubmitDeals lagi
-            onSubmit={() => {
-                setShowHppModal(false); // Tutup modal
-                handleSubmitDeals(new Event('submit')); // Panggil ulang submit
-            }}
-        />
 
       </Main>
     </body>

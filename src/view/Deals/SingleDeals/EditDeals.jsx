@@ -54,6 +54,8 @@ const EditDeals = () => {
   const { uid } = useParams();
   const [pipeline, setPipeline] = useState([]);
   const [valueDeals, setValueDeals] = useState({});
+  const [existingHpp, setExistingHpp] = useState(null);
+
   const [owner, setOwner] = useState([]);
   const [priority, setPriority] = useState([]);
   const [dealCategory, setDealsCategory] = useState([]);
@@ -293,6 +295,8 @@ const EditDeals = () => {
             });
             setSelectedPipeline(dealData.staging_uid);
             setHistory(dealData.history);
+            setExistingHpp(dealData.hpp_file_url  || null);
+
 
             const standardizedProducts = (dealData.detail_product || []).map(item => {
 
@@ -786,8 +790,6 @@ const EditDeals = () => {
       setSelectedPipeline(stageObject.uid);
   };
 
-
-  
   const performSubmit = () => {
       // Logika diambil dari handleSubmit
       const formData = new FormData();
@@ -898,17 +900,19 @@ const EditDeals = () => {
       const currentSelectedStage = pipeline.find(p => p.uid === selectedPipeline);
       const selectedStageName = currentSelectedStage?.name;
 
-      // Ini adalah 'Si Penjaga Gerbang'
-      if (isSalesManager && selectedStageName === 'Closed Won' && !hppFile) {
-          setShowHppModal(true); // Buka modal
-          return; // Berhenti. Jangan lakukan apa-apa lagi.
+      if (isSalesManager && selectedStageName === 'Closed Won') {
+      if (!hppFile && !existingHpp) {
+          Swal.fire({
+              icon: "warning",
+              title: "HPP File Required",
+              text: "You must upload the HPP file before moving this deal to Closed Won.",
+          });
+          return;
+        }
       }
 
-      // Kalo lolos dari gerbang (misal: bukan 'Closed Won' ATAU HPP sudah ada),
-      // langsung panggil 'Si Mesin Submit'
       performSubmit();
   };
-
 
   const currentSelectedStage = pipeline.find(p => p.uid === selectedPipeline);
   // console.log("Current HPP File:", hppFile);
@@ -981,6 +985,7 @@ const EditDeals = () => {
                     <span className="ms-2 fs-5 fw-semibold mt-5">Pipeline</span>
                   </h5>
                 </Card.Header>
+
                 <Card.Body>
                   <div className="mb-3 ms-1">
                     <span>
@@ -1489,35 +1494,55 @@ const EditDeals = () => {
                 </Card.Body>
               </Card>
             </div>
+            <div className="col-md-8">
+              {localStorage.getItem("position_name")?.toLowerCase() === "sales manager" && (
+                <div className="mt-4">
+                    <h6 className="fw-bold">HPP File</h6>
+
+                    {/* ---- Jika ada file lama ---- */}
+                    {existingHpp ? (
+                        <div className="mb-3">
+                            <div className="d-flex align-items-center gap-3">
+                                <a
+                                    href={existingHpp}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="btn btn-outline-primary btn-sm"
+                                >
+                                    Download Existing HPP
+                                </a>
+                            </div>
+
+                            {/* Input untuk reupload */}
+                            <Form.Group className="mt-3">
+                                <Form.Label>Upload New HPP (optional)</Form.Label>
+                                <Form.Control
+                                    type="file"
+                                    accept=".pdf,.xlsx,.xls,.doc,.docx"
+                                    onChange={(e) => setHppFile(e.target.files[0])}
+                                />
+                            </Form.Group>
+                        </div>
+                    ) : (
+                        /* ---- Jika belum ada HPP ---- */
+                        <Form.Group className="mb-3">
+                            <Form.Label>
+                                <span className="text-danger">*</span> Upload HPP File
+                            </Form.Label>
+                            <Form.Control
+                                type="file"
+                                accept=".pdf,.xlsx,.xls,.doc,.docx"
+                                onChange={(e) => setHppFile(e.target.files[0])}
+                                required
+                            />
+                        </Form.Group>
+                    )}
+                </div>
+            )}
+
+            </div>
           </form>
         </div>
-
-        <HppUploadModal
-          show={showHppModal}
-          onClose={() => {
-              console.log("MODAL DITUTUP");
-              setShowHppModal(false);
-              setHppFile(null); 
-          }}
-          onFileSelect={(file) => {
-              console.log("1. FILE DIPILIH:", file); // Cek ini muncul di console
-              setHppFile(file);
-          }}
-          onSubmit={() => {
-              console.log("2. TOMBOL SUBMIT DIKLIK");
-              console.log("3. HPP STATE SAAT SUBMIT:", hppFile); // Cek ini null atau enggak
-
-              if (!hppFile) {
-                  alert('Please select an HPP file first.');
-                  console.log("4. SUBMIT GAGAL, FILE KOSONG");
-                  return; 
-              }
-              
-              console.log("5. SUBMIT BERHASIL, MENJALANKAN performSubmit");
-              setShowHppModal(false);
-              performSubmit();
-          }}
-      />
 
 
       </Main>
