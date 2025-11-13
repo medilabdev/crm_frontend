@@ -20,7 +20,6 @@ import Swal from "sweetalert2";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSackDollar } from "@fortawesome/free-solid-svg-icons";
 
-
 const SingleDeals = () => {
   const token = localStorage.getItem("token");
   const { uid } = useParams();
@@ -512,12 +511,9 @@ const SingleDeals = () => {
     const updatedProducts = JSON.parse(localStorage.getItem("DataProduct") || "[]");
     setProducts(updatedProducts);
   };
-
-  // GANTI TOTAL useEffect ANDA DENGAN INI
+    
   useEffect(() => {
-    // --- FUNGSI BARU UNTUK MEMBEDAKAN CREATE vs EDIT ---
-    const initializeComponent = async () => {
-      // Panggil semua data pendukung yang dibutuhkan kedua mode
+    const initialize = async () => {
       getPipeline();
       getOwnerUser(token);
       getPriority(token);
@@ -526,73 +522,16 @@ const SingleDeals = () => {
       getProjectCategories(token);
       getContact(token);
 
-      if (uid) {
-        try {
-          const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/deals/${uid}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          const dealData = response.data.data;
-          
-           setValueDeals({
-                deal_name: dealData.deal_name,
-                priority_uid: dealData.priority_uid,
-                deal_status: dealData.deal_status,
-                deal_category_uid: dealData.deal_category_uid,
-                company_uid: dealData.company_uid,
-                owner_user_uid: dealData.owner_user_uid,
-                deal_size: dealData.deal_size,
-                project_category_uid: dealData.project_category_uid,
-                planned_implementation_date: dealData.planned_implementation_date ? new Date(dealData.planned_implementation_date) : null,
-                next_project_date: dealData.next_project_date ? new Date(dealData.next_project_date) : null,
-
-            });
-            setSelectedPipeline(dealData.staging_uid);
-
-          // Standarisasi data produk dan simpan ke state & localStorage
-          const standardizedProducts = (dealData.detail_product || []).map(item => {
-            // Menghitung harga satuan dari data yang ada di DB:
-            let unitPrice = 0;
-            if (item.product) {
-                // Produk Single/MCU
-                unitPrice = item.product.price; // Ambil harga satuan dari relasi product
-            } else if (item.package_product) {
-                // Produk Package
-                unitPrice = item.package_product.total_price; // Ambil harga total dari relasi package (karena package harganya sudah total)
-            }
-            
-            return {
-                id: item.id || item.uid,
-                product_uid: item.product_uid || item.package_product_uid,
-                product_name: item.product?.name || item.package_product?.name || item.product_name || 'Product Not Found',         price: unitPrice || 0,
-                qty: item.qty,
-                discount_type: item.discount_type,
-                discount: item.discount,
-                total_price: item.total_price, // Ini adalah harga total per item deal
-            };
-        });
-          setProducts(standardizedProducts);
-          localStorage.setItem("DataProduct", JSON.stringify(standardizedProducts));
-
-        } catch (error) {
-          console.error("Failed to fetch deal data:", error);
-        }
-
-      } else {
-        // --- MODE CREATE ---
-        // Jika tidak ada UID, bersihkan meja kerja!
-        localStorage.removeItem("DataProduct");
-        localStorage.removeItem("companyStorage");
-        localStorage.removeItem("contactPerson");
-        setProducts([]); // Pastikan state produk di UI juga kosong
-      }
+      // CREATE MODE ALWAYS
+      localStorage.removeItem("DataProduct");
+      localStorage.removeItem("companyStorage");
+      localStorage.removeItem("contactPerson");
+      setProducts([]);
     };
 
-    initializeComponent();
-    
-  }, [token, uid]); // Dependency array sekarang hanya butuh token dan uid
+    initialize();
+  }, [token]);
 
-
- 
 
   const [selectFile, setSelectFile] = useState(null);
 
@@ -603,96 +542,84 @@ const SingleDeals = () => {
 
   // Ganti seluruh fungsi submit Anda dengan ini
   const handleSubmitDeals = async (e) => {
-      e.preventDefault();
+    e.preventDefault();
+    setButtonDisabled(true);
 
-      
+    const formData = new FormData();
+    const dealData = inputDeals;
 
+    // API endpoint khusus create
+    const url = `${process.env.REACT_APP_BACKEND_URL}/deals`;
 
-      setButtonDisabled(true);
-      const formData = new FormData();
-      
-      // --- Logika Universal (Create vs Edit) ---
-      const isEditMode = !!uid;
-      const url = isEditMode
-        ? `${process.env.REACT_APP_BACKEND_URL}/deals/${uid}`
-        : `${process.env.REACT_APP_BACKEND_URL}/deals`;
+    // ---- DATA DEAL ----
+    formData.append("deal_name", dealData.deal_name || "");
+    formData.append("deal_status", dealData.deal_status || "");
+    formData.append("priority_uid", dealData.priority_uid ?? "");
+    formData.append("deal_category", dealData.deal_category || "");
+    formData.append("project_category_uid", dealData.project_category_uid || "");
+    formData.append("company_uid", dealData.company_uid || "");
+    formData.append("owner_user_uid", dealData.owner_user_uid || "");
+    formData.append("notes", dealData.notes || "");
+    formData.append("staging_uid", selectedPipeline ?? "");
+    formData.append("deal_size", dealSize || 0);
+    formData.append("file", selectFile || "");
 
-      if (isEditMode) {
-        formData.append("_method", "put");
-      }
+    // ---- TANGGAL ----
+    if (dealData.planned_implementation_date) {
+        const date = new Date(dealData.planned_implementation_date);
+        const formattedDate = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+        formData.append("planned_implementation_date", formattedDate);
+    }
 
-      // Pilih sumber data yang benar (inputDeals untuk Create, valueDeals untuk Edit)
-      const dealData = isEditMode ? valueDeals : inputDeals;
+    if (dealData.next_project_date) {
+        const date = new Date(dealData.next_project_date);
+        const formattedDate = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+        formData.append("next_project_date", formattedDate);
+    }
 
-      // --- Mengisi FormData (Sudah Lengkap) ---
-      // Data Deal Utama
-      formData.append("deal_name", dealData.deal_name || "");
-      formData.append("deal_status", dealData.deal_status || "");
-      formData.append("priority_uid", dealData.priority_uid ?? "");
-      formData.append("deal_category", dealData.deal_category || "");
-      formData.append("project_category_uid", dealData.project_category_uid || "");
-      formData.append("company_uid", dealData.company_uid || "");
-      formData.append("owner_user_uid", dealData.owner_user_uid || "");
-      formData.append("notes", dealData.notes || "");
+    // ---- CONTACT ----
+    inputContact.forEach(uid => formData.append("contact_person[]", uid));
 
-      // Data dari state terpisah
-      formData.append("staging_uid", selectedPipeline ?? "");
-      formData.append("deal_size", dealSize);
-      formData.append("file", selectFile || "");
-      
-      // Data Tanggal
-      if (dealData.planned_implementation_date) {
-          const date = new Date(dealData.planned_implementation_date);
-          const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-          formData.append("planned_implementation_date", formattedDate);
-      }
-      if (dealData.next_project_date) {
-          const date = new Date(dealData.next_project_date);
-          const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-          formData.append("next_project_date", formattedDate);
-      }
+    // ---- MENTION ----
+    mentionUsers.forEach((uid, index) =>
+        formData.append(`mention_user[${index}]`, uid)
+    );
 
-      // Data Relasi (Kontak & Mention)
-      inputContact.forEach(contactUid => formData.append('contact_person[]', contactUid));
-      mentionUsers.forEach((userUid, index) => formData.append(`mention_user[${index}]`, userUid));
+    // ---- PRODUCTS ----
+    const productsToSave = JSON.parse(localStorage.getItem("DataProduct") || "[]");
+    productsToSave.forEach((product, index) => {
+        formData.append(`products[${index}][product_uid]`, product.product_uid);
+        formData.append(`products[${index}][product_name]`, product.product_name);
+        formData.append(`products[${index}][qty]`, product.qty);
+        formData.append(`products[${index}][discount_type]`, product.discount_type);
+        formData.append(`products[${index}][discount]`, product.discount);
+        formData.append(`products[${index}][price]`, product.price);
+        formData.append(`products[${index}][total_price]`, product.total_price);
+    });
 
-      // Data Produk (dari localStorage)
-      const productsToSave = JSON.parse(localStorage.getItem("DataProduct") || "[]");
-      if (productsToSave.length > 0) {
-        productsToSave.forEach((product, index) => {
-          formData.append(`products[${index}][product_uid]`, product.product_uid || "");
-          formData.append(`products[${index}][product_name]`, product.product_name || "");
-          formData.append(`products[${index}][qty]`, product.qty || "1");
-          formData.append(`products[${index}][discount_type]`, product.discount_type || "none");
-          formData.append(`products[${index}][discount]`, product.discount || 0);
-                formData.append(`products[${index}][price]`, product.price || 0); 
-
-          formData.append(`products[${index}][total_price]`, product.total_price || 0);
-        });
-      }
-
-      // --- Pengiriman Data & Penanganan Hasil ---
-      try {
+    try {
         const res = await axios.post(url, formData, {
-          headers: { Authorization: `Bearer ${token}` },
+            headers: { Authorization: `Bearer ${token}` },
         });
 
         Swal.fire({
-          title: res.data.message,
-          text: isEditMode ? "Successfully updated deal" : "Successfully created deal",
-          icon: "success",
-        }).then((result) => {
-          if (result.isConfirmed) {
+            title: res.data.message,
+            text: "Successfully created deal",
+            icon: "success",
+        }).then(() => {
             localStorage.removeItem("DataProduct");
-            window.location.href = "/deals"; // Redirect
-          }
+            window.location.href = "/deals";
         });
-      } catch (err) {
-        Swal.fire({ text: err.response?.data?.message || "An error occurred!", icon: "warning" });
-      } finally {
-        setButtonDisabled(false); // Selalu aktifkan kembali tombol, baik sukses maupun gagal
-      }
+    } catch (err) {
+        Swal.fire({
+            text: err.response?.data?.message || "An error occurred!",
+            icon: "warning",
+        });
+    } finally {
+        setButtonDisabled(false);
+    }
   };
+
 
   const currentSelectedStage = pipeline.find(p => p.uid === selectedPipeline);
 
