@@ -136,27 +136,32 @@ const ActivityByDate = () => {
         </Card.Header>
 
         <Card.Body>
-          <Row className="align-items-end">
-            <Col md={6}>
-              <label className="mb-1 mr-2">Select Date or Range</label>
+          <Row className="align-items-end g-3">
+            <Col xs={12} md={6}>
+              <label className="form-label d-block mb-2">Select Date or Range</label>
               <DatePicker
-                selectsRange={true}
+                selectsRange
                 startDate={startDate}
                 endDate={endDate}
                 onChange={(update) => setDateRange(update)}
-                isClearable={true}
+                isClearable
                 className="form-control"
                 dateFormat="dd/MM/yyyy"
                 placeholderText="Select date or range"
               />
             </Col>
 
-            <Col md={3}>
-              <Button onClick={handleGenerateReport} disabled={isLoading}>
+            <Col xs={12} md={3}>
+              <Button
+                className="w-100"
+                onClick={handleGenerateReport}
+                disabled={isLoading}
+              >
                 {isLoading ? "Loading..." : "Generate Report"}
               </Button>
             </Col>
           </Row>
+
 
           <hr />
 

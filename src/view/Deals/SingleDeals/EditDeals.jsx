@@ -17,38 +17,6 @@ import Swal from "sweetalert2";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSackDollar } from "@fortawesome/free-solid-svg-icons";
 
-
-const HppUploadModal = ({ show, onClose, onFileSelect, onSubmit }) => {
-  return (
-      <Modal show={show} onHide={onClose} centered>
-          <Modal.Header closeButton>
-              <Modal.Title>Upload HPP File</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-              <p>To move this deal to "Closed Won", you must upload the HPP file.</p>
-              <Form.Group controlId="hppFile">
-                  <Form.Label><span className="text-danger">*</span> HPP File (PDF, XLSX, DOC)</Form.Label>
-                  <Form.Control 
-                      type="file" 
-                      accept=".pdf,.xlsx,.xls,.doc,.docx"
-                      onChange={(e) => onFileSelect(e.target.files[0])}
-                      required
-                  />
-              </Form.Group>
-          </Modal.Body>
-          <Modal.Footer>
-              <Button variant="secondary" onClick={onClose}>
-                  Cancel
-              </Button>
-              <Button variant="primary" onClick={onSubmit}>
-                  Confirm & Save Deal
-              </Button>
-          </Modal.Footer>
-      </Modal>
-  );
-};
-
-
 const EditDeals = () => {
   const token = localStorage.getItem("token");
   const { uid } = useParams();
@@ -73,7 +41,6 @@ const EditDeals = () => {
   const handleShowProduct = () => setShowAddProduct(true);
   const [isButtonDisabled, setButtonDisabled] = useState(false);
   const [projectCategories, setProjectCategories] = useState([]);
-  const [showHppModal, setShowHppModal] = useState(false);
   const [hppFile, setHppFile] = useState(null);
   const [contactLocalStorage, setContactLocalStorage] = useState([]); 
   const [selectedCompanyData, setSelectedCompanyData] = useState([]);
@@ -807,7 +774,10 @@ const EditDeals = () => {
       formData.append("staging_uid", selectedPipeline ?? "");
       formData.append("company_uid", valueDeals.company_uid || "");
       formData.append("owner_user_uid", valueDeals.owner_user_uid);
-      formData.append("file", selectFile || ""); // <-- Pastikan 'selectFile' ada di state
+
+      if (selectFile) {
+          formData.append("file", selectFile);
+      }
 
       if (hppFile) {
           formData.append("hpp_file", hppFile); // <-- Ini akan keisi
@@ -861,7 +831,7 @@ const EditDeals = () => {
 
       setButtonDisabled(true);
       axios
-        .post(`${process.env.REACT_APP_BACKEND_URL}/deals/${uid} `, formData, {
+        .post(`${process.env.REACT_APP_BACKEND_URL}/deals/${uid}`, formData, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -894,26 +864,27 @@ const EditDeals = () => {
       // console.log("STALE STATE in handleSubmit:", products);
 
       e.preventDefault();
-      const userPosition = localStorage.getItem('position_name');
-      const isSalesManager = userPosition?.toLowerCase() === 'sales manager';
+      const userRole = localStorage.getItem("position_name")?.toLowerCase();
+      const allowedRoles = ["sales manager", "director", "finance"];
 
       const currentSelectedStage = pipeline.find(p => p.uid === selectedPipeline);
       const selectedStageName = currentSelectedStage?.name;
 
-      if (isSalesManager && selectedStageName === 'Closed Won') {
-      if (!hppFile && !existingHpp) {
+      if (
+        allowedRoles.includes(userRole) &&
+        selectedStageName === "Closed Won" &&
+        !hppFile && !existingHpp
+      ) {
           Swal.fire({
               icon: "warning",
               title: "HPP File Required",
               text: "You must upload the HPP file before moving this deal to Closed Won.",
           });
           return;
-        }
       }
-
-      performSubmit();
-  };
-
+        performSubmit();
+    };
+  
   const currentSelectedStage = pipeline.find(p => p.uid === selectedPipeline);
   // console.log("Current HPP File:", hppFile);
   // console.log("Company from localStorage:", companyStorage);

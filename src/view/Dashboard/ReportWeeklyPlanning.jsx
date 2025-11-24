@@ -5,6 +5,8 @@ import "react-datepicker/dist/react-datepicker.css";
 import DoughnutChart from "./Doughnut";
 import ChartBar from "./ChartBar";
 import { reportService } from "../../services/reportService";
+import "./style_report.css"
+
 
 const ReportWeeklyPlanning = () => {
   const [branches, setBranches] = useState([]);
@@ -101,19 +103,31 @@ const ReportWeeklyPlanning = () => {
     </Col>
   );
 
-  console.log("branches", branches);
+  const isEmptyReport = () => {
+    if (!reportData) return false;
+    if (!reportData.monthly_totals) return true;
+    if (!reportData.weekly_breakdown?.length) return true;
+    if (!reportData.categories_list?.length) return true;
+    return false;
+  };
+
+
+  // console.log("branches", branches);
 
   return (
     <div className="report-weekly-planning">
+
       <Card className="shadow-sm border-0">
-        <Card.Header className="bg-light">
+        <Card.Header className="bg-light py-3">
           <h5 className="text-primary mb-0">Filter Report Task by User</h5>
         </Card.Header>
-        <Card.Body>
-          <Row className="mb-3 g-3">
-            <Col md={4}>
-              <Form.Group>
-                <Form.Label>Pilih Bulan</Form.Label>
+
+        <Card.Body className="pb-4">
+          <Row className="g-4">
+            {/* Pilih Bulan */}
+            <Col xs={12} sm={6} md={4}>
+              <div className="form-group-modern">
+                <label className="form-group-label">Pilih Bulan</label>
                 <DatePicker
                   selected={new Date(selectedMonth + "-01")}
                   onChange={(date) =>
@@ -121,39 +135,42 @@ const ReportWeeklyPlanning = () => {
                   }
                   dateFormat="MM/yyyy"
                   showMonthYearPicker
-                  className="form-control"
+                  className="form-control form-control-modern"
                 />
-              </Form.Group>
+              </div>
             </Col>
 
-            <Col md={4}>
-              <Form.Group>
-                <Form.Label>Pilih Cabang</Form.Label>
+            {/* Pilih Cabang */}
+            <Col xs={12} sm={6} md={4}>
+              <div className="form-group-modern">
+                <label className="form-group-label">Pilih Cabang</label>
                 <Form.Select
                   value={selectedBranch}
                   onChange={(e) => setSelectedBranch(e.target.value)}
+                  className="form-control-modern"
                 >
                   <option value="">-- Pilih Cabang --</option>
-                    {Array.isArray(branches) && branches.length > 0 ? (
-                    branches.map(branch => (
-                        <option key={branch.value} value={branch.value}>
+                  {branches?.length > 0 ? (
+                    branches.map((branch) => (
+                      <option key={branch.value} value={branch.value}>
                         {branch.label}
-                        </option>
+                      </option>
                     ))
-                    ) : (
+                  ) : (
                     <option value="">-- Tidak ada cabang tersedia --</option>
-                    )}
-
+                  )}
                 </Form.Select>
-              </Form.Group>
+              </div>
             </Col>
 
-            <Col md={4}>
-              <Form.Group>
-                <Form.Label>Pilih User</Form.Label>
+            {/* Pilih User */}
+            <Col xs={12} sm={6} md={4}>
+              <div className="form-group-modern">
+                <label className="form-group-label">Pilih User</label>
                 <Form.Select
                   value={selectedUser}
                   onChange={(e) => setSelectedUser(e.target.value)}
+                  className="form-control-modern"
                 >
                   <option value="">-- Semua User --</option>
                   {users.map((u) => (
@@ -162,12 +179,17 @@ const ReportWeeklyPlanning = () => {
                     </option>
                   ))}
                 </Form.Select>
-              </Form.Group>
+              </div>
             </Col>
           </Row>
 
-          <div className="d-flex justify-content-end">
-            <Button onClick={handleFetchReport} disabled={loading}>
+          {/* BUTTON */}
+          <div className="mt-4 d-flex justify-content-md-end">
+            <Button
+              className="px-4 w-100 w-md-auto"
+              onClick={handleFetchReport}
+              disabled={loading}
+            >
               {loading ? (
                 <>
                   <Spinner as="span" size="sm" /> Memuat...
@@ -188,7 +210,26 @@ const ReportWeeklyPlanning = () => {
         </div>
       )}
 
-      {reportData && (
+      {reportData && isEmptyReport() && (
+        <Card className="shadow-sm border-0 mt-4">
+          <Card.Body className="text-center py-5">
+            <div className="mb-3" style={{ fontSize: "3rem" }}>📭</div> 
+            <h5 className="fw-bold text-secondary">Data Tidak Tersedia</h5>
+            <p className="text-muted mb-3">
+              Tidak ditemukan data report untuk bulan atau filter yang dipilih.
+            </p>
+            <Button
+              variant="outline-primary"
+              onClick={handleFetchReport}
+              disabled={loading}
+            >
+              Coba Muat Ulang
+            </Button>
+          </Card.Body>
+        </Card>
+      )}
+
+      {reportData && !isEmptyReport() && (
         <div className="report-content mt-4">
           {/* KPI */}
           <Row>{reportData.monthly_totals.analysis_summary.map(renderSummaryCard)}</Row>
