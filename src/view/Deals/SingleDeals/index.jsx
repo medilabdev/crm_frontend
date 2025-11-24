@@ -1,13 +1,16 @@
 import React from "react";
+import DatePicker from "react-datepicker";
 import Topbar from "../../../components/Template/Topbar";
 import Sidebar from "../../../components/Template/Sidebar";
 import Main from "../../../components/Template/Main";
 import BreadcrumbSingleDeals from "../Component/BreadcrumbSingleDeals";
-import { Card, Col, FloatingLabel, Form, Row } from "react-bootstrap";
+import { Card, Col, FloatingLabel, Form, Row, Modal, Button } from "react-bootstrap";
 import { useState } from "react";
 import axios from "axios";
 import { useEffect } from "react";
+import { useParams } from "react-router-dom";
 import Select from "react-select";
+import CreatableSelect from 'react-select/creatable';
 import OverlayAddCompany from "../../../components/Overlay/addCompany";
 import ReactQuill from "react-quill";
 import OverlayAddContact from "../../../components/Overlay/addContact";
@@ -19,12 +22,17 @@ import { faSackDollar } from "@fortawesome/free-solid-svg-icons";
 
 const SingleDeals = () => {
   const token = localStorage.getItem("token");
+  const { uid } = useParams();
   const [owner, setOwner] = useState([]);
   const [priority, setPriority] = useState([]);
   const [dealCategory, setDealCategory] = useState([]);
+  const [projectCategories, setProjectCategories] = useState([]);
   const [companies, setCompanies] = useState([]);
   const [contact, setContact] = useState([]);
   const [pipeline, setPipeline] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [valueDeals, setValueDeals] = useState({}); // <-- PASTIKAN BARIS INI ADA
+
   // overlay add company
   const [showAddCampCanvas, setShowAddCampCanvas] = useState(false);
   const handleCloseAddCampCanvas = () => setShowAddCampCanvas(false);
@@ -42,40 +50,33 @@ const SingleDeals = () => {
   const handleShowProduct = () => setShowAddProduct(true);
   const [allProductData, setAllProductData] = useState([]);
   const [mentionUsers, setMentionUsers] = useState([]);
-  const [dealSize, setDealSize] = useState([]);
+  const [dealSize, setDealSize] = useState(null);
 
-  const allData = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key.startsWith("DataProduct")) {
-      const data = JSON.parse(localStorage.getItem(key));
-      allData.push(data);
-    }
-  }
-  let totalPrice = 0;
-  if (allData[0]) {
-    const totalPriceArray = allData.map((data) =>
-      data.map((item) => (totalPrice += item.total_price))
-    );
-  }
-  const [price, setPrice] = useState(0);
-  const handlePrice = (e) => {
-    const value = e.target.value;
-    setPrice(value);
+  const [price, setPrice] = useState(0); // Tidak diperlukan lagi
+  const handlePrice = (e) => { // Tidak diperlukan lagi
+      const value = e.target.value;
+      setPrice(value);
   };
+
+  const totalPrice = products.reduce((sum, item) => sum + (item.total_price || 0), 0);
+
   const [inputDeals, setInputDeals] = useState({
     deal_name: "",
     deal_size: "",
-    priority: "",
+    priority_uid: "",
     deal_status: "",
     deal_category: "",
+    project_category_uid: "", 
     staging: "",
     company_uid: "",
     product_uid: "",
     notes: "",
     gps: "",
     owner_user_uid: "",
+    planned_implementation_date: null,
+    next_project_date: null
   });
+  
   const [inputContact, setInputContact] = useState([]);
   const handleInputDeals = (e) => {
     setInputDeals({
@@ -83,22 +84,27 @@ const SingleDeals = () => {
       [e.target.name]: e.target.value,
     });
   };
+
   const [selectedPipeline, setSelectedPipeline] = useState(null);
-  const handleCheckboxChange = (uid) => {
-    setSelectedPipeline(uid === selectedPipeline ? null : uid);
+
+  const handleCheckboxChange = (stageObject) => {
+    setSelectedPipeline(stageObject.uid);
   };
+
   const handleInputOwner = (e) => {
     setInputDeals({
       ...inputDeals,
       owner_user_uid: e.value,
     });
   };
+
   const handleInputPriority = (e) => {
     setInputDeals({
       ...inputDeals,
-      priority: e.value,
+      priority_uid: e.value,
     });
   };
+
   const handleInputDealCategory = (e) => {
     setInputDeals({
       ...inputDeals,
@@ -106,18 +112,29 @@ const SingleDeals = () => {
     });
   };
 
-  const handleCompanyUid = (e) => {
-    setInputDeals({
-      ...inputDeals,
-      company_uid: e.value,
-    });
+  const handleCompanyUid = (selectedOption) => {
+    setInputDeals((prevDeals) => ({
+      ...prevDeals,
+      company_uid: selectedOption ? selectedOption.value : "",
+      deal_name: selectedOption ? selectedOption.label : "",
+    }));
   };
+
   const handleContactUid = (e) => {
     setInputContact(e.map((opt) => opt.value));
   };
+  
   const mantionUsersUid = (e) => {
     setMentionUsers(e.map((opt) => opt.value));
   };
+
+  const handleInputProjectCategory = (selectedOption) => {
+      setInputDeals(prevDeals => ({
+          ...prevDeals,
+          project_category_uid: selectedOption ? selectedOption.value : "",
+      }));
+  };
+
   // ambil data owner
   const getOwnerUser = async (retryCount = 0) => {
     try {
@@ -258,6 +275,17 @@ const SingleDeals = () => {
     }
   };
 
+  const getProjectCategories = async () => {
+      try {
+          const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/project-categories`, {
+              headers: { Authorization: `Bearer ${token}` },
+          });
+          setProjectCategories(response.data.data);
+      } catch (error) {
+          console.error("Failed to fetch project categories:", error);
+      }
+  };
+
   // ambil data contact
   const getContact = async (retryCount = 0) => {
     try {
@@ -305,6 +333,7 @@ const SingleDeals = () => {
         }
       );
       setPipeline(response.data.data);
+      console.log("Pipeline data:", response.data.data); // Debugging line
     } catch (error) {
       if (
         error.response.status === 401 &&
@@ -341,6 +370,7 @@ const SingleDeals = () => {
     });
     return result;
   };
+
   // select priority
   const prioritySelect = () => {
     const result = [];
@@ -395,7 +425,7 @@ const SingleDeals = () => {
 
   // handle delete product product
   const handleDeleteProduct = (productId) => {
-    const updateData = allData[0].filter((product) => product.id !== productId);
+    const updateData = products.filter((product) => product.id !== productId);
     setAllProductData(updateData);
     localStorage.setItem("DataProduct", JSON.stringify(updateData));
   };
@@ -449,6 +479,7 @@ const SingleDeals = () => {
       ),
     },
   ];
+
   // custom style
   const customStyle = {
     headRow: {
@@ -468,107 +499,132 @@ const SingleDeals = () => {
     },
   };
 
-  useEffect(() => {
-    getOwnerUser(token);
-    getPriority(token);
-    getDealCategory(token);
-    getCompanies(token);
-    getContact(token);
-    getPipeline(token);
-    setPrice(totalPrice);
+  const projectCategorySelectOptions = () => {
+      return projectCategories.map(cat => ({
+          value: cat.uid,
+          label: cat.name,
+      }));
+  };
 
-    // jika windows di reload maka data product akan hilang
-    const clearDataProductLocalStorage = () => {
+  // Fungsi ini akan dipanggil oleh overlay setelah produk disimpan
+  const handleProductsUpdate = () => {
+    const updatedProducts = JSON.parse(localStorage.getItem("DataProduct") || "[]");
+    setProducts(updatedProducts);
+  };
+    
+  useEffect(() => {
+    const initialize = async () => {
+      getPipeline();
+      getOwnerUser(token);
+      getPriority(token);
+      getDealCategory(token);
+      getCompanies(token);
+      getProjectCategories(token);
+      getContact(token);
+
+      // CREATE MODE ALWAYS
       localStorage.removeItem("DataProduct");
+      localStorage.removeItem("companyStorage");
+      localStorage.removeItem("contactPerson");
+      setProducts([]);
     };
-    window.addEventListener("beforeunload", clearDataProductLocalStorage);
-    return () => {
-      window.removeEventListener("beforeunload", clearDataProductLocalStorage);
-    };
-  }, [token, dealSize, totalPrice]);
+
+    initialize();
+  }, [token]);
+
 
   const [selectFile, setSelectFile] = useState(null);
+
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     setSelectFile(file);
   };
-  const handleSubmitDeals = (e) => {
+
+  // Ganti seluruh fungsi submit Anda dengan ini
+  const handleSubmitDeals = async (e) => {
     e.preventDefault();
+    setButtonDisabled(true);
+
+    const formData = new FormData();
+    const dealData = inputDeals;
+
+    // API endpoint khusus create
+    const url = `${process.env.REACT_APP_BACKEND_URL}/deals`;
+
+    // ---- DATA DEAL ----
+    formData.append("deal_name", dealData.deal_name || "");
+    formData.append("deal_status", dealData.deal_status || "");
+    formData.append("priority_uid", dealData.priority_uid ?? "");
+    formData.append("deal_category", dealData.deal_category || "");
+    formData.append("project_category_uid", dealData.project_category_uid || "");
+    formData.append("company_uid", dealData.company_uid || "");
+    formData.append("owner_user_uid", dealData.owner_user_uid || "");
+    formData.append("notes", dealData.notes || "");
+    formData.append("staging_uid", selectedPipeline ?? "");
+    formData.append("deal_size", dealSize || 0);
+    formData.append("file", selectFile || "");
+
+    // ---- TANGGAL ----
+    if (dealData.planned_implementation_date) {
+        const date = new Date(dealData.planned_implementation_date);
+        const formattedDate = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+        formData.append("planned_implementation_date", formattedDate);
+    }
+
+    if (dealData.next_project_date) {
+        const date = new Date(dealData.next_project_date);
+        const formattedDate = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+        formData.append("next_project_date", formattedDate);
+    }
+
+    // ---- CONTACT ----
+    inputContact.forEach(uid => formData.append("contact_person[]", uid));
+
+    // ---- MENTION ----
+    mentionUsers.forEach((uid, index) =>
+        formData.append(`mention_user[${index}]`, uid)
+    );
+
+    // ---- PRODUCTS ----
+    const productsToSave = JSON.parse(localStorage.getItem("DataProduct") || "[]");
+    productsToSave.forEach((product, index) => {
+        formData.append(`products[${index}][product_uid]`, product.product_uid);
+        formData.append(`products[${index}][product_name]`, product.product_name);
+        formData.append(`products[${index}][qty]`, product.qty);
+        formData.append(`products[${index}][discount_type]`, product.discount_type);
+        formData.append(`products[${index}][discount]`, product.discount);
+        formData.append(`products[${index}][price]`, product.price);
+        formData.append(`products[${index}][total_price]`, product.total_price);
+    });
+
     try {
-      const formData = new FormData();
-      for (const uidContact of inputContact) {
-        formData.append("contact_person[]", uidContact || "");
-      }
-      mentionUsers.forEach((ment, index) => {
-        formData.append(`mention_user[${index}]`, ment);
-      });
-      formData.append("deal_name", inputDeals.deal_name);
-      formData.append("deal_size", price || "");
-      formData.append("deal_status", inputDeals.deal_status);
-      formData.append("priority_uid", inputDeals.priority ?? "");
-      formData.append("deal_category", inputDeals.deal_category || "");
-      formData.append("staging_uid", selectedPipeline);
-      formData.append("owner_user_uid", inputDeals.owner_user_uid);
-      formData.append("company_uid", inputDeals.company_uid || "");
-      formData.append("notes", inputDeals.notes ? inputDeals.notes : "");
-      formData.append("file", selectFile || "");
-      if (Array.isArray(allData[0]) && allData[0].length > 0) {
-        allData[0].forEach((product, index) => {
-          formData.append(
-            `products[${index}][product_uid]`,
-            product.product_uid || ""
-          );
-          formData.append(`products[${index}][qty]`, product.qty || "");
-          formData.append(
-            `products[${index}][discount_type]`,
-            product.discount_type || ""
-          );
-          formData.append(
-            `products[${index}][discount]`,
-            product.discount || ""
-          );
-          formData.append(
-            `products[${index}][total_price]`,
-            product.total_price || ""
-          );
+        const res = await axios.post(url, formData, {
+            headers: { Authorization: `Bearer ${token}` },
         });
-      }
-      // for (const pair of formData.entries()) {
-      //   console.log(pair[0] + ": " + pair[1]);
-      // }
-      setButtonDisabled(true);
-      axios
-        .post(`${process.env.REACT_APP_BACKEND_URL}/deals`, formData, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        .then((res) => {
-          Swal.fire({
+
+        Swal.fire({
             title: res.data.message,
-            text: "Successfullly created deals",
+            text: "Successfully created deal",
             icon: "success",
-          }).then((res) => {
-            if (res.isConfirmed) {
-              window.location.href = "/deals";
-            }
-          });
+        }).then(() => {
+            localStorage.removeItem("DataProduct");
+            window.location.href = "/deals";
         });
-      // }
     } catch (err) {
-      if (err.response) {
         Swal.fire({
-          text: err.response.data.message,
-          icon: "warning",
+            text: err.response?.data?.message || "An error occurred!",
+            icon: "warning",
         });
-      } else {
-        Swal.fire({
-          text: "Something went wrong !",
-          icon: "error",
-        });
-      }
+    } finally {
+        setButtonDisabled(false);
     }
   };
+
+
+  const currentSelectedStage = pipeline.find(p => p.uid === selectedPipeline);
+
+  console.log('deal size state:', dealSize);
+
   return (
     <body id="body">
       <Topbar />
@@ -608,11 +664,12 @@ const SingleDeals = () => {
                   {pipeline.map((data) => (
                     <div className="form-check form-check-inline ms-3">
                       <input
-                        type="checkbox"
+                        type="radio"
+                        name="pipeline"
                         className="form-check-input me-2"
                         value={data.uid}
                         checked={data.uid === selectedPipeline}
-                        onChange={() => handleCheckboxChange(data.uid)}
+                        onChange={() => handleCheckboxChange(data)}
                         style={{
                           width: "15px",
                           height: "15px",
@@ -643,35 +700,36 @@ const SingleDeals = () => {
                   </h5>
                 </Card.Header>
                 <Card.Body>
-                  <FloatingLabel
-                    label={
-                      <span>
-                        Deal Name
-                        <span style={{ color: "red" }} className="fs-6">
-                          *
-                        </span>
-                      </span>
-                    }
-                    className="mb-3"
-                  >
-                    <Form.Control
-                      type="text"
-                      name="deal_name"
-                      onChange={handleInputDeals}
-                      placeholder="text"
-                      required
-                    />
+                  <FloatingLabel label={
+                          <span>
+                          Deal Name
+                          <span style={{ color: "red" }} className="fs-6">
+                              *
+                          </span>
+                          </span>
+                      }
+                      className="mb-3">
+                      <Form.Control
+                          type="text"
+                          placeholder="Deal Name"
+                          name="deal_name"
+                          value={inputDeals.deal_name} 
+                          onChange={handleInputDeals}
+                          required
+                      />
                   </FloatingLabel>
+
                   <FloatingLabel
-                    label={<span>Deal Size</span>}
-                    className="mb-3"
+                      label={<span>Deal Size</span>}
+                      className="mb-3"
                   >
-                    <Form.Control
-                      type="number"
-                      placeholder="text"
-                      value={price}
-                      onChange={handlePrice}
-                    />
+                      <Form.Control
+                          type="number"
+                          placeholder="text"
+                          value={dealSize || ''} // <-- GANTI dari price
+                          onChange={(e) => setDealSize(e.target.value)} // <-- GANTI dari handlePrice
+                          name="deal_size"
+                      />
                   </FloatingLabel>
                   <FloatingLabel label="Deal Status" className="mb-3">
                     <Form.Control
@@ -708,8 +766,56 @@ const SingleDeals = () => {
                       onChange={(e) => handleInputDealCategory(e)}
                     />
                   </Form.Group>
+
+                  <Form.Group className="mb-3">
+                    <Form.Label>Project Category</Form.Label>
+                    <CreatableSelect
+                        isClearable
+                        options={projectCategorySelectOptions()}
+                        onChange={handleInputProjectCategory}
+                        placeholder="Select or create a project category..."
+                    />
+                  </Form.Group>
+
+                  {currentSelectedStage?.name === 'Approaching' && (
+                      <Card className="shadow mt-4">
+                          <Card.Body>
+                              <Form.Group>
+                                  <Form.Label>
+                                      <span className="text-danger">*</span> Planned Implementation Date
+                                  </Form.Label>
+                                  <DatePicker
+                                      selected={inputDeals.planned_implementation_date}
+                                      onChange={(date) => setInputDeals({ ...inputDeals, planned_implementation_date: date })}
+                                      className="form-control"
+                                      dateFormat="dd/MM/yyyy"
+                                      placeholderText="Select a date"
+                                      required // <-- Membuat field ini wajib diisi jika muncul
+                                  />
+                                  <Form.Text className="text-muted">
+                                      This date is mandatory for the Approaching stage.
+                                  </Form.Text>
+                              </Form.Group>
+                          </Card.Body>
+                      </Card>
+                  )}
+
+                  <Form.Group as={Col} md={6} className="mb-3">
+                    <Form.Label>Next Project Date</Form.Label>
+                    <DatePicker
+                        selected={inputDeals.next_project_date}
+                        onChange={(date) => setInputDeals({ ...inputDeals, next_project_date: date })}
+                        className="form-control"
+                        dateFormat="dd/MM/yyyy"
+                        placeholderText="Optional: Set a follow-up date"
+                        isClearable
+                    />
+                </Form.Group>
+
+
                 </Card.Body>
               </Card>
+
               <Card className="shadow">
                 <Card.Header>
                   <h5 className="mt-2">
@@ -780,6 +886,7 @@ const SingleDeals = () => {
                 visible={showAddContact}
               />
             </div>
+          
             <div className="col-md-8">
               <Card className="shadow">
                 <Card.Header>
@@ -791,19 +898,17 @@ const SingleDeals = () => {
                 <Card.Body>
                   <div>
                     <DataTable
-                      data={allData[0]}
+                      data={products} // <-- PERBAIKAN: Gunakan state 'products'
                       columns={columns}
                       customStyles={customStyle}
                     />
                   </div>
                   <div className="row">
                     <div className="mt-3 me-3">
-                      <span
-                        className="float-end"
-                        style={{ fontWeight: 400, fontSize: "0.80rem" }}
-                      >
+                      <span className="float-end" style={{ fontWeight: 400, fontSize: "0.80rem" }}>
                         Total Price Product:
                         <span className="ms-3 me-2" style={{ fontWeight: 600 }}>
+                          {/* PERBAIKAN: Gunakan variabel totalPrice yang reaktif */}
                           Rp. {new Intl.NumberFormat().format(totalPrice)}
                         </span>
                       </span>
@@ -811,23 +916,19 @@ const SingleDeals = () => {
                   </div>
                   <div>
                     <div className="mt-3 text-center">
-                      <a
-                        onClick={handleShowProduct}
-                        className="fw-semibold fs-6 btn btn-outline-primary"
-                        style={{
-                          cursor: "pointer",
-                        }}
-                      >
+                      <Button variant="outline-primary" onClick={handleShowProduct}>
                         Add Product
-                      </a>
+                      </Button>
                     </div>
                   </div>
                 </Card.Body>
               </Card>
               <AddProductOverlay
-                onClose={handleCloseProduct}
-                visible={showAddProduct}
+                  visible={showAddProduct}
+                  onClose={handleCloseProduct}
+                  onProductsUpdated={handleProductsUpdate} // <-- PERBAIKAN: Pastikan prop ini ada
               />
+
               <Card className="shadow">
                 <Card.Header>
                   <h6 className="fw-bold mt-2">Notes</h6>
@@ -871,8 +972,12 @@ const SingleDeals = () => {
                 </Card.Body>
               </Card>
             </div>
+            
+
           </form>
-        </div>
+          </div>
+
+
       </Main>
     </body>
   );

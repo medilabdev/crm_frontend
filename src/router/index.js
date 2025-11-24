@@ -6,7 +6,6 @@ import ShowUser from "../view/User/show";
 import Auth from "../view/Auth";
 import Contact from "../view/Contact";
 import SingleContact from "../view/Contact/SingleContact";
-
 import BulkChange from "../view/Contact/BulkChange";
 import Company from "../view/Company";
 import SingleCompany from "../view/Company/SingleCompany";
@@ -21,6 +20,7 @@ import ShowCompany from "../view/Company/ShowCompany";
 import Templates from "../view/Documents/Templates";
 import ShortCode from "../view/Documents/ShortCode";
 import Deals from "../view/Deals";
+import FollowUpReport from "../view/Deals/FollowUpReport";
 import SingleDeals from "../view/Deals/SingleDeals";
 import BulkChangeDeals from "../view/Deals/BulkChange";
 import EditPackageProduct from "../view/Products/EditPackageProduct";
@@ -33,7 +33,7 @@ import DealsCategory from "../view/Properties/DealsStage";
 import NeedsApproval from "../view/Deals/NeedApproval";
 import EditDeals from "../view/Deals/SingleDeals/EditDeals";
 import Accounting from "../view/Deals/Accounting";
-import Task from "../view/Task";
+import Task from "../view/TaskNew/WeeklyPlanning/index";
 import BulkChangeTask from "../view/Task/BulkChange";
 import UploadFileTask from "../view/Task/UploadFile";
 import DetailNeedApproval from "../view/Deals/NeedApproval/Detail";
@@ -60,7 +60,13 @@ import FillTaskWeekly from "../view/Weekly/FillTaskWeekly";
 import ActivityTechnician from "../view/ActivityTechnicians";
 import DetailActivity from "../view/ActivityTechnicians/details";
 import CreateTechnicianTicket from "../view/ActivityTechnicians/create";
-
+import ApprovalCenter from "../view/Contact/ApprovalCenter";
+import WeeklyPlanningForm from "../view/TaskNew/WeeklyPlanningForm";
+import WeeklyPlanningPreview from "../view/TaskNew/WeeklyPlanningPreview";
+import WeeklyPlanningReportMockup from "../view/TaskNew/WeeklyPlanningReportMockup";
+import WeeklyPlanningSystem from "../view/TaskNew/WeeklyPlanningSystem";
+import WeeklyPlanningTestPage from "../view/TaskNew/WeeklyPlanningTestPage";
+import WeeklyPlanningSimulation from "../view/TaskNew/WeeklyPlanningSimulation";
 const Login = ({ children }) => {
   const token = localStorage.getItem("token");
   if (!token) {
@@ -150,6 +156,7 @@ function Router() {
             </Login>
           }
         />
+        <Route exact path="/approvals/contact-deletions" element={<ApprovalCenter />} />
         <Route
           exact
           path="/company"
@@ -212,6 +219,8 @@ function Router() {
             </Login>
           }
         />
+        <Route path="/deals/follow-up-report" element={<FollowUpReport />} />
+
         <Route
           exact
           path="/products"
@@ -482,6 +491,11 @@ function Router() {
             </Login>
           }
         />
+        <Route exact path="/task/weekly-planning-form" element={<Login><WeeklyPlanningForm /></Login>} />
+        <Route exact path="/task/weekly-planning-preview" element={<Login><WeeklyPlanningPreview /></Login>} />
+        <Route exact path="/task/weekly-planning-report" element={<Login><WeeklyPlanningReportMockup /></Login>} />
+        <Route exact path="/task/weekly-planning-system" element={<Login><WeeklyPlanningSystem /></Login>} />
+        <Route exact path="/task/weekly-planning-test" element={<Login><WeeklyPlanningTestPage /></Login>} />
 
         <Route exact path="/properties/deals-version" element={<Login><DealsVersion /></Login>} />
         <Route exact path="/deals-second/:uid/edit" element={<Login><EditDataSecondDeals /></Login>} />
@@ -492,7 +506,7 @@ function Router() {
         <Route exact path="/weekly-task/create" element={<Login><CreateWeeklyTask /></Login>} />
         <Route exact path="/weekly-task/:uid/edit" element={<Login><EditTaskWeekly /></Login>} />
         <Route exact path="/weekly-task/:uid/note" element={<Login><FillTaskWeekly /></Login>} />
-
+        <Route exact path="/task/weekly-planning-simulation" element={<Login><WeeklyPlanningSimulation /></Login>} />
         {/* activity technician */}
         <Route exact path="/activity-technician" element={<Login><ActivityTechnician /></Login>} />
         <Route exact path="/activity-technician/:uid/detail" element={<Login><DetailActivity /></Login>} />

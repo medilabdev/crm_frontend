@@ -8,7 +8,7 @@ import dumyData from "./Dummy/index";
 import Card from "../../components/Card";
 import IconImage from "../../assets/img/profile.png";
 import "../Contact/style.css";
-import { Row, Col, OverlayTrigger, Tooltip } from "react-bootstrap";
+import { Row, Col, OverlayTrigger, Tooltip, Button, Badge } from "react-bootstrap";
 import DeleteContact from "./Modals/deleteContact";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
@@ -29,6 +29,7 @@ import {
   faSackDollar,
   faTrash,
   faX,
+  faCircleXmark
 } from "@fortawesome/free-solid-svg-icons";
 import Breadcrumb from "./Partials/Breadcrumb";
 import TopButton from "./Partials/TopButton";
@@ -365,7 +366,9 @@ const Contact = () => {
     ownerContact,
     formSearch,
     pagination.page,
-    pagination.limit,])
+    pagination.limit,
+  ]);
+
 
   const handleChangePage = (page) => {
     setPagination((e) => ({ ...e, page }));
@@ -382,8 +385,19 @@ const Contact = () => {
     }
   };
 
+  
+  const conditionalRowStyles = [
+    {
+      when : row => !!row.pending_deletion_request,
+      style : {
+        opacity : 0.6,
+        backgroundColor: '#f8f9fa',
+      }
+    }
+  ];
 
   const isMobile = useMediaQuery({ maxWidth : 767 })
+  
   const ExpandedComponent = ({ data }) => {
     const associatedCompanies = data?.associate?.slice(0, 3)
     .map((item) => item?.company?.name)
@@ -407,9 +421,18 @@ const Contact = () => {
     const formatter = new Intl.DateTimeFormat("en-US", formatOptions);
     const createdDateTime = formatter.format(createdAt);
     const updatedDateTime = formatter.format(updatedAt);
+    const isPending = !!data.pending_deletion_request;
+
     return (
       <>
       <div>
+        {isPending && (
+            <div className="mt-3" style={{ marginLeft: "1rem", marginBottom: "1rem" }}>
+                <span style={{ fontWeight: 400 }}>Status : </span>
+                <Badge bg="warning" text="dark">Pending Approval</Badge>
+            </div>
+        )}
+
         <div className="mt-3 " style={{ marginLeft: "1rem", marginBottom: "1rem", fontWeight:600, whiteSpace:"nowrap"}}> 
           <span style={{ fontWeight : 400}}>Contact :</span>  
           {data?.phone?.[0]?.number ?? '-'}
@@ -440,25 +463,23 @@ const Contact = () => {
           {updatedDateTime}
         </div>
         : ""}
-        <div className="mt-3 d-flex" style={{ marginLeft: "1rem", marginBottom: "1rem", fontWeight:600, whiteSpace:"nowrap"}}> 
-          <span style={{ fontWeight : 400}}>Action : </span>  
-          <div className="ms-2">
-            <a
-              href={`/contact/${data.uid}/edit`}
-              target="_blank"
-              className="btn btn-primary"
-              title="edit"
-            >
-              Edit
-            </a>
-            <button
-              className="ms-2 btn btn-danger"
-              title="delete"
-              onClick={() => setDeleteContact(data.uid)}
-            >
-              Hapus
-            </button>
-          </div>
+        <div className="mt-3 d-flex" style={{ marginLeft: "1rem", marginBottom: "1rem" }}> 
+            <span style={{ fontWeight : 400 }}>Action : </span>
+            <div className="ms-2">
+                {/* Tombol Edit dan Hapus di-disable jika pending */}
+                <Button variant="primary" size="sm" href={`/contact/${data.uid}/edit`} target="_blank" disabled={isPending}>
+                    Edit
+                </Button>
+                <Button
+                    variant="danger"
+                    size="sm"
+                    className="ms-2"
+                    onClick={() => isPending ? null : setDeleteContact(data.uid)}
+                    disabled={isPending}
+                >
+                    Hapus
+                </Button>
+            </div>
         </div>
       </div>
       </>
@@ -471,33 +492,114 @@ const Contact = () => {
     {
       name: "Name",
       selector: (row) => {
-        const createdDate = new Date(row?.created_at);
-        const updatedDate = new Date(row?.updated_at);
         const now = new Date();
-        const twoDaysAgo = new Date(now.setDate(now.getDate() - 2));
-  
-        const isNew = createdDate > twoDaysAgo;
-        const isUpdate = updatedDate > twoDaysAgo && updatedDate > createdDate;
-  
+        const createdAt = new Date(row.created_at);
+        const updatedAt = new Date(row.updated_at);
+
+        const rejection = row.latest_deletion_request;
+        const rejectedAt = rejection?.approved_or_rejected_at
+          ? new Date(rejection.approved_or_rejected_at)
+          : null;
+
+        const hoursSinceCreated = (now - createdAt) / (1000 * 60 * 60);
+        const hoursSinceUpdated = (now - updatedAt) / (1000 * 60 * 60);
+        const hoursSinceRejected = rejectedAt
+          ? (now - rejectedAt) / (1000 * 60 * 60)
+          : Infinity;
+
+        const isNew = hoursSinceCreated <= 48;
+        const isUpdated = hoursSinceUpdated <= 24 && updatedAt > createdAt;
+        const isRejectedRecently =
+          rejection &&
+          rejection.status === "rejected" &&
+          hoursSinceRejected <= 24;
+        const isPending = !!row.pending_deletion_request;
+
+        const renderBadge = () => {
+          // 1️⃣ Pending selalu prioritas tertinggi
+          if (isPending) {
+            return (
+              <Badge bg="warning" text="dark" className="ms-2" style={{ fontSize: "0.6rem" }}>
+                Pending
+              </Badge>
+            );
+          }
+
+          // 2️⃣ Rejected override semua status
+          if (isRejectedRecently) {
+            return (
+              <OverlayTrigger
+                placement="top"
+                overlay={
+                  <Tooltip id={`tooltip-reject-${row.uid}`}>
+                    <div>
+                      <strong>Rejected by:</strong>{" "}
+                      {rejection?.approver?.name || "-"}
+                      <br />
+                      <strong>Date:</strong>{" "}
+                      {rejectedAt.toLocaleDateString("id-ID")}
+                      <br />
+                      <strong>Reason:</strong>{" "}
+                      {rejection?.reason_for_rejection || "-"}
+                    </div>
+                  </Tooltip>
+                }
+              >
+                <Badge
+                  bg="danger"
+                  className="ms-2 d-inline-flex align-items-center"
+                  style={{ fontSize: "0.6rem", cursor: "help" }}
+                >
+                  <FontAwesomeIcon icon={faCircleXmark} className="me-1" />
+                  Rejected
+                </Badge>
+              </OverlayTrigger>
+            );
+          }
+
+          // 3️⃣ Baru dibuat
+          if (isNew) {
+            return (
+              <Badge bg="primary" className="ms-2" style={{ fontSize: "0.6rem" }}>
+                New
+              </Badge>
+            );
+          }
+
+          // 4️⃣ Baru diperbarui
+          if (isUpdated) {
+            return (
+              <Badge bg="success" className="ms-2" style={{ fontSize: "0.6rem" }}>
+                Updated
+              </Badge>
+            );
+          }
+
+          return null;
+        };
+
         return (
-          <a href={`/contact/${row.uid}/edit`} target="_blank" className="text-decoration-none text-dark">
+          <a
+            href={`/contact/${row.uid}/edit`}
+            target="_blank"
+            className="text-decoration-none text-dark"
+          >
             <div>
-              <span style={{ fontWeight: "500", fontSize: "0.9rem" }}>{row.name}</span>
-              {isNew && (
-                <span className="badge rounded-pill bg-primary ms-2" style={{ fontSize: "0.6rem" }}>New</span>
-              )}
-              {!isNew && isUpdate && (
-                <span className="badge rounded-pill bg-success ms-2" style={{ fontSize: "0.6rem" }}>Updated</span>
-              )}
-              <div style={{ fontSize: "0.75rem", color: "#666" }}>{row.position || "-"}</div>
+              <span style={{ fontWeight: 500, fontSize: "0.9rem" }}>{row.name}</span>
+              {renderBadge()}
+              <div style={{ fontSize: "0.75rem", color: "#666" }}>
+                {row.position || "-"}
+              </div>
             </div>
           </a>
         );
       },
       left: true,
       wrap: true,
-      width: "180px",
+      width: "200px",
     },
+
+
     {
       name: "Contact Info",
       selector: (row) => (
@@ -574,28 +676,36 @@ const Contact = () => {
     },
     {
       name: "Action",
-      selector: (row) => (
-        <div className="d-flex gap-2">
-          <a
-            href={`/contact/${row.uid}/edit`}
-            className="btn btn-outline-primary btn-sm"
-            title="Edit"
-            target="_blank"
-          >
-            <FontAwesomeIcon icon={faPenToSquare} />
-          </a>
-          <button
-            onClick={() => setDeleteContact(row.uid)}
-            className="btn btn-outline-danger btn-sm"
-            title="Delete"
-          >
-            <FontAwesomeIcon icon={faTrash} />
-          </button>
-        </div>
-      ),
+       cell: (row) => { 
+        const isPending = !!row.pending_deletion_request;
+        return (
+            <div className="d-flex gap-2">
+                <OverlayTrigger placement="top" overlay={<Tooltip>Edit Contact</Tooltip>}>
+                    <Button variant="outline-primary" size="sm" href={`/contact/${row.uid}/edit`} target="_blank" disabled={isPending}>
+                        <FontAwesomeIcon icon={faPenToSquare} />
+                    </Button>
+                </OverlayTrigger>
+
+                <OverlayTrigger placement="top" overlay={<Tooltip>{isPending ? "Deletion request is pending" : "Request Delete"}</Tooltip>}>
+                    <span className="d-inline-block">
+                        <Button
+                            variant="outline-danger"
+                            size="sm"
+                            onClick={() => isPending ? null : setDeleteContact(row.uid)}
+                            disabled={isPending}
+                            style={isPending ? { pointerEvents: 'none' } : {}}
+                        >
+                            <FontAwesomeIcon icon={faTrash} />
+                        </Button>
+                    </span>
+                </OverlayTrigger>
+            </div>
+        );
+      },
       width: "140px",
     },
   ];
+
   
 
   const handleContactMyOrPerson = (e) => {
@@ -632,34 +742,38 @@ const Contact = () => {
   const handleDeleteSelected = async (e) => {
     e.preventDefault();
     const isResult = await Swal.fire({
-      title: "Apakah Anda Yakin",
-      text: "Anda tidak dapat mengembalikan data ini setelah menghapusnya!",
+      title: `Request Deletion for ${selectUid.length} Selected Items?`,
+      text: "This action will send a deletion request to an admin for approval.",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Ya, Hapus!",
-      cancelButtonText: "Batal",
+      confirmButtonText: "Yes, Send Requests!",
+      cancelButtonText: "Cancel",
     });
+
     if (isResult.isConfirmed) {
       try {
         const formData = new FormData();
         for (const uid of selectUid) {
           formData.append("contact_uid[]", uid);
         }
-        const deleteForSelect = await axios.post(
-          `${process.env.REACT_APP_BACKEND_URL}/contacts/delete/item`,
+
+        const response = await axios.post(
+          `${process.env.REACT_APP_BACKEND_URL}/contacts/request-delete/bulk`,
           formData,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
+
         Swal.fire({
-          title: deleteForSelect.data.message,
-          text: "Successfully delete contact",
+          title: "Requests Sent!",
+          text: response.data.message,
           icon: "success",
         });
         window.location.reload();
+
       } catch (error) {
-        if (error.response.data.message === "Unauthenticated") {
+        if (error.response?.data?.message === "Unauthenticated.") {
           Swal.fire({
             title: error.response.data.message,
             text: "Tolong Login Kembali",
@@ -667,11 +781,16 @@ const Contact = () => {
           });
           localStorage.clear();
           window.location.href = "/login";
-        }
-        if (error.message) {
+        } else if (error.response?.data?.message) {
           Swal.fire({
             text: error.response.data.message,
             icon: "warning",
+          });
+        } else {
+          Swal.fire({
+            title: "An Error Occurred",
+            text: "Something went wrong, please try again.",
+            icon: "error",
           });
         }
       }
@@ -904,6 +1023,7 @@ const Contact = () => {
                 </div>
                 <DataTable
                   columns={columns}
+                  conditionalRowStyles={conditionalRowStyles}
                   data={contact}
                   defaultSortFieldId={1}
                   pagination
@@ -919,6 +1039,8 @@ const Contact = () => {
                   paginationComponentOptions={{
                     noRowsPerPage: true,
                   }}
+                  selectableRowDisabled={row => !!row.pending_deletion_request}
+
                   highlightOnHover
                   expandableRows={isMobile}
                   expandableRowsComponent={isMobile ? ExpandedComponent : null}

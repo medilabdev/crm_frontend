@@ -8,6 +8,10 @@ function Sidebar() {
   const token = localStorage.getItem("token");
   const role = localStorage.getItem("role");
   const { sidebarData } = useSelector((state) => state.DataSideBar);
+  const userRole = localStorage.getItem('role_name');
+  const userPosition = localStorage.getItem('position_name');
+  const isAdmin = userRole?.toLowerCase() === 'owner' || userPosition?.toLowerCase() === 'direktur';
+
   const dispatch = useDispatch();
   const [dataToRender, setDataToRender] = useState(null);
   useEffect(() => {
@@ -32,6 +36,14 @@ function Sidebar() {
     <>
       <aside id="sidebar" className="sidebar shadow">
         <ul className="sidebar-nav" id="sidebar-nav">
+          {isAdmin && (
+              <li className="nav-item">
+                  <a className="nav-link" href="/approvals/contact-deletions">
+                      <i className="bi bi-check-circle"></i>
+                      <span>Approval Center</span>
+                  </a>
+              </li>
+          )}
           {dataToRender &&
             dataToRender.map((data, index) => (
               <MenuSidebar

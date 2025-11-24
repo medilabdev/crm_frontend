@@ -1,13 +1,13 @@
-import React from "react";
+import React, { useEffect, useState, useRef } from "react";
+import DatePicker from "react-datepicker";
 import Topbar from "../../../components/Template/Topbar";
 import Sidebar from "../../../components/Template/Sidebar";
 import Main from "../../../components/Template/Main";
 import { Link, json, useParams } from "react-router-dom";
-import { Card, Col, FloatingLabel, Form, Row } from "react-bootstrap";
+import { Card, Col, FloatingLabel, Form, Row, Modal, Button } from "react-bootstrap";
 import Select from "react-select";
+import CreatableSelect from 'react-select/creatable';
 import ReactQuill from "react-quill";
-import { useState } from "react";
-import { useEffect } from "react";
 import axios from "axios";
 import DataTable from "react-data-table-component";
 import IconPerson from "../../../assets/img/telephone-call.png";
@@ -16,17 +16,22 @@ import AddProductOverlay from "../../../components/Overlay/addProduct";
 import Swal from "sweetalert2";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSackDollar } from "@fortawesome/free-solid-svg-icons";
+
 const EditDeals = () => {
   const token = localStorage.getItem("token");
   const { uid } = useParams();
   const [pipeline, setPipeline] = useState([]);
   const [valueDeals, setValueDeals] = useState({});
+  const [existingHpp, setExistingHpp] = useState(null);
+
   const [owner, setOwner] = useState([]);
   const [priority, setPriority] = useState([]);
   const [dealCategory, setDealsCategory] = useState([]);
   const [company, setCompany] = useState([]);
   const [contact, setContact] = useState([]);
   const [contactDetail, setContactDetail] = useState({});
+  const [products, setProducts] = useState([]);
+  const productsRef = useRef(products);
   const [history, setHistory] = useState([]);
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [mentionUsers, setMentionUsers] = useState([]);
@@ -35,10 +40,16 @@ const EditDeals = () => {
   const handleCloseProduct = () => setShowAddProduct(false);
   const handleShowProduct = () => setShowAddProduct(true);
   const [isButtonDisabled, setButtonDisabled] = useState(false);
-  // mention user
+  const [projectCategories, setProjectCategories] = useState([]);
+  const [hppFile, setHppFile] = useState(null);
+  const [contactLocalStorage, setContactLocalStorage] = useState([]); 
+  const [selectedCompanyData, setSelectedCompanyData] = useState([]);
+  const [companyStorage, setCompanyStorage] = useState([]); // Ganti variabel global dengan state
+  
   const mantionUsersUid = (e) => {
     setMentionUsers(e.map((opt) => opt.value));
   };
+
   const getContact = async (retryCount = 0) => {
     try {
       const response = await axios.get(
@@ -74,20 +85,8 @@ const EditDeals = () => {
     }
   };
 
-  const allProduct = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key.startsWith("DataProduct")) {
-      const data = JSON.parse(localStorage.getItem(key));
-      allProduct.push(data);
-    }
-  }
-  let totalPrice = 0;
-  if (allProduct[0]) {
-    const totalPriceArray = allProduct.map((data) => {
-      data.map((item) => (totalPrice += item.total_price));
-    });
-  }
+  const totalPrice = products.reduce((sum, item) => sum + (item.total_price || 0), 0);
+
 
   const getCompany = async (retryCount = 0) => {
     try {
@@ -156,6 +155,17 @@ const EditDeals = () => {
       } else {
         console.error("Unhandled error:", error);
       }
+    }
+  };
+
+  const getProjectCategories = async () => {
+    try {
+        const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/project-categories`, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        setProjectCategories(response.data.data);
+    } catch (error) {
+        console.error("Failed to fetch project categories:", error);
     }
   };
 
@@ -229,67 +239,133 @@ const EditDeals = () => {
     }
   };
 
-  const getDealsValueOld = async (token, uid, retryCount = 0) => {
-    try {
-      const response = await axios.get(
-        `${process.env.REACT_APP_BACKEND_URL}/deals/${uid}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+  useEffect(() => {
+    const getDealsValueOld = async () => {
+        try {
+            const response = await axios.get(
+              `${process.env.REACT_APP_BACKEND_URL}/deals/${uid}`,
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            const dealData = response.data.data;
+
+            setValueDeals({
+                deal_name: dealData.deal_name,
+                priority_uid: dealData.priority_uid,
+                deal_status: dealData.deal_status,
+                deal_category_uid: dealData.deal_category_uid,
+                company_uid: dealData.company_uid,
+                owner_user_uid: dealData.owner_user_uid,
+                deal_size: dealData.deal_size,
+                project_category_uid: dealData.project_category_uid,
+                planned_implementation_date: dealData.planned_implementation_date ? new Date(dealData.planned_implementation_date) : null,
+                next_project_date: dealData.next_project_date ? new Date(dealData.next_project_date) : null,
+            });
+            setSelectedPipeline(dealData.staging_uid);
+            setHistory(dealData.history);
+            setExistingHpp(dealData.hpp_file_url  || null);
+
+
+            const standardizedProducts = (dealData.detail_product || []).map(item => {
+
+              // Cari harga satuan dari relasi product/package
+              let unitPrice = 0;
+              if (item.product) {
+                  // Produk Single/MCU: Ambil harga dari tabel 'products'
+                  unitPrice = item.product.price;
+              } else if (item.package_product) {
+                  // Produk Package: Ambil harga total dari tabel 'package_products'
+                  unitPrice = item.package_product.total_price;
+              }
+
+
+
+              return {
+                  id: item.id || item.uid,
+                  product_uid: item.product_uid || item.package_product_uid,
+                  product_name: (item.product && item.product.name) || (item.package_product && item.package_product.name) || item.product_name || 'Product Not Found',
+                  
+                  // >>> PERBAIKAN: Tambahkan unitPrice <<<
+                  price: unitPrice || 0,
+                  // >>> END PERBAIKAN <<<
+                  
+                  qty: item.qty,
+                  discount_type: item.discount_type,
+                  discount: item.discount,
+                  total_price: item.total_price, // Harga total final per item
+              }
+            });
+
+            const existingContacts = dealData.contact_person || []; // Sesuaikan nama key relasi dari backend
+            const standardizedContacts = existingContacts.map(item => ({
+                uid: item.uid,
+                contact_uid: item.contact_uid, 
+                contact: item.contact || null 
+            }));
+
+
+            setProducts(standardizedProducts);
+            setContactLocalStorage(standardizedContacts);
+            localStorage.setItem("DataProduct", JSON.stringify(standardizedProducts));
+            localStorage.setItem("contactPerson", JSON.stringify(standardizedContacts));
+
+            if (dealData.company) {                
+                 const companyDataToStore = [dealData.company]; 
+                 localStorage.setItem("companyStorage", JSON.stringify(companyDataToStore));
+            } else {
+                 localStorage.removeItem("companyStorage");
+                 setDataCompany([]);
+            }
+
+        } catch (error) {
+            console.error("Failed to fetch deal data:", error);
+            if (error.response?.status === 401) {
+                localStorage.clear();
+                window.location.href = "/login";
+            }
         }
-      );
-      const dealsOld = response.data.data;
-      setValueDeals({
-        deal_name: dealsOld.deal_name,
-        priority_uid: dealsOld.priority_uid,
-        deal_status: dealsOld.deal_status,
-        deal_category_uid: dealsOld.deal_category_uid,
-        company_uid: dealsOld.company_uid,
-        owner_user_uid: dealsOld.owner_user_uid,
-        deal_size: dealsOld.deal_size,
-      });
-      setHistory(dealsOld.history);
-      localStorage.setItem(
-        "DataProduct",
-        JSON.stringify(dealsOld?.detail_product)
-      );
-      setStageOld(dealsOld?.staging);
-      if (dealsOld?.contact_person) {
-        localStorage.setItem(
-          `contactPerson`,
-          JSON.stringify(dealsOld?.contact_person)
-        );
-        setContactDetail(dealsOld?.contact_person);
-      }
-      if (dealsOld?.company) {
-        localStorage.setItem(
-          "companyStorage",
-          JSON.stringify(dealsOld?.company)
-        );
-      }
-    } catch (error) {
-      if (
-        error.response.status === 401 &&
-        error.response.data.message === "Unauthenticated."
-      ) {
-        localStorage.clear();
-        window.location.href = "/login";
-      } else if (error.response && error.response.status === 429) {
-        const maxRetries = 3;
-        if (retryCount < maxRetries) {
-          setTimeout(() => {
-            getDealsValueOld(retryCount + 1);
-          }, 2000);
-        } else {
-          console.error(
-            "Max retry attempts reached. Unable to complete the request."
-          );
-        }
-      } else {
-        console.error("Unhandled error:", error);
-      }
-    }
+    };
+    
+    // Panggil semua fungsi get
+    getDealsValueOld();
+    getPipeline();
+    getOwner();
+    getPriority();
+    getDealsCategory();
+    getProjectCategories();
+    getCompany();
+    getContact();
+    const loadInitialCompany = () => {
+        // Muat dari localStorage
+        const company = JSON.parse(localStorage.getItem("companyStorage") || "[]");
+        setCompanyStorage(company);
+    };
+    loadInitialCompany();
+
+    // Listener untuk update UI jika localStorage diubah oleh overlay
+    const handleStorageChange = () => {
+      setProducts(JSON.parse(localStorage.getItem("DataProduct") || "[]"));
+    };
+    window.addEventListener('storage', handleStorageChange);
+    
+    // HAPUS LISTENER `beforeunload` YANG BERBAHAYA
+    return () => {
+        window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [token, uid]);
+
+  useEffect(() => {
+  // Setiap kali 'products' berubah, update isi 'kotak' ref
+    productsRef.current = products;
+  }, [products]);
+
+  const handleProductsUpdate = () => {
+    const updatedProducts = JSON.parse(localStorage.getItem("DataProduct") || "[]");
+    setProducts(updatedProducts);
+    console.log("PARENT STATE UPDATED:", updatedProducts); // Log untuk verifikasi
+  };
+
+  const handleContactUpdate = () => {
+    setContactLocalStorage(JSON.parse(localStorage.getItem("contactPerson") || "[]"));
   };
 
   const getPipeline = async (retryCount = 0) => {
@@ -363,6 +439,13 @@ const EditDeals = () => {
     return result;
   };
 
+  const projectCategorySelectOptions = () => {
+    return projectCategories.map(cat => ({
+        value: cat.uid,
+        label: cat.name,
+    }));
+  };
+
   const selectCompany = () => {
     const result = [];
     company?.map((data) => {
@@ -374,7 +457,9 @@ const EditDeals = () => {
     });
     return result;
   };
+
   const [resContact, setResContact] = useState([]);
+
   const handleResContact = (e) => {
     setResContact(e.map((opt) => opt.value));
   };
@@ -388,13 +473,15 @@ const EditDeals = () => {
     }
   }
 
-  let contactLocalStorage = null;
-  if (allContact[0]) {
-    contactLocalStorage = allContact[0]?.map((data) => data);
-  }
+  const loadInitialContacts = () => {
+    const contacts = JSON.parse(localStorage.getItem("contactPerson") || "[]");
+    setContactLocalStorage(contacts);
+  };
+
   const uidRes = contactLocalStorage?.map((data) => data.contact_uid);
   const uniqCont = new Set([...resContact, ...(uidRes || [])]);
   const combineCont = Array.from(uniqCont);
+  
   const selectContact = () => {
     const result = [];
     contact?.map((data) => {
@@ -420,36 +507,33 @@ const EditDeals = () => {
       [e.target.name]: e.target.value,
     });
   };
+
   const [selectFile, setSelectFile] = useState(null);
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     setSelectFile(file);
   };
-  useEffect(() => {
-    getPipeline();
-    getDealsValueOld(token, uid);
-    getOwner();
-    getPriority();
-    getDealsCategory();
-    getCompany();
-    getContact();
-    const clearDataProductLocalStorage = () => {
-      localStorage.removeItem("DataProduct");
-      localStorage.removeItem("companyStorage");
-      localStorage.removeItem("contactPerson");
-    };
-    window.addEventListener("beforeunload", clearDataProductLocalStorage);
-    return () => {
-      window.removeEventListener("beforeunload", clearDataProductLocalStorage);
-    };
-  }, [token, uid]);
 
-  const [dataProduct, setDataProduct] = useState([]);
-  const handleDeleteProduct = (productUid) => {
-    const upData = allProduct[0].filter((data) => data.id !== productUid);
-    setDataProduct(upData);
-    localStorage.setItem("DataProduct", JSON.stringify(upData));
+  const handleInputProjectCategory = (selectedOption) => {
+    setValueDeals(prevDeals => ({
+        ...prevDeals,
+        project_category_uid: selectedOption ? selectedOption.value : "",
+    }));
   };
+
+  const handleDateChange = (date, fieldName) => {
+      setValueDeals(prevDeals => ({
+          ...prevDeals,
+          [fieldName]: date,
+      }));
+  };
+
+  const handleDeleteProduct = (productId) => {
+    const updatedProducts = products.filter(p => p.id !== productId);
+    setProducts(updatedProducts); // Update state
+    localStorage.setItem("DataProduct", JSON.stringify(updatedProducts)); // Sinkronkan localStorage
+  };
+
 
   const handleDeleteContact = (uid) => {
     Swal.fire({
@@ -483,6 +567,7 @@ const EditDeals = () => {
   };
 
   const [dataCompany, setDataCompany] = useState([]);
+
   const handleDeleteCompany = (company) => {
     Swal.fire({
       title: "Konfirmasi",
@@ -585,14 +670,16 @@ const EditDeals = () => {
     },
   ];
 
-  const companyStorage = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const keys = localStorage.key(i);
-    if (keys.startsWith("companyStorage")) {
-      const data = JSON.parse(localStorage.getItem(keys));
-      companyStorage.push(data);
-    }
-  }
+  // const companyStorage = [];
+
+  // for (let i = 0; i < localStorage.length; i++) {
+  //   const keys = localStorage.key(i);
+  //   if (keys.startsWith("companyStorage")) {
+  //     const data = JSON.parse(localStorage.getItem(keys));
+  //     companyStorage.push(data);
+  //   }
+  // }
+
   const dataHistory = [
     {
       name: "Created By",
@@ -660,78 +747,151 @@ const EditDeals = () => {
       width: "140px",
     },
   ];
+
   const paginationComponentOptions = {
     selectAllRowsItem: true,
     selectAllRowsItemText: "ALL",
   };
 
-  const handleCheckboxChange = (uid) => {
-    setSelectedPipeline(uid === selectedPipeline ? null : uid);
+  const handleCheckboxChange = (stageObject) => {
+      setSelectedPipeline(stageObject.uid);
   };
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const formData = new FormData();
-    formData.append("deal_name", valueDeals.deal_name);
-    formData.append("deal_size", valueDeals.deal_size || totalPrice);
-    formData.append("priority", valueDeals.priority_uid);
-    formData.append("deal_status", valueDeals.deal_status);
-    formData.append("deal_category", valueDeals.deal_category);
-    formData.append("staging_uid", selectedPipeline ?? "");
-    formData.append("company_uid", valueDeals.company_uid || "");
-    formData.append("owner_user_uid", valueDeals.owner_user_uid);
-    formData.append("file", selectFile || "");
-    mentionUsers.forEach((ment, index) => {
-      formData.append(`mention_user[${index}]`, ment);
-    });
-    combineCont.forEach((com, index) => {
-      formData.append(`contact_person[${index}]`, com);
-    });
-    allProduct[0].forEach((product, index) => {
-      formData.append(
-        `products[${index}][product_uid]`,
-        product.product_uid || product.package_product_uid
-      );
-      formData.append(`products[${index}][qty]`, product.qty);
-      formData.append(
-        `products[${index}][discount_type]`,
-        product.discount_type
-      );
-      formData.append(`products[${index}][discount]`, product.discount);
-      formData.append(`products[${index}][total_price]`, product.total_price);
-    });
-    formData.append("notes", valueDeals.notes ? valueDeals.notes : "");
-    formData.append("_method", "put");
-    // for (const pair of formData.entries()) {
-    //   console.log(pair[0] + ": " + pair[1]);
-    // }
-    setButtonDisabled(true);
-    axios
-      .post(`${process.env.REACT_APP_BACKEND_URL}/deals/${uid} `, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => {
-        Swal.fire({
-          title: res.data.message,
-          text: "Successfully updated deals",
-          icon: "success",
-        }).then((res) => {
-          if (res.isConfirmed) {
-            window.location.reload();
-          }
-        });
-      })
-      .catch((err) => {
-        // console.log(err);
-        if (err.response) {
-          Swal.fire({
-            text: err.response.data.message,
-            icon: "warning",
-          });
-        }
+
+  const performSubmit = () => {
+      // Logika diambil dari handleSubmit
+      const formData = new FormData();
+      formData.append("_method", "put");
+
+      formData.append("deal_name", valueDeals.deal_name);
+      formData.append("deal_size", valueDeals.deal_size);
+      if (valueDeals.priority_uid) {
+          formData.append("priority_uid", valueDeals.priority_uid);
+      }
+      formData.append("deal_status", valueDeals.deal_status);
+      formData.append("deal_category", valueDeals.deal_category);
+      formData.append("project_category_uid", valueDeals.project_category_uid || "");
+
+      formData.append("staging_uid", selectedPipeline ?? "");
+      formData.append("company_uid", valueDeals.company_uid || "");
+      formData.append("owner_user_uid", valueDeals.owner_user_uid);
+
+      if (selectFile) {
+          formData.append("file", selectFile);
+      }
+
+      if (hppFile) {
+          formData.append("hpp_file", hppFile); // <-- Ini akan keisi
+      }
+
+
+      if (valueDeals.planned_implementation_date) {
+          const date = new Date(valueDeals.planned_implementation_date);
+          const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+          formData.append("planned_implementation_date", formattedDate);
+      }
+
+      if (valueDeals.next_project_date) {
+          const date = new Date(valueDeals.next_project_date);
+          const formattedDate = `${date.getFullYear()}-${String(
+              date.getMonth() + 1
+          ).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+          formData.append("next_project_date", formattedDate);
+      }
+
+      mentionUsers.forEach((ment, index) => {
+        formData.append(`mention_user[${index}]`, ment);
       });
+      
+      // Pastikan 'combineCont' ada di scope ini
+      combineCont.forEach((com, index) => { 
+        formData.append(`contact_person[${index}]`, com);
+      });
+
+      const productsFromStorage = JSON.parse(localStorage.getItem("DataProduct") || "[]");
+
+      if (productsFromStorage.length > 0) {
+        productsFromStorage.forEach((product, index) => {
+          formData.append(`products[${index}][product_uid]`, product.product_uid || "");
+          formData.append(`products[${index}][product_name]`, product.product_name || "");
+          formData.append(`products[${index}][price]`, product.price || 0);
+
+          formData.append(`products[${index}][qty]`, product.qty || 1);
+          formData.append(`products[${index}][discount_type]`, product.discount_type || "none");
+          formData.append(`products[${index}][discount]`, product.discount || 0);
+          formData.append(`products[${index}][total_price]`, product.total_price || 0);
+        });
+      }
+
+      formData.append("notes", valueDeals.notes ? valueDeals.notes : "");
+
+      console.log("--- FORM DATA SENT TO BACKEND ---");
+      for (const pair of formData.entries()) {
+        console.log(pair[0] + ": " + pair[1]);
+      }
+
+      setButtonDisabled(true);
+      axios
+        .post(`${process.env.REACT_APP_BACKEND_URL}/deals/${uid}`, formData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((res) => {
+          Swal.fire({
+            title: res.data.message,
+            text: "Successfully updated deals",
+            icon: "success",
+          }).then((res) => {
+            if (res.isConfirmed) {
+              localStorage.removeItem("DataProduct");
+              window.location.reload();
+            }
+          });
+        })
+        .catch((err) => {
+          if (err.response) {
+            Swal.fire({
+              text: err.response.data.message,
+              icon: "warning",
+            });
+          }
+          setButtonDisabled(false); // <-- Jangan lupa balikin kalo error
+        });
   };
+
+  const handleSubmit = (e) => {
+      // Hapus console.log stale state, udah nggak relevan
+      // console.log("STALE STATE in handleSubmit:", products);
+
+      e.preventDefault();
+      const userRole = localStorage.getItem("position_name")?.toLowerCase();
+      const allowedRoles = ["sales manager", "director", "finance"];
+
+      const currentSelectedStage = pipeline.find(p => p.uid === selectedPipeline);
+      const selectedStageName = currentSelectedStage?.name;
+
+      if (
+        allowedRoles.includes(userRole) &&
+        selectedStageName === "Closed Won" &&
+        !hppFile && !existingHpp
+      ) {
+          Swal.fire({
+              icon: "warning",
+              title: "HPP File Required",
+              text: "You must upload the HPP file before moving this deal to Closed Won.",
+          });
+          return;
+      }
+        performSubmit();
+    };
+  
+  const currentSelectedStage = pipeline.find(p => p.uid === selectedPipeline);
+  // console.log("Current HPP File:", hppFile);
+  // console.log("Company from localStorage:", companyStorage);
+  // console.log("Company from state:", company);
+  // console.log("Contact from state:", contact);
+  // console.log("Contact from localStorage:", contactLocalStorage);
+
   return (
     <body id="body">
       <Topbar />
@@ -796,6 +956,7 @@ const EditDeals = () => {
                     <span className="ms-2 fs-5 fw-semibold mt-5">Pipeline</span>
                   </h5>
                 </Card.Header>
+
                 <Card.Body>
                   <div className="mb-3 ms-1">
                     <span>
@@ -803,29 +964,33 @@ const EditDeals = () => {
                       <i className="fw-semibold fs-6 ms-2">{stageOld?.name}</i>
                     </span>
                   </div>
-                  {pipeline.map((data) => (
-                    <div className="form-check form-check-inline ms-3">
-                      <input
-                        type="checkbox"
-                        className="form-check-input me-2"
-                        value={data.uid}
-                        checked={data.uid === selectedPipeline}
-                        onChange={() => handleCheckboxChange(data.uid)}
-                        style={{
-                          width: "15px",
-                          height: "15px",
-                          borderColor: "#012970",
-                          boxShadow: "0 2 5px rgba(0, 0, 0, 0.3)",
-                        }}
-                      />
-                      <label
-                        className="form-check-label mt-1"
-                        style={{ fontWeight: 400, fontSize: "0.75rem" }}
-                      >
-                        {data.name}
-                      </label>
-                    </div>
-                  ))}
+                  {pipeline.map((data) => {
+                   
+                    return (
+                        <div className="form-check form-check-inline ms-3" key={data.uid}>
+                            <input
+                                type="radio"
+                                name="pipeline"
+                                className="form-check-input me-2"
+                                value={data.uid}
+                                checked={data.uid === selectedPipeline} 
+                                onChange={() => handleCheckboxChange(data)} 
+                                style={{
+                                    width: "15px",
+                                    height: "15px",
+                                    borderColor: "#012970",
+                                    boxShadow: "0 2 5px rgba(0, 0, 0, 0.3)",
+                                }}
+                            />
+                            <label
+                                className="form-check-label mt-1"
+                                style={{ fontWeight: 400, fontSize: "0.75rem" }}
+                            >
+                                {data.name}
+                            </label>
+                        </div>
+                    );
+                  })}
                 </Card.Body>
               </Card>
             </div>
@@ -868,7 +1033,7 @@ const EditDeals = () => {
                     <Form.Control
                       type="number"
                       name="deal_size"
-                      value={valueDeals.deal_size || totalPrice}
+                      value={valueDeals.deal_size}
                       onChange={handlePrice}
                       placeholder="text"
                     />
@@ -937,8 +1102,52 @@ const EditDeals = () => {
                       }
                     />
                   </Form.Group>
+
+                  <Form.Group className="mb-3">
+                      <Form.Label>Project Category</Form.Label>
+                      <CreatableSelect
+                          isClearable
+                          options={projectCategorySelectOptions()}
+                          // Mencari dan menampilkan nilai yang sudah tersimpan di state
+                          value={projectCategorySelectOptions().find(c => c.value === valueDeals.project_category_uid)}
+                          onChange={handleInputProjectCategory}
+                          placeholder="Select or create a project category..."
+                      />
+                  </Form.Group>
+                  {
+                    currentSelectedStage?.name === 'Approaching' && (
+                      <>
+                      <Form.Group>
+                          <Form.Label>
+                              <span className="text-danger">*</span> Planned Implementation Date
+                          </Form.Label>
+                          <DatePicker
+                              selected={valueDeals.planned_implementation_date}
+                              onChange={(date) => setValueDeals({ ...valueDeals, planned_implementation_date: date })}
+                              className="form-control"
+                              dateFormat="dd/MM/yyyy"
+                              placeholderText="Select a date"
+                              required
+                          />
+                      </Form.Group>
+                      </>
+                    )
+                  }
+
+                  <Form.Group as={Col} md={6} className="mb-3">
+                      <Form.Label>Next Project Date</Form.Label>
+                      <DatePicker
+                          selected={valueDeals.next_project_date}
+                          onChange={(date) => handleDateChange(date, 'next_project_date')}
+                          className="form-control"
+                          dateFormat="dd/MM/yyyy"
+                          placeholderText="Optional: Set a follow-up date"
+                          isClearable
+                      />
+                  </Form.Group>
                 </Card.Body>
               </Card>
+              
               <Card className="shadow mb-4">
                 <Card.Header>
                   <h5 className="mt-2">
@@ -1046,6 +1255,8 @@ const EditDeals = () => {
                   </div>
                 </Card.Body>
               </Card>
+
+
               <Card className="shadow">
                 <Card.Header>
                   <h5 className="mt-2">
@@ -1156,7 +1367,7 @@ const EditDeals = () => {
                 <Card.Body>
                   <div>
                     <DataTable
-                      data={allProduct[0]}
+                      data={products}
                       customStyles={customStyles}
                       columns={columns}
                     />
@@ -1190,8 +1401,9 @@ const EditDeals = () => {
                 </Card.Body>
               </Card>
               <AddProductOverlay
-                onClose={handleCloseProduct}
                 visible={showAddProduct}
+                onClose={() => setShowAddProduct(false)}
+                onProductsUpdated={handleProductsUpdate} // Prop baru yang didedikasikan untuk update
               />
               <Card className="shadow">
                 <Card.Header>
@@ -1235,6 +1447,8 @@ const EditDeals = () => {
                 </Card.Body>
               </Card>
 
+              
+
               <Card className="shadow">
                 <Card.Header>
                   <h6 className="fw-bold mt-2">History</h6>
@@ -1251,8 +1465,57 @@ const EditDeals = () => {
                 </Card.Body>
               </Card>
             </div>
+            <div className="col-md-8">
+              {localStorage.getItem("position_name")?.toLowerCase() === "sales manager" && (
+                <div className="mt-4">
+                    <h6 className="fw-bold">HPP File</h6>
+
+                    {/* ---- Jika ada file lama ---- */}
+                    {existingHpp ? (
+                        <div className="mb-3">
+                            <div className="d-flex align-items-center gap-3">
+                                <a
+                                    href={existingHpp}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="btn btn-outline-primary btn-sm"
+                                >
+                                    Download Existing HPP
+                                </a>
+                            </div>
+
+                            {/* Input untuk reupload */}
+                            <Form.Group className="mt-3">
+                                <Form.Label>Upload New HPP (optional)</Form.Label>
+                                <Form.Control
+                                    type="file"
+                                    accept=".pdf,.xlsx,.xls,.doc,.docx"
+                                    onChange={(e) => setHppFile(e.target.files[0])}
+                                />
+                            </Form.Group>
+                        </div>
+                    ) : (
+                        /* ---- Jika belum ada HPP ---- */
+                        <Form.Group className="mb-3">
+                            <Form.Label>
+                                <span className="text-danger">*</span> Upload HPP File
+                            </Form.Label>
+                            <Form.Control
+                                type="file"
+                                accept=".pdf,.xlsx,.xls,.doc,.docx"
+                                onChange={(e) => setHppFile(e.target.files[0])}
+                                required
+                            />
+                        </Form.Group>
+                    )}
+                </div>
+            )}
+
+            </div>
           </form>
         </div>
+
+
       </Main>
     </body>
   );

@@ -1,3 +1,4 @@
+import React from "react";
 import {
   faBuilding,
   faChevronDown,
@@ -11,9 +12,20 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
 import DataTable from "react-data-table-component";
-
-import React from "react";
 import { useMediaQuery } from "react-responsive";
+
+const conditionalRowStyles = [
+  {
+    when: (row) => !!row.pending_deletion_request, // kalau masih pending delete
+    style: {
+      opacity: 0.5,
+      pointerEvents: "none",
+      cursor: "not-allowed",
+      backgroundColor: "#f8f9fa",
+    },
+  },
+];
+
 
 export const CustomStyles = {
   headCells: {
@@ -48,30 +60,119 @@ const ColumnsDataTable = ({
       id: 1,
       name: "Company Name",
       selector: (row) => {
-        const createdDate = new Date(row?.created_at)
-        const currentDate = new Date();
-        const twoDaysAgo = new Date(currentDate)
-        twoDaysAgo?.setDate(currentDate.getDate() - 2)
-        const isNew = createdDate > twoDaysAgo;   
-        const updatedDate = new Date(row?.updated_at)
-        const isUpdate = updatedDate > twoDaysAgo;
-      return (
-       <div>  
-        <a
-          href={`/company/${row.uid}/edit`}
-          target="_blank"
-          className="image-name text-decoration-none"  
-          style={{ whiteSpace: "normal", color: "black", fontWeight: 600 ,fontFamily:"Nunito Sans, sans-serif", fontSize:"0.9rem" }}
-        >
+        const now = new Date();
+        const createdAt = new Date(row.created_at);
+        const updatedAt = new Date(row.updated_at);
+
+        const rejection = row.latest_deletion_request;
+        const rejectedAt = rejection?.approved_or_rejected_at
+          ? new Date(rejection.approved_or_rejected_at)
+          : null;
+
+        const hoursSinceCreated = (now - createdAt) / (1000 * 60 * 60);
+        const hoursSinceUpdated = (now - updatedAt) / (1000 * 60 * 60);
+        const hoursSinceRejected = rejectedAt
+          ? (now - rejectedAt) / (1000 * 60 * 60)
+          : Infinity;
+
+        const isNew = hoursSinceCreated <= 48;
+        const isUpdated = hoursSinceUpdated <= 24 && updatedAt > createdAt;
+        const isRejectedRecently =
+          rejection &&
+          rejection.status === "rejected" &&
+          hoursSinceRejected <= 24;
+        const isPending = !!row.pending_deletion_request;
+
+        const renderBadge = () => {
+          // 1️⃣ Pending request delete (prioritas tertinggi)
+          if (isPending) {
+            return (
+              <span
+                className="badge bg-warning text-dark ms-2"
+                style={{ fontSize: "0.65rem" }}
+              >
+                Pending
+              </span>
+            );
+          }
+
+          // 2️⃣ Rejected (ada tooltip detail)
+          if (isRejectedRecently) {
+            return (
+              <OverlayTrigger
+                placement="top"
+                overlay={
+                  <Tooltip id={`tooltip-reject-${row.uid}`}>
+                    <div>
+                      <strong>Rejected by:</strong>{" "}
+                      {rejection?.approver?.name || "-"}
+                      <br />
+                      <strong>Date:</strong>{" "}
+                      {rejectedAt.toLocaleDateString("id-ID")}
+                      <br />
+                      <strong>Reason:</strong>{" "}
+                      {rejection?.reason_for_rejection || "-"}
+                    </div>
+                  </Tooltip>
+                }
+              >
+                <span
+                  className="badge bg-danger ms-2"
+                  style={{ fontSize: "0.65rem", cursor: "help" }}
+                >
+                  Rejected
+                </span>
+              </OverlayTrigger>
+            );
+          }
+
+          // 3️⃣ Baru dibuat
+          if (isNew) {
+            return (
+              <span className="badge bg-primary ms-2" style={{ fontSize: "0.65rem" }}>
+                New
+              </span>
+            );
+          }
+
+          // 4️⃣ Baru diperbarui
+          if (isUpdated) {
+            return (
+              <span className="badge bg-success ms-2" style={{ fontSize: "0.65rem" }}>
+                Updated
+              </span>
+            );
+          }
+
+          return null;
+        };
+
+        return (
+          <div>
+            <a
+              href={`/company/${row.uid}`}
+              target="_blank"
+              className="image-name text-decoration-none"
+              style={{
+                whiteSpace: "normal",
+                color: "black",
+                fontWeight: 600,
+                fontFamily: "Nunito Sans, sans-serif",
+                fontSize: "0.9rem",
+              }}
+            >
               {row.name}
-          
-        </a>{ isNew ?  isNew && <span className="badge bg-primary ms-2">New</span> : isUpdate ?  isUpdate && <span className="badge bg-success ms-2">Update</span> : "" }</div>
-      )},
+            </a>
+            {renderBadge()}
+          </div>
+        );
+      },
       left: true,
       width: "200px",
-      wrap:true,
+      wrap: true,
       sortable: true,
     },
+
     {
       id: 2,
       name: "Associated with",
@@ -349,6 +450,8 @@ const ColumnsDataTable = ({
             expanded: <FontAwesomeIcon icon={faChevronDown} isExpanded />
           } : null
         }
+        conditionalRowStyles={conditionalRowStyles}
+
         
       />
     </>

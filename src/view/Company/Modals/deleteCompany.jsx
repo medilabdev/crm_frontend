@@ -1,61 +1,60 @@
 import axios from "axios";
 import React from "react";
-import { Modal, Button } from "react-bootstrap";
+import { Button, Modal } from "react-bootstrap";
 import Swal from "sweetalert2";
 
-const DeleteCompany = ({ visible, onClose, uid }) => {
+const DeleteCompany = ({ visible, onClose, uid, isPending }) => {
   const token = localStorage.getItem("token");
-  const arrUid = [uid];
-  const deleteCompany = async () => {
+
+  const requestDeleteCompany = async () => {
+    if (isPending) return; // 🚫 stop kalau masih pending
     try {
-      const formData = new FormData();
-      formData.append("company_uid[0]", arrUid);
       await axios.post(
-        `${process.env.REACT_APP_BACKEND_URL}/companies/delete/item`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      ).then((res) => {
-        Swal.fire({
-          title: "Successfully delete company",
-          text: "Successfully delete company",
-          icon: "success",
-        }).then((res) => {
-          if(res.isConfirmed){
-            window.location.reload();
-          }
-        })
-      })
-    } catch (err) {
+        `${process.env.REACT_APP_BACKEND_URL}/companies/${uid}/request-delete`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
       Swal.fire({
-        title: err.response.data.message,
-        text: "Gagal menghapus company",
-        icon:"warning"
-      })
+        title: "Request Sent!",
+        text: "Your request to delete the company has been sent for approval.",
+        icon: "success",
+      }).then(() => window.location.reload());
+      onClose();
+    } catch (err) {
+      const message = err.response?.data?.message || "Failed to send request.";
+      Swal.fire("Error!", message, "error");
       onClose();
     }
   };
+
   return (
-    <>
-      <Modal show={visible} onHide={onClose} centered>
-        <Modal.Header closeButton>Delete Company</Modal.Header>
-        <Modal.Body>
-          <h5>Are you sure delete this company</h5>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={onClose}>
-            Close
-          </Button>
-          <Button variant="danger" onClick={deleteCompany}>
-            Delete
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    </>
+    <Modal show={visible} onHide={onClose} centered>
+      <Modal.Header closeButton>Request Delete Company</Modal.Header>
+      <Modal.Body>
+        <h5>
+          {isPending
+            ? "This company already has a pending deletion request."
+            : "Are you sure you want to request deletion for this company?"}
+        </h5>
+        <p className="text-muted small">
+          This action will be sent to an admin for approval.
+        </p>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="secondary" onClick={onClose}>
+          Cancel
+        </Button>
+        <Button
+          variant="danger"
+          disabled={isPending}
+          onClick={requestDeleteCompany}
+        >
+          {isPending ? "Waiting Approval..." : "Yes, Send Request"}
+        </Button>
+      </Modal.Footer>
+    </Modal>
   );
 };
+
 
 export default DeleteCompany;

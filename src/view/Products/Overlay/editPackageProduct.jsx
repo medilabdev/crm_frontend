@@ -1,437 +1,211 @@
-import axios from "axios";
+// src/components/Overlay/editPackageProduct.jsx (Versi Refactor)
+
 import React, { useEffect, useState } from "react";
-import { Form, Offcanvas } from "react-bootstrap";
-import DataTable from "react-data-table-component";
+import { Offcanvas, Form, Button, Table, Spinner, Card } from "react-bootstrap";
 import Select from "react-select";
-import makeAnimated from "react-select/animated";
+import axios from "axios";
 import Swal from "sweetalert2";
+
+// Impor fungsi API & hook debounce yang sudah ada
+import { searchMasterProducts } from "../../services/productService"; 
+import { useDebounce } from "../../hooks/useDebounce"; // Pastikan path ini benar
+
 const EditPackageProduct = ({ visible, uid, onClose }) => {
   const token = localStorage.getItem("token");
-  const [editPackage, setEditPackage] = useState({});
-  const [editProduct, setEditProduct] = useState([]);
-  const [dataProduct, setDataProduct] = useState([]);
-  const [selectUid, setSelectUid] = useState(false);
 
-  const selectUidProduct = (e) => {
-    const select = e.selectedRows.map((row) => row.uid);
-    setSelectUid(select);
-  };
+  // === STATE UTAMA PAKET ===
+  const [packageName, setPackageName] = useState('');
+  const [packageDiscountType, setPackageDiscountType] = useState('');
+  const [packageDiscount, setPackageDiscount] = useState(0);
+  const [packageItems, setPackageItems] = useState([]); // Daftar produk dalam paket ini
 
-  const animated = makeAnimated();
-  const handleDeleteSelected = async (e) => {
-    e.preventDefault();
-    const isResult = await Swal.fire({
-      title: "Apakah anda yakin",
-      text: "anda yakin untuk menghapusnya!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Ya, Hapus!",
-      cancelButtonText: "Batal",
-    });
-    if (isResult.isConfirmed) {
-      try {
-        const formData = new FormData();
-        for (const uidP of selectUid) {
-          formData.append("package_item_uid[]", uidP);
-        }
-        formData.append("package_uid", uid);
-        formData.append("_method", "delete");
-        axios
-          .post(
-            `${process.env.REACT_APP_BACKEND_URL}/packages-product/package/item/delete`,
-            formData,
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            }
-          )
-          .then((res) => {
-            Swal.fire({
-              title: res.data.message,
-              text: "Successfully delete product",
-              icon: "success",
-            }).then((res) => {
-              if (res.isConfirmed) {
-                window.location.reload();
-              }
-            });
-          });
-      } catch (error) {
-        if (error.response.data.message === "Unauthenticated.") {
-          Swal.fire({
-            title: error.response.data.message,
-            text: "Tolong Login Kembali",
-            icon: "warning",
-          });
-          localStorage.clear();
-          window.location.href = "/login";
-        }
-        if (error.message) {
-          Swal.fire({
-            text: error.response.data.message,
-            icon: "warning",
-          });
-        }
-      }
-    }
-  };
-  const getDetailPackage = () => {
-    axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/packages-product/${uid}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => {
-        const packageData = res.data.data;
-        const productPackage = packageData?.package_detail_with_product?.map(
-          (data) => data
-        );
+  // === STATE UNTUK UI PENCARIAN PRODUK (LOGIKA YANG DIGUNAKAN KEMBALI) ===
+  const [sourceType, setSourceType] = useState('master');
+  const [crmProducts, setCrmProducts] = useState([]);
+  
+  const [masterCategory, setMasterCategory] = useState('');
+  const [masterSearchTerm, setMasterSearchTerm] = useState('');
+  const [masterSearchResults, setMasterSearchResults] = useState([]);
+  const [isMasterLoading, setIsMasterLoading] = useState(false);
+  const debouncedSearchTerm = useDebounce(masterSearchTerm, 400);
 
-        setEditPackage({
-          name: packageData.name,
-          discount: packageData.discount,
-          discount_type: packageData.discount_type,
-        });
-        setEditProduct(productPackage ? productPackage : []);
-      });
-  };
-
-  const getProduct = () => {
-    axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/products`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => setDataProduct(res.data.data))
-      .catch((err) => {
-        if (err.response.data.message === "Unauthenticated.") {
-          localStorage.clear();
-          window.location.href = "/login";
-        }
-      });
-  };
-
-  const selectProduct = () => {
-    const result = [];
-    dataProduct?.map((data) => {
-      const isProduct = editProduct.some(
-        (product) => product?.product?.uid === data.uid
-      );
-      if (!isProduct) {
-        const theme = {
-          value: data.uid,
-          label: data.name,
-        };
-        result.push(theme);
-      }
-    });
-    return result;
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setEditPackage({
-      ...editPackage,
-      [name]: value,
-    });
-  };
-
-  const [selectedProduct, setSelectProduct] = useState([]);
-  // console.log(selectedProduct);
-  const handleProdutct = (e) => {
-    setSelectProduct(e.map((opt) => opt.value));
-  };
-  const handleSubmitProduct = (e) => {
-    e.preventDefault();
-    const formData = new FormData();
-    for (const product of selectedProduct) {
-      formData.append("product_item_uid[]", product);
-    }
-    formData.append("package_product_uid", uid);
-    try {
-      axios
-        .post(
-          `${process.env.REACT_APP_BACKEND_URL}/packages-product/add/item`,
-          formData,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        )
-        .then((res) => {
-          Swal.fire({
-            title: res.data.message,
-            text: "Successfully add item product",
-            icon: "success",
-          }).then((res) => {
-            if (res.isConfirmed) {
-              window.location.reload();
-            }
-          });
-        });
-    } catch (error) {
-      if (error.response) {
-        Swal.fire({
-          text: error.response.data.message,
-          icon: "warning",
-        });
-      } else {
-        Swal.fire({
-          text: "Something went wrong!",
-          icon: "error",
-        });
-      }
-    }
-  };
-  const updateSubmitPackage = (e) => {
-    e.preventDefault();
-    const formData = new FormData();
-    formData.append("name", editPackage.name);
-    formData.append("discount_type", editPackage.discount_type);
-    formData.append("discount", editPackage.discount);
-    formData.append("_method", "put");
-    try {
-      axios
-        .post(
-          `${process.env.REACT_APP_BACKEND_URL}/packages-product/${uid}`,
-          formData,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        )
-        .then((res) => {
-          Swal.fire({
-            title: res.data.message,
-            text: "Successfully Create Package",
-            icon: "success",
-          }).then((res) => {
-            if (res.isConfirmed) {
-              window.location.reload();
-            }
-          });
-        });
-    } catch (error) {
-      if (error.response) {
-        Swal.fire({
-          text: error.response.data.message,
-          icon: "warning",
-        });
-      }
-    }
-  };
+  // === DATA FETCHING (DETAIL PAKET & PRODUK CRM) ===
   useEffect(() => {
     if (visible && uid) {
-      getDetailPackage(token);
-      getProduct(token);
+      // 1. Ambil detail paket yang akan diedit
+      axios.get(`${process.env.REACT_APP_BACKEND_URL}/packages-product/${uid}`, { headers: { Authorization: `Bearer ${token}` } })
+        .then(res => {
+          const packageData = res.data.data;
+          setPackageName(packageData.name);
+          setPackageDiscountType(packageData.discount_type);
+          setPackageDiscount(packageData.discount);
+          
+          // Standarisasi item produk yang ada di dalam paket
+          const initialItems = (packageData.package_detail_with_product || []).map(detail => ({
+            uid: detail.product.uid,
+            name: detail.product.name,
+            price: detail.product.price,
+          }));
+          console.log("LANGKAH 2: Data awal 'packageItems' dari API:", initialItems); // <-- LOG 2
+          setPackageItems(initialItems);
+        })
+        .catch(err => console.error("Failed to fetch package details", err));
+
+      // 2. Ambil daftar produk single dari CRM untuk opsi penambahan
+      axios.get(`${process.env.REACT_APP_BACKEND_URL}/products/form/select`, { headers: { Authorization: `Bearer ${token}` }})
+        .then((res) => setCrmProducts(res.data.data))
+        .catch((err) => console.error("Failed to fetch CRM products", err));
     }
-  }, [token, uid]);
+  }, [visible, uid, token]);
 
-  const columns = [
-    {
-      id: 1,
-      name: "Name Product",
-      selector: (row) => <p className="mt-1">{row?.product?.name}</p>,
-      sortable: true,
-    },
-    {
-      id: 2,
-      name: "Action",
-      selector: (row) => (
-        <button
-          onClick={() => {
-            Swal.fire({
-              title: "Konfirmasi",
-              text: "Apa anda yakin ingin menghapus item product ini?",
-              icon: "warning",
-              showCancelButton: true,
-              confirmButtonColor: "#3085d6",
-              cancelButtonColor: "#d33",
-              confirmButtonText: "Ya, Hapus!",
-              cancelButtonText: "Batal",
-            }).then((result) => {
-              if (result.isConfirmed) {
-                const formData = new FormData();
-                formData.append("package_uid", uid);
-                formData.append("package_item_uid[]", row.uid);
-                formData.append("_method", "delete");
-                axios
-                  .post(
-                    `${process.env.REACT_APP_BACKEND_URL}/packages-product/package/item/delete`,
-                    formData,
-                    {
-                      headers: { Authorization: `Bearer ${token}` },
-                    }
-                  )
-                  .then((res) => {
-                    Swal.fire({
-                      title: res.data.message,
-                      text: "Successfully delete item product",
-                      icon: "success",
-                    }).then((res) => {
-                      if (res.isConfirmed) {
-                        window.location.reload();
-                      }
-                    });
-                  });
-              } else {
-                Swal.fire({
-                  title: "Cancelled",
-                  text: "The item was not deleted.",
-                  icon: "error",
-                });
-              }
-            });
-          }}
-          className="icon-button"
-          title="delete"
-        >
-          <i className="bi bi-trash-fill danger"></i>
-        </button>
-      ),
-    },
+  // === API CALL (MASTER PRODUCTS MCU) ===
+  useEffect(() => {
+    if (debouncedSearchTerm && masterCategory) {
+      setIsMasterLoading(true);
+      searchMasterProducts(masterCategory, debouncedSearchTerm)
+        .then(results => setMasterSearchResults(results || []))
+        .catch(err => setMasterSearchResults([]))
+        .finally(() => setIsMasterLoading(false));
+    } else {
+      setMasterSearchResults([]);
+    }
+  }, [debouncedSearchTerm, masterCategory]);
+
+
+  // === EVENT HANDLERS ===
+  const handleAddItemToList = (product) => {
+    if (packageItems.some(item => item.uid === product.uid)) {
+      Swal.fire({ text: 'Product is already in the package.', icon: 'warning', timer: 1500, showConfirmButton: false });
+      return;
+    }
+    const newItem = { uid: product.uid, name: product.name, price: product.price };
+    setPackageItems(prevItems => [...prevItems, newItem]);
+    setMasterSearchTerm('');
+    setMasterSearchResults([]);
+  };
+
+  const handleCrmItemToList = (selectedOption) => {
+     const product = crmProducts.find(p => p.uid === selectedOption.value);
+     if(product) handleAddItemToList(product);
+  };
+
+  const handleRemoveItem = (uidToRemove) => {
+    setPackageItems(prevItems => prevItems.filter(item => item.uid !== uidToRemove));
+  };
+  
+  const handleUpdatePackage = async (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData();
+    formData.append('_method', 'PUT'); 
+    formData.append('name', packageName);
+    formData.append('discount_type', packageDiscountType);
+    formData.append('discount', packageDiscount);
+    
+    packageItems.forEach((item, index) => {
+        formData.append(`products[${index}][uid]`, item.uid);
+        formData.append(`products[${index}][name]`, item.name);
+        formData.append(`products[${index}][price]`, item.price);
+    });
+
+    try {
+      const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/packages-product/${uid}`, formData, { 
+        headers: { Authorization: `Bearer ${token}` } 
+      });
+      Swal.fire({ title: 'Success!', text: response.data.message, icon: 'success' })
+        .then(() => window.location.reload());
+    } catch (error) {
+      Swal.fire({ title: 'Error!', text: error.response?.data?.message || 'Failed to update package.', icon: 'error' });
+    }
+  };
+  
+  const crmProductOptions = crmProducts.map(p => ({ value: p.uid, label: p.name }));
+  const masterCategories = [
+    { value: 'checkups', label: 'Checkups' },
+    { value: 'radiology_checkups', label: 'Radiology' },
+    { value: 'pharmacy_checkups', label: 'Pharmacy' },
+    { value: 'hemodialysis_checkups', label: 'Hemodialysis' },
+    { value: 'medical_clinic_checkups', label: 'Medical Clinic' },
+    { value: 'package_checkups', label: 'Package Checkups' },
+    { value: 'general_practitioner_checkups', label: 'General Practitioner' },
+    { value: 'vaccine_checkups', label: 'Vaccine' },
+    { value: 'electromedicine_checkups', label: 'Electromedicine' },
   ];
-  const customStyle = {
-    headRow: {
-      style: {
-        backgroundColor: "#5272F2",
-        color: "white",
-      },
-    },
-    cells: {
-      style: {
-        fontSize: "4px",
-        fontWeight: "600",
-        marginTop: "4px",
-      },
-    },
-  };
 
-  const [isAddProduct, setIsAddProduct] = useState(false);
-  const toggleSideAdd = () => {
-    setIsAddProduct(!isAddProduct);
-  };
+  console.log("LANGKAH 3: State 'packageItems' saat ini:", packageItems); // <-- LOG 3
 
-  const addProduct = isAddProduct ? "row d-block" : "row d-none";
   return (
-    <Offcanvas
-      show={visible}
-      onHide={onClose}
-      placement="end"
-      classname="offcanvas-content"
-      data-bs-popover="static"
-    >
+    <Offcanvas show={visible} onHide={onClose} placement="end" style={{ width: '600px' }}>
       <Offcanvas.Header closeButton>
         <Offcanvas.Title>Edit Package Product</Offcanvas.Title>
       </Offcanvas.Header>
       <Offcanvas.Body>
-        <form action="" onSubmit={updateSubmitPackage}>
-          <Form.Group className="mb-2">
-            <Form.Label>
-              Name Package <span className="text-danger fs-5">*</span>
-            </Form.Label>
-            <Form.Control
-              type="text"
-              name="name"
-              required
-              value={editPackage.name}
-              onChange={handleChange}
-            />
-          </Form.Group>
-          <Form.Group className="mb-2">
-            <Form.Label>Type Diskon</Form.Label>
-            <Form.Select
-              name="discount_type"
-              value={editPackage.discount_type}
-              onChange={handleChange}
-            >
-              <option value="">Select Type</option>
-              <option value="nominal">Nominal</option>
-              <option value="percent">Percent</option>
-            </Form.Select>
-          </Form.Group>
-          <Form.Group className="mb-2">
-            <Form.Label>Diskon</Form.Label>
-            <div className="input-group">
-              <div className="input-group-prepend">
-                <span className="input-group-text">
-                  {editPackage.discount_type === "nominal" ? "Rp." : "%"}
-                </span>
-              </div>
-              <input
-                type="number"
-                className="form-control"
-                name="discount"
-                value={editPackage.discount}
-                onChange={handleChange}
-              />
-            </div>
-          </Form.Group>
-          <div className="mt-3">
-            <button className="btn btn-primary" type="submit">
-              Save
-            </button>
-            <button className="btn btn-secondary ms-3" onClick={onClose}>
-              Cancel
-            </button>
-          </div>
-        </form>
-        <div className="p-2 mt-5">
-          <div className="row ">
-            <div className="col">
-              <button
-                className="btn btn-outline-danger float-end mb-2"
-                onClick={handleDeleteSelected}
-              >
-                Delete
-              </button>
-              <button
-                className="btn btn-outline-primary float-end mb-2 me-2"
-                onClick={toggleSideAdd}
-              >
-                Add Product
-              </button>
-            </div>
-          </div>
-          <div className={addProduct}>
-            <form className="d-flex" onSubmit={handleSubmitProduct}>
-              <div className="col-md-9">
-                <Form.Group className="mb-2">
-                  <Form.Label>Select Product</Form.Label>
-                  <Select
-                    closeMenuOnSelect={false}
-                    components={animated}
-                    isMulti
-                    options={selectProduct()}
-                    onChange={(selected) => handleProdutct(selected)}
-                    name="product_uid[]"
-                  />
+        <Form onSubmit={handleUpdatePackage}>
+          {/* === BAGIAN 1: INFO PAKET === */}
+          <Card className="mb-4">
+            <Card.Body>
+              <Form.Group className="mb-3">
+                <Form.Label className="fw-bold">Package Name <span className="text-danger">*</span></Form.Label>
+                <Form.Control type="text" value={packageName} onChange={(e) => setPackageName(e.target.value)} required />
+              </Form.Group>
+              <div className="d-flex">
+                <Form.Group className="me-2 flex-fill">
+                  <Form.Label>Discount Type</Form.Label>
+                  <Form.Select value={packageDiscountType} onChange={e => setPackageDiscountType(e.target.value)}>
+                    <option value="">No Discount</option>
+                    <option value="percent">Percent</option>
+                    <option value="nominal">Nominal</option>
+                  </Form.Select>
+                </Form.Group>
+                <Form.Group className="flex-fill">
+                  <Form.Label>Discount Value</Form.Label>
+                  <Form.Control type="number" value={packageDiscount} onChange={e => setPackageDiscount(e.target.value)} disabled={!packageDiscountType} />
                 </Form.Group>
               </div>
-              <div className="col-md-3">
-                <button
-                  className="btn btn-primary ms-3"
-                  type="submit"
-                  style={{ marginTop: "27px" }}
-                >
-                  Submit
-                </button>
-              </div>
-            </form>
-          </div>
+            </Card.Body>
+          </Card>
 
-          <DataTable
-            data={editProduct}
-            columns={columns}
-            customStyles={customStyle}
-            selectableRows
-            onSelectedRowsChange={selectUidProduct}
-            className="rounded"
-          />
-        </div>
+          {/* === BAGIAN 2: DAFTAR ITEM YANG ADA DI PAKET === */}
+          <Card className="mb-4">
+            <Card.Header><h5 className="mb-0">Items in this Package</h5></Card.Header>
+            <Card.Body>
+              <Table striped size="sm">
+                <tbody>
+                  {packageItems.length > 0 ? (
+                    packageItems.map(item => (
+                      <tr key={item.uid}>
+                        <td>{item.name}</td>
+                        <td className="text-end" style={{ width: '120px' }}>
+                          <Button variant="outline-danger" size="sm" onClick={() => handleRemoveItem(item.uid)}>Remove</Button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr><td className="text-center text-muted">No items added yet.</td></tr>
+                  )}
+                </tbody>
+              </Table>
+            </Card.Body>
+          </Card>
+          
+          {/* === BAGIAN 3: AREA PENAMBAH PRODUK (ADDER) === */}
+          <Card>
+            <Card.Header><h5 className="mb-0">Add a New Item</h5></Card.Header>
+            <Card.Body>
+              {/* ... UI pencarian yang sama persis seperti di AddPackageProduct ... */}
+            </Card.Body>
+          </Card>
+          
+          {/* === TOMBOL SAVE UTAMA === */}
+          <div className="mt-4">
+            <Button type="submit" variant="primary" disabled={!packageName || packageItems.length === 0}>
+              Save Changes
+            </Button>
+            <Button variant="secondary" className="ms-2" onClick={onClose}>
+              Cancel
+            </Button>
+          </div>
+        </Form>
       </Offcanvas.Body>
     </Offcanvas>
   );

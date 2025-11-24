@@ -60,6 +60,7 @@ const Company = () => {
   const [selectedUIDs, setSelectedUIDs] = useState([]);
   const [deleteCompany, setDeleteCompany] = useState(false);
   const handleDeleteCompany = () => setDeleteCompany(false);
+  
   const [owner, setOwner] = useState([]);
   const [resultOwner, setResultOwner] = useState([]);
   const [source, setSource] = useState([]);
@@ -417,6 +418,7 @@ const Company = () => {
     };
     setFormSearch(formSearchMultiple);
   };
+
   const handleSubmitDeleteSelect = async (e) => {
     e.preventDefault();
     const result = await Swal.fire({
@@ -458,6 +460,55 @@ const Company = () => {
       }
     }
   };
+
+  // === REQUEST DELETE APPROVAL (NEW) ===
+  const handleDeleteRequestSelected = async (e) => {
+    e.preventDefault();
+    if (selectedUIDs.length === 0) {
+      Swal.fire("Warning", "No companies selected.", "warning");
+      return;
+    }
+
+    const confirm = await Swal.fire({
+      title: `Request deletion for ${selectedUIDs.length} selected companies?`,
+      text: "This action will send a deletion request to admin for approval.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, Send Request",
+      cancelButtonText: "Cancel",
+    });
+
+    if (!confirm.isConfirmed) return;
+
+    try {
+      const formData = new FormData();
+      for (const uid of selectedUIDs) {
+        formData.append("company_uid[]", uid);
+      }
+
+      const response = await axios.post(
+        `${process.env.REACT_APP_BACKEND_URL}/companies/request-delete/bulk`,
+        formData,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      Swal.fire("Success", response.data.message, "success");
+      window.location.reload();
+    } catch (error) {
+      console.error("Bulk deletion request failed:", error);
+      if (error.response?.status === 401) {
+        localStorage.clear();
+        window.location.href = "/login";
+      } else {
+        Swal.fire(
+          "Error",
+          error.response?.data?.message || "Failed to send request.",
+          "error"
+        );
+      }
+    }
+  };
+
 
   const [pending, setPending] = useState(true);
 
@@ -517,7 +568,7 @@ const Company = () => {
         <Main>
           <div className="container">
             <BreadcrumbCompany />
-            <TopButton handleSubmitDeleteSelect={handleSubmitDeleteSelect} />
+            <TopButton handleDeleteSelected={handleDeleteRequestSelected} />
             <Card className="shadow">
               <div className="row">
                 <div className={`${filterClass}`} id="filter">
@@ -737,6 +788,8 @@ const Company = () => {
                 onClose={handleDeleteCompany}
                 visible={deleteCompany !== false}
                 uid={deleteCompany}
+                isPending={!!deleteCompany?.pending_deletion_request}
+
               />
             </Card>
           </div>

@@ -9,7 +9,7 @@ import {
   Legend,
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
-import { faker } from "@faker-js/faker";
+// 1. HAPUS 'faker' (kita tidak butuh data palsu lagi)
 
 ChartJS.register(
   CategoryScale,
@@ -20,47 +20,20 @@ ChartJS.register(
   Legend
 );
 
-export const options = {
-  plugins: {
-    title: {
-      display: true,
-      text: "Total Staging Deals",
-    },
-  },
-  responsive: true,
-  scales: {
-    x: {
-      stacked: true,
-    },
-    y: {
-      stacked: true,
-    },
-  },
-};
+// 2. HAPUS 'export const options = ...'
+// 3. HAPUS 'export const data = ...'
+// 4. HAPUS 'const labels = ...'
 
-const labels = ["January", "February", "March", "April", "May", "June", "July"];
+// 5. Buat komponen menerima 'data' dan 'options' sebagai props
+export function ChartBar({ data, options }) {
+  
+  // 6. Tambahkan penjaga
+  if (!data) {
+    return <p className="text-center text-muted">Memuat data chart...</p>;
+  }
 
-export const data = {
-  labels,
-  datasets: [
-    {
-      label: "Dataset 1",
-      data: labels.map(() => faker.datatype.number({ min: -1000, max: 1000 })),
-      backgroundColor: "rgb(255, 99, 132)",
-    },
-    {
-      label: "Dataset 2",
-      data: labels.map(() => faker.datatype.number({ min: -1000, max: 1000 })),
-      backgroundColor: "rgb(75, 192, 192)",
-    },
-    {
-      label: "Dataset 3",
-      data: labels.map(() => faker.datatype.number({ min: -1000, max: 1000 })),
-      backgroundColor: "rgb(53, 162, 235)",
-    },
-  ],
-};
-
-export function ChartBar() {
   return <Bar options={options} data={data} />;
 }
+
+// 7. (Opsional) Export default
+export default ChartBar;

@@ -24,6 +24,7 @@ const Auth = () => {
       [e.target.name]: e.target.value,
     });
   };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
@@ -33,9 +34,11 @@ const Auth = () => {
         {
           headers: {
             "Content-Type": "application/json",
-          },
+          }
         }
       );
+    console.log(response);
+
       localStorage.clear();
       sessionStorage.clear();
       if (response.data.message !== "Login successful!") {
@@ -56,6 +59,9 @@ const Auth = () => {
         localStorage.setItem("image", image);
         localStorage.setItem("role", role);
         localStorage.setItem("position", position);
+        localStorage.setItem("role_name", response.data.data.role_name);
+        localStorage.setItem("position_name", response.data.data.position_name);
+
         navigate("/");
         setButtonDisabled(true);
       } else {
@@ -66,7 +72,7 @@ const Auth = () => {
         });
       }
     } catch (error) {
-      // console.log(error);
+      console.log(error);
       if (error.response) {
         Swal.fire({
           text: error.response.data.message,
@@ -80,6 +86,7 @@ const Auth = () => {
       }
     }
   };
+  
   return (
     <body className="auth-body">
       <main className="auth-main color-auth">

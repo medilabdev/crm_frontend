@@ -1,0 +1,16 @@
+.search-container {
+  position: relative;
+}
+.search-spinner {
+  position: absolute;
+  right: 10px;
+  top: 40px; /* Sesuaikan dengan tinggi label */
+}
+.search-results {
+  position: absolute;
+  width: 100%;
+  z-index: 1000;
+  max-height: 200px;
+  overflow-y: auto;
+  border-top: none;
+}

@@ -2,7 +2,7 @@ import { faArrowsTurnToDots } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
 
-const TopButton = ({ handleSubmitDeleteSelect }) => {
+const TopButton = ({ handleDeleteSelected }) => {
   return (
     <div className="row mb-2">
       <div className="col ms-4 mb-2">
@@ -69,13 +69,13 @@ const TopButton = ({ handleSubmitDeleteSelect }) => {
             <FontAwesomeIcon icon={faArrowsTurnToDots} className="me-2" />
             Bulk Change
           </a>
-          <button
+          {/* <button
             class="btn btn-danger ms-2 delete"
-            onClick={handleSubmitDeleteSelect}
+            onClick={handleDeleteSelected}
             style={{ fontSize: "0.85rem", fontWeight: "600" }}
           >
             Delete
-          </button>
+          </button> */}
         </div>
       </div>
       {/* <div className="col d-flex mb-2">

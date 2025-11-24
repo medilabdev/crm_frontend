@@ -1,0 +1,595 @@
+import React, { useState, useMemo, useCallback } from 'react';
+import { 
+    Card, 
+    Row, 
+    Col, 
+    Table, 
+    Button, 
+    Form, 
+    Modal, 
+    Alert,
+    Badge,
+    Spinner,
+    OverlayTrigger,
+    Tooltip,
+    Tabs, 
+    Tab,
+    ListGroup
+
+} from 'react-bootstrap';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { 
+  faPlus, 
+  faEdit, 
+  faTrash, 
+  faCalendarWeek,
+  faCalendarDay,
+  faChartLine,
+  faEye,
+  faExternalLinkAlt,
+  faClipboardList,
+  faCalendarCheck,
+  faCalendarTimes,
+} from '@fortawesome/free-solid-svg-icons';
+import Swal from 'sweetalert2';
+// Utils
+import { formatDate } from '../utils/dateUtils';
+import { calculateWeekStatistics, calculatePlanningStatistics, getPerformanceIndicator, formatPercentage } from '../utils/calculationUtils';
+// Child components
+import PlanningDetailModal from './PlanningDetailModal';
+import OutsideActivityModal from './OutsideActivityModal';
+import { useAppConfig } from '../../../../context/AppConfigContext';
+
+const getDefaultCalculations = () => ({
+  total_weekly_plan: 0, total_weekly_report: 0, daily_planning_pct: 0,
+  total_outside: 0, daily_outside_pct: 0, total_report: 0,
+});
+
+const WeeklyPlanningGrid = ({
+  planningData,
+  planningUid,
+  onUpdateWeek,
+  onUpdateDay,
+  onAddPlanningDetail,
+  onUpdatePlanningDetail,
+  onDeletePlanningDetail,
+  onAddOutsideDetail,
+  onUpdateOutsideDetail,
+  onDeleteOutsideDetail,
+  weeklyPlanMasters = [],
+  loading = false,
+  createPlanMaster,
+  handleToggleWorkingDay
+}) => {
+    
+    const { min_daily_plan_target } = useAppConfig();
+    const [selectedWeek, setSelectedWeek] = useState(null);
+    const [selectedDay, setSelectedDay] = useState(null);
+    const [showDetailModal, setShowDetailModal] = useState(false);
+    const [showOutsideModal, setShowOutsideModal] = useState(false);
+    const [editingDetail, setEditingDetail] = useState(null);
+    const [modalLoading, setModalLoading] = useState(false);
+    
+    const handleSavePlanningDetail = async (formData, editingDetail) => {
+        setModalLoading(true);
+        try {
+            let success = false;
+            if (editingDetail) {
+                success = await onUpdatePlanningDetail(
+                    selectedWeek?.uid,
+                    selectedDay?.uid,
+                    editingDetail.uid,
+                    formData
+                );
+            } else {
+                success = await onAddPlanningDetail(
+                    selectedWeek?.uid,
+                    selectedDay?.uid,
+                    formData
+                );
+            }
+            setModalLoading(false);
+            if (success) {
+                handleCloseModals();
+            }
+            return success; 
+        } catch (error) {
+            console.error('Failed to save planning detail:', error);
+            setModalLoading(false);
+            return false;
+        }
+    };
+
+    const handleSaveOutsideActivity = async (formData, editingDetail) => {
+        setModalLoading(true);
+        try {
+            let success = false;
+            if (editingDetail) {
+                success = await onUpdateOutsideDetail(
+                    selectedWeek?.uid,
+                    selectedDay?.uid,
+                    editingDetail.uid,
+                    formData
+                );
+            } else {
+                success = await onAddOutsideDetail(
+                    selectedWeek?.uid,
+                    selectedDay?.uid,
+                    formData
+                );
+            }
+            setModalLoading(false);
+            if (success) {
+                handleCloseModals();
+            }
+            return success;
+        } catch (error) {
+            console.error('Failed to save outside activity:', error);
+            setModalLoading(false);
+            return false;
+        }
+    };
+
+    const handleOpenDetailModal = (week, day, detail = null) => {
+        setSelectedWeek(week);
+        setSelectedDay(day);
+        setEditingDetail(detail);
+        setShowDetailModal(true);
+    };
+
+    const handleOpenOutsideModal = (week, day, detail = null) => {
+        setSelectedWeek(week);
+        setSelectedDay(day);
+        setEditingDetail(detail); 
+        setShowOutsideModal(true);
+    };
+
+    const handleCloseModals = () => {
+        setShowDetailModal(false);
+        setShowOutsideModal(false);
+        setSelectedWeek(null);
+        setSelectedDay(null);
+        setEditingDetail(null);
+        // setModalLoading(false);
+    };
+
+    const renderWeekHeader = (week) => {
+        console.log("Week Statistics: ", week.statistics);
+        const stats = week.statistics || { 
+            total_weekly_plan: 0,
+            total_weekly_report: 0,
+            total_outside: 0,
+            week_planning_pct: 0,
+            week_outside_pct: 0,
+        };
+        const performance = stats.week_planning_pct !== undefined
+            ? getPerformanceIndicator(stats.week_planning_pct)
+            : { color: 'secondary', label: 'N/A' };
+        
+        const totalVisitPct = (stats.week_planning_pct || 0) + (stats.week_outside_pct || 0);
+
+
+        return (
+        <Card className="mb-3 border-primary">
+            <Card.Header className="bg-primary text-white">
+            <Row className="align-items-center">
+                <Col md={4}> {/* Info Week */}
+                <h6 className="mb-0">
+                    <FontAwesomeIcon icon={faCalendarWeek} className="me-2" />
+                    {week.week_name || `Week ${week.week_number}`}
+                </h6>
+                <small>
+                    {formatDate(new Date(week.start_date || week.week_start_date))} - {formatDate(new Date(week.end_date || week.week_end_date))}
+                </small>
+                </Col>
+                <Col md={6}>
+                    {/* Ubah Row agar punya 7 kolom */}
+                    <Row className="text-center" xs={7}> 
+                        <Col>
+                            <small>Plan</small>
+                            <div className="fw-bold">{stats.total_weekly_plan || 0}</div>
+                        </Col>
+                        <Col>
+                            <small>Report</small>
+                            <div className="fw-bold">{stats.total_weekly_report || 0}</div>
+                        </Col>
+                        <Col>
+                            <small>Outside</small>
+                            <div className="fw-bold">{stats.total_outside || 0}</div>
+                        </Col>
+                        <Col>
+                            <small>% Plan</small>
+                            <div className="fw-bold">{formatPercentage(stats.week_planning_pct)}</div>
+                        </Col>
+                        {/* ✅ Kolom % Outside sudah ada, pastikan datanya benar */}
+                        <Col>
+                            <small>% Outside</small>
+                            <div className="fw-bold">{formatPercentage(stats.week_outside_pct)}</div>
+                        </Col>
+                        <Col>
+                            <small>Perf.</small>
+                            <div><Badge bg={performance.color}>{performance.label}</Badge></div>
+                        </Col>
+                        {/* ✅ Kolom BARU: Total Kunjungan (Total Report) */}
+                        <Col>
+                            <small>Total Persentase Kunjungan</small>
+                            <div className="fw-bold">{formatPercentage(totalVisitPct)} </div>
+                        </Col>
+                    </Row>
+                </Col>
+                <Col md={2} className="text-end">
+                    <small className="text-muted">
+                        {/* ✅ Akses jumlah hari */}
+                        Days: {week.days?.length || 0}
+                    </small>
+                </Col>
+            </Row>
+            </Card.Header>
+        </Card>
+        );
+    };
+
+
+    const renderDayColumn = (week, day) => {
+        const stats = day.calculations || getDefaultCalculations();
+        const planningDetails = day.weeklyPlanningDetails || [];
+        const outsideDetails = day.outsidePlanningDetails || [];
+
+        const currentPlanCount = stats.total_weekly_plan;
+        const isTargetMet = currentPlanCount >= min_daily_plan_target;
+
+        const defaultTabKey = planningDetails.length > 0 ? "planning" : (outsideDetails.length > 0 ? "outside" : "planning");
+        return (
+            <Card className={`h-100 shadow-sm day-card ${!day.is_working_day ? 'bg-light-subtle' : ''}`}>
+ 
+                <Card.Header className="d-flex justify-content-between align-items-center py-2 bg-light">
+                    <div>
+                        <h6 className="mb-0 d-inline-block">
+                            {day.day_name}
+                            {!day.is_working_day && ( 
+                                <Badge bg="secondary" pill className="ms-2" title="Hari Libur">
+                                    Libur 
+                                </Badge>
+                            )}
+                        </h6>
+                        <small className="text-muted d-block">
+                            {formatDate(new Date(day.day_date))}
+                        </small>
+
+                        {day.is_working_day && (
+                            <div className="mt-2" style={{ fontSize: '0.8rem' }}>
+                                <span 
+                                    className={isTargetMet ? 'text-success' : 'text-warning fw-bold'}
+                                    title={isTargetMet ? `Target ${min_daily_plan_target} plan tercapai` : `Target minimal ${min_daily_plan_target} plan`}
+                                >
+                                    {currentPlanCount} / {min_daily_plan_target} Plan
+                                </span>
+                            </div>
+                        )}
+                    </div>
+                    <div className="btn-group" role="group">
+                        <OverlayTrigger overlay={<Tooltip>Add Planning Detail</Tooltip>}>
+                            <Button variant="outline-primary" size="sm" onClick={() => handleOpenDetailModal(week, day)} disabled={!day.is_working_day}> 
+                                <FontAwesomeIcon icon={faPlus} />
+                            </Button>
+                        </OverlayTrigger>
+                        <OverlayTrigger overlay={<Tooltip>Add Outside Activity</Tooltip>}>
+                            <Button variant="outline-warning" size="sm" onClick={() => handleOpenOutsideModal(week, day)} disabled={!day.is_working_day}>
+                                <FontAwesomeIcon icon={faExternalLinkAlt} /> 
+                            </Button>
+                        </OverlayTrigger>
+                        <OverlayTrigger overlay={<Tooltip>{day.is_working_day ? 'Tandai Libur' : 'Tandai Hari Kerja'}</Tooltip>}>
+                            <Button 
+                                variant={day.is_working_day ? "outline-secondary" : "outline-success"} 
+                                size="sm" 
+                                onClick={() => handleToggleWorkingDay(week.uid, day.uid)} 
+                            >
+                                <FontAwesomeIcon icon={day.is_working_day ? faCalendarTimes : faCalendarCheck} /> 
+                            </Button>
+                        </OverlayTrigger>
+                    </div>
+                </Card.Header>
+
+                <Card.Body className="p-0 d-flex flex-column">
+                    <Tabs 
+                        defaultActiveKey={defaultTabKey} 
+                        id={`day-tabs-${day.uid}`} 
+                        className="day-card-tabs px-3 pt-2 flex-shrink-0"
+                        justify 
+                        unmountOnExit
+                    > 
+                        <Tab 
+                            eventKey="planning" 
+                            title={
+                                <span title="Planning Details"> 
+                                    <FontAwesomeIcon icon={faClipboardList} className="me-1"/> 
+                                    <span className="d-none d-lg-inline">Plan</span>
+                                    <Badge pill bg="primary" className="ms-1">{planningDetails.length}</Badge> 
+                                </span>
+                            }
+                            // disabled={planningDetails.length === 0} 
+                            className="p-3 details-area" 
+                            style={{ overflowY: 'auto', flexGrow: 1 }}
+                        >
+                            {planningDetails.length === 0 ? (
+                                <p className="text-muted text-center small mt-3 mb-0">No planned activities.</p>
+                            ) : (
+                                <ListGroup variant="flush">
+                                    {planningDetails.map((detail) => (
+                                        <ListGroup.Item key={detail.uid} className="d-flex justify-content-between align-items-center px-0 py-1">
+                                            <div className="flex-grow-1 me-2" style={{wordBreak: 'break-word'}}> 
+                                                <span className="d-block">{detail.weekly_plan_text || 'No plan'}</span>
+                                                {detail.weekly_report_text && (
+                                                    <small className="text-success d-block">
+                                                        <Badge bg="success" className="me-1" pill>R</Badge> {detail.weekly_report_text}
+                                                    </small>
+                                                )}
+                                                {detail.plan_notes && <small className="text-muted d-block fst-italic ms-1" title={detail.plan_notes}>P-Note: {(detail.plan_notes || '').substring(0, 30)}...</small>}
+                                                {detail.report_notes && <small className="text-muted d-block fst-italic ms-1" title={detail.report_notes}>R-Note: {(detail.report_notes || '').substring(0, 30)}...</small>}
+                                            </div>
+                                            <div className="btn-group flex-shrink-0">
+                                                <OverlayTrigger overlay={<Tooltip>Edit</Tooltip>}>
+                                                    <Button variant="outline-secondary" size="sm" onClick={() => handleOpenDetailModal(week, day, detail)}>
+                                                        <FontAwesomeIcon icon={faEdit} />
+                                                    </Button>
+                                                </OverlayTrigger>
+                                                <OverlayTrigger overlay={<Tooltip>Delete</Tooltip>}>
+                                                    <Button
+                                                        variant="outline-danger"
+                                                        size="sm"
+                                                        // ✅ Panggil handler bersih
+                                                        onClick={() => handleDeleteDetail(week, day, detail)}
+                                                        title='Delete Planning Detail'
+                                                    >
+                                                        <FontAwesomeIcon icon={faTrash} />
+                                                    </Button>
+                                                </OverlayTrigger>
+                                            </div>
+                                        </ListGroup.Item>
+                                    ))}
+                                </ListGroup>
+                            )}
+                        </Tab>
+
+                        <Tab 
+                            eventKey="outside" 
+                            title={
+                                <span title="Outside Activities">
+                                    <FontAwesomeIcon icon={faExternalLinkAlt} className="me-1"/> 
+                                    <span className="d-none d-lg-inline">Outside</span>
+                                    <Badge pill bg="warning" text="dark" className="ms-1">{outsideDetails.length}</Badge> 
+                                </span>
+                            }
+                            // disabled={outsideDetails.length === 0}
+                            className="p-3 details-area"
+                            style={{ overflowY: 'auto', flexGrow: 1 }}
+                        >
+                            {outsideDetails.length === 0 ? (
+                                <p className="text-muted text-center small mt-3 mb-0">No outside activities.</p>
+                            ) : (
+                                <ListGroup variant="flush">
+                                    {outsideDetails.map((outside) => (
+                                        <ListGroup.Item key={outside.uid} className="d-flex justify-content-between align-items-center px-0 py-1">
+                                            <div className="flex-grow-1 me-2" style={{wordBreak: 'break-word'}}>
+                                                <span className="d-block">{outside.activity_text || 'No description'}</span>
+                                                {outside.notes && <small className="text-muted d-block fst-italic ms-1" title={outside.notes}>Note: {(outside.notes || '').substring(0, 30)}...</small>}
+                                            </div>
+                                            <div className="btn-group flex-shrink-0">
+                                                <OverlayTrigger overlay={<Tooltip>Edit</Tooltip>}>
+                                                    <Button variant="outline-secondary" size="sm" onClick={() => handleOpenOutsideModal(week, day, outside)}>
+                                                        <FontAwesomeIcon icon={faEdit} />
+                                                    </Button>
+                                                </OverlayTrigger>
+                                                <OverlayTrigger overlay={<Tooltip>Delete</Tooltip>}>
+                                                    <Button
+                                                        variant="outline-danger"
+                                                        size="sm"
+                                                        // ✅ Panggil handler bersih
+                                                        onClick={() => confirmDeleteOutsideDetail(week, day, outside)}
+                                                        title="Delete Outside Activity"
+                                                    >
+                                                        <FontAwesomeIcon icon={faTrash} />
+                                                    </Button>
+                                                </OverlayTrigger>
+                                            </div>
+                                        </ListGroup.Item>
+                                    ))}
+                                </ListGroup>
+                            )}
+                        </Tab>
+                    </Tabs>
+
+                    <Card.Footer className="py-2 bg-light mt-auto"> {/* Beri padding py-2 */}
+                        <Row className="text-center">
+                            {/* Kolom Plan Achievement */}
+                            <Col xs={6} className="border-end"> {/* xs={6} = 50% width, border-end = garis pemisah */}
+                                <small className="text-muted" title="Plan vs Report">Plan Achv.</small>
+                                <div 
+                                    className={`fw-bold text-${stats.daily_planning_pct >= 80 ? 'success' : stats.daily_planning_pct >= 60 ? 'warning' : 'danger'}`}
+                                    title={`Plan: ${stats.total_weekly_plan} | Report: ${stats.total_weekly_report}`}
+                                >
+                                    {`${stats.daily_planning_pct || 0}%`}
+                                </div>
+                            </Col>
+                            {/* Kolom Outside Percentage */}
+                            <Col xs={6}>
+                                <small className="text-muted" title="Outside vs Plan">Outside %</small>
+                                <div 
+                                    className={`fw-bold text-warning`} // Beri warna warning
+                                    title={`Outside: ${stats.total_outside} | Plan: ${stats.total_weekly_plan}`}
+                                >
+                                    {/* ✅ Tampilkan daily_outside_pct */}
+                                    {`${stats.daily_outside_pct || 0}%`}
+                                </div>
+                            </Col>
+                        </Row>
+                    </Card.Footer>
+
+                </Card.Body>
+            </Card>
+        );
+    };
+
+    const renderWeekSummary = (week) => {
+        const totalOutsideActivities = week.statistics?.total_outside || 0;
+
+        if (totalOutsideActivities === 0) return null;
+
+        return (
+        <Alert variant="warning" className="mb-3">
+            <Row className="align-items-center">
+            <Col>
+                <small>
+                <FontAwesomeIcon icon={faChartLine} className="me-2" />
+                <strong>Week Summary:</strong> {totalOutsideActivities} outside activities across all days
+                </small>
+            </Col>
+            </Row>
+        </Alert>
+        );
+    };
+
+    const handleDeleteDetail = (week, day, detail) => {
+        // 'week', 'day', 'detail' adalah argumen dari tombol
+        Swal.fire({
+            title: 'Hapus Detail Planning?',
+            text: `Anda yakin ingin menghapus plan "${detail.weekly_plan_text || 'ini'}"?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal'
+        }).then(async (result) => { 
+            if (result.isConfirmed) {
+                try {
+                    console.log(`[Grid Handler] Mengirim UID: w:${week.uid}, d:${day.uid}, dt:${detail.uid}`);
+                    // Panggil prop dari index.jsx
+                    await onDeletePlanningDetail(week.uid, day.uid, detail.uid); 
+                    
+                    Swal.fire('Dihapus!', 'Detail planning berhasil dihapus.', 'success');
+                } catch (error) {
+                    console.error('Gagal menghapus planning detail:', error);
+                    Swal.fire('Error!', 'Gagal menghapus detail planning. Coba lagi.', 'error');
+                }
+            }
+        });
+    };
+
+    const confirmDeleteOutsideDetail = (week, day, outside) => {
+        Swal.fire({
+            title: 'Hapus Outside Activity?',
+            text: `Anda yakin ingin menghapus aktivitas "${outside.activity_text || 'ini'}"?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    console.log(`[Grid Handler] Mengirim UID: w:${week.uid}, d:${day.uid}, dt:${outside.uid}`);
+                    // Panggil prop dari index.jsx
+                    await onDeleteOutsideDetail(week.uid, day.uid, outside.uid);
+                    Swal.fire('Dihapus!', 'Outside activity berhasil dihapus.', 'success');
+                } catch (error) {
+                    console.error('Gagal menghapus outside detail:', error);
+                    Swal.fire('Error!', 'Gagal menghapus outside activity. Coba lagi.', 'error');
+                }
+            }
+        });
+    };
+    
+    const handleDeleteOutsideDetail = async (week, day, detail) => {
+        // ✅ Konfirmasi sebelum delete
+        if (window.confirm('Are you sure you want to delete this outside activity?')) {
+            try {
+                // ✅ Panggil prop dari index.jsx (yang sudah handle refetch)
+                await onDeleteOutsideDetail(week.uid, day.uid, detail.uid);
+            } catch (error) {
+                console.error('Failed to delete outside detail:', error);
+                // Error handling bisa ditambahkan di sini atau di index.jsx
+            }
+        }
+    };
+
+    // ✅ Loading state (sudah benar)
+    if (loading) {
+        return (
+        <div className="text-center py-5">
+            <Spinner animation="border" variant="primary" />
+            <p className="mt-3">Loading planning data...</p>
+        </div>
+        );
+    }
+
+    // ✅ No data state (sudah benar, cek planningData.weeks)
+    if (!planningData || !planningData.weeks || planningData.weeks.length === 0) {
+        console.log('WeeklyPlanningGrid: Merender "No Planning Data"');
+        return (
+            
+        <Alert variant="info" className="text-center">
+            <FontAwesomeIcon icon={faCalendarWeek} size="2x" className="mb-3 opacity-50" />
+            <h5>No Planning Data</h5>
+            <p>Please select a branch and month to view or create weekly planning.</p>
+        </Alert>
+        );
+    }
+
+
+    console.log("Planning Data: ", planningData);
+
+    return (
+    <>
+    <div className="weekly-planning-grid">
+        {planningData.weeks?.map((week, weekIndex) => {
+            // ✅ Bagian 1: Bagi array 'days' menjadi dua (maks 3 per baris)
+            const daysInWeek = week.days || [];
+            const daysRow1 = daysInWeek.slice(0, 3); // Ambil 3 hari pertama (Senin, Selasa, Rabu)
+            const daysRow2 = daysInWeek.slice(3);   // Ambil sisanya (Kamis, Jumat, Sabtu)
+
+            return (
+                <div key={week.uid || weekIndex} className="week-section mb-4">
+                {renderWeekHeader(week)}
+                {renderWeekSummary(week)}
+
+                <Row xs={1} sm={2} md={3} className="g-3"> 
+                    {daysInWeek.map((day, dayIndex) => (
+                        <Col key={day.uid || dayIndex}> 
+                            {renderDayColumn(week, day)}
+                        </Col>
+                    ))}
+                </Row>
+            </div>
+            );
+        })}
+
+        <PlanningDetailModal
+            show={showDetailModal}
+            onHide={handleCloseModals}
+            onSave={handleSavePlanningDetail}
+            editingDetail={editingDetail}
+            selectedWeek={selectedWeek}
+            selectedDay={selectedDay}
+            weeklyPlanMasters={weeklyPlanMasters}
+            loading={modalLoading}
+            createPlanMaster={createPlanMaster}
+        />
+
+        <OutsideActivityModal
+            show={showOutsideModal}
+            onHide={handleCloseModals}
+            onSave={handleSaveOutsideActivity}
+            editingDetail={editingDetail}
+            selectedWeek={selectedWeek}
+            selectedDay={selectedDay}
+            loading={modalLoading}
+            createPlanMaster={createPlanMaster}
+        />
+    </div>
+    </>
+    );
+};
+
+export default WeeklyPlanningGrid;

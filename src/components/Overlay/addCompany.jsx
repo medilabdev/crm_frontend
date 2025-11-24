@@ -12,6 +12,7 @@ import Select from "react-select";
 import { useDispatch } from "react-redux";
 import { GetDataTypeHospital } from "../../action/TypeHospital";
 import { useSelector } from "react-redux";
+
 const OverlayAddCompany = ({ visible, onClose }) => {
   const uid = localStorage.getItem("uid")
   const [ownerUser, setOwnerUser] = useState([]);
