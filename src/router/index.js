@@ -67,11 +67,14 @@ import WeeklyPlanningReportMockup from "../view/TaskNew/WeeklyPlanningReportMock
 import WeeklyPlanningSystem from "../view/TaskNew/WeeklyPlanningSystem";
 import WeeklyPlanningTestPage from "../view/TaskNew/WeeklyPlanningTestPage";
 import WeeklyPlanningSimulation from "../view/TaskNew/WeeklyPlanningSimulation";
+
 const Login = ({ children }) => {
   const token = localStorage.getItem("token");
+
   if (!token) {
     return <Navigate to="/login" replace />;
   }
+
   return children;
 };
 
@@ -84,15 +87,7 @@ function Router() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Auth />} />
-        <Route
-          exact
-          path="/"
-          element={
-            <Login>
-              <Dashboard />
-            </Login>
-          }
-        />
+        <Route exact path="/" element={<Login><Dashboard /></Login>} />
         <Route
           exact
           path="/users"
@@ -156,7 +151,7 @@ function Router() {
             </Login>
           }
         />
-        <Route exact path="/approvals/contact-deletions" element={<ApprovalCenter />} />
+        <Route exact path="/approvals/contact-deletions" element={<Login><ApprovalCenter /></Login>} />
         <Route
           exact
           path="/company"

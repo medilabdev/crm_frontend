@@ -24,24 +24,24 @@ const ReportWeeklyPlanning = () => {
   // 🔹 Load Branch
   useEffect(() => {
     reportService
-        .getBranches()
-        .then((res) => {
+      .getBranches()
+      .then((res) => {
         const branchData = Array.isArray(res.data)
-            ? res.data
-            : Array.isArray(res.data?.data)
+          ? res.data
+          : Array.isArray(res.data?.data)
             ? res.data.data
             : []; // fallback aman
 
         setBranches(branchData);
         if (branchData.length > 0) {
-            setSelectedBranch(branchData[0].value);
+          setSelectedBranch(branchData[0].value);
         }
-        })
-        .catch((err) => {
+      })
+      .catch((err) => {
         console.error("Failed to fetch branches", err);
         setError("Gagal memuat daftar cabang.");
-        });
-    }, []);
+      });
+  }, []);
 
 
   // 🔹 Load Users (per branch)
@@ -63,6 +63,7 @@ const ReportWeeklyPlanning = () => {
     setError(null);
     setReportData(null);
 
+
     try {
       const formattedMonth = `${selectedMonth}-01`;
       const res = await reportService.getTaskReport(
@@ -70,6 +71,7 @@ const ReportWeeklyPlanning = () => {
         selectedBranch,
         selectedUser
       );
+      console.log(formattedMonth, selectedBranch, selectedUser);
       setReportData(res.data.data);
     } catch (err) {
       console.error("Failed to fetch report", err);
@@ -88,11 +90,10 @@ const ReportWeeklyPlanning = () => {
             {item.title}
           </Card.Title>
           <h4
-            className={`fw-bold ${
-              item.value === "Buruk" || item.value === "Kurang"
-                ? "text-danger"
-                : "text-success"
-            }`}
+            className={`fw-bold ${item.value === "Buruk" || item.value === "Kurang"
+              ? "text-danger"
+              : "text-success"
+              }`}
           >
             {item.value}
           </h4>
@@ -110,9 +111,6 @@ const ReportWeeklyPlanning = () => {
     if (!reportData.categories_list?.length) return true;
     return false;
   };
-
-
-  // console.log("branches", branches);
 
   return (
     <div className="report-weekly-planning">
@@ -213,7 +211,7 @@ const ReportWeeklyPlanning = () => {
       {reportData && isEmptyReport() && (
         <Card className="shadow-sm border-0 mt-4">
           <Card.Body className="text-center py-5">
-            <div className="mb-3" style={{ fontSize: "3rem" }}>📭</div> 
+            <div className="mb-3" style={{ fontSize: "3rem" }}>📭</div>
             <h5 className="fw-bold text-secondary">Data Tidak Tersedia</h5>
             <p className="text-muted mb-3">
               Tidak ditemukan data report untuk bulan atau filter yang dipilih.

@@ -5,7 +5,7 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAt } from "@fortawesome/free-solid-svg-icons";
+import { faAt, faLock } from "@fortawesome/free-solid-svg-icons";
 const Auth = () => {
   const navigate = useNavigate();
   const [buttonDisabled, setButtonDisabled] = useState(false);
@@ -37,7 +37,7 @@ const Auth = () => {
           }
         }
       );
-    console.log(response);
+      console.log(response);
 
       localStorage.clear();
       sessionStorage.clear();
@@ -86,7 +86,7 @@ const Auth = () => {
       }
     }
   };
-  
+
   return (
     <body className="auth-body">
       <main className="auth-main color-auth">
@@ -124,15 +124,13 @@ const Auth = () => {
                           method="post"
                           onSubmit={handleLogin}
                         >
-                          <div className=" col-12">
+                          <div className="col-12">
                             <label className="form-label">Email</label>
                             <div className="input-group has-validation shadow-sm">
-                              <span
-                                className="input-group-text"
-                                id="inputGroupPrepend"
-                              >
+                              <span className="input-group-text" id="inputGroupPrepend">
                                 <FontAwesomeIcon icon={faAt} />
                               </span>
+
                               <input
                                 type="email"
                                 name="email"
@@ -147,37 +145,42 @@ const Auth = () => {
                               </div>
                             </div>
                           </div>
-                          <div className="col-12">
-                            <label
-                              htmlFor="yourPassword"
-                              className="form-label"
-                            >
+
+                          <div className="col-12 mb-2">
+                            <label htmlFor="yourPassword" className="form-label">
                               Password
                             </label>
-                            <input
-                              type={checkPass === true ? "text" : "password"}
-                              name="password"
-                              className="form-control mb-2 shadow-sm"
-                              id="yourPassword"
-                              onChange={handleChange}
-                              required
-                            />
-                            <input
-                              className="form-check-input"
-                              type="checkbox"
-                              onChange={handleCheckPass}
-                              checked={checkPass}
-                            />
-                            <label
-                              class="form-check-label ms-2"
-                              for="flexCheckDefault"
-                            >
-                              Check Password
-                            </label>
+
+                            <div className="input-group has-validation shadow-sm">
+                              <span className="input-group-text" id="inputGroupPrepend">
+                                <FontAwesomeIcon icon={faLock} />
+                              </span>
+
+                              <input
+                                type={checkPass === true ? "text" : "password"}
+                                name="password"
+                                className="form-control shadow-sm"
+                                id="yourPassword"
+                                onChange={handleChange}
+                                required
+                              />
+                            </div>
+
+
                             <div className="invalid-feedback">
                               Please enter your password!
                             </div>
                           </div>
+
+
+                          <div className="col-12 mb-2">
+                            <input className="form-check-input" type="checkbox" onChange={handleCheckPass} checked={checkPass} />
+                            <label class="form-check-label ms-2" for="flexCheckDefault">
+                              Check Password
+                            </label>
+                          </div>
+
+
                           <div className="col-12">
                             <button
                               className="btn rounded-pill w-100 mb-4 shadow-sm"

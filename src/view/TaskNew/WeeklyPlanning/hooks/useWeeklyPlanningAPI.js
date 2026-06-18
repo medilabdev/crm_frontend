@@ -1,14 +1,14 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { 
-  branchService, 
-  weeklyPlanMasterService, 
+import {
+  branchService,
+  weeklyPlanMasterService,
   weeklyPlanningService,
   weeklyPlanningWeekService,
   weeklyPlanningDayService,
   weeklyPlanningDetailService,
   outsidePlanningDetailService,
   reportSuggestionsService,
-  weeklyCategoryService, 
+  weeklyCategoryService,
   masterImportService,
   planningRecapService
 } from '../services/weeklyPlanningService';
@@ -98,7 +98,7 @@ export const useWeeklyPlanningAPI = () => {
   const planningRecap = useMemo(
     () => ({
       // 'month' adalah string 'Y-m-d'
-      getRecap: (month, branchUid) => apiCall(planningRecapService.getRecap, month, branchUid), 
+      getRecap: (month, branchUid, userUid) => apiCall(planningRecapService.getRecap, month, branchUid, userUid),
     }),
     [apiCall]
   );
@@ -246,7 +246,7 @@ export const useBranches = () => {
   const fetchBranches = useCallback(async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const response = await branchService.getAll();
       setBranches(response.data || []);
@@ -308,7 +308,7 @@ export const useWeeklyPlanMasters = () => {
   const fetchPlanMasters = useCallback(async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const response = await weeklyPlanMasterService.getAll();
       // console.log('[HOOK] Data Master Mentah dari API:', response?.data);
