@@ -57,7 +57,7 @@ export const appConfigService = {
 }
 
 export const branchService = {
-  
+
   async getAll() {
     try {
       const response = await apiClient.get(API_ENDPOINTS.WEEKLY_PLANNING.BRANCHES, {
@@ -70,7 +70,7 @@ export const branchService = {
     }
   },
 
-  
+
   async create(branchData) {
     try {
       const response = await apiClient.post(API_ENDPOINTS.WEEKLY_PLANNING.BRANCHES, branchData, {
@@ -86,7 +86,7 @@ export const branchService = {
 
 
 export const weeklyPlanMasterService = {
-  
+
   async getAll() {
     try {
       const response = await apiClient.get(API_ENDPOINTS.WEEKLY_PLANNING.PLAN_MASTERS, {
@@ -137,7 +137,7 @@ export const weeklyPlanMasterService = {
 };
 
 export const weeklyPlanningService = {
-    async getAll(filters = {}) {
+  async getAll(filters = {}) {
     try {
       const response = await rateLimitedGetAll(filters);
       return response;
@@ -197,7 +197,7 @@ export const weeklyPlanningService = {
 };
 
 export const weeklyPlanningWeekService = {
-  
+
   async getAll(planningUid) {
     try {
       const response = await apiClient.get(API_ENDPOINTS.WEEKLY_PLANNING.WEEKS(planningUid), {
@@ -260,7 +260,7 @@ export const weeklyPlanningWeekService = {
 };
 
 export const weeklyPlanningDayService = {
- 
+
   async getAll(planningUid, weekUid) {
     try {
       const response = await apiClient.get(API_ENDPOINTS.WEEKLY_PLANNING.DAYS(planningUid, weekUid), {
@@ -273,7 +273,7 @@ export const weeklyPlanningDayService = {
     }
   },
 
-  
+
   async create(planningUid, weekUid, dayData) {
     try {
       const response = await apiClient.post(API_ENDPOINTS.WEEKLY_PLANNING.DAYS(planningUid, weekUid), dayData, {
@@ -286,7 +286,7 @@ export const weeklyPlanningDayService = {
     }
   },
 
-  
+
   async bulkCreate(planningUid, weekUid, daysData) {
     try {
       const response = await apiClient.post(`${API_ENDPOINTS.WEEKLY_PLANNING.DAYS(planningUid, weekUid)}/bulk`, daysData, {
@@ -299,7 +299,7 @@ export const weeklyPlanningDayService = {
     }
   },
 
-  
+
   async update(planningUid, weekUid, dayUid, dayData) {
     try {
       const response = await apiClient.put(`${API_ENDPOINTS.WEEKLY_PLANNING.DAYS(planningUid, weekUid)}/${dayUid}`, dayData, {
@@ -314,22 +314,22 @@ export const weeklyPlanningDayService = {
 
   // Di weeklyPlanningDayService
   async toggleWorking(planningUid, weekUid, dayUid) {
-      try {
-          // Asumsi API_ENDPOINTS.WEEKLY_PLANNING.DAY_TOGGLE_WORKING(...) sudah dibuat
-          const apiUrl = API_ENDPOINTS.WEEKLY_PLANNING.DAY_TOGGLE_WORKING(planningUid, weekUid, dayUid);
-          const response = await apiClient.put(apiUrl, {}, { // Kirim body kosong jika tidak perlu data
-              headers: getAuthHeaders() 
-          });
-          return response.data; // Harusnya berisi objek Day yang diupdate
-      } catch (error) {
-          console.error('Error toggling day working status:', error);
-          throw error;
-      }
+    try {
+      // Asumsi API_ENDPOINTS.WEEKLY_PLANNING.DAY_TOGGLE_WORKING(...) sudah dibuat
+      const apiUrl = API_ENDPOINTS.WEEKLY_PLANNING.DAY_TOGGLE_WORKING(planningUid, weekUid, dayUid);
+      const response = await apiClient.put(apiUrl, {}, { // Kirim body kosong jika tidak perlu data
+        headers: getAuthHeaders()
+      });
+      return response.data; // Harusnya berisi objek Day yang diupdate
+    } catch (error) {
+      console.error('Error toggling day working status:', error);
+      throw error;
+    }
   }
 };
 
 export const weeklyPlanningDetailService = {
-  
+
   async getAll(planningUid, weekUid, dayUid) {
     try {
       const response = await apiClient.get(API_ENDPOINTS.WEEKLY_PLANNING.PLANNING_DETAILS(planningUid, weekUid, dayUid), {
@@ -418,7 +418,7 @@ export const outsidePlanningDetailService = {
     }
   },
 
- 
+
   async delete(planningUid, weekUid, dayUid, detailUid) {
     try {
       const apiUrl = API_ENDPOINTS.WEEKLY_PLANNING.OUTSIDE_DETAIL_ITEM(planningUid, weekUid, dayUid, detailUid);
@@ -434,7 +434,7 @@ export const outsidePlanningDetailService = {
 };
 
 export const reportSuggestionsService = {
- 
+
   async getSuggestions() {
     try {
       const response = await apiClient.get(API_ENDPOINTS.WEEKLY_PLANNING.REPORT_SUGGESTIONS, {
@@ -499,14 +499,20 @@ export const masterImportService = {
 
 export const planningRecapService = {
 
-  async getRecap(month, branchUid) {
+  async getRecap(month, branchUid, userUid) {
     try {
+      const params = {
+        month: month,
+        branch_uid: branchUid,
+      };
+
+      if (userUid) {
+        params.user_uid = userUid;
+      }
+
       const response = await apiClient.get(API_ENDPOINTS.WEEKLY_PLANNING.RECAP, {
         headers: getAuthHeaders(),
-        params: { 
-          month: month,
-          branch_uid: branchUid
-         },
+        params,
       });
       return response.data;
     } catch (error) {

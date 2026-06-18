@@ -26,42 +26,43 @@ import ReportWeeklyPlanning from "./ReportWeeklyPlanning";
 
 function Dashboard() {
   return (
-    <body id="body">
-      <Topbar />
-      <Sidebar />
-      <Main>
-        <div className="container" style={{ marginBottom: "3.4rem"}}>
-          <div className="row">
-            <div className="col">
-              <div className="pagetitle">
-                <h1>Dashboard</h1>
+    <div>
+      <body id="body">
+        <Topbar />
+        <Sidebar />
+        <Main>
+          <div className="container" style={{ marginBottom: "3.4rem" }}>
+            <div className="row">
+              <div className="col">
+                <div className="pagetitle">
+                  <h1>Dashboard</h1>
+                </div>
               </div>
             </div>
-          </div>
 
-           <div className="row mt-3">
-            <div className="col-12">
-              <Tabs defaultActiveKey="by-deal" id="report-tabs" className="mb-3">
-                <Tab eventKey="by-deal" title="Report by Deal">
-                  <ActivityDeals />
-                </Tab>
-                <Tab eventKey="by-date" title="Report by Date">
-                  <ActivityByDate />
-                </Tab>
-                <Tab eventKey="sales-performance" title="Sales Performance">
-                  <SalesPerformanceReport />
-                </Tab>
+            <div className="row mt-3">
+              <div className="col-12">
+                <Tabs defaultActiveKey="by-deal" id="report-tabs" className="mb-3">
+                  <Tab eventKey="by-deal" title="Report by Deal">
+                    <ActivityDeals />
+                  </Tab>
+                  <Tab eventKey="by-date" title="Report by Date">
+                    <ActivityByDate />
+                  </Tab>
+                  <Tab eventKey="sales-performance" title="Sales Performance">
+                    <SalesPerformanceReport />
+                  </Tab>
                   <Tab eventKey="deals-by-stage" title="Deals by Stage">
-                      <DealsByStageReport />
+                    <DealsByStageReport />
                   </Tab>
                   <Tab eventKey="weekly-planning" title="Report Task (Weekly Plan)">
-                      <ReportWeeklyPlanning />
+                    <ReportWeeklyPlanning />
                   </Tab>
-              </Tabs>
+                </Tabs>
+              </div>
             </div>
-          </div>
-          
-          {/* <div className="row">
+
+            {/* <div className="row">
               <div className="col-md-6">
               <Card className="shadow">
                 <ChartWinLose />
@@ -93,10 +94,11 @@ function Dashboard() {
               </Card>
             </div>
           </div> */}
-        </div>
-        <Footer />
-      </Main>
-    </body>
+          </div>
+          <Footer />
+        </Main>
+      </body>
+    </div>
   );
 }
 

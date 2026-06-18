@@ -54,8 +54,8 @@ const SingleDeals = () => {
 
   const [price, setPrice] = useState(0); // Tidak diperlukan lagi
   const handlePrice = (e) => { // Tidak diperlukan lagi
-      const value = e.target.value;
-      setPrice(value);
+    const value = e.target.value;
+    setPrice(value);
   };
 
   const totalPrice = products.reduce((sum, item) => sum + (item.total_price || 0), 0);
@@ -66,7 +66,7 @@ const SingleDeals = () => {
     priority_uid: "",
     deal_status: "",
     deal_category: "",
-    project_category_uid: "", 
+    project_category_uid: "",
     staging: "",
     company_uid: "",
     product_uid: "",
@@ -76,7 +76,7 @@ const SingleDeals = () => {
     planned_implementation_date: null,
     next_project_date: null
   });
-  
+
   const [inputContact, setInputContact] = useState([]);
   const handleInputDeals = (e) => {
     setInputDeals({
@@ -123,16 +123,16 @@ const SingleDeals = () => {
   const handleContactUid = (e) => {
     setInputContact(e.map((opt) => opt.value));
   };
-  
+
   const mantionUsersUid = (e) => {
     setMentionUsers(e.map((opt) => opt.value));
   };
 
   const handleInputProjectCategory = (selectedOption) => {
-      setInputDeals(prevDeals => ({
-          ...prevDeals,
-          project_category_uid: selectedOption ? selectedOption.value : "",
-      }));
+    setInputDeals(prevDeals => ({
+      ...prevDeals,
+      project_category_uid: selectedOption ? selectedOption.value : "",
+    }));
   };
 
   // ambil data owner
@@ -276,14 +276,14 @@ const SingleDeals = () => {
   };
 
   const getProjectCategories = async () => {
-      try {
-          const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/project-categories`, {
-              headers: { Authorization: `Bearer ${token}` },
-          });
-          setProjectCategories(response.data.data);
-      } catch (error) {
-          console.error("Failed to fetch project categories:", error);
-      }
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/project-categories`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setProjectCategories(response.data.data);
+    } catch (error) {
+      console.error("Failed to fetch project categories:", error);
+    }
   };
 
   // ambil data contact
@@ -500,10 +500,10 @@ const SingleDeals = () => {
   };
 
   const projectCategorySelectOptions = () => {
-      return projectCategories.map(cat => ({
-          value: cat.uid,
-          label: cat.name,
-      }));
+    return projectCategories.map(cat => ({
+      value: cat.uid,
+      label: cat.name,
+    }));
   };
 
   // Fungsi ini akan dipanggil oleh overlay setelah produk disimpan
@@ -511,7 +511,7 @@ const SingleDeals = () => {
     const updatedProducts = JSON.parse(localStorage.getItem("DataProduct") || "[]");
     setProducts(updatedProducts);
   };
-    
+
   useEffect(() => {
     const initialize = async () => {
       getPipeline();
@@ -566,15 +566,15 @@ const SingleDeals = () => {
 
     // ---- TANGGAL ----
     if (dealData.planned_implementation_date) {
-        const date = new Date(dealData.planned_implementation_date);
-        const formattedDate = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
-        formData.append("planned_implementation_date", formattedDate);
+      const date = new Date(dealData.planned_implementation_date);
+      const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+      formData.append("planned_implementation_date", formattedDate);
     }
 
     if (dealData.next_project_date) {
-        const date = new Date(dealData.next_project_date);
-        const formattedDate = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
-        formData.append("next_project_date", formattedDate);
+      const date = new Date(dealData.next_project_date);
+      const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+      formData.append("next_project_date", formattedDate);
     }
 
     // ---- CONTACT ----
@@ -582,41 +582,41 @@ const SingleDeals = () => {
 
     // ---- MENTION ----
     mentionUsers.forEach((uid, index) =>
-        formData.append(`mention_user[${index}]`, uid)
+      formData.append(`mention_user[${index}]`, uid)
     );
 
     // ---- PRODUCTS ----
     const productsToSave = JSON.parse(localStorage.getItem("DataProduct") || "[]");
     productsToSave.forEach((product, index) => {
-        formData.append(`products[${index}][product_uid]`, product.product_uid);
-        formData.append(`products[${index}][product_name]`, product.product_name);
-        formData.append(`products[${index}][qty]`, product.qty);
-        formData.append(`products[${index}][discount_type]`, product.discount_type);
-        formData.append(`products[${index}][discount]`, product.discount);
-        formData.append(`products[${index}][price]`, product.price);
-        formData.append(`products[${index}][total_price]`, product.total_price);
+      formData.append(`products[${index}][product_uid]`, product.product_uid);
+      formData.append(`products[${index}][product_name]`, product.product_name);
+      formData.append(`products[${index}][qty]`, product.qty);
+      formData.append(`products[${index}][discount_type]`, product.discount_type);
+      formData.append(`products[${index}][discount]`, product.discount);
+      formData.append(`products[${index}][price]`, product.price);
+      formData.append(`products[${index}][total_price]`, product.total_price);
     });
 
     try {
-        const res = await axios.post(url, formData, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
+      const res = await axios.post(url, formData, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-        Swal.fire({
-            title: res.data.message,
-            text: "Successfully created deal",
-            icon: "success",
-        }).then(() => {
-            localStorage.removeItem("DataProduct");
-            window.location.href = "/deals";
-        });
+      Swal.fire({
+        title: res.data.message,
+        text: "Successfully created deal",
+        icon: "success",
+      }).then(() => {
+        localStorage.removeItem("DataProduct");
+        window.location.href = "/deals";
+      });
     } catch (err) {
-        Swal.fire({
-            text: err.response?.data?.message || "An error occurred!",
-            icon: "warning",
-        });
+      Swal.fire({
+        text: err.response?.data?.message || "An error occurred!",
+        icon: "warning",
+      });
     } finally {
-        setButtonDisabled(false);
+      setButtonDisabled(false);
     }
   };
 
@@ -701,35 +701,35 @@ const SingleDeals = () => {
                 </Card.Header>
                 <Card.Body>
                   <FloatingLabel label={
-                          <span>
-                          Deal Name
-                          <span style={{ color: "red" }} className="fs-6">
-                              *
-                          </span>
-                          </span>
-                      }
-                      className="mb-3">
-                      <Form.Control
-                          type="text"
-                          placeholder="Deal Name"
-                          name="deal_name"
-                          value={inputDeals.deal_name} 
-                          onChange={handleInputDeals}
-                          required
-                      />
+                    <span>
+                      Deal Name
+                      <span style={{ color: "red" }} className="fs-6">
+                        *
+                      </span>
+                    </span>
+                  }
+                    className="mb-3">
+                    <Form.Control
+                      type="text"
+                      placeholder="Deal Name"
+                      name="deal_name"
+                      value={inputDeals.deal_name}
+                      onChange={handleInputDeals}
+                      required
+                    />
                   </FloatingLabel>
 
                   <FloatingLabel
-                      label={<span>Deal Size</span>}
-                      className="mb-3"
+                    label={<span>Deal Size</span>}
+                    className="mb-3"
                   >
-                      <Form.Control
-                          type="number"
-                          placeholder="text"
-                          value={dealSize || ''} // <-- GANTI dari price
-                          onChange={(e) => setDealSize(e.target.value)} // <-- GANTI dari handlePrice
-                          name="deal_size"
-                      />
+                    <Form.Control
+                      type="number"
+                      placeholder="text"
+                      value={dealSize || ''} // <-- GANTI dari price
+                      onChange={(e) => setDealSize(e.target.value)} // <-- GANTI dari handlePrice
+                      name="deal_size"
+                    />
                   </FloatingLabel>
                   <FloatingLabel label="Deal Status" className="mb-3">
                     <Form.Control
@@ -770,47 +770,47 @@ const SingleDeals = () => {
                   <Form.Group className="mb-3">
                     <Form.Label>Project Category</Form.Label>
                     <CreatableSelect
-                        isClearable
-                        options={projectCategorySelectOptions()}
-                        onChange={handleInputProjectCategory}
-                        placeholder="Select or create a project category..."
+                      isClearable
+                      options={projectCategorySelectOptions()}
+                      onChange={handleInputProjectCategory}
+                      placeholder="Select or create a project category..."
                     />
                   </Form.Group>
 
                   {currentSelectedStage?.name === 'Approaching' && (
-                      <Card className="shadow mt-4">
-                          <Card.Body>
-                              <Form.Group>
-                                  <Form.Label>
-                                      <span className="text-danger">*</span> Planned Implementation Date
-                                  </Form.Label>
-                                  <DatePicker
-                                      selected={inputDeals.planned_implementation_date}
-                                      onChange={(date) => setInputDeals({ ...inputDeals, planned_implementation_date: date })}
-                                      className="form-control"
-                                      dateFormat="dd/MM/yyyy"
-                                      placeholderText="Select a date"
-                                      required // <-- Membuat field ini wajib diisi jika muncul
-                                  />
-                                  <Form.Text className="text-muted">
-                                      This date is mandatory for the Approaching stage.
-                                  </Form.Text>
-                              </Form.Group>
-                          </Card.Body>
-                      </Card>
+                    <Card className="shadow mt-4">
+                      <Card.Body>
+                        <Form.Group>
+                          <Form.Label>
+                            <span className="text-danger">*</span> Planned Implementation Date
+                          </Form.Label>
+                          <DatePicker
+                            selected={inputDeals.planned_implementation_date}
+                            onChange={(date) => setInputDeals({ ...inputDeals, planned_implementation_date: date })}
+                            className="form-control"
+                            dateFormat="dd/MM/yyyy"
+                            placeholderText="Select a date"
+                            required // <-- Membuat field ini wajib diisi jika muncul
+                          />
+                          <Form.Text className="text-muted">
+                            This date is mandatory for the Approaching stage.
+                          </Form.Text>
+                        </Form.Group>
+                      </Card.Body>
+                    </Card>
                   )}
 
                   <Form.Group as={Col} md={6} className="mb-3">
                     <Form.Label>Next Project Date</Form.Label>
                     <DatePicker
-                        selected={inputDeals.next_project_date}
-                        onChange={(date) => setInputDeals({ ...inputDeals, next_project_date: date })}
-                        className="form-control"
-                        dateFormat="dd/MM/yyyy"
-                        placeholderText="Optional: Set a follow-up date"
-                        isClearable
+                      selected={inputDeals.next_project_date}
+                      onChange={(date) => setInputDeals({ ...inputDeals, next_project_date: date })}
+                      className="form-control"
+                      dateFormat="dd/MM/yyyy"
+                      placeholderText="Optional: Set a follow-up date"
+                      isClearable
                     />
-                </Form.Group>
+                  </Form.Group>
 
 
                 </Card.Body>
@@ -886,7 +886,7 @@ const SingleDeals = () => {
                 visible={showAddContact}
               />
             </div>
-          
+
             <div className="col-md-8">
               <Card className="shadow">
                 <Card.Header>
@@ -924,9 +924,9 @@ const SingleDeals = () => {
                 </Card.Body>
               </Card>
               <AddProductOverlay
-                  visible={showAddProduct}
-                  onClose={handleCloseProduct}
-                  onProductsUpdated={handleProductsUpdate} // <-- PERBAIKAN: Pastikan prop ini ada
+                visible={showAddProduct}
+                onClose={handleCloseProduct}
+                onProductsUpdated={handleProductsUpdate} // <-- PERBAIKAN: Pastikan prop ini ada
               />
 
               <Card className="shadow">
@@ -972,10 +972,10 @@ const SingleDeals = () => {
                 </Card.Body>
               </Card>
             </div>
-            
+
 
           </form>
-          </div>
+        </div>
 
 
       </Main>
